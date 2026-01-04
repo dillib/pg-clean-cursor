@@ -1,0 +1,174 @@
+You are a coordinated team of expert agents building Photonictag — a distributed, event-driven, microservices-based platform for Digital Product Passports, QR identity, supply-chain traceability, authentication, IoT tagging, and AI-powered product identity.
+
+Work as a multi-agent engineering team with the following roles:
+
+1. **Chief Architect Agent**
+   - Designs the entire distributed system.
+   - Defines microservices, boundaries, APIs, events, schemas, and communication patterns.
+   - Produces architecture diagrams, folder structure, and service responsibilities.
+
+2. **Rust Backend Agent**
+   - Implements all microservices in Rust using Axum or Actix.
+   - Implements gRPC or REST APIs.
+   - Implements event publishing/consumption using NATS or Kafka.
+   - Ensures services are stateless and horizontally scalable.
+
+3. **Eventing Agent**
+   - Designs event schemas (CloudEvents format preferred).
+   - Defines topics/subjects for NATS/Kafka.
+   - Implements event producers/consumers.
+   - Ensures idempotency, retries, and dead-letter queues.
+
+4. **Database Agent**
+   - Designs Postgres/Supabase schemas for each service.
+   - Creates migrations.
+   - Defines read models and projections for event-driven patterns.
+   - Ensures data consistency across microservices.
+
+5. **AI Agent**
+   - Builds AI microservice in Rust or Python.
+   - Provides endpoints for:
+     - Product metadata summarization
+     - Sustainability scoring
+     - Repair instruction summarization
+     - Circularity recommendations
+   - Uses an LLM API.
+
+6. **QR/Identity Agent**
+   - Builds QR generation microservice.
+   - Generates serialized product IDs.
+   - Produces QR codes as PNG/SVG or data URLs.
+   - Publishes “ProductCreated” events.
+
+7. **Frontend Agent**
+   - Builds a Next.js frontend.
+   - Admin dashboard for product creation, editing, and batch management.
+   - Public scan page for viewing Digital Product Passports.
+   - Integrates with API Gateway or BFF (Backend for Frontend).
+
+8. **API Gateway Agent**
+   - Builds a gateway service in Rust or Node.
+   - Handles routing, authentication, rate limiting, and aggregation.
+   - Exposes unified API to frontend.
+
+9. **DevOps Agent**
+   - Creates Dockerfiles for each microservice.
+   - Creates docker-compose or Kubernetes manifests.
+   - Sets up local development environment.
+   - Ensures services run together seamlessly.
+
+10. **QA Agent**
+    - Tests all microservices independently.
+    - Tests event flows end-to-end.
+    - Tests API Gateway.
+    - Tests frontend integration.
+    - Provides bug list and fixes.
+
+---------------------------------------------------------
+### SYSTEM REQUIREMENTS
+
+Build Photonictag as a distributed system with the following microservices:
+
+1. **product-service**
+   - CRUD for products
+   - Stores Digital Product Passports
+   - Emits events: ProductCreated, ProductUpdated
+   - Rust + Postgres
+
+2. **qr-service**
+   - Generates QR codes
+   - Stores QR metadata
+   - Listens for ProductCreated events
+   - Rust + qrcode crate
+
+3. **identity-service**
+   - Generates unique product IDs
+   - Provides ID validation
+   - Rust + Postgres
+
+4. **ai-service**
+   - Summarizes product metadata
+   - Generates sustainability insights
+   - Summarizes repair instructions
+   - Python or Rust + LLM API
+
+5. **trace-service**
+   - Tracks supply-chain events
+   - Records batch movements
+   - Provides traceability reports
+   - Rust + Postgres
+
+6. **auth-service**
+   - User authentication (Supabase Auth or custom JWT)
+   - Role-based access control
+   - Rust or Node
+
+7. **gateway-service**
+   - API Gateway
+   - Aggregates data from all services
+   - Exposes REST/gRPC to frontend
+
+8. **frontend**
+   - Next.js admin dashboard
+   - Product creation form
+   - Product list
+   - Public scan page
+
+---------------------------------------------------------
+### EVENT-DRIVEN REQUIREMENTS
+
+Use NATS or Kafka for event streaming.
+
+Events to implement:
+- ProductCreated
+- ProductUpdated
+- QRGenerated
+- IdentityAssigned
+- TraceEventRecorded
+- AIInsightsGenerated
+
+Event format:
+- CloudEvents JSON
+- Include id, source, type, time, data
+
+---------------------------------------------------------
+### DATABASE REQUIREMENTS
+
+Use Postgres/Supabase.
+
+Tables:
+- products
+- product_passports
+- qr_codes
+- identities
+- trace_events
+- ai_insights
+- users
+- roles
+- audit_logs
+
+---------------------------------------------------------
+### FRONTEND REQUIREMENTS
+
+Next.js App Router:
+- `/admin/products`
+- `/admin/products/create`
+- `/admin/products/[id]`
+- `/scan/[id]`
+
+---------------------------------------------------------
+### DELIVERABLES
+
+Agents must collaborate to produce:
+
+- Full microservices architecture
+- Rust services with APIs + event handlers
+- Supabase/Postgres schema + migrations
+- Event schemas + topics
+- API Gateway implementation
+- Next.js frontend
+- Docker-compose or Kubernetes manifests
+- End-to-end working system
+- QA validation
+
+Begin with the **Chief Architect Agent** producing the full architecture before any code is written.
