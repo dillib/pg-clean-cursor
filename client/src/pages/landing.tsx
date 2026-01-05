@@ -28,7 +28,7 @@ export default function Landing() {
               <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
                 <QrCode className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold tracking-tight">Photonictag</span>
+              <span className="text-xl font-bold tracking-tight">PhotonicTag</span>
             </div>
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-features">Features</a>
@@ -41,7 +41,7 @@ export default function Landing() {
                 <a href="/api/login">Log In</a>
               </Button>
               <Button asChild data-testid="button-get-started">
-                <a href="/api/login">Get Started</a>
+                <a href="/api/login">Start Illuminating</a>
               </Button>
             </div>
           </div>
@@ -59,42 +59,43 @@ export default function Landing() {
               <div className="space-y-4">
                 <Badge variant="secondary" className="gap-1" data-testid="badge-hero-ai">
                   <Sparkles className="w-3 h-3" />
-                  AI-Powered Product Identity
+                  Physics-Rooted Identity
                 </Badge>
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
-                  Digital Product Passports for the{" "}
-                  <span className="text-primary">Circular Economy</span>
+                  Every Product Deserves a{" "}
+                  <span className="text-primary">Secure Identity</span>
                 </h1>
                 <p className="text-lg sm:text-xl text-muted-foreground max-w-xl">
-                  Transform how you manage product identity, sustainability compliance, 
-                  and supply chain traceability with AI-powered Digital Product Passports.
+                  Transform identity from a printed label into a tamper-proof signature. 
+                  Bridge the physical and digital worlds with AI-powered Digital Product Passports 
+                  that cannot be forged, erased, or lost.
                 </p>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" asChild data-testid="button-hero-start">
                   <a href="/api/login" className="gap-2">
-                    Start Free Trial
+                    Begin Illuminating
                     <ArrowRight className="w-4 h-4" />
                   </a>
                 </Button>
                 <Button size="lg" variant="outline" asChild data-testid="button-hero-demo">
-                  <Link href="/product/demo">View Demo Passport</Link>
+                  <Link href="/product/demo">See a Live Passport</Link>
                 </Button>
               </div>
 
               <div className="flex items-center gap-6 pt-4 flex-wrap">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground" data-testid="badge-eu-dpp">
                   <CheckCircle className="w-4 h-4 text-primary" />
-                  <span>EU DPP Ready</span>
+                  <span>EU Passport Compliant</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground" data-testid="badge-soc2">
                   <CheckCircle className="w-4 h-4 text-primary" />
-                  <span>SOC 2 Compliant</span>
+                  <span>Verified Security</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground" data-testid="badge-gdpr">
                   <CheckCircle className="w-4 h-4 text-primary" />
-                  <span>GDPR Ready</span>
+                  <span>Privacy Protected</span>
                 </div>
               </div>
             </div>
@@ -150,7 +151,7 @@ export default function Landing() {
                           <Leaf className="w-3 h-3 text-primary" />
                         </div>
                       </div>
-                      <span className="text-sm text-muted-foreground">Full traceability enabled</span>
+                      <span className="text-sm text-muted-foreground">Complete journey illuminated</span>
                     </div>
                   </div>
                 </div>
@@ -163,13 +164,13 @@ export default function Landing() {
       <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <Badge variant="secondary" className="mb-4" data-testid="badge-features">Platform Features</Badge>
+            <Badge variant="secondary" className="mb-4" data-testid="badge-features">The Identity Layer</Badge>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-              Everything You Need for Product Identity
+              Trust What You See. Trace What You Buy.
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              A complete platform for creating, managing, and sharing Digital Product Passports 
-              that meet EU regulations and drive sustainable business practices.
+              Enable brands, regulators, and consumers to verify authenticity 
+              and understand the full story behind every product.
             </p>
           </div>
 
@@ -179,10 +180,10 @@ export default function Landing() {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <QrCode className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold">QR-Based Identity</h3>
+                <h3 className="text-xl font-semibold">Physics-Rooted Signatures</h3>
                 <p className="text-muted-foreground">
-                  Generate unique QR codes for every product, linking directly to comprehensive 
-                  Digital Product Passports accessible by consumers and partners.
+                  Each product receives a unique, tamper-proof QR signature — a physics-rooted 
+                  identity that bridges the physical and digital worlds.
                 </p>
               </CardContent>
             </Card>
@@ -192,10 +193,10 @@ export default function Landing() {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Truck className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold">Supply Chain Traceability</h3>
+                <h3 className="text-xl font-semibold">Illuminate the Journey</h3>
                 <p className="text-muted-foreground">
-                  Track every step of your product's journey from manufacturing to end-of-life 
-                  with our event-driven traceability system.
+                  Follow every step of your product's story — from origin through lifecycle 
+                  to end-of-life — with transparent, verifiable traceability.
                 </p>
               </CardContent>
             </Card>
@@ -205,10 +206,10 @@ export default function Landing() {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Sparkles className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold">AI-Powered Insights</h3>
+                <h3 className="text-xl font-semibold">Intelligent Insights</h3>
                 <p className="text-muted-foreground">
-                  Get intelligent sustainability scores, repair recommendations, and 
-                  circularity insights powered by advanced AI models.
+                  AI reveals the full story — sustainability scores, repair guidance, 
+                  and circularity insights that illuminate hidden product truths.
                 </p>
               </CardContent>
             </Card>
@@ -218,10 +219,10 @@ export default function Landing() {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Leaf className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold">Sustainability Metrics</h3>
+                <h3 className="text-xl font-semibold">Transparent Impact</h3>
                 <p className="text-muted-foreground">
-                  Capture and display carbon footprint, material composition, recyclability, 
-                  and repairability scores for full transparency.
+                  Carbon footprint, material origins, recyclability — every sustainability 
+                  metric becomes visible, verifiable, and impossible to hide.
                 </p>
               </CardContent>
             </Card>
@@ -231,10 +232,10 @@ export default function Landing() {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Shield className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold">Authentication & Security</h3>
+                <h3 className="text-xl font-semibold">Unforgeable Identity</h3>
                 <p className="text-muted-foreground">
-                  Verify product authenticity and combat counterfeiting with cryptographic 
-                  identity verification and audit trails.
+                  Combat counterfeiting with identities that cannot be forged, erased, or lost. 
+                  Cryptographic verification ensures authenticity at every touchpoint.
                 </p>
               </CardContent>
             </Card>
@@ -244,10 +245,10 @@ export default function Landing() {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Recycle className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold">End-of-Life Guidance</h3>
+                <h3 className="text-xl font-semibold">Circular Economy Ready</h3>
                 <p className="text-muted-foreground">
-                  Provide clear recycling instructions and takeback program information 
-                  to support circular economy initiatives.
+                  Guide products through their complete lifecycle with clear end-of-life 
+                  pathways, enabling true circular economy participation.
                 </p>
               </CardContent>
             </Card>
@@ -258,12 +259,13 @@ export default function Landing() {
       <section id="how-it-works" className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <Badge variant="secondary" className="mb-4" data-testid="badge-how-it-works">Simple Process</Badge>
+            <Badge variant="secondary" className="mb-4" data-testid="badge-how-it-works">From Label to Light</Badge>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-              How It Works
+              Three Steps to Illuminate Your Products
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Get your Digital Product Passports up and running in minutes, not months.
+              Transform product identity in minutes — creating tamper-proof signatures 
+              that travel with your products through their entire lifecycle.
             </p>
           </div>
 
@@ -272,10 +274,10 @@ export default function Landing() {
               <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground mx-auto flex items-center justify-center text-2xl font-bold">
                 1
               </div>
-              <h3 className="text-xl font-semibold">Create Products</h3>
+              <h3 className="text-xl font-semibold">Define the Identity</h3>
               <p className="text-muted-foreground">
-                Add your products with sustainability data, materials, warranty info, 
-                and recycling instructions through our intuitive dashboard.
+                Capture your product's complete story — materials, origins, sustainability data, 
+                and lifecycle information through our intuitive dashboard.
               </p>
             </div>
 
@@ -283,10 +285,10 @@ export default function Landing() {
               <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground mx-auto flex items-center justify-center text-2xl font-bold">
                 2
               </div>
-              <h3 className="text-xl font-semibold">Generate QR Codes</h3>
+              <h3 className="text-xl font-semibold">Forge the Signature</h3>
               <p className="text-muted-foreground">
-                Automatic QR code generation links each product to its unique Digital Product 
-                Passport, ready for printing on packaging or labels.
+                Each product receives a unique, physics-rooted signature — a tamper-proof 
+                QR code that cannot be forged, cloned, or manipulated.
               </p>
             </div>
 
@@ -294,10 +296,10 @@ export default function Landing() {
               <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground mx-auto flex items-center justify-center text-2xl font-bold">
                 3
               </div>
-              <h3 className="text-xl font-semibold">Share & Track</h3>
+              <h3 className="text-xl font-semibold">Illuminate the Journey</h3>
               <p className="text-muted-foreground">
-                Consumers scan QR codes to access passport data. Track engagement, 
-                monitor supply chain events, and gather sustainability insights.
+                Anyone can scan and verify. Track every interaction, monitor the supply chain, 
+                and let the product tell its own authentic story.
               </p>
             </div>
           </div>
@@ -310,12 +312,12 @@ export default function Landing() {
             <div className="space-y-6">
               <Badge variant="secondary" data-testid="badge-eu-compliance">EU Compliance</Badge>
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                Ready for Digital Product Passport Regulations
+                Where Transparency is Foundational
               </h2>
               <p className="text-lg text-muted-foreground">
-                The EU Digital Product Passport regulation is coming. Be prepared with a platform 
-                that meets all requirements for product transparency, sustainability reporting, 
-                and circularity tracking.
+                In a world where products move across borders, supply chains, and lifecycles, 
+                identity has become the missing link. PhotonicTag bridges the gap with physics-rooted 
+                verification that regulators and consumers can trust.
               </p>
               <div className="space-y-4">
                 <div className="flex items-start gap-3" data-testid="compliance-material">
@@ -383,19 +385,23 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/5 via-transparent to-transparent" />
+        <div className="relative max-w-4xl mx-auto text-center">
+          <Badge variant="secondary" className="mb-6" data-testid="badge-cta-illumination">The Identity Layer</Badge>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-            Ready to Transform Your Product Identity?
+            This is Not Just Tagging.
+            <br />
+            <span className="text-primary">This is Illumination.</span>
           </h2>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join forward-thinking brands using Photonictag to build trust, ensure compliance, 
-            and lead the transition to a circular economy.
+            Inspired by the precision of photonics — the science of light — PhotonicTag is building 
+            the identity layer for the next era of commerce. Where transparency is not optional, but foundational.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild data-testid="button-cta-start">
               <a href="/api/login" className="gap-2">
-                Start Free Trial
+                Start Your Journey
                 <ArrowRight className="w-4 h-4" />
               </a>
             </Button>
@@ -447,14 +453,15 @@ export default function Landing() {
             </div>
           </div>
           <div className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2" data-testid="footer-logo">
+            <div className="flex items-center gap-3" data-testid="footer-logo">
               <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
                 <QrCode className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="font-semibold">Photonictag</span>
+              <span className="font-semibold">PhotonicTag</span>
+              <span className="text-xs text-muted-foreground hidden sm:inline">— Illuminating Product Identity</span>
             </div>
             <p className="text-sm text-muted-foreground" data-testid="footer-copyright">
-              2025 Photonictag. All rights reserved.
+              2025 PhotonicTag. All rights reserved.
             </p>
           </div>
         </div>

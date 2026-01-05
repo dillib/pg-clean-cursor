@@ -69,8 +69,8 @@ export function AppSidebar() {
             <QrCode className="h-5 w-5 text-primary-foreground" />
           </div>
           <div className="flex flex-col">
-            <span className="text-base font-semibold tracking-tight">Photonictag</span>
-            <span className="text-xs text-muted-foreground">Product Identity</span>
+            <span className="text-base font-semibold tracking-tight">PhotonicTag</span>
+            <span className="text-xs text-muted-foreground">Illuminating Identity</span>
           </div>
         </Link>
       </SidebarHeader>

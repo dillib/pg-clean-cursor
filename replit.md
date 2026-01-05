@@ -1,8 +1,12 @@
-# Photonictag
+# PhotonicTag
 
 ## Overview
 
-Photonictag is an AI-powered product identity platform for Digital Product Passports (DPP). It enables businesses to create, manage, and share comprehensive product information through QR-based identities, supporting supply-chain traceability, sustainability tracking, and product authentication.
+PhotonicTag is an AI-powered product identity platform for Digital Product Passports (DPP). Inspired by the precision of photonics — the science of light — PhotonicTag transforms identity from a printed label into a physics-rooted, tamper-proof signature.
+
+**Brand Philosophy:** Every product deserves a secure, intelligent, and verifiable identity — one that cannot be forged, erased, or lost. PhotonicTag bridges the physical and digital worlds, enabling brands, regulators, and consumers to trust what they see, trace what they buy, and understand the full story behind every product.
+
+**Tagline:** "This is not just tagging. This is illumination."
 
 The platform provides an admin dashboard for product management and public scan pages where consumers can view Digital Product Passports by scanning QR codes.
 
@@ -13,6 +17,9 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### January 2026
+- Integrated brand story: "Physics-rooted identity" and "Illumination" theme throughout landing page
+- Updated hero section with core messaging: "Every Product Deserves a Secure Identity"
+- Added "This is not just tagging. This is illumination." CTA section
 - Implemented Replit Auth integration for OAuth-based authentication (Google, GitHub, X, Apple, email)
 - Created premium landing page with hero section, feature showcase, sustainability metrics, and branding
 - Added protected routes showing landing page for logged-out users
