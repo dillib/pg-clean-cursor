@@ -22,6 +22,7 @@ import {
   Truck,
   CheckCircle,
   RefreshCw,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -30,6 +31,25 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,11 +65,30 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Product, AISummary, SustainabilityInsight, RepairSummary, TraceEvent } from "@shared/schema";
 
+const eventTypes = [
+  { value: "manufactured", label: "Manufactured" },
+  { value: "shipped", label: "Shipped" },
+  { value: "received", label: "Received" },
+  { value: "transferred", label: "Transferred" },
+  { value: "inspected", label: "Inspected" },
+  { value: "repaired", label: "Repaired" },
+  { value: "recycled", label: "Recycled" },
+  { value: "disposed", label: "Disposed" },
+  { value: "custom", label: "Custom Event" },
+];
+
 export default function ProductDetail() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
+  const [traceDialogOpen, setTraceDialogOpen] = useState(false);
+  const [traceForm, setTraceForm] = useState({
+    eventType: "shipped",
+    actor: "",
+    location: "",
+    description: "",
+  });
 
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: ["/api/products", params.id],
@@ -99,6 +138,33 @@ export default function ProductDetail() {
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/ai/repair-summary", { productId: params.id });
       return response.json();
+    },
+  });
+
+  const addTraceMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", `/api/products/${params.id}/trace`, {
+        eventType: traceForm.eventType,
+        actor: traceForm.actor,
+        location: traceForm.location ? { name: traceForm.location } : undefined,
+        description: traceForm.description || undefined,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products", params.id, "trace"] });
+      setTraceDialogOpen(false);
+      setTraceForm({ eventType: "shipped", actor: "", location: "", description: "" });
+      toast({
+        title: "Event recorded",
+        description: "Supply chain event has been added to the timeline.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to record event. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -517,15 +583,102 @@ export default function ProductDetail() {
                         Track this product's journey through the supply chain
                       </p>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/products", params.id, "trace"] })}
-                      data-testid="button-refresh-trace"
-                    >
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Refresh
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Dialog open={traceDialogOpen} onOpenChange={setTraceDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button size="sm" data-testid="button-add-trace-event">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Event
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Record Supply Chain Event</DialogTitle>
+                            <DialogDescription>
+                              Add a new event to track this product's journey
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="eventType">Event Type</Label>
+                              <Select
+                                value={traceForm.eventType}
+                                onValueChange={(value) => setTraceForm({ ...traceForm, eventType: value })}
+                              >
+                                <SelectTrigger data-testid="select-event-type">
+                                  <SelectValue placeholder="Select event type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {eventTypes.map((type) => (
+                                    <SelectItem key={type.value} value={type.value}>
+                                      {type.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="actor">Performed By</Label>
+                              <Input
+                                id="actor"
+                                placeholder="e.g., Warehouse Team, Quality Control"
+                                value={traceForm.actor}
+                                onChange={(e) => setTraceForm({ ...traceForm, actor: e.target.value })}
+                                data-testid="input-trace-actor"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="location">Location (optional)</Label>
+                              <Input
+                                id="location"
+                                placeholder="e.g., Berlin Distribution Center"
+                                value={traceForm.location}
+                                onChange={(e) => setTraceForm({ ...traceForm, location: e.target.value })}
+                                data-testid="input-trace-location"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="description">Description (optional)</Label>
+                              <Textarea
+                                id="description"
+                                placeholder="Additional details about this event..."
+                                value={traceForm.description}
+                                onChange={(e) => setTraceForm({ ...traceForm, description: e.target.value })}
+                                data-testid="input-trace-description"
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button
+                              variant="outline"
+                              onClick={() => setTraceDialogOpen(false)}
+                              data-testid="button-cancel-trace"
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={() => addTraceMutation.mutate()}
+                              disabled={!traceForm.actor || addTraceMutation.isPending}
+                              data-testid="button-save-trace"
+                            >
+                              {addTraceMutation.isPending && (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              )}
+                              Record Event
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/products", params.id, "trace"] })}
+                        data-testid="button-refresh-trace"
+                      >
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Refresh
+                      </Button>
+                    </div>
                   </div>
 
                   {isLoadingTrace ? (

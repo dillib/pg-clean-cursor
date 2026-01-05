@@ -53,9 +53,20 @@ export async function registerRoutes(
 
       const product = await productService.createProduct(parsed.data);
       
+      await qrService.generateQRCode(product.id);
+      
+      await identityService.createIdentity(product.id);
+      
+      await traceService.recordEvent(product.id, "manufactured", product.manufacturer, {
+        description: `Product ${product.productName} registered in PhotonicTag`,
+        location: { name: product.manufacturer },
+      });
+      
       await auditService.logCreate("product", product.id, product as unknown as Record<string, unknown>);
       
-      res.status(201).json(product);
+      const updatedProduct = await productService.getProduct(product.id);
+      
+      res.status(201).json(updatedProduct);
     } catch (error) {
       console.error("Error creating product:", error);
       res.status(500).json({ error: "Failed to create product" });
