@@ -70,7 +70,7 @@ export function AppSidebar() {
           </div>
           <div className="flex flex-col">
             <span className="text-base font-semibold tracking-tight">PhotonicTag</span>
-            <span className="text-xs text-muted-foreground">Illuminating Identity</span>
+            <span className="text-xs text-muted-foreground">Identity, at the speed of light.</span>
           </div>
         </Link>
       </SidebarHeader>

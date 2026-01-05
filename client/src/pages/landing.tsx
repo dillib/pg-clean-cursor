@@ -458,7 +458,7 @@ export default function Landing() {
                 <QrCode className="w-4 h-4 text-primary-foreground" />
               </div>
               <span className="font-semibold">PhotonicTag</span>
-              <span className="text-xs text-muted-foreground hidden sm:inline">— Illuminating Product Identity</span>
+              <span className="text-xs text-muted-foreground hidden sm:inline">— Identity, at the speed of light.</span>
             </div>
             <p className="text-sm text-muted-foreground" data-testid="footer-copyright">
               2025 PhotonicTag. All rights reserved.

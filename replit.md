@@ -6,7 +6,7 @@ PhotonicTag is an AI-powered product identity platform for Digital Product Passp
 
 **Brand Philosophy:** Every product deserves a secure, intelligent, and verifiable identity — one that cannot be forged, erased, or lost. PhotonicTag bridges the physical and digital worlds, enabling brands, regulators, and consumers to trust what they see, trace what they buy, and understand the full story behind every product.
 
-**Tagline:** "This is not just tagging. This is illumination."
+**Tagline:** "Identity, at the speed of light."
 
 The platform provides an admin dashboard for product management and public scan pages where consumers can view Digital Product Passports by scanning QR codes.
 
