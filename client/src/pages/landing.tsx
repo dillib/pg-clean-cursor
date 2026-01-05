@@ -431,13 +431,13 @@ export default function Landing() {
       <section id="how-it-works" className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <Badge variant="secondary" className="mb-4" data-testid="badge-how-it-works">From Label to Light</Badge>
+            <Badge variant="secondary" className="mb-4" data-testid="badge-how-it-works">How It Works</Badge>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-              Three Steps to Illuminate Your Products
+              Three Simple Steps
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Transform product identity in minutes — creating tamper-proof signatures 
-              that travel with your products through their entire lifecycle.
+              Create digital product passports in minutes — giving every product 
+              a secure, verifiable identity.
             </p>
           </div>
 
@@ -446,9 +446,9 @@ export default function Landing() {
               <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground mx-auto flex items-center justify-center text-2xl font-bold">
                 1
               </div>
-              <h3 className="text-xl font-semibold">Define the Identity</h3>
+              <h3 className="text-xl font-semibold">Add Your Product</h3>
               <p className="text-muted-foreground">
-                Capture your product's complete story — materials, origins, sustainability data, 
+                Enter your product details — materials, origins, sustainability data, 
                 and lifecycle information through our intuitive dashboard.
               </p>
             </div>
@@ -457,10 +457,10 @@ export default function Landing() {
               <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground mx-auto flex items-center justify-center text-2xl font-bold">
                 2
               </div>
-              <h3 className="text-xl font-semibold">Generate the Passport</h3>
+              <h3 className="text-xl font-semibold">Get Your QR Code</h3>
               <p className="text-muted-foreground">
-                Each product receives a unique, physics-rooted signature — a tamper-proof 
-                QR code that cannot be forged, cloned, or manipulated.
+                Each product receives a unique, tamper-proof QR code — 
+                a digital passport that travels with your product.
               </p>
             </div>
 
@@ -468,10 +468,10 @@ export default function Landing() {
               <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground mx-auto flex items-center justify-center text-2xl font-bold">
                 3
               </div>
-              <h3 className="text-xl font-semibold">Illuminate the Journey</h3>
+              <h3 className="text-xl font-semibold">Scan & Verify</h3>
               <p className="text-muted-foreground">
-                Anyone can scan and verify. Track every interaction, monitor the supply chain, 
-                and let the product tell its own authentic story.
+                Anyone can scan to verify authenticity. Track every interaction 
+                and let the product tell its own story.
               </p>
             </div>
           </div>
