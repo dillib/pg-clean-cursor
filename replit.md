@@ -17,6 +17,15 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### January 2026
+- **AI-Generated Insights**: Complete 5-type AI insights system with fetch-or-generate pattern:
+  - AI Summary: Product highlights and key features
+  - AI Sustainability Analysis: Carbon footprint scoring and circularity recommendations
+  - AI Repair Guide: Repairability rating, instructions, and parts availability
+  - AI Circularity Score: Recyclability grade (A+ to F), material efficiency, end-of-life options
+  - AI Risk Assessment: Overall risk level, data completeness %, counterfeit risk, compliance issues
+- Pre-generated AI insights for all 5 demo products for immediate demo visibility
+- Added CircularityScore and RiskAssessment TypeScript interfaces to schema
+- Added API endpoints: /api/ai/circularity, /api/ai/risk-assessment
 - **IoT Tagging System**: Complete NFC/RFID/BLE device management with 9 API endpoints, device registration, sensor readings, and scan tracking
 - Added IoT Devices admin page with device type breakdown and status tracking in sidebar navigation
 - Added IoT Devices tab to product detail view showing linked devices with proper filtering
