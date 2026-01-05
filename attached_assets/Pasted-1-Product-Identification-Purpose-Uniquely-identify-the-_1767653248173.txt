@@ -1,0 +1,152 @@
+1. Product Identification
+Purpose: Uniquely identify the item.
+
+Fields:
+
+Product Name
+
+Product Category
+
+Model Number
+
+SKU / GTIN / UPC
+
+Serial Number
+
+Unique Product ID (your system’s ID)
+
+QR Code / Digital Identifier
+
+Manufacturer Name
+
+Manufacturer Address
+
+Country of Origin
+
+Include in demo:  
+✔ Product name
+✔ Unique Photonictag ID
+✔ QR code
+✔ Manufacturer
+
+✅ 2. Materials & Composition
+Purpose: Transparency for sustainability and recycling.
+
+Fields:
+
+Material Breakdown (percentages)
+
+Chemical Substances (if applicable)
+
+Hazardous Materials
+
+Recycled Content (%)
+
+Recyclability (%)
+
+Include in demo:  
+✔ Material list
+✔ Recycled content
+✔ Recyclability score
+
+✅ 3. Environmental Impact
+Purpose: Required for EU sustainability scoring.
+
+Fields:
+
+Carbon Footprint (CO₂e)
+
+Water Usage
+
+Energy Consumption
+
+Environmental Certifications
+
+Lifecycle Assessment Summary
+
+Include in demo:  
+✔ Carbon footprint
+✔ Sustainability score (AI‑generated)
+
+✅ 4. Durability & Repairability
+Purpose: Required for circularity and right‑to‑repair.
+
+Fields:
+
+Repairability Score
+
+Expected Lifespan
+
+Spare Parts Availability
+
+Repair Instructions
+
+Service Centers
+
+Warranty Information
+
+Include in demo:  
+✔ Repairability score
+✔ Warranty info
+✔ AI‑generated repair summary
+
+✅ 5. Ownership & Lifecycle
+Purpose: Enables resale, transfer, and provenance.
+
+Fields:
+
+Ownership History
+
+Date of Manufacture
+
+Date of First Sale
+
+Transfer Records
+
+Maintenance / Repair Logs
+
+Resale Authenticity Status
+
+Include in demo:  
+✔ Ownership history (simple list)
+✔ Transfer button (even if not functional)
+
+✅ 6. Compliance & Certifications
+Purpose: Required for regulated industries.
+
+Fields:
+
+CE Marking
+
+Safety Certifications
+
+ESG Compliance
+
+Industry‑Specific Standards
+
+Batch Number
+
+Lot Number
+
+Include in demo:  
+✔ Batch number
+✔ Compliance badges
+
+✅ 7. End‑of‑Life & Recycling
+Purpose: Required for circular economy compliance.
+
+Fields:
+
+Disassembly Instructions
+
+Recycling Instructions
+
+Material Recovery Notes
+
+Hazard Warnings
+
+Take‑Back Programs
+
+Include in demo:  
+✔ Recycling instructions
+✔ AI‑generated circularity recommendations

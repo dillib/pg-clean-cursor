@@ -19,6 +19,10 @@ import {
   type InsertAuditLog,
   type ProductPassport,
   type InsertProductPassport,
+  type IoTDevice,
+  type InsertIoTDevice,
+  type IoTSensorReading,
+  type IoTDeviceStatus,
   users,
   products,
   roles,
@@ -28,6 +32,7 @@ import {
   aiInsights,
   auditLogs,
   productPassports,
+  iotDevices,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -80,6 +85,16 @@ export interface IStorage {
   getProductPassportByProductId(productId: string): Promise<ProductPassport | undefined>;
   createProductPassport(passport: InsertProductPassport): Promise<ProductPassport>;
   updateProductPassport(id: string, updates: Partial<InsertProductPassport>): Promise<ProductPassport | undefined>;
+  
+  // IoT Devices
+  getIoTDevice(id: string): Promise<IoTDevice | undefined>;
+  getIoTDeviceByDeviceId(deviceId: string): Promise<IoTDevice | undefined>;
+  getIoTDevicesByProductId(productId: string): Promise<IoTDevice[]>;
+  getAllIoTDevices(): Promise<IoTDevice[]>;
+  createIoTDevice(device: InsertIoTDevice): Promise<IoTDevice>;
+  updateIoTDeviceStatus(id: string, status: IoTDeviceStatus): Promise<IoTDevice | undefined>;
+  recordIoTReading(id: string, reading: IoTSensorReading): Promise<IoTDevice | undefined>;
+  deleteIoTDevice(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -297,6 +312,57 @@ export class DatabaseStorage implements IStorage {
       .where(eq(productPassports.id, id))
       .returning();
     return passport;
+  }
+
+  // IoT Devices
+  async getIoTDevice(id: string): Promise<IoTDevice | undefined> {
+    const [device] = await db.select().from(iotDevices).where(eq(iotDevices.id, id));
+    return device;
+  }
+
+  async getIoTDeviceByDeviceId(deviceId: string): Promise<IoTDevice | undefined> {
+    const [device] = await db.select().from(iotDevices).where(eq(iotDevices.deviceId, deviceId));
+    return device;
+  }
+
+  async getIoTDevicesByProductId(productId: string): Promise<IoTDevice[]> {
+    return db.select().from(iotDevices).where(eq(iotDevices.productId, productId));
+  }
+
+  async getAllIoTDevices(): Promise<IoTDevice[]> {
+    return db.select().from(iotDevices).orderBy(desc(iotDevices.createdAt));
+  }
+
+  async createIoTDevice(insertDevice: InsertIoTDevice): Promise<IoTDevice> {
+    const [device] = await db.insert(iotDevices).values(insertDevice as typeof iotDevices.$inferInsert).returning();
+    return device;
+  }
+
+  async updateIoTDeviceStatus(id: string, status: IoTDeviceStatus): Promise<IoTDevice | undefined> {
+    const [device] = await db
+      .update(iotDevices)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(iotDevices.id, id))
+      .returning();
+    return device;
+  }
+
+  async recordIoTReading(id: string, reading: IoTSensorReading): Promise<IoTDevice | undefined> {
+    const [device] = await db
+      .update(iotDevices)
+      .set({ 
+        lastReading: reading, 
+        lastSeenAt: new Date(),
+        updatedAt: new Date() 
+      })
+      .where(eq(iotDevices.id, id))
+      .returning();
+    return device;
+  }
+
+  async deleteIoTDevice(id: string): Promise<boolean> {
+    const result = await db.delete(iotDevices).where(eq(iotDevices.id, id)).returning();
+    return result.length > 0;
   }
 }
 

@@ -1,12 +1,14 @@
 import type { Express, Request, Response } from "express";
 import { type Server } from "http";
-import { insertProductSchema } from "@shared/schema";
+import { insertProductSchema, insertIoTDeviceSchema } from "@shared/schema";
 import { productService } from "./services/product-service";
 import { qrService } from "./services/qr-service";
 import { identityService } from "./services/identity-service";
 import { traceService } from "./services/trace-service";
 import { aiService } from "./services/ai-service";
 import { auditService } from "./services/audit-service";
+import { iotService } from "./services/iot-service";
+import { seedDemoData } from "./seed-demo-data";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 
 export async function registerRoutes(
@@ -333,6 +335,138 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching audit logs:", error);
       res.status(500).json({ error: "Failed to fetch audit logs" });
+    }
+  });
+
+  // ==========================================
+  // IOT DEVICE ENDPOINTS
+  // ==========================================
+
+  app.get("/api/iot/devices", async (req: Request, res: Response) => {
+    try {
+      const { productId } = req.query;
+      let devices;
+      if (productId) {
+        devices = await iotService.getDevicesByProductId(productId as string);
+      } else {
+        devices = await iotService.getAllDevices();
+      }
+      res.json(devices);
+    } catch (error) {
+      console.error("Error fetching IoT devices:", error);
+      res.status(500).json({ error: "Failed to fetch IoT devices" });
+    }
+  });
+
+  app.get("/api/iot/devices/:id", async (req: Request, res: Response) => {
+    try {
+      const device = await iotService.getDevice(req.params.id);
+      if (!device) {
+        return res.status(404).json({ error: "IoT device not found" });
+      }
+      res.json(device);
+    } catch (error) {
+      console.error("Error fetching IoT device:", error);
+      res.status(500).json({ error: "Failed to fetch IoT device" });
+    }
+  });
+
+  app.post("/api/iot/devices", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const parsed = insertIoTDeviceSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid IoT device data", details: parsed.error.issues });
+      }
+
+      const device = await iotService.registerDevice(parsed.data);
+      
+      await auditService.logCreate("iot_device", device.id, device as unknown as Record<string, unknown>);
+      
+      res.status(201).json(device);
+    } catch (error) {
+      console.error("Error registering IoT device:", error);
+      res.status(500).json({ error: "Failed to register IoT device" });
+    }
+  });
+
+  app.patch("/api/iot/devices/:id/status", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["active", "inactive", "lost", "damaged"].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+
+      const device = await iotService.updateDeviceStatus(req.params.id, status);
+      if (!device) {
+        return res.status(404).json({ error: "IoT device not found" });
+      }
+      res.json(device);
+    } catch (error) {
+      console.error("Error updating IoT device status:", error);
+      res.status(500).json({ error: "Failed to update IoT device status" });
+    }
+  });
+
+  app.post("/api/iot/devices/:deviceId/reading", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { deviceId } = req.params;
+      const reading = req.body;
+
+      if (!reading.timestamp) {
+        reading.timestamp = new Date().toISOString();
+      }
+
+      const device = await iotService.recordSensorReading(deviceId, reading);
+      if (!device) {
+        return res.status(404).json({ error: "IoT device not found" });
+      }
+      res.json(device);
+    } catch (error) {
+      console.error("Error recording sensor reading:", error);
+      res.status(500).json({ error: "Failed to record sensor reading" });
+    }
+  });
+
+  app.post("/api/iot/scan/:deviceId", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { deviceId } = req.params;
+      const { location } = req.body;
+
+      const result = await iotService.scanDevice(deviceId, location);
+      if (!result) {
+        return res.status(404).json({ error: "IoT device not found" });
+      }
+      res.json(result);
+    } catch (error) {
+      console.error("Error scanning IoT device:", error);
+      res.status(500).json({ error: "Failed to scan IoT device" });
+    }
+  });
+
+  app.delete("/api/iot/devices/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const deleted = await iotService.deleteDevice(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "IoT device not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting IoT device:", error);
+      res.status(500).json({ error: "Failed to delete IoT device" });
+    }
+  });
+
+  // ==========================================
+  // ADMIN/DEMO ENDPOINTS
+  // ==========================================
+  
+  app.post("/api/admin/seed-demo-data", async (req: Request, res: Response) => {
+    try {
+      await seedDemoData();
+      res.json({ success: true, message: "Demo data seeded successfully" });
+    } catch (error) {
+      console.error("Error seeding demo data:", error);
+      res.status(500).json({ error: "Failed to seed demo data" });
     }
   });
 

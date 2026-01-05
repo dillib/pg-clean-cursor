@@ -182,6 +182,49 @@ export type InsertTraceEvent = z.infer<typeof insertTraceEventSchema>;
 export type TraceEvent = typeof traceEvents.$inferSelect;
 
 // ============================================
+// IOT DEVICES (NFC, RFID, BLE Tags)
+// ============================================
+
+export type IoTDeviceType = "nfc" | "rfid" | "ble" | "qr" | "optical";
+export type IoTDeviceStatus = "active" | "inactive" | "lost" | "damaged";
+
+export interface IoTSensorReading {
+  timestamp: string;
+  temperature?: number;
+  humidity?: number;
+  shock?: boolean;
+  location?: { lat: number; lng: number };
+  batteryLevel?: number;
+  customData?: Record<string, unknown>;
+}
+
+export const iotDevices = pgTable("iot_devices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").references(() => products.id).notNull(),
+  deviceType: text("device_type").$type<IoTDeviceType>().notNull(),
+  deviceId: text("device_id").notNull().unique(),
+  manufacturer: text("manufacturer"),
+  model: text("model"),
+  firmwareVersion: text("firmware_version"),
+  status: text("status").$type<IoTDeviceStatus>().default("active").notNull(),
+  lastReading: jsonb("last_reading").$type<IoTSensorReading>(),
+  lastSeenAt: timestamp("last_seen_at"),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertIoTDeviceSchema = createInsertSchema(iotDevices).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastSeenAt: true,
+});
+
+export type InsertIoTDevice = z.infer<typeof insertIoTDeviceSchema>;
+export type IoTDevice = typeof iotDevices.$inferSelect;
+
+// ============================================
 // AI INSIGHTS
 // ============================================
 

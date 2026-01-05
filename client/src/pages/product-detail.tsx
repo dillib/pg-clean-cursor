@@ -23,6 +23,10 @@ import {
   CheckCircle,
   RefreshCw,
   Plus,
+  Wifi,
+  Radio,
+  Bluetooth,
+  Signal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -63,7 +67,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Product, AISummary, SustainabilityInsight, RepairSummary, TraceEvent } from "@shared/schema";
+import type { Product, AISummary, SustainabilityInsight, RepairSummary, TraceEvent, IoTDevice } from "@shared/schema";
 
 const eventTypes = [
   { value: "manufactured", label: "Manufactured" },
@@ -96,6 +100,16 @@ export default function ProductDetail() {
 
   const { data: traceEvents, isLoading: isLoadingTrace } = useQuery<TraceEvent[]>({
     queryKey: ["/api/products", params.id, "trace"],
+    enabled: !!params.id,
+  });
+
+  const { data: iotDevices, isLoading: isLoadingIoT } = useQuery<IoTDevice[]>({
+    queryKey: ["/api/iot/devices", "product", params.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/iot/devices?productId=${params.id}`);
+      if (!response.ok) throw new Error("Failed to fetch IoT devices");
+      return response.json();
+    },
     enabled: !!params.id,
   });
 
@@ -323,6 +337,13 @@ export default function ProductDetail() {
                       data-testid="tab-traceability"
                     >
                       Traceability
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="iot-devices"
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+                      data-testid="tab-iot-devices"
+                    >
+                      IoT Devices
                     </TabsTrigger>
                   </TabsList>
                 </div>
@@ -750,6 +771,82 @@ export default function ProductDetail() {
                         <p className="text-muted-foreground">
                           No trace events recorded yet. Events will appear here as the product
                           moves through the supply chain.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="iot-devices" className="p-6 space-y-6">
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <div>
+                      <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <Wifi className="h-5 w-5" />
+                        Connected IoT Devices
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        NFC, RFID, and BLE tags linked to this product
+                      </p>
+                    </div>
+                  </div>
+
+                  {isLoadingIoT ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : iotDevices && iotDevices.length > 0 ? (
+                    <div className="space-y-3">
+                      {iotDevices.map((device) => {
+                        const DeviceIcon = device.deviceType === "nfc" ? Radio
+                          : device.deviceType === "rfid" ? Signal
+                          : device.deviceType === "ble" ? Bluetooth
+                          : Wifi;
+                        return (
+                          <Card key={device.id} data-testid={`iot-device-card-${device.id}`}>
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-4">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted">
+                                  <DeviceIcon className="h-5 w-5 text-muted-foreground" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-medium font-mono text-sm" data-testid={`text-iot-device-id-${device.id}`}>
+                                      {device.deviceId}
+                                    </span>
+                                    <Badge variant="outline" className="uppercase text-xs" data-testid={`badge-iot-type-${device.id}`}>
+                                      {device.deviceType}
+                                    </Badge>
+                                    <Badge variant={device.status === "active" ? "default" : "secondary"} data-testid={`badge-iot-status-${device.id}`}>
+                                      {device.status}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">
+                                    {device.manufacturer} {device.model}
+                                  </p>
+                                </div>
+                                <div className="text-right text-sm text-muted-foreground">
+                                  {device.lastSeenAt ? (
+                                    <>
+                                      Last seen
+                                      <br />
+                                      {new Date(device.lastSeenAt).toLocaleDateString()}
+                                    </>
+                                  ) : (
+                                    "Never scanned"
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <Card className="bg-muted/50">
+                      <CardContent className="p-8 text-center">
+                        <Wifi className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                        <p className="text-muted-foreground">
+                          No IoT devices linked to this product yet. Register NFC, RFID, or BLE tags to enable physical-digital tracking.
                         </p>
                       </CardContent>
                     </Card>

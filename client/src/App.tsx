@@ -14,6 +14,7 @@ import Dashboard from "@/pages/dashboard";
 import Products from "@/pages/products";
 import ProductForm from "@/pages/product-form";
 import ProductDetail from "@/pages/product-detail";
+import IoTDevices from "@/pages/iot-devices";
 import PublicScan from "@/pages/public-scan";
 import Pricing from "@/pages/pricing";
 import Integrations from "@/pages/integrations";
@@ -99,6 +100,11 @@ function Router() {
       <Route path="/products/:id">
         <ProtectedRoute>
           <ProductDetail />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/iot-devices">
+        <ProtectedRoute>
+          <IoTDevices />
         </ProtectedRoute>
       </Route>
       <Route path="/product/:id">
