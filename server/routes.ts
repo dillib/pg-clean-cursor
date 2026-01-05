@@ -320,6 +320,40 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/ai/circularity", async (req: Request, res: Response) => {
+    try {
+      const { productId } = req.body;
+      const product = await productService.getProduct(productId);
+      
+      if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      const result = await aiService.generateCircularityScore(product);
+      res.json(result);
+    } catch (error) {
+      console.error("Error generating circularity score:", error);
+      res.status(500).json({ error: "Failed to generate circularity score" });
+    }
+  });
+
+  app.post("/api/ai/risk-assessment", async (req: Request, res: Response) => {
+    try {
+      const { productId } = req.body;
+      const product = await productService.getProduct(productId);
+      
+      if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      const result = await aiService.generateRiskAssessment(product);
+      res.json(result);
+    } catch (error) {
+      console.error("Error generating risk assessment:", error);
+      res.status(500).json({ error: "Failed to generate risk assessment" });
+    }
+  });
+
   // ==========================================
   // AUDIT LOG ENDPOINTS
   // ==========================================

@@ -73,7 +73,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Product, AISummary, SustainabilityInsight, RepairSummary, TraceEvent, IoTDevice } from "@shared/schema";
+import type { Product, AISummary, SustainabilityInsight, RepairSummary, CircularityScore, RiskAssessment, TraceEvent, IoTDevice, AIInsight } from "@shared/schema";
 
 const eventTypes = [
   { value: "manufactured", label: "Manufactured" },
@@ -160,6 +160,37 @@ export default function ProductDetail() {
       return response.json();
     },
   });
+
+  const circularityMutation = useMutation<CircularityScore>({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/ai/circularity", { productId: params.id });
+      return response.json();
+    },
+  });
+
+  const riskMutation = useMutation<RiskAssessment>({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/ai/risk-assessment", { productId: params.id });
+      return response.json();
+    },
+  });
+
+  const { data: existingInsights } = useQuery<AIInsight[]>({
+    queryKey: ["/api/products", params.id, "insights"],
+    enabled: !!params.id,
+  });
+
+  const getStoredInsight = <T,>(type: string): T | undefined => {
+    if (!existingInsights) return undefined;
+    const insight = existingInsights.find(i => i.insightType === type);
+    return insight?.content as T | undefined;
+  };
+
+  const storedSummary = summarizeMutation.data || getStoredInsight<AISummary>("summary");
+  const storedSustainability = sustainabilityMutation.data || getStoredInsight<SustainabilityInsight>("sustainability");
+  const storedRepair = repairMutation.data || getStoredInsight<RepairSummary>("repair");
+  const storedCircularity = circularityMutation.data || getStoredInsight<CircularityScore>("circularity");
+  const storedRisk = riskMutation.data || getStoredInsight<RiskAssessment>("risk_assessment");
 
   const addTraceMutation = useMutation({
     mutationFn: async () => {
@@ -723,17 +754,17 @@ export default function ProductDetail() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        {summarizeMutation.data ? (
+                        {storedSummary ? (
                           <div className="space-y-3">
                             <p className="leading-relaxed" data-testid="text-ai-summary">
-                              {summarizeMutation.data.summary}
+                              {storedSummary.summary}
                             </p>
-                            {summarizeMutation.data.keyFeatures?.length > 0 && (
+                            {storedSummary.keyFeatures?.length > 0 && (
                               <div>
                                 <p className="text-sm font-medium mb-2">Key Features:</p>
                                 <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                                  {summarizeMutation.data.keyFeatures.map((feature, i) => (
-                                    <li key={i}>{feature}</li>
+                                  {storedSummary.keyFeatures.map((feature, i) => (
+                                    <li key={i} data-testid={`text-feature-${i}`}>{feature}</li>
                                   ))}
                                 </ul>
                               </div>
@@ -767,26 +798,26 @@ export default function ProductDetail() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        {sustainabilityMutation.data ? (
+                        {storedSustainability ? (
                           <div className="space-y-4">
                             <div className="flex items-center gap-3">
-                              <div className="text-2xl font-bold">
-                                {sustainabilityMutation.data.overallScore}/100
+                              <div className="text-2xl font-bold" data-testid="text-sustainability-score">
+                                {storedSustainability.overallScore}/100
                               </div>
                               <Progress
-                                value={sustainabilityMutation.data.overallScore}
+                                value={storedSustainability.overallScore}
                                 className="flex-1 h-2"
                               />
                             </div>
                             <p className="text-sm text-muted-foreground" data-testid="text-ai-sustainability">
-                              {sustainabilityMutation.data.carbonAnalysis}
+                              {storedSustainability.carbonAnalysis}
                             </p>
-                            {sustainabilityMutation.data.improvements?.length > 0 && (
+                            {storedSustainability.improvements?.length > 0 && (
                               <div>
                                 <p className="text-sm font-medium mb-2">Improvement Suggestions:</p>
                                 <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                                  {sustainabilityMutation.data.improvements.map((item, i) => (
-                                    <li key={i}>{item}</li>
+                                  {storedSustainability.improvements.map((item, i) => (
+                                    <li key={i} data-testid={`text-improvement-${i}`}>{item}</li>
                                   ))}
                                 </ul>
                               </div>
@@ -820,23 +851,23 @@ export default function ProductDetail() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        {repairMutation.data ? (
+                        {storedRepair ? (
                           <div className="space-y-4">
-                            <Badge variant="secondary" className="text-sm">
-                              {repairMutation.data.repairabilityRating}
+                            <Badge variant="secondary" className="text-sm" data-testid="badge-repair-rating">
+                              {storedRepair.repairabilityRating}
                             </Badge>
-                            {repairMutation.data.repairInstructions?.length > 0 && (
+                            {storedRepair.repairInstructions?.length > 0 && (
                               <div>
                                 <p className="text-sm font-medium mb-2">Repair Steps:</p>
                                 <ol className="list-decimal list-inside text-sm text-muted-foreground space-y-1">
-                                  {repairMutation.data.repairInstructions.map((step, i) => (
-                                    <li key={i}>{step}</li>
+                                  {storedRepair.repairInstructions.map((step, i) => (
+                                    <li key={i} data-testid={`text-repair-step-${i}`}>{step}</li>
                                   ))}
                                 </ol>
                               </div>
                             )}
                             <p className="text-sm text-muted-foreground" data-testid="text-ai-repair">
-                              Parts availability: {repairMutation.data.partsAvailability}
+                              Parts availability: {storedRepair.partsAvailability}
                             </p>
                           </div>
                         ) : (
@@ -851,6 +882,165 @@ export default function ProductDetail() {
                             )}
                             <Wrench className="mr-2 h-4 w-4" />
                             Generate Repair Guide
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Recycle className="h-4 w-4" />
+                          Circularity Score
+                        </CardTitle>
+                        <CardDescription>
+                          AI-powered material efficiency and recyclability analysis
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {storedCircularity ? (
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-3">
+                              <div className="text-3xl font-bold" data-testid="text-circularity-score">
+                                {storedCircularity.score}
+                              </div>
+                              <Badge 
+                                variant={storedCircularity.grade === "A+" || storedCircularity.grade === "A" ? "default" : "secondary"} 
+                                className="text-lg"
+                                data-testid="badge-circularity-grade"
+                              >
+                                Grade: {storedCircularity.grade}
+                              </Badge>
+                            </div>
+                            <Progress value={storedCircularity.score} className="h-2" />
+                            <div className="grid gap-3 sm:grid-cols-2">
+                              <div>
+                                <p className="text-sm font-medium mb-1">Recyclability Analysis</p>
+                                <p className="text-sm text-muted-foreground" data-testid="text-recyclability-analysis">
+                                  {storedCircularity.recyclabilityAnalysis}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium mb-1">Material Efficiency</p>
+                                <p className="text-sm text-muted-foreground" data-testid="text-material-efficiency">
+                                  {storedCircularity.materialEfficiency}
+                                </p>
+                              </div>
+                            </div>
+                            {storedCircularity.endOfLifeOptions?.length > 0 && (
+                              <div>
+                                <p className="text-sm font-medium mb-2">End-of-Life Options:</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {storedCircularity.endOfLifeOptions.map((option, i) => (
+                                    <Badge key={i} variant="outline" data-testid={`badge-eol-${i}`}>
+                                      {option}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            onClick={() => circularityMutation.mutate()}
+                            disabled={circularityMutation.isPending}
+                            data-testid="button-generate-circularity"
+                          >
+                            {circularityMutation.isPending && (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )}
+                            <Recycle className="mr-2 h-4 w-4" />
+                            Analyze Circularity
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4" />
+                          Risk Assessment
+                        </CardTitle>
+                        <CardDescription>
+                          AI-powered risk flags and compliance analysis
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {storedRisk ? (
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <Badge 
+                                variant={storedRisk.overallRisk === "Low" ? "default" : storedRisk.overallRisk === "Medium" ? "secondary" : "destructive"}
+                                className="text-sm"
+                                data-testid="badge-risk-level"
+                              >
+                                Risk Level: {storedRisk.overallRisk}
+                              </Badge>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-muted-foreground">Data Completeness:</span>
+                                <span className="font-medium" data-testid="text-data-completeness">{storedRisk.dataCompleteness}%</span>
+                              </div>
+                            </div>
+                            <Progress value={storedRisk.dataCompleteness} className="h-2" />
+                            
+                            <div>
+                              <p className="text-sm font-medium mb-1">Counterfeit Risk</p>
+                              <p className="text-sm text-muted-foreground" data-testid="text-counterfeit-risk">
+                                {storedRisk.counterfeitRisk}
+                              </p>
+                            </div>
+
+                            {storedRisk.riskFlags?.length > 0 && (
+                              <div>
+                                <p className="text-sm font-medium mb-2">Risk Flags:</p>
+                                <div className="space-y-2">
+                                  {storedRisk.riskFlags.map((flag, i) => (
+                                    <div 
+                                      key={i} 
+                                      className="flex items-start gap-2 p-2 rounded-md bg-muted/50"
+                                      data-testid={`risk-flag-${i}`}
+                                    >
+                                      <Badge 
+                                        variant={flag.severity === "Low" ? "outline" : flag.severity === "Medium" ? "secondary" : "destructive"}
+                                        className="text-xs shrink-0"
+                                      >
+                                        {flag.severity}
+                                      </Badge>
+                                      <div>
+                                        <p className="text-sm font-medium">{flag.type}</p>
+                                        <p className="text-xs text-muted-foreground">{flag.description}</p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {storedRisk.complianceIssues?.length > 0 && (
+                              <div>
+                                <p className="text-sm font-medium mb-2">Compliance Issues:</p>
+                                <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+                                  {storedRisk.complianceIssues.map((issue, i) => (
+                                    <li key={i} data-testid={`text-compliance-issue-${i}`}>{issue}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            onClick={() => riskMutation.mutate()}
+                            disabled={riskMutation.isPending}
+                            data-testid="button-generate-risk"
+                          >
+                            {riskMutation.isPending && (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )}
+                            <AlertTriangle className="mr-2 h-4 w-4" />
+                            Analyze Risks
                           </Button>
                         )}
                       </CardContent>

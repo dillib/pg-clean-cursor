@@ -8,7 +8,9 @@ import type {
   Product,
   AISummary,
   SustainabilityInsight,
-  RepairSummary
+  RepairSummary,
+  CircularityScore,
+  RiskAssessment
 } from "@shared/schema";
 
 const openai = new OpenAI({
@@ -96,6 +98,73 @@ Respond in JSON format: { "repairabilityRating": "...", "repairInstructions": ["
     const parsed = JSON.parse(response) as RepairSummary;
 
     await this.storeInsight(product.id, "repair", parsed as unknown as Record<string, unknown>);
+
+    return parsed;
+  }
+
+  async generateCircularityScore(product: Product): Promise<CircularityScore> {
+    const recycledContent = product.recycledContentPercent ?? 0;
+    const recyclability = product.recyclabilityPercent ?? 0;
+    
+    const prompt = `Analyze circularity and material efficiency for this product:
+Product: ${product.productName}
+Materials: ${product.materials}
+Recycled Content: ${recycledContent}%
+Recyclability: ${recyclability}%
+Recycling Instructions: ${product.recyclingInstructions}
+Disassembly Instructions: ${product.disassemblyInstructions || "Not provided"}
+Take-Back Programs: ${JSON.stringify(product.takeBackPrograms || [])}
+
+Provide a circularity assessment:
+1. Overall circularity score (0-100)
+2. Grade (A+, A, B, C, D, F)
+3. Recyclability analysis
+4. Material efficiency assessment
+5. End-of-life options
+6. Improvement recommendations
+
+Respond in JSON format: { "score": 75, "grade": "B", "recyclabilityAnalysis": "...", "materialEfficiency": "...", "endOfLifeOptions": ["..."], "recommendations": ["..."] }`;
+
+    const response = await getChatCompletion([{ role: "user", content: prompt }]);
+    const parsed = JSON.parse(response) as CircularityScore;
+
+    await this.storeInsight(product.id, "circularity", parsed as unknown as Record<string, unknown>);
+
+    return parsed;
+  }
+
+  async generateRiskAssessment(product: Product): Promise<RiskAssessment> {
+    const hasAllFields = !!(product.manufacturer && product.batchNumber && product.materials && 
+      product.carbonFootprint && product.recyclingInstructions);
+    const hasCertifications = (product.safetyCertifications?.length ?? 0) > 0;
+    const hasCeMarking = product.ceMarking === true;
+    
+    const prompt = `Analyze risk factors for this Digital Product Passport:
+Product: ${product.productName}
+Manufacturer: ${product.manufacturer}
+Country of Origin: ${product.countryOfOrigin || "Not specified"}
+Batch Number: ${product.batchNumber}
+CE Marking: ${hasCeMarking ? "Yes" : "No"}
+Safety Certifications: ${JSON.stringify(product.safetyCertifications || [])}
+Environmental Certifications: ${JSON.stringify(product.environmentalCertifications || [])}
+Has Complete Core Data: ${hasAllFields ? "Yes" : "No"}
+
+Analyze and identify:
+1. Overall risk level (Low/Medium/High)
+2. Specific risk flags with severity and descriptions
+3. Data completeness percentage (0-100)
+4. Counterfeit risk assessment
+5. Any compliance issues
+6. Recommendations for risk mitigation
+
+Consider: missing mandatory fields, certification gaps, traceability issues, potential counterfeit indicators.
+
+Respond in JSON format: { "overallRisk": "Low", "riskFlags": [{"type": "...", "severity": "Low", "description": "..."}], "dataCompleteness": 85, "counterfeitRisk": "...", "complianceIssues": ["..."], "recommendations": ["..."] }`;
+
+    const response = await getChatCompletion([{ role: "user", content: prompt }]);
+    const parsed = JSON.parse(response) as RiskAssessment;
+
+    await this.storeInsight(product.id, "risk_assessment", parsed as unknown as Record<string, unknown>);
 
     return parsed;
   }

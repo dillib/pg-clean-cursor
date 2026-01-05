@@ -2,7 +2,7 @@ import { storage } from "./storage";
 import { qrService } from "./services/qr-service";
 import { identityService } from "./services/identity-service";
 import { traceService } from "./services/trace-service";
-import type { InsertProduct, InsertProductPassport, IoTDeviceType } from "@shared/schema";
+import type { InsertProduct, InsertProductPassport, IoTDeviceType, AIInsightType, AISummary, SustainabilityInsight, RepairSummary, CircularityScore, RiskAssessment } from "@shared/schema";
 
 interface DemoProductData {
   product: InsertProduct;
@@ -313,6 +313,193 @@ const iotDeviceConfigs: { productIndex: number; deviceType: IoTDeviceType; devic
   { productIndex: 4, deviceType: "qr", deviceId: "QR-EVC-2025-7500", manufacturer: "PhotonicTag", model: "Optical QR" }
 ];
 
+interface AIInsightsBundle {
+  summary: AISummary;
+  sustainability: SustainabilityInsight;
+  repair: RepairSummary;
+  circularity: CircularityScore;
+  risk: RiskAssessment;
+}
+
+const demoAIInsights: AIInsightsBundle[] = [
+  {
+    summary: {
+      summary: "The EcoPower Li-Ion Battery Pack is a premium 5000mAh lithium-ion battery designed for high-performance portable electronics with exceptional environmental credentials and EU battery passport compliance.",
+      keyFeatures: ["95% recyclability rate", "22% recycled content", "8-year expected lifespan", "UN38.3 safety certified", "Manufacturer take-back program"]
+    },
+    sustainability: {
+      overallScore: 82,
+      carbonAnalysis: "With only 12kg CO2e lifecycle emissions, this battery demonstrates strong environmental performance through responsible sourcing and efficient manufacturing processes.",
+      circularityRecommendations: ["Increase recycled lithium content to 25%", "Partner with additional recycling networks", "Implement second-life program for EV applications"],
+      improvements: ["Consider switching to LFP chemistry for cobalt-free option", "Reduce polymer separator content for higher recyclability"]
+    },
+    repair: {
+      repairabilityRating: "Good",
+      repairInstructions: ["Discharge battery to safe level before service", "Remove outer casing using T6 screwdriver", "Disconnect BMS board connector", "Replace individual cells as needed"],
+      commonIssues: ["Capacity degradation after 500+ cycles", "BMS calibration drift", "Terminal connector wear"],
+      partsAvailability: "Excellent - replacement cells and BMS boards available through authorized service centers"
+    },
+    circularity: {
+      score: 88,
+      grade: "A",
+      recyclabilityAnalysis: "95% of materials can be recovered through established battery recycling processes. Lithium, cobalt, and copper recovery rates exceed 90%.",
+      materialEfficiency: "Compact cell design maximizes energy density while minimizing material usage. Only 5% non-recyclable polymer content.",
+      endOfLifeOptions: ["Manufacturer take-back", "Second-life energy storage", "Certified battery recycling", "Material recovery"],
+      recommendations: ["Explore second-life applications", "Document cell-level tracking for circularity"]
+    },
+    risk: {
+      overallRisk: "Low",
+      riskFlags: [
+        { type: "Supply Chain", severity: "Low", description: "Cobalt sourcing documented and verified through due diligence" }
+      ],
+      dataCompleteness: 96,
+      counterfeitRisk: "Minimal - NFC authentication tag embedded, unique batch tracking, manufacturer verification available",
+      complianceIssues: [],
+      recommendations: ["Consider blockchain-based supply chain verification for enhanced transparency"]
+    }
+  },
+  {
+    summary: {
+      summary: "The Nordic Wool Premium Sweater is a luxurious Merino wool garment crafted in Sweden with exceptional sustainability credentials and 100% natural, biodegradable materials.",
+      keyFeatures: ["100% recyclable materials", "GOTS & OEKO-TEX certified", "15-year expected lifespan", "Lifetime repair service", "Full supply chain traceability"]
+    },
+    sustainability: {
+      overallScore: 94,
+      carbonAnalysis: "Only 8kg CO2e footprint achieved through sustainable wool sourcing, renewable energy manufacturing, and local production in Sweden.",
+      circularityRecommendations: ["Continue wool fiber recycling partnerships", "Expand repair service network", "Develop wool-to-wool recycling capability"],
+      improvements: ["Source buttons from recycled materials", "Reduce water usage in finishing process by 10%"]
+    },
+    repair: {
+      repairabilityRating: "Excellent",
+      repairInstructions: ["Minor holes can be darned at home", "Seam repairs done free at ScandiKnit partners", "Button replacement available at no charge", "Professional cleaning recommended annually"],
+      commonIssues: ["Pilling after extended wear", "Seam stress at shoulders", "Button thread loosening"],
+      partsAvailability: "Excellent - matching buttons and thread always available for repairs"
+    },
+    circularity: {
+      score: 97,
+      grade: "A+",
+      recyclabilityAnalysis: "100% of materials are natural and biodegradable. Wool fibers can be recycled multiple times without quality loss.",
+      materialEfficiency: "Minimal waste design with 92% primary material content. All components designed for easy separation.",
+      endOfLifeOptions: ["Textile donation", "Fiber recycling", "Natural composting", "Wool reclamation"],
+      recommendations: ["Perfect circularity model - maintain current practices"]
+    },
+    risk: {
+      overallRisk: "Low",
+      riskFlags: [],
+      dataCompleteness: 100,
+      counterfeitRisk: "Very Low - RFID tag with unique identifier, full supply chain visibility from farm to retail",
+      complianceIssues: [],
+      recommendations: ["Excellent compliance profile - no immediate actions needed"]
+    }
+  },
+  {
+    summary: {
+      summary: "The IoTrix Industrial Sensor Hub X200 is a modular IoT device designed for smart manufacturing environments with cloud connectivity and predictive maintenance capabilities.",
+      keyFeatures: ["10-year modular design", "OTA firmware updates", "IP67 industrial rating", "98% uptime SLA available", "Modular sensor expansion"]
+    },
+    sustainability: {
+      overallScore: 71,
+      carbonAnalysis: "35kg CO2e reflects the complex electronics manufacturing process, offset by long operational life and energy-efficient design.",
+      circularityRecommendations: ["Increase PCB recycled content", "Develop sensor module refurbishment program", "Implement product-as-a-service model"],
+      improvements: ["Transition to lead-free solder across all components", "Reduce enclosure weight by 15%"]
+    },
+    repair: {
+      repairabilityRating: "Good",
+      repairInstructions: ["Firmware updates resolve 80% of issues remotely", "Sensor modules are hot-swappable", "Main board replacement requires certified technician", "Enclosure can be resealed after service"],
+      commonIssues: ["Sensor calibration drift", "Connectivity interference in RF-dense environments", "Enclosure seal degradation in extreme conditions"],
+      partsAvailability: "Good - modular components stocked for 10+ years post-production"
+    },
+    circularity: {
+      score: 72,
+      grade: "B",
+      recyclabilityAnalysis: "85% recyclability through established e-waste channels. Modular design enables component-level refurbishment.",
+      materialEfficiency: "Modular architecture reduces waste by enabling targeted repairs. PCB design optimized for material recovery.",
+      endOfLifeOptions: ["Module refurbishment", "E-waste recycling", "Manufacturer take-back", "Component harvesting"],
+      recommendations: ["Consider design-for-disassembly improvements", "Document module-level material composition"]
+    },
+    risk: {
+      overallRisk: "Low",
+      riskFlags: [
+        { type: "Firmware Security", severity: "Low", description: "Regular security patches required - automatic OTA updates enabled" }
+      ],
+      dataCompleteness: 92,
+      counterfeitRisk: "Low - BLE secure pairing with manufacturer certificate, unique device identity in cloud platform",
+      complianceIssues: [],
+      recommendations: ["Maintain regular firmware update schedule", "Document cybersecurity compliance for industrial standards"]
+    }
+  },
+  {
+    summary: {
+      summary: "BioWrap Compostable Food Container is an innovative industrial food packaging solution made from agricultural waste with home compostability certification.",
+      keyFeatures: ["100% home compostable", "85% post-consumer recycled content", "120-day shelf life maintenance", "Food-safe certified", "Carbon-negative production"]
+    },
+    sustainability: {
+      overallScore: 95,
+      carbonAnalysis: "Carbon-negative production at -2kg CO2e through agricultural waste upcycling and renewable energy manufacturing.",
+      circularityRecommendations: ["Expand agricultural waste sourcing network", "Partner with commercial composting facilities", "Develop closed-loop program with food service clients"],
+      improvements: ["Increase barrier performance for extended shelf life", "Reduce manufacturing water usage further"]
+    },
+    repair: {
+      repairabilityRating: "Not Applicable",
+      repairInstructions: ["Single-use packaging designed for end-of-life composting", "No repair required or intended"],
+      commonIssues: ["Moisture sensitivity if stored improperly", "Limited hot food application"],
+      partsAvailability: "Not Applicable - designed for single use and composting"
+    },
+    circularity: {
+      score: 98,
+      grade: "A+",
+      recyclabilityAnalysis: "100% compostable in home or industrial conditions. Returns nutrients to soil within 120 days.",
+      materialEfficiency: "85% post-consumer recycled wheat straw waste. Minimal processing required.",
+      endOfLifeOptions: ["Home composting", "Industrial composting", "Garden waste collection", "Soil amendment"],
+      recommendations: ["Exemplary circular design - document as best practice case study"]
+    },
+    risk: {
+      overallRisk: "Low",
+      riskFlags: [],
+      dataCompleteness: 98,
+      counterfeitRisk: "Very Low - RFID-tagged packaging, batch verification through PhotonicTag platform",
+      complianceIssues: [],
+      recommendations: ["Maintain documentation for EU Packaging Regulation 2025 requirements"]
+    }
+  },
+  {
+    summary: {
+      summary: "The ChargePoint EV Cable Pro 7500 is a premium electric vehicle charging cable with smart monitoring capabilities and industry-leading durability for Type 2 connections.",
+      keyFeatures: ["IP67 weatherproof rating", "Smart power monitoring", "10,000+ plug cycles rated", "Temperature management system", "5-year warranty"]
+    },
+    sustainability: {
+      overallScore: 78,
+      carbonAnalysis: "28kg CO2e reflects durable construction materials, offset by long service life and support for zero-emission vehicles.",
+      circularityRecommendations: ["Increase recycled copper content in conductors", "Develop cable recycling partnership program", "Implement modular connector design for upgrades"],
+      improvements: ["Transition to bio-based cable sheathing", "Reduce packaging materials by 25%"]
+    },
+    repair: {
+      repairabilityRating: "Good",
+      repairInstructions: ["Connector housings can be replaced in field", "Cable damage requires professional splice or replacement", "Smart electronics module is replaceable", "Regular cleaning of contacts recommended"],
+      commonIssues: ["Connector pin wear after extended use", "Cable sheath abrasion in high-traffic areas", "Temperature sensor calibration drift"],
+      partsAvailability: "Good - replacement connectors and electronics modules available through service network"
+    },
+    circularity: {
+      score: 75,
+      grade: "B",
+      recyclabilityAnalysis: "88% recyclability with established metal and plastic recycling streams. Copper conductor recovery exceeds 95%.",
+      materialEfficiency: "Optimized conductor design provides maximum current capacity with minimal material. Modular construction enables targeted repairs.",
+      endOfLifeOptions: ["Manufacturer refurbishment", "Metal recycling", "Cable recycling program", "Component harvesting"],
+      recommendations: ["Explore connector standardization for longer product life", "Document copper content for recycling value"]
+    },
+    risk: {
+      overallRisk: "Low",
+      riskFlags: [
+        { type: "Counterfeit Risk", severity: "Low", description: "QR authentication prevents counterfeit products entering market" }
+      ],
+      dataCompleteness: 94,
+      counterfeitRisk: "Low - PhotonicTag QR authentication, unique serial number verification, manufacturer registration required",
+      complianceIssues: [],
+      recommendations: ["Register all products in PhotonicTag for full traceability benefits"]
+    }
+  }
+];
+
 async function seedDemoData() {
   console.log("Starting demo data seeding...\n");
 
@@ -354,6 +541,28 @@ async function seedDemoData() {
           metadata: { productName: productData.productName }
         });
         console.log(`  - IoT device registered (${iotConfig.deviceType.toUpperCase()}: ${iotConfig.deviceId})`);
+      }
+
+      const aiInsights = demoAIInsights[i];
+      if (aiInsights) {
+        const insightTypes: { type: AIInsightType; content: Record<string, unknown> }[] = [
+          { type: "summary", content: aiInsights.summary as unknown as Record<string, unknown> },
+          { type: "sustainability", content: aiInsights.sustainability as unknown as Record<string, unknown> },
+          { type: "repair", content: aiInsights.repair as unknown as Record<string, unknown> },
+          { type: "circularity", content: aiInsights.circularity as unknown as Record<string, unknown> },
+          { type: "risk_assessment", content: aiInsights.risk as unknown as Record<string, unknown> }
+        ];
+        
+        for (const { type, content } of insightTypes) {
+          await storage.createAIInsight({
+            productId: product.id,
+            insightType: type,
+            content,
+            model: "gpt-4o-demo",
+            isStale: false
+          });
+        }
+        console.log(`  - AI insights generated (5 types: summary, sustainability, repair, circularity, risk)`);
       }
 
       console.log(`  [SUCCESS] ${productData.productName}\n`);

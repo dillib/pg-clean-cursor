@@ -391,3 +391,25 @@ export interface RepairSummary {
   commonIssues: string[];
   partsAvailability: string;
 }
+
+export interface CircularityScore {
+  score: number;
+  grade: string;
+  recyclabilityAnalysis: string;
+  materialEfficiency: string;
+  endOfLifeOptions: string[];
+  recommendations: string[];
+}
+
+export interface RiskAssessment {
+  overallRisk: "Low" | "Medium" | "High";
+  riskFlags: Array<{
+    type: string;
+    severity: "Low" | "Medium" | "High";
+    description: string;
+  }>;
+  dataCompleteness: number;
+  counterfeitRisk: string;
+  complianceIssues: string[];
+  recommendations: string[];
+}
