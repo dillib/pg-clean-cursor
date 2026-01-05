@@ -7,7 +7,7 @@ import { identityService } from "./services/identity-service";
 import { traceService } from "./services/trace-service";
 import { aiService } from "./services/ai-service";
 import { auditService } from "./services/audit-service";
-import { storage } from "./storage";
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -174,7 +174,16 @@ export async function registerRoutes(
         return res.status(404).json({ error: "Product not found" });
       }
       
+      const existingQR = await qrService.getQRCodeByProductId(req.params.productId);
       const qrCode = await qrService.regenerateQRCode(req.params.productId);
+      
+      await auditService.logUpdate(
+        "qr_code",
+        qrCode.id,
+        existingQR as unknown as Record<string, unknown>,
+        qrCode as unknown as Record<string, unknown>
+      );
+      
       res.json(qrCode);
     } catch (error) {
       console.error("Error regenerating QR code:", error);
@@ -220,6 +229,8 @@ export async function registerRoutes(
         { location, description, metadata }
       );
       
+      await auditService.logCreate("trace_event", event.id, event as unknown as Record<string, unknown>);
+      
       res.status(201).json(event);
     } catch (error) {
       console.error("Error recording trace event:", error);
@@ -244,7 +255,7 @@ export async function registerRoutes(
   app.post("/api/ai/summarize", async (req: Request, res: Response) => {
     try {
       const { productId } = req.body;
-      const product = await storage.getProduct(productId);
+      const product = await productService.getProduct(productId);
       
       if (!product) {
         return res.status(404).json({ error: "Product not found" });
@@ -261,7 +272,7 @@ export async function registerRoutes(
   app.post("/api/ai/sustainability", async (req: Request, res: Response) => {
     try {
       const { productId } = req.body;
-      const product = await storage.getProduct(productId);
+      const product = await productService.getProduct(productId);
       
       if (!product) {
         return res.status(404).json({ error: "Product not found" });
@@ -278,7 +289,7 @@ export async function registerRoutes(
   app.post("/api/ai/repair-summary", async (req: Request, res: Response) => {
     try {
       const { productId } = req.body;
-      const product = await storage.getProduct(productId);
+      const product = await productService.getProduct(productId);
       
       if (!product) {
         return res.status(404).json({ error: "Product not found" });
