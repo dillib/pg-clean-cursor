@@ -17,6 +17,12 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### January 2026
+- **IoT Tagging System**: Complete NFC/RFID/BLE device management with 9 API endpoints, device registration, sensor readings, and scan tracking
+- Added IoT Devices admin page with device type breakdown and status tracking in sidebar navigation
+- Added IoT Devices tab to product detail view showing linked devices with proper filtering
+- Seeded 5 realistic demo products across industries (batteries, textiles, IoT devices, packaging, EV accessories) with linked IoT devices
+- Secured all IoT write endpoints with isAuthenticated middleware
+- **GTM Complete**: All 6 core categories fully implemented (DPP, QR Identity, Supply Chain Traceability, Authentication, IoT Tagging, AI Intelligence)
 - Integrated brand story: "Physics-rooted identity" and "Illumination" theme throughout landing page
 - Updated hero section with core messaging: "Every Product Deserves a Secure Identity"
 - Added "This is not just tagging. This is illumination." CTA section
@@ -60,6 +66,7 @@ Preferred communication style: Simple, everyday language.
 ### Key Data Models
 - **Products**: Digital Product Passport data including manufacturer info, materials, carbon footprint, repairability scores, warranty details, ownership history, and recycling instructions
 - **Users**: OAuth-based user model with Replit Auth fields (email, firstName, lastName, profileImageUrl)
+- **IoT Devices**: NFC/RFID/BLE device registry with device ID, type, status, manufacturer, model, firmware version, linked product ID, and last seen timestamp
 - **Conversations/Messages**: Chat functionality schema for AI interactions
 - **Audit Logs**: Event tracking for compliance and traceability
 
