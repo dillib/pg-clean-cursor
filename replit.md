@@ -23,13 +23,13 @@ Preferred communication style: Simple, everyday language.
   - AI Repair Guide: Repairability rating, instructions, and parts availability
   - AI Circularity Score: Recyclability grade (A+ to F), material efficiency, end-of-life options
   - AI Risk Assessment: Overall risk level, data completeness %, counterfeit risk, compliance issues
-- Pre-generated AI insights for all 5 demo products for immediate demo visibility
+- Pre-generated AI insights for all 8 demo products for immediate demo visibility
 - Added CircularityScore and RiskAssessment TypeScript interfaces to schema
 - Added API endpoints: /api/ai/circularity, /api/ai/risk-assessment
 - **IoT Tagging System**: Complete NFC/RFID/BLE device management with 9 API endpoints, device registration, sensor readings, and scan tracking
 - Added IoT Devices admin page with device type breakdown and status tracking in sidebar navigation
 - Added IoT Devices tab to product detail view showing linked devices with proper filtering
-- Seeded 5 realistic demo products across industries (batteries, textiles, IoT devices, packaging, EV accessories) with linked IoT devices
+- Seeded 8 realistic demo products across industries (Batteries, Textiles, IoT Devices, Packaging, EV Accessories, Consumer Electronics, Fashion Accessories, Smart Home) with linked IoT devices and stock images
 - Secured all IoT write endpoints with isAuthenticated middleware
 - **GTM Complete**: All 6 core categories fully implemented (DPP, QR Identity, Supply Chain Traceability, Authentication, IoT Tagging, AI Intelligence)
 - Integrated brand story: "Physics-rooted identity" and "Illumination" theme throughout landing page
