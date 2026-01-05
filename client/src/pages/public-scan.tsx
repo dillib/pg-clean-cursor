@@ -24,9 +24,79 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { Product, TraceEvent, QRCode as QRCodeType } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+
+const demoProduct: Partial<Product> & { id: string; productName: string; manufacturer: string; batchNumber: string; materials: string; carbonFootprint: number; repairabilityScore: number; warrantyInfo: string; recyclingInstructions: string } = {
+  id: "demo",
+  productName: "Sustainable Backpack Pro",
+  manufacturer: "EcoTech Industries",
+  batchNumber: "PHT-ECO-2025-001",
+  materials: "Recycled polyester (85%), organic cotton (10%), plant-based leather alternatives (5%). All materials sourced from certified sustainable suppliers with full chain of custody documentation.",
+  carbonFootprint: 12.5,
+  repairabilityScore: 8.5,
+  warrantyInfo: "5-year comprehensive warranty covering manufacturing defects, zipper failures, and seam separation. Free repairs for the first 2 years, reduced cost repairs thereafter. Lifetime strap replacement program included.",
+  ownershipHistory: [
+    { owner: "EcoTech Industries", date: "2025-01-15", action: "Manufactured" },
+    { owner: "Global Retail Partners", date: "2025-01-20", action: "Distributed" },
+  ],
+  recyclingInstructions: "1. Remove all metal components (zippers, buckles) for metal recycling\n2. Separate fabric components by color\n3. Return to any EcoTech retail location for textile recycling\n4. Alternatively, use local textile recycling programs\n\nThis product is 95% recyclable and designed for circular economy participation.",
+  qrCodeData: null,
+  productImage: null,
+};
+
+const demoTraceEvents: Partial<TraceEvent>[] = [
+  {
+    id: "demo-1",
+    productId: "demo",
+    eventType: "manufactured",
+    timestamp: new Date("2025-01-15T10:00:00Z"),
+    actor: "EcoTech Industries",
+    location: { name: "Munich, Germany" },
+    description: "Product manufactured using 100% renewable energy",
+    metadata: {},
+    createdAt: new Date("2025-01-15T10:00:00Z"),
+    parentEventId: null,
+  },
+  {
+    id: "demo-2",
+    productId: "demo",
+    eventType: "inspected",
+    timestamp: new Date("2025-01-16T14:30:00Z"),
+    actor: "Quality Control Team",
+    location: { name: "Munich, Germany" },
+    description: "Passed all quality checks and sustainability verification",
+    metadata: {},
+    createdAt: new Date("2025-01-16T14:30:00Z"),
+    parentEventId: null,
+  },
+  {
+    id: "demo-3",
+    productId: "demo",
+    eventType: "shipped",
+    timestamp: new Date("2025-01-18T09:00:00Z"),
+    actor: "Green Logistics",
+    location: { name: "Frankfurt Hub" },
+    description: "Carbon-neutral shipping via electric vehicles",
+    metadata: {},
+    createdAt: new Date("2025-01-18T09:00:00Z"),
+    parentEventId: null,
+  },
+  {
+    id: "demo-4",
+    productId: "demo",
+    eventType: "received",
+    timestamp: new Date("2025-01-20T11:00:00Z"),
+    actor: "Global Retail Partners",
+    location: { name: "Berlin, Germany" },
+    description: "Received at retail distribution center",
+    metadata: {},
+    createdAt: new Date("2025-01-20T11:00:00Z"),
+    parentEventId: null,
+  },
+];
 
 const eventTypeIcons: Record<string, typeof Truck> = {
   manufactured: Factory,
@@ -52,21 +122,26 @@ const eventTypeLabels: Record<string, string> = {
   custom: "Event",
 };
 
-export default function PublicScan() {
+interface PublicScanProps {
+  isDemo?: boolean;
+}
+
+export default function PublicScan({ isDemo = false }: PublicScanProps) {
   const params = useParams<{ id: string }>();
 
-  const { data: product, isLoading, error } = useQuery<Product>({
+  const { data: fetchedProduct, isLoading, error } = useQuery<Product>({
     queryKey: ["/api/products", params.id],
+    enabled: !isDemo && !!params.id,
   });
 
-  const { data: traceEvents } = useQuery<TraceEvent[]>({
+  const { data: fetchedTraceEvents } = useQuery<TraceEvent[]>({
     queryKey: ["/api/products", params.id, "trace"],
-    enabled: !!params.id,
+    enabled: !isDemo && !!params.id,
   });
 
   const { data: qrCode } = useQuery<QRCodeType>({
     queryKey: ["/api/products", params.id, "qr"],
-    enabled: !!params.id,
+    enabled: !isDemo && !!params.id,
   });
 
   const scanMutation = useMutation({
@@ -76,12 +151,15 @@ export default function PublicScan() {
   });
 
   useEffect(() => {
-    if (qrCode?.id) {
+    if (qrCode?.id && !isDemo) {
       scanMutation.mutate(qrCode.id);
     }
-  }, [qrCode?.id]);
+  }, [qrCode?.id, isDemo]);
 
-  if (isLoading) {
+  const product = isDemo ? (demoProduct as Product) : fetchedProduct;
+  const traceEvents = isDemo ? (demoTraceEvents as TraceEvent[]) : fetchedTraceEvents;
+
+  if (!isDemo && isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
@@ -100,7 +178,7 @@ export default function PublicScan() {
     );
   }
 
-  if (error || !product) {
+  if (!isDemo && (error || !product)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="text-center space-y-4">
@@ -122,6 +200,10 @@ export default function PublicScan() {
     );
   }
 
+  if (!product) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card sticky top-0 z-50">
@@ -138,14 +220,34 @@ export default function PublicScan() {
             </div>
           </Link>
           <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="gap-1">
-              <CheckCircle2 className="h-3 w-3" />
-              Verified
-            </Badge>
+            {isDemo ? (
+              <Badge variant="outline" className="gap-1 border-primary text-primary">
+                <Sparkles className="h-3 w-3" />
+                Demo
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="gap-1">
+                <CheckCircle2 className="h-3 w-3" />
+                Verified
+              </Badge>
+            )}
             <ThemeToggle />
           </div>
         </div>
       </header>
+
+      {isDemo && (
+        <div className="bg-primary/10 border-b border-primary/20">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+            <p className="text-sm">
+              This is a demo passport. Create your own product passports for free.
+            </p>
+            <Button size="sm" asChild data-testid="button-demo-signup">
+              <a href="/api/login">Get Started</a>
+            </Button>
+          </div>
+        </div>
+      )}
 
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
         <div className="grid gap-6 lg:grid-cols-3">

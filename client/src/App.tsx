@@ -94,6 +94,9 @@ function Router() {
       <Route path="/product/:id">
         <PublicScan />
       </Route>
+      <Route path="/scan/demo">
+        <PublicScan isDemo />
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );

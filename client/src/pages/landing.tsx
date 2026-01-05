@@ -41,7 +41,7 @@ export default function Landing() {
                 <a href="/api/login">Log In</a>
               </Button>
               <Button asChild data-testid="button-get-started">
-                <a href="/api/login">Start Illuminating</a>
+                <a href="/api/login">Get Started</a>
               </Button>
             </div>
           </div>
@@ -75,12 +75,12 @@ export default function Landing() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" asChild data-testid="button-hero-start">
                   <a href="/api/login" className="gap-2">
-                    Begin Illuminating
+                    Get Started Free
                     <ArrowRight className="w-4 h-4" />
                   </a>
                 </Button>
                 <Button size="lg" variant="outline" asChild data-testid="button-hero-demo">
-                  <Link href="/product/demo">See a Live Passport</Link>
+                  <Link href="/scan/demo">View Demo Passport</Link>
                 </Button>
               </div>
 
@@ -453,7 +453,7 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild data-testid="button-cta-start">
               <a href="/api/login" className="gap-2">
-                Start Your Journey
+                Try It Free
                 <ArrowRight className="w-4 h-4" />
               </a>
             </Button>
