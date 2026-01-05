@@ -1,4 +1,4 @@
-import { users, type User, type UpsertUser } from "@shared/models/auth";
+import { users, MASTER_ADMIN_EMAILS, type User, type UpsertUser } from "@shared/models/auth";
 import { db } from "../../db";
 import { eq } from "drizzle-orm";
 
@@ -16,13 +16,17 @@ class AuthStorage implements IAuthStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
+    // Automatically grant admin privileges to master admin emails
+    const isAdmin = userData.email ? MASTER_ADMIN_EMAILS.includes(userData.email.toLowerCase()) : false;
+    
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values({ ...userData, isAdmin })
       .onConflictDoUpdate({
         target: users.id,
         set: {
           ...userData,
+          isAdmin,
           updatedAt: new Date(),
         },
       })
