@@ -27,6 +27,12 @@ import {
   Radio,
   Bluetooth,
   Signal,
+  AlertTriangle,
+  Droplets,
+  Zap,
+  Calendar,
+  Award,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -348,79 +354,279 @@ export default function ProductDetail() {
                   </TabsList>
                 </div>
                 <TabsContent value="overview" className="p-6 space-y-6">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Factory className="h-4 w-4" />
-                        Manufacturer
+                  <div>
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <Factory className="h-4 w-4" />
+                      Product Identification
+                    </h3>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      <div className="space-y-1">
+                        <div className="text-sm text-muted-foreground">Manufacturer</div>
+                        <p className="font-medium" data-testid="text-manufacturer">{product.manufacturer}</p>
+                        {product.manufacturerAddress && (
+                          <p className="text-xs text-muted-foreground" data-testid="text-manufacturer-address">{product.manufacturerAddress}</p>
+                        )}
                       </div>
-                      <p className="font-medium" data-testid="text-manufacturer">
-                        {product.manufacturer}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Hash className="h-4 w-4" />
-                        Batch Number
+                      {product.countryOfOrigin && (
+                        <div className="space-y-1">
+                          <div className="text-sm text-muted-foreground">Country of Origin</div>
+                          <p className="font-medium" data-testid="text-country">{product.countryOfOrigin}</p>
+                        </div>
+                      )}
+                      {product.productCategory && (
+                        <div className="space-y-1">
+                          <div className="text-sm text-muted-foreground">Category</div>
+                          <Badge variant="outline" data-testid="badge-category">{product.productCategory}</Badge>
+                        </div>
+                      )}
+                      {product.modelNumber && (
+                        <div className="space-y-1">
+                          <div className="text-sm text-muted-foreground">Model Number</div>
+                          <p className="font-mono font-medium" data-testid="text-model">{product.modelNumber}</p>
+                        </div>
+                      )}
+                      {product.sku && (
+                        <div className="space-y-1">
+                          <div className="text-sm text-muted-foreground">SKU</div>
+                          <p className="font-mono font-medium" data-testid="text-sku">{product.sku}</p>
+                        </div>
+                      )}
+                      <div className="space-y-1">
+                        <div className="text-sm text-muted-foreground">Batch Number</div>
+                        <p className="font-mono font-medium" data-testid="text-batch">{product.batchNumber}</p>
                       </div>
-                      <p className="font-mono font-medium" data-testid="text-batch">
-                        {product.batchNumber}
-                      </p>
+                      {product.lotNumber && (
+                        <div className="space-y-1">
+                          <div className="text-sm text-muted-foreground">Lot Number</div>
+                          <p className="font-mono font-medium" data-testid="text-lot">{product.lotNumber}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <Separator />
                   <div>
-                    <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
                       <Package className="h-4 w-4" />
-                      Materials
+                      Materials & Composition
                     </h3>
-                    <p className="text-muted-foreground leading-relaxed" data-testid="text-materials">
+                    <p className="text-muted-foreground leading-relaxed mb-4" data-testid="text-materials">
                       {product.materials}
                     </p>
+                    {product.materialBreakdown && product.materialBreakdown.length > 0 && (
+                      <div className="space-y-2 mb-4">
+                        <div className="text-sm font-medium">Material Breakdown</div>
+                        <div className="space-y-2">
+                          {product.materialBreakdown.map((mat, i) => (
+                            <div key={i} className="flex items-center gap-3">
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between text-sm mb-1">
+                                  <span>{mat.material}</span>
+                                  <span className="text-muted-foreground">{mat.percentage}%</span>
+                                </div>
+                                <Progress value={mat.percentage} className="h-1.5" />
+                              </div>
+                              {mat.recyclable && (
+                                <Badge variant="outline" className="text-xs">
+                                  <Recycle className="h-3 w-3 mr-1" />
+                                  Recyclable
+                                </Badge>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      {product.recycledContentPercent !== null && product.recycledContentPercent !== undefined && (
+                        <div className="space-y-1">
+                          <div className="text-sm text-muted-foreground">Recycled Content</div>
+                          <p className="text-2xl font-bold text-green-600" data-testid="text-recycled-content">
+                            {product.recycledContentPercent}%
+                          </p>
+                        </div>
+                      )}
+                      {product.recyclabilityPercent !== null && product.recyclabilityPercent !== undefined && (
+                        <div className="space-y-1">
+                          <div className="text-sm text-muted-foreground">Recyclability</div>
+                          <p className="text-2xl font-bold text-green-600" data-testid="text-recyclability">
+                            {product.recyclabilityPercent}%
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    {product.hazardousMaterials && (
+                      <Card className="mt-4 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800">
+                        <CardContent className="p-3">
+                          <div className="flex items-start gap-2">
+                            <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
+                            <div>
+                              <div className="text-sm font-medium text-amber-800 dark:text-amber-200">Hazardous Materials</div>
+                              <p className="text-sm text-amber-700 dark:text-amber-300" data-testid="text-hazardous">
+                                {product.hazardousMaterials}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
                 </TabsContent>
 
                 <TabsContent value="sustainability" className="p-6 space-y-6">
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Leaf className="h-4 w-4" />
-                        Carbon Footprint
+                  <div>
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                      <Leaf className="h-4 w-4" />
+                      Environmental Impact
+                    </h3>
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Leaf className="h-4 w-4" />
+                          Carbon Footprint
+                        </div>
+                        <div className="text-3xl font-bold" data-testid="text-carbon">
+                          {product.carbonFootprint}
+                          <span className="text-lg font-normal text-muted-foreground ml-1">kg CO2e</span>
+                        </div>
                       </div>
-                      <div className="text-3xl font-bold" data-testid="text-carbon">
-                        {product.carbonFootprint}
-                        <span className="text-lg font-normal text-muted-foreground ml-1">
-                          kg CO2e
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Total lifecycle carbon emissions
-                      </p>
+                      {product.waterUsage !== null && product.waterUsage !== undefined && (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Droplets className="h-4 w-4" />
+                            Water Usage
+                          </div>
+                          <div className="text-3xl font-bold" data-testid="text-water">
+                            {product.waterUsage}
+                            <span className="text-lg font-normal text-muted-foreground ml-1">L</span>
+                          </div>
+                        </div>
+                      )}
+                      {product.energyConsumption !== null && product.energyConsumption !== undefined && (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Zap className="h-4 w-4" />
+                            Energy Consumption
+                          </div>
+                          <div className="text-3xl font-bold" data-testid="text-energy">
+                            {product.energyConsumption}
+                            <span className="text-lg font-normal text-muted-foreground ml-1">kWh</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Wrench className="h-4 w-4" />
-                        Repairability Score
+                    {product.environmentalCertifications && product.environmentalCertifications.length > 0 && (
+                      <div className="mt-6">
+                        <div className="text-sm text-muted-foreground mb-2">Environmental Certifications</div>
+                        <div className="flex flex-wrap gap-2">
+                          {product.environmentalCertifications.map((cert, i) => (
+                            <Badge key={i} variant="outline" data-testid={`badge-env-cert-${i}`}>
+                              <Award className="h-3 w-3 mr-1" />
+                              {cert}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
-                      <div className="text-3xl font-bold" data-testid="text-repairability">
-                        {product.repairabilityScore}
-                        <span className="text-lg font-normal text-muted-foreground">/10</span>
+                    )}
+                  </div>
+                  <Separator />
+                  <div>
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                      <Wrench className="h-4 w-4" />
+                      Durability & Repairability
+                    </h3>
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                      <div className="space-y-2">
+                        <div className="text-sm text-muted-foreground">Repairability Score</div>
+                        <div className="text-3xl font-bold" data-testid="text-repairability">
+                          {product.repairabilityScore}
+                          <span className="text-lg font-normal text-muted-foreground">/10</span>
+                        </div>
+                        <Progress value={product.repairabilityScore * 10} className="h-2" />
                       </div>
-                      <Progress
-                        value={product.repairabilityScore * 10}
-                        className="h-2"
-                      />
+                      {product.expectedLifespanYears !== null && product.expectedLifespanYears !== undefined && (
+                        <div className="space-y-2">
+                          <div className="text-sm text-muted-foreground">Expected Lifespan</div>
+                          <div className="text-3xl font-bold" data-testid="text-lifespan">
+                            {product.expectedLifespanYears}
+                            <span className="text-lg font-normal text-muted-foreground ml-1">years</span>
+                          </div>
+                        </div>
+                      )}
+                      {product.sparePartsAvailable !== null && product.sparePartsAvailable !== undefined && (
+                        <div className="space-y-2">
+                          <div className="text-sm text-muted-foreground">Spare Parts</div>
+                          <Badge variant={product.sparePartsAvailable ? "default" : "secondary"} data-testid="badge-spare-parts">
+                            {product.sparePartsAvailable ? "Available" : "Not Available"}
+                          </Badge>
+                        </div>
+                      )}
                     </div>
+                    {product.repairInstructions && (
+                      <Card className="mt-4 bg-muted/50">
+                        <CardContent className="p-4">
+                          <div className="text-sm font-medium mb-1">Repair Instructions</div>
+                          <p className="text-sm text-muted-foreground" data-testid="text-repair-instructions">
+                            {product.repairInstructions}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+                    {product.serviceCenters && product.serviceCenters.length > 0 && (
+                      <div className="mt-4">
+                        <div className="text-sm font-medium mb-2">Service Centers</div>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          {product.serviceCenters.map((center, i) => (
+                            <Card key={i} className="bg-muted/50">
+                              <CardContent className="p-3">
+                                <div className="font-medium text-sm">{center.name}</div>
+                                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" />
+                                  {center.location}
+                                </div>
+                                {center.contact && (
+                                  <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Phone className="h-3 w-3" />
+                                    {center.contact}
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
 
                 <TabsContent value="lifecycle" className="p-6 space-y-6">
-                  <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Ownership & Lifecycle
+                    </h3>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-4">
+                      {product.dateOfManufacture && (
+                        <div className="space-y-1">
+                          <div className="text-sm text-muted-foreground">Date of Manufacture</div>
+                          <p className="font-medium" data-testid="text-manufacture-date">
+                            {new Date(product.dateOfManufacture).toLocaleDateString()}
+                          </p>
+                        </div>
+                      )}
+                      {product.dateOfFirstSale && (
+                        <div className="space-y-1">
+                          <div className="text-sm text-muted-foreground">Date of First Sale</div>
+                          <p className="font-medium" data-testid="text-first-sale-date">
+                            {new Date(product.dateOfFirstSale).toLocaleDateString()}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                     <div>
-                      <h3 className="font-semibold mb-2 flex items-center gap-2">
+                      <h4 className="font-medium mb-2 flex items-center gap-2">
                         <Shield className="h-4 w-4" />
                         Warranty Information
-                      </h3>
+                      </h4>
                       <Card className="bg-muted/50">
                         <CardContent className="p-4">
                           <p className="leading-relaxed" data-testid="text-warranty">
@@ -429,18 +635,77 @@ export default function ProductDetail() {
                         </CardContent>
                       </Card>
                     </div>
-                    <div>
-                      <h3 className="font-semibold mb-2 flex items-center gap-2">
-                        <Recycle className="h-4 w-4" />
-                        Recycling Instructions
-                      </h3>
+                  </div>
+                  <Separator />
+                  <div>
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <Award className="h-4 w-4" />
+                      Compliance & Certifications
+                    </h3>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {product.ceMarking && (
+                        <Badge variant="default" data-testid="badge-ce">CE Marked</Badge>
+                      )}
+                      {product.safetyCertifications && product.safetyCertifications.map((cert, i) => (
+                        <Badge key={i} variant="outline" data-testid={`badge-safety-cert-${i}`}>
+                          {cert}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <Separator />
+                  <div>
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <Recycle className="h-4 w-4" />
+                      End-of-Life & Recycling
+                    </h3>
+                    <div className="space-y-4">
                       <Card className="bg-muted/50">
                         <CardContent className="p-4">
-                          <p className="leading-relaxed whitespace-pre-line" data-testid="text-recycling">
+                          <div className="text-sm font-medium mb-1">Recycling Instructions</div>
+                          <p className="text-sm text-muted-foreground whitespace-pre-line" data-testid="text-recycling">
                             {product.recyclingInstructions}
                           </p>
                         </CardContent>
                       </Card>
+                      {product.disassemblyInstructions && (
+                        <Card className="bg-muted/50">
+                          <CardContent className="p-4">
+                            <div className="text-sm font-medium mb-1">Disassembly Instructions</div>
+                            <p className="text-sm text-muted-foreground" data-testid="text-disassembly">
+                              {product.disassemblyInstructions}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      )}
+                      {product.hazardWarnings && (
+                        <Card className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800">
+                          <CardContent className="p-4">
+                            <div className="flex items-start gap-2">
+                              <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
+                              <div>
+                                <div className="text-sm font-medium text-amber-800 dark:text-amber-200">Hazard Warnings</div>
+                                <p className="text-sm text-amber-700 dark:text-amber-300" data-testid="text-hazard-warnings">
+                                  {product.hazardWarnings}
+                                </p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                      {product.takeBackPrograms && product.takeBackPrograms.length > 0 && (
+                        <div>
+                          <div className="text-sm font-medium mb-2">Take-Back Programs</div>
+                          <div className="flex flex-wrap gap-2">
+                            {product.takeBackPrograms.map((program, i) => (
+                              <Badge key={i} variant="outline" data-testid={`badge-takeback-${i}`}>
+                                <Recycle className="h-3 w-3 mr-1" />
+                                {program}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </TabsContent>

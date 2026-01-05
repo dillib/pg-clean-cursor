@@ -64,7 +64,14 @@ Preferred communication style: Simple, everyday language.
 - **Storage Abstraction**: Interface-based storage pattern (`IStorage`) currently using in-memory implementation, designed for easy database migration
 
 ### Key Data Models
-- **Products**: Digital Product Passport data including manufacturer info, materials, carbon footprint, repairability scores, warranty details, ownership history, and recycling instructions
+- **Products**: Comprehensive EU DPP-compliant schema with 7 categories:
+  - Product Identification: name, category, modelNumber, SKU, manufacturer, address, countryOfOrigin, batch/lot numbers
+  - Materials & Composition: materials list, materialBreakdown (JSONB), recycledContentPercent, recyclabilityPercent, hazardousMaterials
+  - Environmental Impact: carbonFootprint, waterUsage, energyConsumption, environmentalCertifications
+  - Durability & Repairability: repairabilityScore, expectedLifespanYears, sparePartsAvailable, repairInstructions, serviceCenters
+  - Ownership & Lifecycle: dateOfManufacture, dateOfFirstSale, ownershipHistory
+  - Compliance & Certifications: ceMarking, safetyCertifications
+  - End-of-Life & Recycling: recyclingInstructions, disassemblyInstructions, hazardWarnings, takeBackPrograms
 - **Users**: OAuth-based user model with Replit Auth fields (email, firstName, lastName, profileImageUrl)
 - **IoT Devices**: NFC/RFID/BLE device registry with device ID, type, status, manufacturer, model, firmware version, linked product ID, and last seen timestamp
 - **Conversations/Messages**: Chat functionality schema for AI interactions

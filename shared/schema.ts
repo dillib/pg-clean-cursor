@@ -38,17 +38,69 @@ export interface OwnershipEntry {
   action: string;
 }
 
+export interface MaterialBreakdown {
+  material: string;
+  percentage: number;
+  recyclable: boolean;
+}
+
+export interface ServiceCenter {
+  name: string;
+  location: string;
+  contact?: string;
+}
+
 export const products = pgTable("products", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // === 1. PRODUCT IDENTIFICATION ===
   productName: text("product_name").notNull(),
+  productCategory: text("product_category"),
+  modelNumber: text("model_number"),
+  sku: text("sku"),
   manufacturer: text("manufacturer").notNull(),
+  manufacturerAddress: text("manufacturer_address"),
+  countryOfOrigin: text("country_of_origin"),
   batchNumber: text("batch_number").notNull(),
+  lotNumber: text("lot_number"),
+  
+  // === 2. MATERIALS & COMPOSITION ===
   materials: text("materials").notNull(),
+  materialBreakdown: jsonb("material_breakdown").$type<MaterialBreakdown[]>().default([]),
+  recycledContentPercent: integer("recycled_content_percent"),
+  recyclabilityPercent: integer("recyclability_percent"),
+  hazardousMaterials: text("hazardous_materials"),
+  
+  // === 3. ENVIRONMENTAL IMPACT ===
   carbonFootprint: integer("carbon_footprint").notNull(),
+  waterUsage: integer("water_usage"),
+  energyConsumption: integer("energy_consumption"),
+  environmentalCertifications: jsonb("environmental_certifications").$type<string[]>().default([]),
+  
+  // === 4. DURABILITY & REPAIRABILITY ===
   repairabilityScore: integer("repairability_score").notNull(),
+  expectedLifespanYears: integer("expected_lifespan_years"),
+  sparePartsAvailable: boolean("spare_parts_available"),
+  repairInstructions: text("repair_instructions"),
+  serviceCenters: jsonb("service_centers").$type<ServiceCenter[]>().default([]),
   warrantyInfo: text("warranty_info").notNull(),
+  
+  // === 5. OWNERSHIP & LIFECYCLE ===
+  dateOfManufacture: timestamp("date_of_manufacture"),
+  dateOfFirstSale: timestamp("date_of_first_sale"),
   ownershipHistory: jsonb("ownership_history").$type<OwnershipEntry[]>().default([]),
+  
+  // === 6. COMPLIANCE & CERTIFICATIONS ===
+  ceMarking: boolean("ce_marking"),
+  safetyCertifications: jsonb("safety_certifications").$type<string[]>().default([]),
+  
+  // === 7. END-OF-LIFE & RECYCLING ===
   recyclingInstructions: text("recycling_instructions").notNull(),
+  disassemblyInstructions: text("disassembly_instructions"),
+  hazardWarnings: text("hazard_warnings"),
+  takeBackPrograms: jsonb("take_back_programs").$type<string[]>().default([]),
+  
+  // === SYSTEM FIELDS ===
   productImage: text("product_image"),
   qrCodeData: text("qr_code_data"),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
