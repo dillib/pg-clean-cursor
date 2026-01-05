@@ -14,7 +14,11 @@ import {
   BarChart3,
   Globe,
   Lock,
-  Zap
+  Zap,
+  Factory,
+  Store,
+  ShoppingCart,
+  Trash2
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -248,6 +252,175 @@ export default function Landing() {
                 <p className="text-muted-foreground">
                   Guide products through their complete lifecycle with clear end-of-life 
                   pathways, enabling true circular economy participation.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      <section id="use-cases" className="py-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <Badge variant="secondary" className="mb-4" data-testid="badge-use-cases">Use Cases</Badge>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+              One Platform. Every Stakeholder.
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              From factory floor to recycling center, PhotonicTag serves the entire product lifecycle.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="bg-card" data-testid="card-usecase-manufacturers">
+              <CardContent className="p-6 space-y-4">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Factory className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold">For Manufacturers</h3>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                    Compliance automation
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                    Product passports
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                    Supply chain visibility
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card" data-testid="card-usecase-brands">
+              <CardContent className="p-6 space-y-4">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Store className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold">For Brands</h3>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                    Authenticity verification
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                    Customer engagement
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                    Sustainability storytelling
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card" data-testid="card-usecase-marketplaces">
+              <CardContent className="p-6 space-y-4">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <ShoppingCart className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold">For Marketplaces</h3>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                    Resale verification
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                    Provenance tracking
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                    Fraud prevention
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card" data-testid="card-usecase-recyclers">
+              <CardContent className="p-6 space-y-4">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Trash2 className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold">For Recyclers</h3>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                    Material breakdown
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                    Hazard warnings
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                    Automated sorting
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      <section id="why-us" className="py-24 px-4 sm:px-6 lg:px-8 bg-muted/30">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <Badge variant="secondary" className="mb-4" data-testid="badge-why-us">Why PhotonicTag</Badge>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+              One Platform. Full Lifecycle. Zero Complexity.
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="bg-card" data-testid="card-why-circularity">
+              <CardContent className="p-6 text-center space-y-3">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                  <Globe className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="font-semibold">Built for Circularity</h3>
+                <p className="text-sm text-muted-foreground">
+                  Designed for sustainable manufacturing and global compliance standards.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card" data-testid="card-why-security">
+              <CardContent className="p-6 text-center space-y-3">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                  <Lock className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="font-semibold">Secure by Design</h3>
+                <p className="text-sm text-muted-foreground">
+                  Cryptographic identity, tamper-proof QR, and privacy-first architecture.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card" data-testid="card-why-integration">
+              <CardContent className="p-6 text-center space-y-3">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                  <Zap className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="font-semibold">Lightning-Fast Integration</h3>
+                <p className="text-sm text-muted-foreground">
+                  APIs, webhooks, and no-code tools for rapid onboarding.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card" data-testid="card-why-enterprise">
+              <CardContent className="p-6 text-center space-y-3">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                  <BarChart3 className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="font-semibold">Enterprise-Ready</h3>
+                <p className="text-sm text-muted-foreground">
+                  Scalable, reliable, and built for high-volume manufacturers.
                 </p>
               </CardContent>
             </Card>
