@@ -1,37 +1,25 @@
 import type { Express, Request, Response } from "express";
-import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { type Server } from "http";
 import { insertProductSchema } from "@shared/schema";
-import QRCode from "qrcode";
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
-
-async function generateQRCode(productId: string): Promise<string> {
-  const url = `/product/${productId}`;
-  const qrDataUrl = await QRCode.toDataURL(url, {
-    width: 256,
-    margin: 2,
-    color: {
-      dark: "#000000",
-      light: "#ffffff",
-    },
-  });
-  return qrDataUrl;
-}
-
+import { productService } from "./services/product-service";
+import { qrService } from "./services/qr-service";
+import { identityService } from "./services/identity-service";
+import { traceService } from "./services/trace-service";
+import { aiService } from "./services/ai-service";
+import { auditService } from "./services/audit-service";
+import { storage } from "./storage";
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
   
-  // Get all products
+  // ==========================================
+  // PRODUCT ENDPOINTS
+  // ==========================================
+  
   app.get("/api/products", async (req: Request, res: Response) => {
     try {
-      const products = await storage.getAllProducts();
+      const products = await productService.getAllProducts();
       res.json(products);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -39,10 +27,9 @@ export async function registerRoutes(
     }
   });
 
-  // Get single product
   app.get("/api/products/:id", async (req: Request, res: Response) => {
     try {
-      const product = await storage.getProduct(req.params.id);
+      const product = await productService.getProduct(req.params.id);
       if (!product) {
         return res.status(404).json({ error: "Product not found" });
       }
@@ -53,7 +40,6 @@ export async function registerRoutes(
     }
   });
 
-  // Create product
   app.post("/api/products", async (req: Request, res: Response) => {
     try {
       const parsed = insertProductSchema.safeParse(req.body);
@@ -61,23 +47,20 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Invalid product data", details: parsed.error.issues });
       }
 
-      const product = await storage.createProduct(parsed.data);
+      const product = await productService.createProduct(parsed.data);
       
-      // Generate QR code for the product
-      const qrCodeData = await generateQRCode(product.id);
-      const updatedProduct = await storage.updateProduct(product.id, { qrCodeData });
+      await auditService.logCreate("product", product.id, product as unknown as Record<string, unknown>);
       
-      res.status(201).json(updatedProduct || product);
+      res.status(201).json(product);
     } catch (error) {
       console.error("Error creating product:", error);
       res.status(500).json({ error: "Failed to create product" });
     }
   });
 
-  // Update product
   app.put("/api/products/:id", async (req: Request, res: Response) => {
     try {
-      const existingProduct = await storage.getProduct(req.params.id);
+      const existingProduct = await productService.getProduct(req.params.id);
       if (!existingProduct) {
         return res.status(404).json({ error: "Product not found" });
       }
@@ -87,7 +70,17 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Invalid product data", details: parsed.error.issues });
       }
 
-      const product = await storage.updateProduct(req.params.id, parsed.data);
+      const product = await productService.updateProduct(req.params.id, parsed.data);
+      
+      if (product) {
+        await auditService.logUpdate(
+          "product", 
+          product.id, 
+          existingProduct as unknown as Record<string, unknown>,
+          product as unknown as Record<string, unknown>
+        );
+      }
+      
       res.json(product);
     } catch (error) {
       console.error("Error updating product:", error);
@@ -95,13 +88,20 @@ export async function registerRoutes(
     }
   });
 
-  // Delete product
   app.delete("/api/products/:id", async (req: Request, res: Response) => {
     try {
-      const deleted = await storage.deleteProduct(req.params.id);
+      const existingProduct = await productService.getProduct(req.params.id);
+      if (!existingProduct) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      
+      const deleted = await productService.deleteProduct(req.params.id);
       if (!deleted) {
         return res.status(404).json({ error: "Product not found" });
       }
+      
+      await auditService.logDelete("product", req.params.id, existingProduct as unknown as Record<string, unknown>);
+      
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -109,7 +109,138 @@ export async function registerRoutes(
     }
   });
 
-  // AI Summarize endpoint
+  // ==========================================
+  // IDENTITY ENDPOINTS
+  // ==========================================
+  
+  app.get("/api/identities/:id", async (req: Request, res: Response) => {
+    try {
+      const identity = await identityService.getIdentity(req.params.id);
+      if (!identity) {
+        return res.status(404).json({ error: "Identity not found" });
+      }
+      res.json(identity);
+    } catch (error) {
+      console.error("Error fetching identity:", error);
+      res.status(500).json({ error: "Failed to fetch identity" });
+    }
+  });
+
+  app.get("/api/products/:productId/identity", async (req: Request, res: Response) => {
+    try {
+      const identity = await identityService.getIdentityByProductId(req.params.productId);
+      if (!identity) {
+        return res.status(404).json({ error: "Identity not found for this product" });
+      }
+      res.json(identity);
+    } catch (error) {
+      console.error("Error fetching identity:", error);
+      res.status(500).json({ error: "Failed to fetch identity" });
+    }
+  });
+
+  app.post("/api/identities/validate", async (req: Request, res: Response) => {
+    try {
+      const { serialNumber } = req.body;
+      const result = await identityService.validateIdentity(serialNumber);
+      res.json(result);
+    } catch (error) {
+      console.error("Error validating identity:", error);
+      res.status(500).json({ error: "Failed to validate identity" });
+    }
+  });
+
+  // ==========================================
+  // QR CODE ENDPOINTS
+  // ==========================================
+  
+  app.get("/api/products/:productId/qr", async (req: Request, res: Response) => {
+    try {
+      const qrCode = await qrService.getQRCodeByProductId(req.params.productId);
+      if (!qrCode) {
+        return res.status(404).json({ error: "QR code not found for this product" });
+      }
+      res.json(qrCode);
+    } catch (error) {
+      console.error("Error fetching QR code:", error);
+      res.status(500).json({ error: "Failed to fetch QR code" });
+    }
+  });
+
+  app.post("/api/products/:productId/qr/regenerate", async (req: Request, res: Response) => {
+    try {
+      const product = await productService.getProduct(req.params.productId);
+      if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      
+      const qrCode = await qrService.regenerateQRCode(req.params.productId);
+      res.json(qrCode);
+    } catch (error) {
+      console.error("Error regenerating QR code:", error);
+      res.status(500).json({ error: "Failed to regenerate QR code" });
+    }
+  });
+
+  app.post("/api/qr/:id/scan", async (req: Request, res: Response) => {
+    try {
+      const qrCode = await qrService.recordScan(req.params.id);
+      if (!qrCode) {
+        return res.status(404).json({ error: "QR code not found" });
+      }
+      res.json(qrCode);
+    } catch (error) {
+      console.error("Error recording scan:", error);
+      res.status(500).json({ error: "Failed to record scan" });
+    }
+  });
+
+  // ==========================================
+  // TRACE EVENT ENDPOINTS
+  // ==========================================
+  
+  app.get("/api/products/:productId/trace", async (req: Request, res: Response) => {
+    try {
+      const events = await traceService.getProductTimeline(req.params.productId);
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching trace events:", error);
+      res.status(500).json({ error: "Failed to fetch trace events" });
+    }
+  });
+
+  app.post("/api/products/:productId/trace", async (req: Request, res: Response) => {
+    try {
+      const { eventType, actor, location, description, metadata } = req.body;
+      
+      const event = await traceService.recordEvent(
+        req.params.productId,
+        eventType,
+        actor,
+        { location, description, metadata }
+      );
+      
+      res.status(201).json(event);
+    } catch (error) {
+      console.error("Error recording trace event:", error);
+      res.status(500).json({ error: "Failed to record trace event" });
+    }
+  });
+
+  // ==========================================
+  // AI ENDPOINTS
+  // ==========================================
+  
+  app.get("/api/products/:productId/insights", async (req: Request, res: Response) => {
+    try {
+      const insights = await aiService.getInsightsByProductId(req.params.productId);
+      res.json(insights);
+    } catch (error) {
+      console.error("Error fetching insights:", error);
+      res.status(500).json({ error: "Failed to fetch insights" });
+    }
+  });
+
   app.post("/api/ai/summarize", async (req: Request, res: Response) => {
     try {
       const { productId } = req.body;
@@ -119,31 +250,7 @@ export async function registerRoutes(
         return res.status(404).json({ error: "Product not found" });
       }
 
-      const prompt = `You are an expert product analyst. Analyze the following product information and provide a concise summary with key features.
-
-Product: ${product.productName}
-Manufacturer: ${product.manufacturer}
-Materials: ${product.materials}
-Carbon Footprint: ${product.carbonFootprint}kg CO2e
-Repairability Score: ${product.repairabilityScore}/10
-Warranty: ${product.warrantyInfo}
-
-Respond in JSON format with exactly these fields:
-{
-  "summary": "A 2-3 sentence professional summary of the product",
-  "keyFeatures": ["feature1", "feature2", "feature3"] // 3-5 key features as strings
-}`;
-
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" },
-        max_completion_tokens: 500,
-      });
-
-      const content = response.choices[0]?.message?.content || "{}";
-      const result = JSON.parse(content);
-      
+      const result = await aiService.generateSummary(product);
       res.json(result);
     } catch (error) {
       console.error("Error generating summary:", error);
@@ -151,7 +258,6 @@ Respond in JSON format with exactly these fields:
     }
   });
 
-  // AI Sustainability endpoint
   app.post("/api/ai/sustainability", async (req: Request, res: Response) => {
     try {
       const { productId } = req.body;
@@ -161,32 +267,7 @@ Respond in JSON format with exactly these fields:
         return res.status(404).json({ error: "Product not found" });
       }
 
-      const prompt = `You are an expert sustainability analyst. Analyze the following product's environmental impact and provide insights.
-
-Product: ${product.productName}
-Materials: ${product.materials}
-Carbon Footprint: ${product.carbonFootprint}kg CO2e
-Repairability Score: ${product.repairabilityScore}/10
-Recycling Instructions: ${product.recyclingInstructions}
-
-Respond in JSON format with exactly these fields:
-{
-  "overallScore": <number 0-100 representing sustainability score>,
-  "carbonAnalysis": "Analysis of the carbon footprint and comparison to industry averages",
-  "circularityRecommendations": ["recommendation1", "recommendation2"], // 2-3 circularity recommendations
-  "improvements": ["improvement1", "improvement2", "improvement3"] // 3-4 specific improvement suggestions
-}`;
-
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" },
-        max_completion_tokens: 600,
-      });
-
-      const content = response.choices[0]?.message?.content || "{}";
-      const result = JSON.parse(content);
-      
+      const result = await aiService.generateSustainabilityInsight(product);
       res.json(result);
     } catch (error) {
       console.error("Error generating sustainability insights:", error);
@@ -194,7 +275,6 @@ Respond in JSON format with exactly these fields:
     }
   });
 
-  // AI Repair Summary endpoint
   app.post("/api/ai/repair-summary", async (req: Request, res: Response) => {
     try {
       const { productId } = req.body;
@@ -204,36 +284,29 @@ Respond in JSON format with exactly these fields:
         return res.status(404).json({ error: "Product not found" });
       }
 
-      const prompt = `You are an expert repair technician. Analyze the following product and provide repair guidance.
-
-Product: ${product.productName}
-Manufacturer: ${product.manufacturer}
-Materials: ${product.materials}
-Repairability Score: ${product.repairabilityScore}/10
-Warranty: ${product.warrantyInfo}
-
-Respond in JSON format with exactly these fields:
-{
-  "repairabilityRating": "Easy/Moderate/Difficult based on the score",
-  "repairInstructions": ["step1", "step2", "step3"], // 3-5 general repair guidelines
-  "commonIssues": ["issue1", "issue2"], // 2-3 common issues for this type of product
-  "partsAvailability": "Assessment of spare parts availability and sourcing"
-}`;
-
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" },
-        max_completion_tokens: 500,
-      });
-
-      const content = response.choices[0]?.message?.content || "{}";
-      const result = JSON.parse(content);
-      
+      const result = await aiService.generateRepairSummary(product);
       res.json(result);
     } catch (error) {
       console.error("Error generating repair summary:", error);
       res.status(500).json({ error: "Failed to generate repair summary" });
+    }
+  });
+
+  // ==========================================
+  // AUDIT LOG ENDPOINTS
+  // ==========================================
+  
+  app.get("/api/audit-logs", async (req: Request, res: Response) => {
+    try {
+      const { entityType, entityId } = req.query;
+      const logs = await auditService.getAuditLogs(
+        entityType as string | undefined,
+        entityId as string | undefined
+      );
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      res.status(500).json({ error: "Failed to fetch audit logs" });
     }
   });
 

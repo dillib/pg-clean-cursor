@@ -17,6 +17,11 @@ import {
   Download,
   ExternalLink,
   Loader2,
+  MapPin,
+  Clock,
+  Truck,
+  CheckCircle,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -38,7 +43,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Product, AISummary, SustainabilityInsight, RepairSummary } from "@shared/schema";
+import type { Product, AISummary, SustainabilityInsight, RepairSummary, TraceEvent } from "@shared/schema";
 
 export default function ProductDetail() {
   const params = useParams<{ id: string }>();
@@ -48,6 +53,11 @@ export default function ProductDetail() {
 
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: ["/api/products", params.id],
+  });
+
+  const { data: traceEvents, isLoading: isLoadingTrace } = useQuery<TraceEvent[]>({
+    queryKey: ["/api/products", params.id, "trace"],
+    enabled: !!params.id,
   });
 
   const deleteMutation = useMutation({
@@ -240,6 +250,13 @@ export default function ProductDetail() {
                       data-testid="tab-ai-insights"
                     >
                       AI Insights
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="traceability"
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+                      data-testid="tab-traceability"
+                    >
+                      Traceability
                     </TabsTrigger>
                   </TabsList>
                 </div>
@@ -487,6 +504,103 @@ export default function ProductDetail() {
                       </CardContent>
                     </Card>
                   </div>
+                </TabsContent>
+
+                <TabsContent value="traceability" className="p-6 space-y-6">
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <div>
+                      <h3 className="font-semibold flex items-center gap-2">
+                        <Truck className="h-4 w-4" />
+                        Supply Chain Timeline
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Track this product's journey through the supply chain
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/products", params.id, "trace"] })}
+                      data-testid="button-refresh-trace"
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Refresh
+                    </Button>
+                  </div>
+
+                  {isLoadingTrace ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : traceEvents && traceEvents.length > 0 ? (
+                    <div className="relative">
+                      <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
+                      <div className="space-y-6">
+                        {traceEvents.map((event, index) => (
+                          <div
+                            key={event.id}
+                            className="relative pl-10"
+                            data-testid={`trace-event-${event.id}`}
+                          >
+                            <div className="absolute left-2 w-5 h-5 rounded-full bg-background border-2 border-primary flex items-center justify-center">
+                              {event.eventType === "manufactured" && <Factory className="h-3 w-3 text-primary" />}
+                              {event.eventType === "shipped" && <Truck className="h-3 w-3 text-primary" />}
+                              {event.eventType === "received" && <CheckCircle className="h-3 w-3 text-primary" />}
+                              {event.eventType === "transferred" && <RefreshCw className="h-3 w-3 text-primary" />}
+                              {!["manufactured", "shipped", "received", "transferred"].includes(event.eventType) && (
+                                <Clock className="h-3 w-3 text-primary" />
+                              )}
+                            </div>
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="flex items-start justify-between gap-4 flex-wrap">
+                                  <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Badge variant="secondary" className="capitalize">
+                                        {event.eventType.replace("_", " ")}
+                                      </Badge>
+                                      <span className="text-sm text-muted-foreground">
+                                        by {event.actor}
+                                      </span>
+                                    </div>
+                                    {event.description && (
+                                      <p className="text-sm">{event.description}</p>
+                                    )}
+                                    {event.location && (
+                                      <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                                        <MapPin className="h-3 w-3" />
+                                        {event.location.name}
+                                        {event.location.address && `, ${event.location.address}`}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div className="text-right text-sm text-muted-foreground whitespace-nowrap">
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      {new Date(event.timestamp).toLocaleDateString()}
+                                    </div>
+                                    <div>
+                                      {new Date(event.timestamp).toLocaleTimeString()}
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <Card className="bg-muted/50">
+                      <CardContent className="p-8 text-center">
+                        <Truck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                        <p className="text-muted-foreground">
+                          No trace events recorded yet. Events will appear here as the product
+                          moves through the supply chain.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>
