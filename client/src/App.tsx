@@ -15,6 +15,16 @@ import Products from "@/pages/products";
 import ProductForm from "@/pages/product-form";
 import ProductDetail from "@/pages/product-detail";
 import PublicScan from "@/pages/public-scan";
+import Pricing from "@/pages/pricing";
+import Integrations from "@/pages/integrations";
+import Docs from "@/pages/docs";
+import Blog from "@/pages/blog";
+import CaseStudies from "@/pages/case-studies";
+import EuDppGuide from "@/pages/eu-dpp-guide";
+import Careers from "@/pages/careers";
+import Contact from "@/pages/contact";
+import Privacy from "@/pages/privacy";
+import Terms from "@/pages/terms";
 import NotFound from "@/pages/not-found";
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -97,6 +107,16 @@ function Router() {
       <Route path="/scan/demo">
         <PublicScan isDemo />
       </Route>
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/integrations" component={Integrations} />
+      <Route path="/docs" component={Docs} />
+      <Route path="/blog" component={Blog} />
+      <Route path="/case-studies" component={CaseStudies} />
+      <Route path="/eu-dpp-guide" component={EuDppGuide} />
+      <Route path="/careers" component={Careers} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -384,32 +384,33 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="what-we-are" className="py-24 px-4 sm:px-6 lg:px-8 bg-muted/30">
+      <section id="about" className="py-24 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4" data-testid="badge-what-we-are">Our Philosophy</Badge>
+            <Badge variant="secondary" className="mb-4" data-testid="badge-about">About PhotonicTag</Badge>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-              What PhotonicTag Really Is
+              The Identity Layer for Physical Products
             </h2>
           </div>
           
           <div className="space-y-6 text-lg">
             <p className="text-muted-foreground">
-              PhotonicTag is a <span className="text-foreground font-medium">digital identity and verification platform</span> built 
-              for the era of global product passports. We do not manufacture photonic materials or invent new physical 
-              tag technologies. Instead, we provide the <span className="text-foreground font-medium">AI, cloud infrastructure, and compliance engine</span> that 
-              connects any secure physical marker — photonic, optical, or traditional — to a tamper-proof digital passport.
+              PhotonicTag is the <span className="text-foreground font-medium">digital identity platform</span> that 
+              gives every product a secure, verifiable passport. Our AI-powered infrastructure connects physical products 
+              to their digital twins, creating an <span className="text-foreground font-medium">unbreakable chain of trust</span> from 
+              manufacturer to consumer.
             </p>
             
             <p className="text-muted-foreground">
-              The name <span className="italic">PhotonicTag</span> reflects our mission to bring <span className="text-foreground font-medium">light-level 
-              clarity and transparency</span> to supply chains. It is a brand philosophy, not a claim of proprietary photonic hardware.
+              Like photons carrying information at the speed of light, our platform delivers 
+              <span className="text-foreground font-medium"> instant verification, complete transparency, and absolute clarity</span> about 
+              every product's origin, journey, and authenticity.
             </p>
             
             <p className="text-muted-foreground">
-              PhotonicTag integrates seamlessly with existing technologies — QR codes, RFID/NFC, optical labels, 
-              digital watermarks, and more — transforming them into <span className="text-foreground font-medium">trusted, verifiable identities</span> across 
-              the product lifecycle.
+              We integrate with <span className="text-foreground font-medium">any existing technology</span> — QR codes, RFID, NFC, 
+              optical labels, or digital watermarks — transforming them into trusted, 
+              verifiable identities that travel with your products throughout their lifecycle.
             </p>
           </div>
 
@@ -439,25 +440,25 @@ export default function Landing() {
       <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-primary/5 via-transparent to-transparent" />
         <div className="relative max-w-4xl mx-auto text-center">
-          <Badge variant="secondary" className="mb-6" data-testid="badge-cta-illumination">The Identity Layer</Badge>
+          <Badge variant="secondary" className="mb-6" data-testid="badge-cta-illumination">Get Started Today</Badge>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-            This is Not Just Tagging.
+            Ready to Transform Your
             <br />
-            <span className="text-primary">This is Illumination.</span>
+            <span className="text-primary">Product Identity?</span>
           </h2>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Our innovation lies in the identity graph, AI-based verification, and global product passport engine — 
-            not in the creation of new physical tags. We turn any physical marker into a trusted, traceable, and compliant digital identity.
+            Join forward-thinking brands using PhotonicTag to build trust, ensure compliance, 
+            and create transparency across their entire supply chain.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild data-testid="button-cta-start">
               <a href="/api/login" className="gap-2">
-                Try It Free
+                Start Free Trial
                 <ArrowRight className="w-4 h-4" />
               </a>
             </Button>
             <Button size="lg" variant="outline" asChild data-testid="button-cta-contact">
-              <a href="mailto:hello@photonictag.com">Contact Sales</a>
+              <Link href="/contact">Contact Sales</Link>
             </Button>
           </div>
         </div>
@@ -465,28 +466,38 @@ export default function Landing() {
 
       <footer className="border-t py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
               <h3 className="font-semibold mb-4">Product</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><a href="#features" className="hover:text-foreground transition-colors" data-testid="link-footer-features">Features</a></li>
-                <li><a href="#how-it-works" className="hover:text-foreground transition-colors" data-testid="link-footer-how-it-works">How It Works</a></li>
-                <li><a href="#sustainability" className="hover:text-foreground transition-colors" data-testid="link-footer-sustainability">Sustainability</a></li>
-                <li><Link href="/scan/demo" className="hover:text-foreground transition-colors" data-testid="link-footer-demo">Demo Passport</Link></li>
+                <li><Link href="/pricing" className="hover:text-foreground transition-colors" data-testid="link-footer-pricing">Pricing</Link></li>
+                <li><Link href="/integrations" className="hover:text-foreground transition-colors" data-testid="link-footer-integrations">Integrations</Link></li>
+                <li><Link href="/scan/demo" className="hover:text-foreground transition-colors" data-testid="link-footer-demo">Demo</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Resources</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/docs" className="hover:text-foreground transition-colors" data-testid="link-footer-docs">Documentation</Link></li>
+                <li><Link href="/blog" className="hover:text-foreground transition-colors" data-testid="link-footer-blog">Blog</Link></li>
+                <li><Link href="/case-studies" className="hover:text-foreground transition-colors" data-testid="link-footer-case-studies">Case Studies</Link></li>
+                <li><Link href="/eu-dpp-guide" className="hover:text-foreground transition-colors" data-testid="link-footer-dpp-guide">EU DPP Guide</Link></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Company</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#what-we-are" className="hover:text-foreground transition-colors" data-testid="link-footer-about">About Us</a></li>
-                <li><a href="mailto:hello@photonictag.com" className="hover:text-foreground transition-colors" data-testid="link-footer-contact">Contact</a></li>
+                <li><a href="#about" className="hover:text-foreground transition-colors" data-testid="link-footer-about">About</a></li>
+                <li><Link href="/careers" className="hover:text-foreground transition-colors" data-testid="link-footer-careers">Careers</Link></li>
+                <li><Link href="/contact" className="hover:text-foreground transition-colors" data-testid="link-footer-contact">Contact</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Get Started</h3>
+              <h3 className="font-semibold mb-4">Legal</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/api/login" className="hover:text-foreground transition-colors" data-testid="link-footer-login">Log In</a></li>
-                <li><a href="/api/login" className="hover:text-foreground transition-colors" data-testid="link-footer-signup">Sign Up Free</a></li>
+                <li><Link href="/privacy" className="hover:text-foreground transition-colors" data-testid="link-footer-privacy">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-foreground transition-colors" data-testid="link-footer-terms">Terms of Service</Link></li>
               </ul>
             </div>
           </div>
