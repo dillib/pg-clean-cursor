@@ -66,9 +66,8 @@ export default function Landing() {
                   <span className="text-primary">Secure Identity</span>
                 </h1>
                 <p className="text-lg sm:text-xl text-muted-foreground max-w-xl">
-                  Transform identity from a printed label into a tamper-proof signature. 
-                  Bridge the physical and digital worlds with AI-powered Digital Product Passports 
-                  that cannot be forged, erased, or lost.
+                  PhotonicTag creates tamper-proof Digital Product Passports that travel with your products from factory to consumer. 
+                  Verify authenticity, track sustainability, and build customer trust — all with a single scan.
                 </p>
               </div>
               
