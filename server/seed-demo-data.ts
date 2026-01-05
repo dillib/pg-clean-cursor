@@ -21,6 +21,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Germany",
       batchNumber: "GCT-BAT-2025-0842",
       lotNumber: "LOT-2025-Q3-0842",
+      productImage: "/assets/stock_images/lithium_ion_battery__e9545ddb.jpg",
       materials: "Lithium Cobalt Oxide, Graphite Anode, Polymer Separator, Aluminum Casing, Copper Foil",
       materialBreakdown: [
         { material: "Lithium Cobalt Oxide", percentage: 35, recyclable: true },
@@ -82,6 +83,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Sweden",
       batchNumber: "SKF-TEX-2025-1847",
       lotNumber: "LOT-2025-SUM-1847",
+      productImage: "/assets/stock_images/merino_wool_sweater__bf977340.jpg",
       materials: "100% Merino Wool (Patagonian), Organic Cotton Thread, Natural Shell Buttons",
       materialBreakdown: [
         { material: "Merino Wool", percentage: 92, recyclable: true },
@@ -139,6 +141,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Slovenia",
       batchNumber: "TBE-IOT-2025-X200-3421",
       lotNumber: "LOT-2025-APR-3421",
+      productImage: "/assets/stock_images/industrial_iot_senso_ecc9a791.jpg",
       materials: "Recycled ABS Plastic (65%), PCB with Lead-Free Solder, Aluminum Heat Sink, Tempered Glass Display",
       materialBreakdown: [
         { material: "Recycled ABS Plastic", percentage: 45, recyclable: true },
@@ -199,6 +202,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Slovenia",
       batchNumber: "RLP-PKG-2024-MOD-1152",
       lotNumber: "LOT-2024-NOV-1152",
+      productImage: "/assets/stock_images/eco_friendly_biodegr_38f4835c.jpg",
       materials: "Recycled HDPE (100%), Steel Reinforcement Corners, RFID Tag, QR Label",
       materialBreakdown: [
         { material: "Recycled HDPE", percentage: 88, recyclable: true },
@@ -257,6 +261,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Portugal",
       batchNumber: "CTE-EVC-2025-7500-0892",
       lotNumber: "LOT-2025-SEP-0892",
+      productImage: "/assets/stock_images/electric_vehicle_ev__bf4ed89b.jpg",
       materials: "TPE Outer Jacket (Halogen-Free), Oxygen-Free Copper Conductors, Polycarbonate Connector Housing",
       materialBreakdown: [
         { material: "Oxygen-Free Copper", percentage: 55, recyclable: true },
@@ -302,6 +307,188 @@ const demoProducts: DemoProductData[] = [
       environmentalDeclarations: { category: "EV Accessories", industry: "Automotive" },
       endOfLifeInstructions: "Return to ChargeTech service center. Receive credit toward new cable purchase."
     }
+  },
+  {
+    product: {
+      productName: "SoundWave Pro Wireless Headphones",
+      productCategory: "Consumer Electronics",
+      modelNumber: "SW-PRO-ANC-45",
+      sku: "AUD-HP-PRO-BLK",
+      manufacturer: "AudioTech Innovation GmbH",
+      manufacturerAddress: "Schallweg 12, 10117 Berlin, Germany",
+      countryOfOrigin: "China",
+      batchNumber: "ATI-AUD-2025-4592",
+      lotNumber: "LOT-2025-AUG-4592",
+      productImage: "/assets/stock_images/premium_wireless_noi_6d22461d.jpg",
+      materials: "ABS Plastic, Synthetic Leather, Aluminum, Copper Wiring, Lithium-Ion Battery, Memory Foam",
+      materialBreakdown: [
+        { material: "ABS Plastic", percentage: 42, recyclable: true },
+        { material: "Synthetic Leather", percentage: 18, recyclable: false },
+        { material: "Aluminum", percentage: 15, recyclable: true },
+        { material: "Copper Wiring", percentage: 10, recyclable: true },
+        { material: "Memory Foam", percentage: 10, recyclable: false },
+        { material: "Lithium-Ion Battery", percentage: 5, recyclable: true }
+      ],
+      recycledContentPercent: 12,
+      recyclabilityPercent: 72,
+      hazardousMaterials: "Contains lithium-ion battery (3.7V 800mAh)",
+      carbonFootprint: 25,
+      waterUsage: 310,
+      energyConsumption: 5,
+      environmentalCertifications: ["RoHS", "REACH", "CE", "FCC"],
+      repairabilityScore: 7,
+      expectedLifespanYears: 5,
+      sparePartsAvailable: true,
+      repairInstructions: "Ear cushions and headband pads are user-replaceable. Battery replacement requires authorized service.",
+      serviceCenters: [
+        { name: "AudioTech Berlin Service", location: "Berlin, Germany", contact: "+49 30 5551234" },
+        { name: "AudioTech Authorized Partners", location: "EU-wide network" }
+      ],
+      warrantyInfo: "2-year limited warranty. Ear cushion replacement kits available.",
+      dateOfManufacture: new Date("2025-08-22"),
+      dateOfFirstSale: new Date("2025-09-15"),
+      ownershipHistory: [
+        { owner: "AudioTech Innovation GmbH", date: "2025-08-22", action: "Manufactured" },
+        { owner: "MediaMarkt Distribution", date: "2025-09-01", action: "Wholesale" },
+        { owner: "Consumer Direct", date: "2025-09-15", action: "Retail Sale" }
+      ],
+      ceMarking: true,
+      safetyCertifications: ["IEC 62368-1", "UL 60065"],
+      recyclingInstructions: "Return to e-waste collection point. Battery must be removed before recycling.",
+      disassemblyInstructions: "Remove ear cushions. Unscrew 4 screws on each cup. Disconnect battery module. Separate plastic and metal.",
+      hazardWarnings: "Do not incinerate lithium-ion battery. Risk of fire.",
+      takeBackPrograms: ["AudioTech Trade-In", "EU WEEE Collection"]
+    },
+    passport: {
+      complianceData: {
+        euBatteryPassport: true,
+        roHsCompliance: "Fully compliant with RoHS Directive 2011/65/EU",
+        reachCompliance: "No SVHC substances above threshold"
+      },
+      certifications: ["CE Marked", "FCC Certified", "RoHS", "REACH"],
+      environmentalDeclarations: { category: "Consumer Electronics", industry: "Audio" },
+      endOfLifeInstructions: "Return to AudioTech or certified e-waste recycler. Lithium battery requires separate handling."
+    }
+  },
+  {
+    product: {
+      productName: "Milano Artisan Leather Tote",
+      productCategory: "Fashion Accessories",
+      modelNumber: "ML-TOTE-CAM-L",
+      sku: "FAS-BAG-TOTE-CAM",
+      manufacturer: "Bottega Toscana Srl",
+      manufacturerAddress: "Via del Cuoio 15, 50125 Firenze, Italy",
+      countryOfOrigin: "Italy",
+      batchNumber: "BTS-LEA-2025-2847",
+      lotNumber: "LOT-2025-SPR-2847",
+      productImage: "/assets/stock_images/luxury_leather_handb_0c8e215c.jpg",
+      materials: "Full-Grain Vegetable-Tanned Leather, Brass Hardware, Cotton Lining, Organic Cotton Thread",
+      materialBreakdown: [
+        { material: "Full-Grain Leather", percentage: 75, recyclable: true },
+        { material: "Brass Hardware", percentage: 8, recyclable: true },
+        { material: "Cotton Lining", percentage: 12, recyclable: true },
+        { material: "Cotton Thread", percentage: 5, recyclable: true }
+      ],
+      recycledContentPercent: 0,
+      recyclabilityPercent: 95,
+      hazardousMaterials: null,
+      carbonFootprint: 15,
+      waterUsage: 2800,
+      energyConsumption: 8,
+      environmentalCertifications: ["Leather Working Group Gold", "OEKO-TEX"],
+      repairabilityScore: 9,
+      expectedLifespanYears: 25,
+      sparePartsAvailable: true,
+      repairInstructions: "Leather conditioning recommended annually. Hardware replacement and stitching repairs available at any Bottega Toscana boutique.",
+      serviceCenters: [
+        { name: "Bottega Toscana Florence Atelier", location: "Florence, Italy", contact: "+39 055 1234567" },
+        { name: "Bottega Toscana Milan Boutique", location: "Milan, Italy", contact: "+39 02 9876543" }
+      ],
+      warrantyInfo: "Lifetime craftsmanship warranty. Free leather conditioning service annually.",
+      dateOfManufacture: new Date("2025-03-15"),
+      dateOfFirstSale: new Date("2025-04-01"),
+      ownershipHistory: [
+        { owner: "Bottega Toscana Srl", date: "2025-03-15", action: "Handcrafted in Florence" },
+        { owner: "Luxury Goods Distribution", date: "2025-03-25", action: "Distribution" },
+        { owner: "Harrods London", date: "2025-04-01", action: "Retail" }
+      ],
+      ceMarking: false,
+      safetyCertifications: ["OEKO-TEX Standard 100"],
+      recyclingInstructions: "Leather can be donated or recycled. Brass hardware is fully recyclable. Cotton lining is biodegradable.",
+      disassemblyInstructions: "Remove brass hardware. Separate lining from leather shell. All components can be recycled separately.",
+      hazardWarnings: null,
+      takeBackPrograms: ["Bottega Toscana Restoration Program", "Luxury Consignment Partners"]
+    },
+    passport: {
+      complianceData: {
+        sustainableSourcing: "Leather from traceable European farms",
+        craftCertification: "Made by certified master leatherworkers",
+        animalWelfare: "Byproduct of food industry - no animals harmed for leather production"
+      },
+      certifications: ["Leather Working Group Gold", "Made in Italy Certification", "OEKO-TEX Standard 100"],
+      environmentalDeclarations: { category: "Fashion Accessories", industry: "Luxury Goods" },
+      endOfLifeInstructions: "Return for restoration or consignment. Leather ages beautifully - repair before discarding."
+    }
+  },
+  {
+    product: {
+      productName: "EcoNest Smart Thermostat Pro",
+      productCategory: "Smart Home",
+      modelNumber: "EN-THERM-PRO-W",
+      sku: "SMH-THERM-PRO-WHT",
+      manufacturer: "GreenHome Technologies BV",
+      manufacturerAddress: "Energieweg 88, 5617 AM Eindhoven, Netherlands",
+      countryOfOrigin: "Netherlands",
+      batchNumber: "GHT-SMH-2025-8834",
+      lotNumber: "LOT-2025-OCT-8834",
+      productImage: "/assets/stock_images/smart_home_thermosta_3e0251e2.jpg",
+      materials: "Recycled ABS Plastic, Tempered Glass, PCB with Lead-Free Solder, Temperature Sensors",
+      materialBreakdown: [
+        { material: "Recycled ABS Plastic", percentage: 55, recyclable: true },
+        { material: "Tempered Glass", percentage: 20, recyclable: true },
+        { material: "PCB Components", percentage: 20, recyclable: true },
+        { material: "Sensors", percentage: 5, recyclable: true }
+      ],
+      recycledContentPercent: 55,
+      recyclabilityPercent: 90,
+      hazardousMaterials: null,
+      carbonFootprint: 8,
+      waterUsage: 420,
+      energyConsumption: 2,
+      environmentalCertifications: ["Energy Star", "EU Ecolabel", "TCO Certified"],
+      repairabilityScore: 8,
+      expectedLifespanYears: 15,
+      sparePartsAvailable: true,
+      repairInstructions: "Modular design allows display and sensor replacement. Firmware updates extend product life.",
+      serviceCenters: [
+        { name: "GreenHome Eindhoven HQ", location: "Eindhoven, Netherlands", contact: "+31 40 1234567" },
+        { name: "GreenHome Partner Network", location: "EU-wide" }
+      ],
+      warrantyInfo: "5-year warranty. 10-year firmware update commitment. Spare parts available for 15 years.",
+      dateOfManufacture: new Date("2025-10-05"),
+      dateOfFirstSale: null,
+      ownershipHistory: [
+        { owner: "GreenHome Technologies BV", date: "2025-10-05", action: "Manufactured in Netherlands" },
+        { owner: "Smart Living Distribution", date: "2025-10-15", action: "Distribution" }
+      ],
+      ceMarking: true,
+      safetyCertifications: ["CE", "FCC", "UL Listed"],
+      recyclingInstructions: "Return to GreenHome or WEEE collection. Contains no hazardous materials.",
+      disassemblyInstructions: "Remove wall mount plate. Disconnect from base. Separate glass display from plastic housing.",
+      hazardWarnings: null,
+      takeBackPrograms: ["GreenHome Upgrade Program", "EU WEEE Collection"]
+    },
+    passport: {
+      complianceData: {
+        energySavings: "Average 23% reduction in heating/cooling costs",
+        rightToRepair: true,
+        softwareSupport: "10-year firmware update commitment",
+        privacyCompliance: "GDPR compliant - all data processing in EU"
+      },
+      certifications: ["CE Marked", "Energy Star Certified", "EU Ecolabel", "TCO Certified"],
+      environmentalDeclarations: { category: "Smart Home", industry: "Electronics" },
+      endOfLifeInstructions: "Return for trade-in credit. Device can be refurbished for second life program."
+    }
   }
 ];
 
@@ -310,7 +497,10 @@ const iotDeviceConfigs: { productIndex: number; deviceType: IoTDeviceType; devic
   { productIndex: 1, deviceType: "rfid", deviceId: "RFID-TEX-2025-042", manufacturer: "Impinj", model: "Monza R6" },
   { productIndex: 2, deviceType: "ble", deviceId: "BLE-IOT-2025-X200", manufacturer: "Nordic Semiconductor", model: "nRF52840" },
   { productIndex: 3, deviceType: "rfid", deviceId: "RFID-PKG-2024-1152", manufacturer: "Alien Technology", model: "Higgs-9" },
-  { productIndex: 4, deviceType: "qr", deviceId: "QR-EVC-2025-7500", manufacturer: "PhotonicTag", model: "Optical QR" }
+  { productIndex: 4, deviceType: "qr", deviceId: "QR-EVC-2025-7500", manufacturer: "PhotonicTag", model: "Optical QR" },
+  { productIndex: 5, deviceType: "nfc", deviceId: "NFC-AUD-2025-4592", manufacturer: "NXP Semiconductors", model: "NTAG 424 DNA" },
+  { productIndex: 6, deviceType: "rfid", deviceId: "RFID-LEA-2025-2847", manufacturer: "Impinj", model: "Monza R6-P" },
+  { productIndex: 7, deviceType: "ble", deviceId: "BLE-SMH-2025-8834", manufacturer: "Nordic Semiconductor", model: "nRF52832" }
 ];
 
 interface AIInsightsBundle {
@@ -497,6 +687,110 @@ const demoAIInsights: AIInsightsBundle[] = [
       complianceIssues: [],
       recommendations: ["Register all products in PhotonicTag for full traceability benefits"]
     }
+  },
+  {
+    summary: {
+      summary: "SoundWave Pro Wireless Headphones deliver premium noise-cancelling audio with responsible material choices and good repairability for consumer electronics.",
+      keyFeatures: ["Active noise cancellation", "30-hour battery life", "User-replaceable ear cushions", "2-year warranty", "RoHS/REACH compliant"]
+    },
+    sustainability: {
+      overallScore: 68,
+      carbonAnalysis: "25kg CO2e footprint typical for consumer electronics. Opportunities to improve through increased recycled plastic content and regional manufacturing.",
+      circularityRecommendations: ["Increase recycled ABS content to 30%", "Develop user-replaceable battery module", "Expand repair partner network"],
+      improvements: ["Transition from synthetic to plant-based leather alternatives", "Implement carbon offset program for shipping"]
+    },
+    repair: {
+      repairabilityRating: "Good",
+      repairInstructions: ["Ear cushions snap on/off for easy replacement", "Headband padding is user-serviceable", "Battery replacement requires authorized technician", "Firmware updates available OTA"],
+      commonIssues: ["Ear cushion wear after 18-24 months", "Battery capacity decline after 500+ charges", "Headband cracking in cold temperatures"],
+      partsAvailability: "Good - ear cushions and headband pads available online. Battery service at authorized centers."
+    },
+    circularity: {
+      score: 70,
+      grade: "B",
+      recyclabilityAnalysis: "72% of materials recoverable through e-waste recycling. ABS plastic and aluminum readily recyclable. Synthetic leather and foam present challenges.",
+      materialEfficiency: "Compact design optimizes material usage. Modular ear cup design enables targeted repairs.",
+      endOfLifeOptions: ["Trade-in program", "E-waste recycling", "Ear cushion replacement", "Battery replacement"],
+      recommendations: ["Design next generation with removable battery", "Phase out synthetic leather for recyclable alternatives"]
+    },
+    risk: {
+      overallRisk: "Low",
+      riskFlags: [
+        { type: "Battery Safety", severity: "Low", description: "Lithium battery requires proper disposal - standard for category" }
+      ],
+      dataCompleteness: 88,
+      counterfeitRisk: "Low - NFC authentication, serial number verification, warranty registration required",
+      complianceIssues: [],
+      recommendations: ["Maintain RoHS/REACH compliance documentation", "Consider Conflict Minerals disclosure"]
+    }
+  },
+  {
+    summary: {
+      summary: "Milano Artisan Leather Tote exemplifies Italian craftsmanship with exceptional durability, natural materials, and a 25-year expected lifespan.",
+      keyFeatures: ["Vegetable-tanned leather", "Lifetime warranty", "Made in Italy", "100% natural materials", "Leather Working Group Gold certified"]
+    },
+    sustainability: {
+      overallScore: 85,
+      carbonAnalysis: "15kg CO2e reflects premium natural materials. High water usage offset by exceptional durability and long product lifespan.",
+      circularityRecommendations: ["Explore leather from regenerative agriculture sources", "Develop take-back and restoration program", "Partner with luxury consignment platforms"],
+      improvements: ["Source buttons from recycled brass", "Reduce water usage in tanning process"]
+    },
+    repair: {
+      repairabilityRating: "Excellent",
+      repairInstructions: ["Leather conditioning extends life significantly", "Hardware replacement available at boutiques", "Stitching repairs included in warranty", "Professional restoration service available"],
+      commonIssues: ["Leather drying without conditioning", "Strap wear at attachment points", "Hardware tarnishing"],
+      partsAvailability: "Excellent - all hardware and materials maintained for lifetime of product"
+    },
+    circularity: {
+      score: 92,
+      grade: "A",
+      recyclabilityAnalysis: "95% of materials are natural and recyclable. Leather biodegrades or can be recycled. Brass hardware is infinitely recyclable.",
+      materialEfficiency: "Premium materials with minimal waste. Artisan production ensures no mass production excess.",
+      endOfLifeOptions: ["Professional restoration", "Luxury consignment", "Leather recycling", "Natural composting"],
+      recommendations: ["Exemplary durability extends product life beyond most categories"]
+    },
+    risk: {
+      overallRisk: "Low",
+      riskFlags: [],
+      dataCompleteness: 96,
+      counterfeitRisk: "Low - RFID authentication tag, artisan signature, certificate of authenticity included",
+      complianceIssues: [],
+      recommendations: ["Document animal welfare standards for leather sourcing transparency"]
+    }
+  },
+  {
+    summary: {
+      summary: "EcoNest Smart Thermostat Pro delivers significant energy savings through intelligent climate control with exceptional sustainability credentials and long service life.",
+      keyFeatures: ["23% average energy savings", "55% recycled materials", "10-year firmware support", "EU Ecolabel certified", "GDPR compliant"]
+    },
+    sustainability: {
+      overallScore: 89,
+      carbonAnalysis: "8kg CO2e for manufacturing is quickly offset by energy savings. Typical household saves 500+ kg CO2e annually through optimized heating/cooling.",
+      circularityRecommendations: ["Increase recycled content to 70%", "Implement refurbishment program for returned units", "Develop modular upgrade path"],
+      improvements: ["Transition to 100% recycled packaging", "Add end-of-life notification for proactive recycling"]
+    },
+    repair: {
+      repairabilityRating: "Excellent",
+      repairInstructions: ["Firmware updates resolve most issues remotely", "Display module is replaceable", "Sensor modules can be swapped", "Wall mount plate replaceable if damaged"],
+      commonIssues: ["Display calibration after power outages", "Sensor accuracy drift over time", "Wi-Fi connectivity issues in older homes"],
+      partsAvailability: "Excellent - all modules available for 15 years. Firmware updates for 10 years."
+    },
+    circularity: {
+      score: 88,
+      grade: "A",
+      recyclabilityAnalysis: "90% recyclable through e-waste channels. No hazardous materials. High-value metals recoverable from PCB.",
+      materialEfficiency: "Compact design minimizes material usage. 55% recycled content sets industry benchmark.",
+      endOfLifeOptions: ["Trade-in upgrade program", "Refurbishment for second life", "E-waste recycling", "Module harvesting"],
+      recommendations: ["Document refurbishment potential for second-life market"]
+    },
+    risk: {
+      overallRisk: "Low",
+      riskFlags: [],
+      dataCompleteness: 98,
+      counterfeitRisk: "Very Low - BLE secure pairing, cloud registration required, firmware signing prevents tampering",
+      complianceIssues: [],
+      recommendations: ["Maintain GDPR compliance documentation for data handling"]
+    }
   }
 ];
 
@@ -572,7 +866,7 @@ async function seedDemoData() {
   }
 
   console.log("\nDemo data seeding complete!");
-  console.log("Created 5 products across industries: Batteries, Textiles, IoT Devices, Packaging, EV Accessories");
+  console.log("Created 8 products across industries: Batteries, Textiles, IoT Devices, Packaging, EV Accessories, Consumer Electronics, Fashion Accessories, Smart Home");
 }
 
 export { seedDemoData };
