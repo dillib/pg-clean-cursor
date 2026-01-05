@@ -457,7 +457,7 @@ export default function Landing() {
               <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground mx-auto flex items-center justify-center text-2xl font-bold">
                 2
               </div>
-              <h3 className="text-xl font-semibold">Get Your QR Code</h3>
+              <h3 className="text-xl font-semibold">Digital Product Passport</h3>
               <p className="text-muted-foreground">
                 Each product receives a unique, tamper-proof QR code — 
                 a digital passport that travels with your product.
