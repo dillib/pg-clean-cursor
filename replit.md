@@ -10,6 +10,15 @@ The platform provides an admin dashboard for product management and public scan 
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### January 2026
+- Implemented Replit Auth integration for OAuth-based authentication (Google, GitHub, X, Apple, email)
+- Created premium landing page with hero section, feature showcase, sustainability metrics, and branding
+- Added protected routes showing landing page for logged-out users
+- Updated sidebar with user profile display (avatar, name, email) and logout functionality
+- Removed legacy username/password authentication in favor of OAuth
+
 ## System Architecture
 
 ### Frontend Architecture
@@ -19,12 +28,21 @@ Preferred communication style: Simple, everyday language.
 - **UI Components**: Shadcn/ui component library built on Radix UI primitives
 - **Styling**: Tailwind CSS with custom design tokens for theming (light/dark mode support)
 - **Layout**: Admin dashboard with collapsible sidebar navigation pattern
+- **Authentication**: Protected routes with landing page for unauthenticated users
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express
 - **Language**: TypeScript with ESM modules
 - **API Pattern**: RESTful JSON APIs under `/api/*` prefix
+- **Authentication**: Replit Auth integration with PostgreSQL session storage
 - **Build**: Custom esbuild script for production bundling with selective dependency bundling
+
+### Authentication System
+- **Provider**: Replit Auth (OAuth via OpenID Connect)
+- **Session Storage**: PostgreSQL via connect-pg-simple
+- **User Model**: OAuth-based with email, firstName, lastName, profileImageUrl
+- **Auth Routes**: `/api/login`, `/api/logout`, `/api/auth/user`
+- **Integration Files**: `server/replit_integrations/auth/`
 
 ### Data Layer
 - **ORM**: Drizzle ORM with PostgreSQL dialect
@@ -34,8 +52,9 @@ Preferred communication style: Simple, everyday language.
 
 ### Key Data Models
 - **Products**: Digital Product Passport data including manufacturer info, materials, carbon footprint, repairability scores, warranty details, ownership history, and recycling instructions
-- **Users**: Basic authentication schema with username/password
+- **Users**: OAuth-based user model with Replit Auth fields (email, firstName, lastName, profileImageUrl)
 - **Conversations/Messages**: Chat functionality schema for AI interactions
+- **Audit Logs**: Event tracking for compliance and traceability
 
 ### AI Integration Pattern
 - OpenAI-compatible API integration via environment variables (`AI_INTEGRATIONS_OPENAI_API_KEY`, `AI_INTEGRATIONS_OPENAI_BASE_URL`)
@@ -44,6 +63,11 @@ Preferred communication style: Simple, everyday language.
   - Image generation using gpt-image-1 model
   - Batch processing with rate limiting and retries
 - AI endpoints for product summarization, sustainability scoring, and repair instruction generation
+
+### Event-Driven Architecture
+- In-process CloudEvents bus for decoupled event handling
+- Event types: product.created, product.updated, qr.generated, identity.assigned, trace.recorded, ai.insights_generated
+- Audit logging for all events
 
 ### QR Code System
 - Server-side QR code generation using `qrcode` library
@@ -67,4 +91,5 @@ Preferred communication style: Simple, everyday language.
 - `openai`: AI API client
 - `express` / `express-session`: HTTP server and session management
 - `connect-pg-simple`: PostgreSQL session store
+- `openid-client`: OpenID Connect client for Replit Auth
 - Radix UI primitives: Accessible component foundations

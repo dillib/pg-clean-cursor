@@ -24,7 +24,7 @@ export default function Landing() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" data-testid="nav-logo">
               <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
                 <QrCode className="w-5 h-5 text-primary-foreground" />
               </div>
@@ -57,7 +57,7 @@ export default function Landing() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="space-y-8">
               <div className="space-y-4">
-                <Badge variant="secondary" className="gap-1">
+                <Badge variant="secondary" className="gap-1" data-testid="badge-hero-ai">
                   <Sparkles className="w-3 h-3" />
                   AI-Powered Product Identity
                 </Badge>
@@ -83,16 +83,16 @@ export default function Landing() {
                 </Button>
               </div>
 
-              <div className="flex items-center gap-6 pt-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-6 pt-4 flex-wrap">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground" data-testid="badge-eu-dpp">
                   <CheckCircle className="w-4 h-4 text-primary" />
                   <span>EU DPP Ready</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground" data-testid="badge-soc2">
                   <CheckCircle className="w-4 h-4 text-primary" />
                   <span>SOC 2 Compliant</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground" data-testid="badge-gdpr">
                   <CheckCircle className="w-4 h-4 text-primary" />
                   <span>GDPR Ready</span>
                 </div>
@@ -121,24 +121,24 @@ export default function Landing() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <p className="text-xs text-muted-foreground uppercase tracking-wide">Carbon Footprint</p>
-                      <p className="text-2xl font-bold text-primary">12.5 kg</p>
+                      <p className="text-2xl font-bold text-primary" data-testid="text-preview-carbon">12.5 kg</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-xs text-muted-foreground uppercase tracking-wide">Repairability</p>
-                      <p className="text-2xl font-bold text-primary">8.5/10</p>
+                      <p className="text-2xl font-bold text-primary" data-testid="text-preview-repairability">8.5/10</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-xs text-muted-foreground uppercase tracking-wide">Recycled Content</p>
-                      <p className="text-2xl font-bold">85%</p>
+                      <p className="text-2xl font-bold" data-testid="text-preview-recycled">85%</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-xs text-muted-foreground uppercase tracking-wide">Warranty</p>
-                      <p className="text-2xl font-bold">5 Years</p>
+                      <p className="text-2xl font-bold" data-testid="text-preview-warranty">5 Years</p>
                     </div>
                   </div>
 
                   <div className="pt-4 border-t">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2" data-testid="trust-traceability">
                       <div className="flex -space-x-2">
                         <div className="w-6 h-6 rounded-full bg-primary/20 border-2 border-background flex items-center justify-center">
                           <Truck className="w-3 h-3 text-primary" />
@@ -163,7 +163,7 @@ export default function Landing() {
       <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <Badge variant="secondary" className="mb-4">Platform Features</Badge>
+            <Badge variant="secondary" className="mb-4" data-testid="badge-features">Platform Features</Badge>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
               Everything You Need for Product Identity
             </h2>
@@ -174,7 +174,7 @@ export default function Landing() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="bg-card">
+            <Card className="bg-card" data-testid="card-feature-qr">
               <CardContent className="p-6 space-y-4">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <QrCode className="w-6 h-6 text-primary" />
@@ -187,7 +187,7 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            <Card className="bg-card">
+            <Card className="bg-card" data-testid="card-feature-traceability">
               <CardContent className="p-6 space-y-4">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Truck className="w-6 h-6 text-primary" />
@@ -200,7 +200,7 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            <Card className="bg-card">
+            <Card className="bg-card" data-testid="card-feature-ai">
               <CardContent className="p-6 space-y-4">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Sparkles className="w-6 h-6 text-primary" />
@@ -213,7 +213,7 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            <Card className="bg-card">
+            <Card className="bg-card" data-testid="card-feature-sustainability">
               <CardContent className="p-6 space-y-4">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Leaf className="w-6 h-6 text-primary" />
@@ -226,7 +226,7 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            <Card className="bg-card">
+            <Card className="bg-card" data-testid="card-feature-security">
               <CardContent className="p-6 space-y-4">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Shield className="w-6 h-6 text-primary" />
@@ -239,7 +239,7 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            <Card className="bg-card">
+            <Card className="bg-card" data-testid="card-feature-recycling">
               <CardContent className="p-6 space-y-4">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Recycle className="w-6 h-6 text-primary" />
@@ -258,7 +258,7 @@ export default function Landing() {
       <section id="how-it-works" className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <Badge variant="secondary" className="mb-4">Simple Process</Badge>
+            <Badge variant="secondary" className="mb-4" data-testid="badge-how-it-works">Simple Process</Badge>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
               How It Works
             </h2>
@@ -268,7 +268,7 @@ export default function Landing() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center space-y-4">
+            <div className="text-center space-y-4" data-testid="step-create-products">
               <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground mx-auto flex items-center justify-center text-2xl font-bold">
                 1
               </div>
@@ -279,7 +279,7 @@ export default function Landing() {
               </p>
             </div>
 
-            <div className="text-center space-y-4">
+            <div className="text-center space-y-4" data-testid="step-generate-qr">
               <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground mx-auto flex items-center justify-center text-2xl font-bold">
                 2
               </div>
@@ -290,7 +290,7 @@ export default function Landing() {
               </p>
             </div>
 
-            <div className="text-center space-y-4">
+            <div className="text-center space-y-4" data-testid="step-share-track">
               <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground mx-auto flex items-center justify-center text-2xl font-bold">
                 3
               </div>
@@ -308,7 +308,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <Badge variant="secondary">EU Compliance</Badge>
+              <Badge variant="secondary" data-testid="badge-eu-compliance">EU Compliance</Badge>
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
                 Ready for Digital Product Passport Regulations
               </h2>
@@ -318,28 +318,28 @@ export default function Landing() {
                 and circularity tracking.
               </p>
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3" data-testid="compliance-material">
                   <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
                   <div>
                     <p className="font-medium">Full Material Disclosure</p>
                     <p className="text-sm text-muted-foreground">Track materials, components, and substances of concern</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3" data-testid="compliance-carbon">
                   <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
                   <div>
                     <p className="font-medium">Carbon Footprint Tracking</p>
                     <p className="text-sm text-muted-foreground">Calculate and display product lifecycle emissions</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3" data-testid="compliance-repair">
                   <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
                   <div>
                     <p className="font-medium">Repairability Scoring</p>
                     <p className="text-sm text-muted-foreground">Standardized repair scores and instructions</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3" data-testid="compliance-eol">
                   <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
                   <div>
                     <p className="font-medium">End-of-Life Information</p>
@@ -350,31 +350,31 @@ export default function Landing() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Card>
+              <Card data-testid="card-stat-compliance">
                 <CardContent className="p-6 text-center">
                   <BarChart3 className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <p className="text-3xl font-bold">67%</p>
+                  <p className="text-3xl font-bold" data-testid="text-stat-compliance">67%</p>
                   <p className="text-sm text-muted-foreground">Reduction in compliance costs</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card data-testid="card-stat-countries">
                 <CardContent className="p-6 text-center">
                   <Globe className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <p className="text-3xl font-bold">100+</p>
+                  <p className="text-3xl font-bold" data-testid="text-stat-countries">100+</p>
                   <p className="text-sm text-muted-foreground">Countries supported</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card data-testid="card-stat-soc2">
                 <CardContent className="p-6 text-center">
                   <Lock className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <p className="text-3xl font-bold">SOC 2</p>
+                  <p className="text-3xl font-bold" data-testid="text-stat-soc2">SOC 2</p>
                   <p className="text-sm text-muted-foreground">Type II Certified</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card data-testid="card-stat-uptime">
                 <CardContent className="p-6 text-center">
                   <Zap className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <p className="text-3xl font-bold">99.9%</p>
+                  <p className="text-3xl font-bold" data-testid="text-stat-uptime">99.9%</p>
                   <p className="text-sm text-muted-foreground">Uptime SLA</p>
                 </CardContent>
               </Card>
@@ -412,48 +412,48 @@ export default function Landing() {
             <div>
               <h3 className="font-semibold mb-4">Product</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">API</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Integrations</a></li>
+                <li><a href="#features" className="hover:text-foreground transition-colors" data-testid="link-footer-features">Features</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-pricing">Pricing</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-api">API</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-integrations">Integrations</a></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Resources</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Documentation</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Case Studies</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">EU DPP Guide</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-docs">Documentation</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-blog">Blog</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-case-studies">Case Studies</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-dpp-guide">EU DPP Guide</a></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Company</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Press</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Contact</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-about">About</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-careers">Careers</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-press">Press</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-contact">Contact</a></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Legal</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Cookie Policy</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">GDPR</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-privacy">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-terms">Terms of Service</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-cookies">Cookie Policy</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-gdpr">GDPR</a></li>
               </ul>
             </div>
           </div>
           <div className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" data-testid="footer-logo">
               <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
                 <QrCode className="w-4 h-4 text-primary-foreground" />
               </div>
               <span className="font-semibold">Photonictag</span>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground" data-testid="footer-copyright">
               2025 Photonictag. All rights reserved.
             </p>
           </div>
