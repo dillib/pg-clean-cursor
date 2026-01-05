@@ -4,7 +4,13 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // ============================================
-// USERS & ROLES
+// AUTH (from Replit Auth integration)
+// ============================================
+import { users, sessions, type User, type UpsertUser } from "./models/auth";
+export { users, sessions, type User, type UpsertUser };
+
+// ============================================
+// ROLES (for RBAC)
 // ============================================
 
 export const roles = pgTable("roles", {
@@ -21,26 +27,6 @@ export const insertRoleSchema = createInsertSchema(roles).omit({
 
 export type InsertRole = z.infer<typeof insertRoleSchema>;
 export type Role = typeof roles.$inferSelect;
-
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  email: text("email"),
-  roleId: varchar("role_id").references(() => roles.id),
-  isActive: boolean("is_active").default(true).notNull(),
-  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
-  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
-});
-
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
 
 // ============================================
 // PRODUCTS & DIGITAL PRODUCT PASSPORTS

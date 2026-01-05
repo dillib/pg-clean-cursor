@@ -7,11 +7,15 @@ import { identityService } from "./services/identity-service";
 import { traceService } from "./services/trace-service";
 import { aiService } from "./services/ai-service";
 import { auditService } from "./services/audit-service";
+import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  
+  await setupAuth(app);
+  registerAuthRoutes(app);
   
   // ==========================================
   // PRODUCT ENDPOINTS

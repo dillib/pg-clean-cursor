@@ -1,198 +1,203 @@
 # Photonictag Design Guidelines
 
 ## Design Approach
-**System-Based with Modern B2B Influence**
-- Primary inspiration: Linear (clean, data-focused), Stripe (trust, clarity)
-- Enterprise-grade SaaS aesthetic with consumer-friendly scan experience
-- Emphasis on data hierarchy, efficiency, and trustworthiness
+**Premium B2B SaaS Aesthetic**
+- Primary inspiration: Linear (clean precision), Stripe (trust, clarity), Vercel (modern minimalism)
+- Enterprise-grade platform balancing authority with approachability
+- Emphasis on data hierarchy, sophisticated simplicity, and visual credibility
 
 ## Typography System
 
 **Font Stack:**
-- Primary: Inter (via Google Fonts)
-- Monospace: JetBrains Mono (for product IDs, batch numbers)
+- Primary: Inter (via Google Fonts CDN)
+- Monospace: JetBrains Mono (product IDs, batch codes, technical data)
 
 **Hierarchy:**
-- Headings: font-semibold to font-bold, tight leading (leading-tight)
-- Body: font-normal, relaxed leading (leading-relaxed)
-- Data labels: text-xs to text-sm, uppercase tracking-wide for field labels
-- Product IDs/codes: font-mono, letter-spacing for readability
-
-**Scale:**
-- Admin headings: text-2xl to text-3xl
-- Section titles: text-lg to text-xl
-- Body text: text-base
-- Metadata/labels: text-sm to text-xs
+- Marketing headlines: text-4xl to text-6xl, font-bold, leading-tight, tracking-tight
+- Dashboard headings: text-2xl to text-3xl, font-semibold
+- Section titles: text-lg to text-xl, font-medium
+- Body text: text-base, leading-relaxed
+- Data labels: text-xs to text-sm, uppercase, tracking-wide, font-medium
+- Technical data: font-mono, text-sm
 
 ## Layout & Spacing
 
-**Spacing Units:** Use Tailwind units of 2, 4, 6, 8, 12, 16, 24
-- Tight spacing: p-2, gap-2 (within cards, data rows)
-- Standard spacing: p-4, gap-4 (form fields, card padding)
-- Section spacing: p-8, py-12 (between major sections)
-- Generous spacing: p-16, py-24 (page-level containers)
+**Spacing Units:** Tailwind units of 2, 4, 6, 8, 12, 16, 24, 32
+- Component internal: p-2 to p-4
+- Card padding: p-6 to p-8
+- Section spacing: py-12 to py-24 (responsive: py-8 mobile to py-24 desktop)
+- Page containers: max-w-7xl with px-4 to px-8
 
 **Grid Systems:**
-- Admin dashboard: 2-column layout (sidebar + main content)
-- Product lists: grid-cols-1 md:grid-cols-2 lg:grid-cols-3
-- Forms: Single column, max-w-2xl
-- Data displays: Full-width tables with horizontal scroll
+- Marketing: Full-width sections with inner max-w-7xl containers
+- Dashboard: Fixed sidebar (w-64) + main content area
+- Feature grids: grid-cols-1 md:grid-cols-2 lg:grid-cols-3
+- Data tables: Full-width with horizontal scroll, sticky headers
 
-## Component Library
+## Marketing & Landing Pages
 
-### Admin Dashboard
-**Sidebar Navigation:**
-- Fixed width: w-64
-- Full height with logo at top
-- Navigation items with icons (use Heroicons)
-- Active state clearly indicated with subtle treatment
-- Spacing: py-2 between items, px-4 internal padding
-
-**Main Content Area:**
-- Container: max-w-7xl with responsive padding (px-4 to px-8)
-- Page header: mb-8 with title + action buttons aligned
-- Content cards: rounded-lg, border, p-6
-
-### Product Creation/Edit Forms
-**Form Structure:**
-- Vertical single-column layout
-- Field groups separated by space-y-6
-- Labels above inputs, text-sm font-medium
-- Required field indicators
-- Input fields: full width with consistent height (h-10 to h-12)
-- Textarea for long content: min-h-32
-- Multi-field rows (e.g., carbon footprint + repairability): grid-cols-2 gap-4
-
-**Form Sections:**
-1. Basic Information (name, manufacturer, batch)
-2. Materials & Sustainability (materials, carbon footprint, repairability)
-3. Lifecycle Data (warranty, recycling, ownership)
-4. Media Upload (product images)
-
-### Product List View
-**Card Design:**
-- Consistent card structure: rounded-lg border p-6
-- Product image: aspect-square, rounded-md, mb-4
-- Product name: text-lg font-semibold, truncate
-- Metadata grid: 2-column for key data points
-- QR code thumbnail in corner or separate section
-- Action buttons: Edit/View/Delete in footer
-
-**Table Alternative:**
-- Striped rows for readability
-- Sticky header: position-sticky top-0
-- Column widths: balanced for product name, ID, manufacturer, actions
-- Responsive: collapse to cards on mobile
-
-### Public Scan Page
+### Hero Section
 **Layout:**
-- Centered content: max-w-4xl mx-auto
-- Product image: Large, prominent display (aspect-video or aspect-square)
-- Product name: text-3xl font-bold, mb-2
-- Manufacturer: text-xl, mb-8
-- Information sections in cards: space-y-6
+- Full viewport height (90vh to 100vh)
+- Two-column split: lg:grid-cols-2, gap-12
+- Left: Headline (text-5xl lg:text-6xl) + subheading (text-xl) + CTA stack
+- Right: Hero visualization (dashboard screenshot, product passport mockup, or abstract data viz)
+- Background: Subtle gradient mesh with geometric elements
+- Buttons on hero images: Backdrop blur (backdrop-blur-md) with semi-transparent background
 
-**Information Display:**
-- Icon + Label pattern for each data point
-- Two-column grid for specifications: grid-cols-2 gap-x-8 gap-y-4
-- Clear visual separation between sections
-- Sustainability scores: Progress bars or circular indicators
-- Warranty info: Highlighted card with border accent
-- Recycling instructions: Step-by-step list with numbers
+**Content Strategy:**
+- Headline: Bold value proposition (e.g., "Digital Product Passports for the Circular Economy")
+- Subheading: 2-3 lines clarifying offering
+- Dual CTAs: Primary ("Start Free Trial") + Secondary ("Watch Demo" or "Schedule Consultation")
+- Trust indicators: "Trusted by 500+ manufacturers" with logo strip below
 
-### QR Code Display
-**Admin View:**
-- Prominent placement in product detail
-- Size: w-48 h-48 to w-64 h-64
-- Download/print button directly below
-- Product ID displayed beneath in monospace font
+### Feature Sections
+**Two-Column Feature Blocks:**
+- Alternating image/content layout
+- Content side: Icon + heading (text-2xl) + description + feature list (3-4 bullets) + CTA link
+- Image side: Product screenshots, data visualizations, or conceptual illustrations
+- Spacing: py-24, gap-16 between sections
 
-**Print Version:**
-- Larger size for clarity
-- Product name and ID included
-- High contrast for scanning reliability
+**Three-Column Feature Grid:**
+- Cards with icon, title, description
+- Icons from Heroicons (outline style)
+- Consistent card heights, p-8 padding
+- Hover state: subtle lift and border treatment
 
-### AI-Generated Content
-**Styling:**
-- Distinct cards: rounded-lg with subtle border
-- Icon indicator for AI-generated content
-- Title: font-semibold with icon (sparkle/AI icon)
-- Content: prose formatting with proper line-height
-- Spacing: p-6, space-y-3 for paragraphs
+### Data Visualization Showcase
+**Section Structure:**
+- Full-width container with heading
+- Interactive dashboard preview (large screenshot or live component)
+- Three-metric highlights below: grid-cols-3, emphasizing key capabilities
+- Each metric: Large number (text-4xl font-bold) + label + micro-description
 
-### Data Visualization
-**Metrics Display:**
-- Card-based: grid-cols-2 md:grid-cols-4
-- Large number: text-3xl font-bold
-- Label below: text-sm
-- Icon or graph when appropriate
+### Trust & Social Proof
+**Customer Logos:**
+- Grid-cols-3 md:grid-cols-6, grayscale treatment
+- Consistent sizing, centered alignment
 
-**Sustainability Scoring:**
-- Progress bars: h-2 rounded-full
-- Percentage display: font-mono font-semibold
-- Color-agnostic: rely on fill percentage, not color coding
+**Testimonial Cards:**
+- Two-column grid (lg:grid-cols-2)
+- Quote + attribution + company logo
+- Generous padding (p-8), subtle border
 
-### Buttons & Actions
-**Primary Actions:**
-- Consistent height: h-10 to h-12
-- Padding: px-6
-- Font: font-medium
-- Rounded: rounded-lg
-- Icon + text combination where appropriate
+**Case Study Preview:**
+- Horizontal card with image + content split
+- Metrics callout: "67% reduction in supply chain opacity"
+- Read more link with arrow icon
 
-**Secondary/Tertiary:**
-- Ghost/outline variants
-- Consistent sizing with primary
-- Clear hierarchy through border/background treatment
+### Footer (Enhanced)
+**Multi-Column Layout:**
+- Four-column grid: Product links, Resources, Company, Contact
+- Newsletter signup: Full-width component above columns with email input + subscribe button
+- Bottom bar: Copyright + privacy links + social icons (LinkedIn, Twitter)
+- Spacing: py-16 with py-8 bottom bar
 
-### Navigation
-**Top Bar (Admin):**
-- Height: h-16
-- Logo + breadcrumbs on left
-- User menu + notifications on right
-- Border bottom for separation
+## Dashboard & Admin Interface
 
-**Tabs:**
-- Horizontal tabs for section switching
-- Active state: border-b-2 treatment
-- Spacing: px-4 py-2 per tab
+### Sidebar Navigation
+- Fixed position, w-64, full height
+- Logo at top (p-6)
+- Navigation groups with section headers (text-xs uppercase tracking-wide)
+- Navigation items: Heroicons + label, py-2 px-4, rounded-md
+- Active state: subtle background treatment
+- Bottom: User profile card with avatar + name + role
 
-## Interaction Patterns
+### Dashboard Home
+**Metrics Cards:**
+- Grid-cols-1 md:grid-cols-2 lg:grid-cols-4
+- Each card: Large metric number (text-3xl font-bold) + percentage change indicator + sparkline graph
+- Card structure: p-6, rounded-lg, border
 
-**Loading States:**
-- Skeleton screens for product cards
-- Spinner for form submissions
-- Progress indicators for file uploads
+**Activity Feed:**
+- Two-column layout: Main feed (2/3 width) + Recent activity sidebar (1/3)
+- Feed items: Timeline with icons, truncated descriptions, timestamp
+- Sidebar: Compact list with micro-interactions
 
-**Empty States:**
-- Centered icon + message
-- Call-to-action button
-- Helpful context (e.g., "Create your first product")
+### Product Management
 
-**Validation:**
-- Inline error messages below fields
-- Error state: border treatment on inputs
-- Success confirmation: Toast notifications
+**Product List View:**
+- Table with columns: Thumbnail, Name, Batch ID, Manufacturer, Sustainability Score, Status, Actions
+- Sticky header, striped rows, hover state
+- Filters bar above: Search + dropdown filters (category, status, manufacturer)
+- Batch actions: Checkbox selection with action bar
+
+**Product Detail:**
+- Breadcrumb navigation
+- Header: Product name (text-3xl) + status badge + action buttons (Edit, Generate QR, Export)
+- Content sections in cards: Basic Info, Sustainability Metrics, Materials, Lifecycle, Media Gallery
+- Two-column grid for specifications within cards
+- QR code prominent display: w-64 h-64 with download button
+
+**Product Form:**
+- Single column, max-w-3xl centered
+- Form sections with headings + dividers
+- Field groups: space-y-6
+- Multi-field rows: grid-cols-2 gap-4 (e.g., Carbon Footprint + Repairability Score)
+- Media upload: Dropzone with preview grid
+- AI content generation: Trigger button + loading state + generated content in distinct card with AI badge
+- Fixed bottom action bar: Cancel + Save buttons
+
+### Data Visualization Components
+
+**Sustainability Dashboard:**
+- Score cards with progress rings (circular indicators)
+- Comparison charts: Bar charts comparing products or batches
+- Timeline visualization: Lifecycle events and milestones
+- Material composition: Donut chart with legend
+
+**Supply Chain Map:**
+- Interactive flowchart or geographic map
+- Node-based visualization with connection lines
+- Tooltip on hover with detailed information
+
+## Public Scan Experience
+
+**Scan Page Layout:**
+- Centered content: max-w-4xl
+- Hero product image: Full-width, aspect-video, rounded-lg, mb-8
+- Product name: text-4xl font-bold + manufacturer (text-xl)
+- Information architecture: Tabbed sections (Overview, Sustainability, Lifecycle, Repair & Recycle)
+- Each tab content in cards with icon-label pairs
+- Sustainability score: Prominent progress bars with percentage labels
+- Warranty card: Highlighted with border accent, includes dates and coverage details
+- Recycling instructions: Numbered steps with icons
+- Footer: "Powered by Photonictag" with logo
+
+## Images & Media
+
+**Hero Images:**
+- Marketing hero: Dashboard screenshot mockup, abstract data visualization, or product passport concept
+- Aspect ratio: 16:9 or custom to fit layout
+- High-quality, professional photography or 3D renders
+
+**Feature Section Images:**
+- Product screenshots with subtle shadow and border
+- Data visualizations showing platform capabilities
+- Conceptual illustrations for abstract concepts (trust, traceability, circularity)
+
+**Product Photography:**
+- Admin thumbnails: aspect-square, rounded-md
+- Scan page: aspect-video hero image
+- Fallback: Icon-based placeholder with product category icon
+
+**Background Elements:**
+- Subtle gradient meshes in hero sections
+- Geometric patterns (dots, lines) for visual interest without distraction
+- No large decorative illustrations competing with content
 
 ## Responsive Behavior
 
-**Breakpoints:**
-- Mobile: Single column, stacked layouts
-- Tablet (md:): 2-column grids, condensed sidebar
-- Desktop (lg:): Full layouts, 3-column grids
+- Mobile: Single column, hamburger navigation, stacked metrics, card-based tables
+- Tablet (md:): Two-column grids, condensed sidebar
+- Desktop (lg:): Full layouts, three-column grids, expanded data tables
+- Padding scales: p-4 mobile to p-8 desktop
+- Font sizes scale: text-4xl mobile to text-6xl desktop for headlines
 
-**Mobile Adjustments:**
-- Sidebar: Collapse to hamburger menu
-- Tables: Transform to card stack
-- Forms: Maintain single column
-- Reduce padding: scale from p-4 to p-2
+## Component Enrichment
 
-## Images
-
-**Product Images:**
-- Admin: Square thumbnails (aspect-square) in lists, larger in detail view
-- Scan page: Hero image at top, aspect-video or 16:9, full width of content area
-- Upload: Clear dropzone with preview
-- Fallback: Icon-based placeholder for products without images
-
-**No large hero sections needed** - This is a functional application focused on product data display and management. Image usage is primarily for product photography within content areas.
+- **Headers:** Logo + navigation + "Get Started" CTA + social proof indicator
+- **Footers:** Links + newsletter + contact info + trust badges (SOC 2, ISO certifications)
+- **CTA Sections:** Primary message + supporting bullet points + dual action buttons + trust reinforcement
+- **Feature Cards:** Icon (Heroicons) + title + description + supporting metrics + learn more link
+- **Form Sections:** Field labels + help text + validation messaging + character counts for textareas
