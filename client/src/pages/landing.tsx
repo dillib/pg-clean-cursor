@@ -62,8 +62,8 @@ export default function Landing() {
                   Physics-Rooted Identity
                 </Badge>
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
-                  Every Product Deserves a{" "}
-                  <span className="text-primary">Secure Identity</span>
+                  One Scan.{" "}
+                  <span className="text-primary">Complete Trust.</span>
                 </h1>
                 <p className="text-lg sm:text-xl text-muted-foreground max-w-xl">
                   PhotonicTag creates tamper-proof Digital Product Passports that travel with your products from factory to consumer. 
@@ -465,41 +465,28 @@ export default function Landing() {
 
       <footer className="border-t py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 mb-8">
             <div>
               <h3 className="font-semibold mb-4">Product</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><a href="#features" className="hover:text-foreground transition-colors" data-testid="link-footer-features">Features</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-pricing">Pricing</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-api">API</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-integrations">Integrations</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Resources</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-docs">Documentation</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-blog">Blog</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-case-studies">Case Studies</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-dpp-guide">EU DPP Guide</a></li>
+                <li><a href="#how-it-works" className="hover:text-foreground transition-colors" data-testid="link-footer-how-it-works">How It Works</a></li>
+                <li><a href="#sustainability" className="hover:text-foreground transition-colors" data-testid="link-footer-sustainability">Sustainability</a></li>
+                <li><Link href="/scan/demo" className="hover:text-foreground transition-colors" data-testid="link-footer-demo">Demo Passport</Link></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Company</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-about">About</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-careers">Careers</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-press">Press</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-contact">Contact</a></li>
+                <li><a href="#what-we-are" className="hover:text-foreground transition-colors" data-testid="link-footer-about">About Us</a></li>
+                <li><a href="mailto:hello@photonictag.com" className="hover:text-foreground transition-colors" data-testid="link-footer-contact">Contact</a></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Legal</h3>
+              <h3 className="font-semibold mb-4">Get Started</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-privacy">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-terms">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-cookies">Cookie Policy</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors" data-testid="link-footer-gdpr">GDPR</a></li>
+                <li><a href="/api/login" className="hover:text-foreground transition-colors" data-testid="link-footer-login">Log In</a></li>
+                <li><a href="/api/login" className="hover:text-foreground transition-colors" data-testid="link-footer-signup">Sign Up Free</a></li>
               </ul>
             </div>
           </div>
