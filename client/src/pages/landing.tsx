@@ -385,6 +385,58 @@ export default function Landing() {
         </div>
       </section>
 
+      <section id="what-we-are" className="py-24 px-4 sm:px-6 lg:px-8 bg-muted/30">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <Badge variant="secondary" className="mb-4" data-testid="badge-what-we-are">Our Philosophy</Badge>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+              What PhotonicTag Really Is
+            </h2>
+          </div>
+          
+          <div className="space-y-6 text-lg">
+            <p className="text-muted-foreground">
+              PhotonicTag is a <span className="text-foreground font-medium">digital identity and verification platform</span> built 
+              for the era of global product passports. We do not manufacture photonic materials or invent new physical 
+              tag technologies. Instead, we provide the <span className="text-foreground font-medium">AI, cloud infrastructure, and compliance engine</span> that 
+              connects any secure physical marker — photonic, optical, or traditional — to a tamper-proof digital passport.
+            </p>
+            
+            <p className="text-muted-foreground">
+              The name <span className="italic">PhotonicTag</span> reflects our mission to bring <span className="text-foreground font-medium">light-level 
+              clarity and transparency</span> to supply chains. It is a brand philosophy, not a claim of proprietary photonic hardware.
+            </p>
+            
+            <p className="text-muted-foreground">
+              PhotonicTag integrates seamlessly with existing technologies — QR codes, RFID/NFC, optical labels, 
+              digital watermarks, and more — transforming them into <span className="text-foreground font-medium">trusted, verifiable identities</span> across 
+              the product lifecycle.
+            </p>
+          </div>
+
+          <div className="mt-12 grid sm:grid-cols-3 gap-6">
+            <div className="text-center space-y-2" data-testid="integration-qr">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                <QrCode className="w-6 h-6 text-primary" />
+              </div>
+              <p className="text-sm font-medium">QR & Serial Codes</p>
+            </div>
+            <div className="text-center space-y-2" data-testid="integration-nfc">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                <Zap className="w-6 h-6 text-primary" />
+              </div>
+              <p className="text-sm font-medium">RFID & NFC</p>
+            </div>
+            <div className="text-center space-y-2" data-testid="integration-optical">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                <Shield className="w-6 h-6 text-primary" />
+              </div>
+              <p className="text-sm font-medium">Optical & Digital Watermarks</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-primary/5 via-transparent to-transparent" />
         <div className="relative max-w-4xl mx-auto text-center">
@@ -395,8 +447,8 @@ export default function Landing() {
             <span className="text-primary">This is Illumination.</span>
           </h2>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Inspired by the precision of photonics — the science of light — PhotonicTag is building 
-            the identity layer for the next era of commerce. Where transparency is not optional, but foundational.
+            Our innovation lies in the identity graph, AI-based verification, and global product passport engine — 
+            not in the creation of new physical tags. We turn any physical marker into a trusted, traceable, and compliant digital identity.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild data-testid="button-cta-start">
