@@ -30,11 +30,12 @@ export default function Landing() {
           <div className="flex h-16 items-center justify-between gap-4">
             <div className="flex items-center gap-2" data-testid="nav-logo">
               <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-                <Zap className="w-5 h-5 text-primary-foreground" />
+                <QrCode className="w-5 h-5 text-primary-foreground" />
               </div>
               <span className="text-xl font-bold tracking-tight">PhotonicTag</span>
             </div>
             <div className="hidden md:flex items-center gap-6">
+              <Link href="/solution" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-solution">Solution</Link>
               <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-pricing">Pricing</Link>
               <Link href="/case-studies" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-case-studies">Case Studies</Link>
               <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-docs">Docs</Link>

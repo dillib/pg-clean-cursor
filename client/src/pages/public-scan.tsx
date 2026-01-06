@@ -11,7 +11,6 @@ import {
   Leaf,
   Wrench,
   QrCode,
-  Zap,
   CheckCircle2,
   Clock,
   MapPin,
@@ -211,7 +210,7 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
           <Link href="/">
             <div className="flex items-center gap-2 cursor-pointer">
               <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
-                <Zap className="h-5 w-5 text-primary-foreground" />
+                <QrCode className="h-5 w-5 text-primary-foreground" />
               </div>
               <div className="flex flex-col">
                 <span className="font-semibold text-sm">PhotonicTag</span>
@@ -506,7 +505,7 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
           <div className="flex flex-col items-center gap-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <div className="h-6 w-6 rounded-md bg-primary flex items-center justify-center">
-                <Zap className="h-4 w-4 text-primary-foreground" />
+                <QrCode className="h-4 w-4 text-primary-foreground" />
               </div>
               <span className="font-medium">PhotonicTag</span>
             </div>
