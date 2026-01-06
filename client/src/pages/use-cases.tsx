@@ -556,9 +556,9 @@ export default function UseCases() {
               <span className="text-xl font-bold tracking-tight">PhotonicTag</span>
             </Link>
             <div className="hidden md:flex items-center gap-6">
-              <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-nav-home">Home</Link>
-              <Link href="/use-cases" className="text-sm text-foreground font-medium transition-colors" data-testid="link-use-cases">Use Cases</Link>
+              <Link href="/solution" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-solution">Solution</Link>
               <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-pricing">Pricing</Link>
+              <Link href="/use-cases" className="text-sm text-foreground font-medium transition-colors" data-testid="link-use-cases">Use Cases</Link>
               <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-docs">Docs</Link>
             </div>
             <div className="flex items-center gap-3">
@@ -574,44 +574,37 @@ export default function UseCases() {
         </div>
       </nav>
 
-      <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        
-        <div className="relative max-w-4xl mx-auto text-center space-y-6">
-          <Badge variant="secondary" className="gap-1" data-testid="badge-hero">
-            <Globe className="w-3 h-3" />
-            Global Compliance Solutions
-          </Badge>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
-            Digital Product Passports{" "}
-            <span className="text-primary">for Every Industry</span>
-          </h1>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-            From batteries to textiles, electronics to packaging — PhotonicTag delivers compliance-ready 
-            Digital Product Passports that meet global regulations while building consumer trust.
-          </p>
-          
-          <div className="flex flex-wrap justify-center gap-4 pt-4">
-            {useCases.map((uc) => {
-              const Icon = uc.icon;
-              return (
-                <Button 
-                  key={uc.id} 
-                  variant="outline" 
-                  size="sm"
-                  className="gap-2"
-                  asChild
-                  data-testid={`nav-${uc.id}`}
-                >
-                  <a href={`#${uc.id}`}>
-                    <Icon className="w-4 h-4" />
-                    {uc.title.split(' ')[0]}
-                  </a>
-                </Button>
-              );
-            })}
+      <section className="relative pt-28 pb-12 px-4 sm:px-6 lg:px-8 border-b">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div className="space-y-2">
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                Industry Use Cases
+              </h1>
+              <p className="text-muted-foreground max-w-xl">
+                Explore how PhotonicTag enables compliance across industries with tailored Digital Product Passport solutions.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {useCases.map((uc) => {
+                const Icon = uc.icon;
+                return (
+                  <Button 
+                    key={uc.id} 
+                    variant="outline" 
+                    size="sm"
+                    className="gap-2"
+                    asChild
+                    data-testid={`nav-${uc.id}`}
+                  >
+                    <a href={`#${uc.id}`}>
+                      <Icon className="w-4 h-4" />
+                      {uc.title.split(' ')[0]}
+                    </a>
+                  </Button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>

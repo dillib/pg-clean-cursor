@@ -25,7 +25,12 @@ import {
   Store,
   ShoppingCart,
   Trash2,
-  HelpCircle
+  HelpCircle,
+  Shirt,
+  Cpu,
+  Package,
+  Car,
+  Home
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -886,6 +891,66 @@ export default function Landing() {
             </p>
             <Button variant="outline" asChild data-testid="button-faq-contact">
               <Link href="/contact">Contact Our Team</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        
+        <div className="relative max-w-4xl mx-auto text-center space-y-6">
+          <Badge variant="secondary" className="gap-1" data-testid="badge-industries">
+            <Globe className="w-3 h-3" />
+            Global Compliance Solutions
+          </Badge>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
+            Digital Product Passports{" "}
+            <span className="text-primary">for Every Industry</span>
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            From batteries to textiles, electronics to packaging — PhotonicTag delivers compliance-ready 
+            Digital Product Passports that meet global regulations while building consumer trust.
+          </p>
+          
+          <div className="flex flex-wrap justify-center gap-3 pt-4">
+            <Button variant="outline" size="sm" className="gap-2" asChild data-testid="nav-batteries">
+              <Link href="/use-cases#batteries">
+                <Zap className="w-4 h-4" />
+                Batteries
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2" asChild data-testid="nav-textiles">
+              <Link href="/use-cases#textiles">
+                <Shirt className="w-4 h-4" />
+                Textiles
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2" asChild data-testid="nav-electronics">
+              <Link href="/use-cases#electronics">
+                <Cpu className="w-4 h-4" />
+                Electronics
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2" asChild data-testid="nav-packaging">
+              <Link href="/use-cases#packaging">
+                <Package className="w-4 h-4" />
+                Packaging
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2" asChild data-testid="nav-automotive">
+              <Link href="/use-cases#automotive">
+                <Car className="w-4 h-4" />
+                Automotive
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2" asChild data-testid="nav-smarthome">
+              <Link href="/use-cases#smart-home">
+                <Home className="w-4 h-4" />
+                Smart Home
+              </Link>
             </Button>
           </div>
         </div>
