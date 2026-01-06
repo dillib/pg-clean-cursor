@@ -43,7 +43,7 @@ const demoProduct: Partial<Product> & { id: string; productName: string; manufac
   ],
   recyclingInstructions: "1. Remove all metal components (zippers, buckles) for metal recycling\n2. Separate fabric components by color\n3. Return to any EcoTech retail location for textile recycling\n4. Alternatively, use local textile recycling programs\n\nThis product is 95% recyclable and designed for circular economy participation.",
   qrCodeData: null,
-  productImage: null,
+  productImage: "/assets/stock_images/hiking_backpack_outd_db06293e.jpg",
 };
 
 const demoTraceEvents: Partial<TraceEvent>[] = [
@@ -218,6 +218,11 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
               </div>
             </div>
           </Link>
+          <div className="hidden md:flex items-center gap-4">
+            <Link href="/solution" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-solution">Solution</Link>
+            <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-pricing">Pricing</Link>
+            <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-contact">Contact</Link>
+          </div>
           <div className="flex items-center gap-3">
             {isDemo ? (
               <Badge variant="outline" className="gap-1 border-primary text-primary">

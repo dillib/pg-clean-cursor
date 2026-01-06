@@ -21,7 +21,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Germany",
       batchNumber: "GCT-BAT-2025-0842",
       lotNumber: "LOT-2025-Q3-0842",
-      productImage: "/assets/stock_images/lithium_ion_battery__e9545ddb.jpg",
+      productImage: "/assets/stock_images/lithium_ion_battery__913af259.jpg",
       materials: "Lithium Cobalt Oxide, Graphite Anode, Polymer Separator, Aluminum Casing, Copper Foil",
       materialBreakdown: [
         { material: "Lithium Cobalt Oxide", percentage: 35, recyclable: true },
@@ -83,7 +83,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Sweden",
       batchNumber: "SKF-TEX-2025-1847",
       lotNumber: "LOT-2025-SUM-1847",
-      productImage: "/assets/stock_images/merino_wool_sweater__bf977340.jpg",
+      productImage: "/assets/stock_images/premium_merino_wool__c7ed7cc2.jpg",
       materials: "100% Merino Wool (Patagonian), Organic Cotton Thread, Natural Shell Buttons",
       materialBreakdown: [
         { material: "Merino Wool", percentage: 92, recyclable: true },
@@ -141,7 +141,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Slovenia",
       batchNumber: "TBE-IOT-2025-X200-3421",
       lotNumber: "LOT-2025-APR-3421",
-      productImage: "/assets/stock_images/industrial_iot_senso_ecc9a791.jpg",
+      productImage: "/assets/stock_images/smart_home_hub_devic_8ba94000.jpg",
       materials: "Recycled ABS Plastic (65%), PCB with Lead-Free Solder, Aluminum Heat Sink, Tempered Glass Display",
       materialBreakdown: [
         { material: "Recycled ABS Plastic", percentage: 45, recyclable: true },
@@ -261,7 +261,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Portugal",
       batchNumber: "CTE-EVC-2025-7500-0892",
       lotNumber: "LOT-2025-SEP-0892",
-      productImage: "/assets/stock_images/electric_vehicle_ev__bf4ed89b.jpg",
+      productImage: "/assets/stock_images/electric_vehicle_car_73ff6ee8.jpg",
       materials: "TPE Outer Jacket (Halogen-Free), Oxygen-Free Copper Conductors, Polycarbonate Connector Housing",
       materialBreakdown: [
         { material: "Oxygen-Free Copper", percentage: 55, recyclable: true },
@@ -319,7 +319,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "China",
       batchNumber: "ATI-AUD-2025-4592",
       lotNumber: "LOT-2025-AUG-4592",
-      productImage: "/assets/stock_images/premium_wireless_noi_6d22461d.jpg",
+      productImage: "/assets/stock_images/premium_wireless_hea_9e631693.jpg",
       materials: "ABS Plastic, Synthetic Leather, Aluminum, Copper Wiring, Lithium-Ion Battery, Memory Foam",
       materialBreakdown: [
         { material: "ABS Plastic", percentage: 42, recyclable: true },
@@ -381,7 +381,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Italy",
       batchNumber: "BTS-LEA-2025-2847",
       lotNumber: "LOT-2025-SPR-2847",
-      productImage: "/assets/stock_images/luxury_leather_handb_0c8e215c.jpg",
+      productImage: "/assets/stock_images/luxury_leather_handb_03681045.jpg",
       materials: "Full-Grain Vegetable-Tanned Leather, Brass Hardware, Cotton Lining, Organic Cotton Thread",
       materialBreakdown: [
         { material: "Full-Grain Leather", percentage: 75, recyclable: true },
