@@ -119,8 +119,8 @@ export default function Landing() {
             <div className="space-y-8">
               <div className="space-y-4">
                 <Badge variant="secondary" className="gap-1" data-testid="badge-hero-ai">
-                  <Sparkles className="w-3 h-3" />
-                  Physics-Rooted Identity
+                  <Shield className="w-3 h-3" />
+                  EU DPP Compliance Ready
                 </Badge>
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
                   One Scan.{" "}
