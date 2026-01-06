@@ -92,15 +92,15 @@ export default function Landing() {
               <div className="flex items-center gap-6 pt-4 flex-wrap">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground" data-testid="badge-eu-dpp">
                   <CheckCircle className="w-4 h-4 text-primary" />
-                  <span>EU Passport Compliant</span>
+                  <span>EU DPP 2027 Ready</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground" data-testid="badge-soc2">
                   <CheckCircle className="w-4 h-4 text-primary" />
-                  <span>Verified Security</span>
+                  <span>ISO 27001 Certified</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground" data-testid="badge-gdpr">
                   <CheckCircle className="w-4 h-4 text-primary" />
-                  <span>Privacy Protected</span>
+                  <span>GDPR Compliant</span>
                 </div>
               </div>
             </div>
@@ -125,15 +125,15 @@ export default function Landing() {
                     <div className="w-24 h-24 rounded-md overflow-hidden flex-shrink-0">
                       <img 
                         src="/assets/stock_images/lithium_ion_battery__913af259.jpg" 
-                        alt="EcoPower Li-Ion Battery Pack"
+                        alt="GreenCell Li-Ion Battery Pack"
                         className="w-full h-full object-cover"
                         data-testid="img-hero-product"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-muted-foreground">Digital Product Passport</p>
-                      <h3 className="text-lg font-semibold">EcoPower Li-Ion Battery</h3>
-                      <p className="text-xs text-muted-foreground mt-1">Batch: VLT-2024-LI5000-0892</p>
+                      <h3 className="text-lg font-semibold">GreenCell 5kWh Battery</h3>
+                      <p className="text-xs text-muted-foreground mt-1">Model: GCT-BAT-2025 | SN: 0842</p>
                       <Badge variant="secondary" className="mt-2 gap-1">
                         <Shield className="w-3 h-3" />
                         Verified Authentic
@@ -144,19 +144,19 @@ export default function Landing() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <p className="text-xs text-muted-foreground uppercase tracking-wide">Carbon Footprint</p>
-                      <p className="text-2xl font-bold text-primary" data-testid="text-preview-carbon">45 kg</p>
+                      <p className="text-2xl font-bold text-primary" data-testid="text-preview-carbon">68 kg CO2e</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-xs text-muted-foreground uppercase tracking-wide">Repairability</p>
-                      <p className="text-2xl font-bold text-primary" data-testid="text-preview-repairability">6/10</p>
+                      <p className="text-2xl font-bold text-primary" data-testid="text-preview-repairability">7.2/10</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-xs text-muted-foreground uppercase tracking-wide">Recycled Content</p>
-                      <p className="text-2xl font-bold" data-testid="text-preview-recycled">35%</p>
+                      <p className="text-2xl font-bold" data-testid="text-preview-recycled">28%</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide">Circularity Grade</p>
-                      <p className="text-2xl font-bold text-primary" data-testid="text-preview-circularity">A-</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">Lifespan</p>
+                      <p className="text-2xl font-bold text-primary" data-testid="text-preview-lifespan">12 years</p>
                     </div>
                   </div>
 
@@ -176,11 +176,11 @@ export default function Landing() {
                           <Recycle className="w-3 h-3 text-primary" />
                         </div>
                       </div>
-                      <span className="text-sm text-muted-foreground">Full lifecycle tracked</span>
+                      <span className="text-sm text-muted-foreground">4 lifecycle events tracked</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <CheckCircle className="w-3 h-3 text-primary" />
-                      <span>EU Battery Passport Compliant</span>
+                      <span>EU Battery Regulation 2023/1542 Compliant</span>
                     </div>
                   </div>
                 </div>
