@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { ScrollToTop } from "@/components/scroll-to-top";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
@@ -135,6 +136,7 @@ function App() {
     <ThemeProvider defaultTheme="light" storageKey="photonictag-theme">
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
+          <ScrollToTop />
           <Router />
           <Toaster />
         </TooltipProvider>
