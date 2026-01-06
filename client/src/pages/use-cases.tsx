@@ -35,6 +35,8 @@ interface UseCase {
   icon: React.ComponentType<{ className?: string }>;
   gradient: string;
   iconBg: string;
+  demoProductId: number;
+  demoProductName: string;
   challenge: {
     headline: string;
     points: string[];
@@ -63,6 +65,8 @@ const useCases: UseCase[] = [
     icon: Battery,
     gradient: "from-emerald-500/20 via-emerald-500/5 to-transparent",
     iconBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    demoProductId: 1,
+    demoProductName: "EcoPower Li-Ion Battery Pack",
     challenge: {
       headline: "The Battery Transparency Crisis",
       points: [
@@ -117,6 +121,8 @@ const useCases: UseCase[] = [
     icon: Shirt,
     gradient: "from-violet-500/20 via-violet-500/5 to-transparent",
     iconBg: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
+    demoProductId: 2,
+    demoProductName: "Nordic Wool Premium Sweater",
     challenge: {
       headline: "Fashion's Transparency Gap",
       points: [
@@ -171,6 +177,8 @@ const useCases: UseCase[] = [
     icon: Smartphone,
     gradient: "from-blue-500/20 via-blue-500/5 to-transparent",
     iconBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+    demoProductId: 6,
+    demoProductName: "SoundWave Pro Wireless Headphones",
     challenge: {
       headline: "E-Waste & Planned Obsolescence",
       points: [
@@ -225,6 +233,8 @@ const useCases: UseCase[] = [
     icon: Package,
     gradient: "from-amber-500/20 via-amber-500/5 to-transparent",
     iconBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    demoProductId: 4,
+    demoProductName: "CircularPack Modular Container",
     challenge: {
       headline: "The Packaging Paradox",
       points: [
@@ -279,6 +289,8 @@ const useCases: UseCase[] = [
     icon: Car,
     gradient: "from-rose-500/20 via-rose-500/5 to-transparent",
     iconBg: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+    demoProductId: 5,
+    demoProductName: "Alpine EV Charging Cable",
     challenge: {
       headline: "Counterfeit Parts & Safety Risks",
       points: [
@@ -333,6 +345,8 @@ const useCases: UseCase[] = [
     icon: Home,
     gradient: "from-cyan-500/20 via-cyan-500/5 to-transparent",
     iconBg: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400",
+    demoProductId: 8,
+    demoProductName: "EcoNest Smart Thermostat Pro",
     challenge: {
       headline: "IoT Security & Lifecycle Management",
       points: [
@@ -496,8 +510,8 @@ function UseCaseCard({ useCase, index }: { useCase: UseCase; index: number }) {
             </div>
 
             <Button className="w-full gap-2" asChild data-testid={`button-demo-${useCase.id}`}>
-              <Link href="/scan/demo">
-                See Live Demo
+              <Link href={`/scan/${useCase.demoProductId}`}>
+                View {useCase.demoProductName}
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </Button>
