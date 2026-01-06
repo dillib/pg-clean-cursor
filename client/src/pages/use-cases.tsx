@@ -510,7 +510,7 @@ function UseCaseCard({ useCase, index }: { useCase: UseCase; index: number }) {
             </div>
 
             <Button className="w-full gap-2" asChild data-testid={`button-demo-${useCase.id}`}>
-              <Link href={`/scan/${useCase.demoProductId}`}>
+              <Link href={`/product/${useCase.demoProductId}`}>
                 View {useCase.demoProductName}
                 <ArrowRight className="w-4 h-4" />
               </Link>
