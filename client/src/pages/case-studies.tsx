@@ -119,9 +119,11 @@ export default function CaseStudies() {
                     </div>
                   ))}
                 </div>
-                <Button variant="outline" className="w-full gap-2" data-testid={`button-read-case-study-${index}`}>
-                  Read Full Case Study
-                  <ArrowRight className="w-4 h-4" />
+                <Button variant="outline" className="w-full gap-2" asChild data-testid={`button-read-case-study-${index}`}>
+                  <Link href="/contact">
+                    Request Full Case Study
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
