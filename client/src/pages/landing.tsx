@@ -30,14 +30,15 @@ export default function Landing() {
           <div className="flex h-16 items-center justify-between gap-4">
             <div className="flex items-center gap-2" data-testid="nav-logo">
               <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-                <QrCode className="w-5 h-5 text-primary-foreground" />
+                <Zap className="w-5 h-5 text-primary-foreground" />
               </div>
               <span className="text-xl font-bold tracking-tight">PhotonicTag</span>
             </div>
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-features">Features</a>
-              <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-how-it-works">How It Works</a>
-              <a href="#sustainability" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-sustainability">Sustainability</a>
+            <div className="hidden md:flex items-center gap-6">
+              <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-pricing">Pricing</Link>
+              <Link href="/case-studies" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-case-studies">Case Studies</Link>
+              <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-docs">Docs</Link>
+              <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-contact">Contact</Link>
             </div>
             <div className="flex items-center gap-3">
               <ThemeToggle />

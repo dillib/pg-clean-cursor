@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { QrCode, Book, Code, Zap, ArrowRight, FileText, Settings, Users } from "lucide-react";
+import { Book, Code, Zap, FileText, Settings, Users } from "lucide-react";
 import { Link } from "wouter";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { PublicNav } from "@/components/public-nav";
 
 const docSections = [
   {
@@ -35,29 +35,7 @@ const docSections = [
 export default function Docs() {
   return (
     <div className="min-h-screen bg-background">
-      <nav className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between gap-4">
-            <Link href="/">
-              <div className="flex items-center gap-2 cursor-pointer" data-testid="nav-logo">
-                <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-                  <QrCode className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <span className="text-xl font-bold tracking-tight">PhotonicTag</span>
-              </div>
-            </Link>
-            <div className="flex items-center gap-3">
-              <ThemeToggle />
-              <Button variant="ghost" asChild data-testid="button-login">
-                <a href="/api/login">Log In</a>
-              </Button>
-              <Button asChild data-testid="button-get-started">
-                <a href="/api/login">Get Started</a>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <PublicNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-16">
