@@ -2,6 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { 
   QrCode, 
   Shield, 
@@ -18,9 +24,53 @@ import {
   Factory,
   Store,
   ShoppingCart,
-  Trash2
+  Trash2,
+  HelpCircle
 } from "lucide-react";
 import { Link } from "wouter";
+
+const faqItems = [
+  {
+    question: "What is a Digital Product Passport (DPP)?",
+    answer: "A Digital Product Passport is an electronic record that contains comprehensive information about a product throughout its lifecycle — from raw materials and manufacturing to usage, repair, and end-of-life recycling. It's accessed via a unique identifier (like a QR code) and provides transparency for consumers, regulators, and supply chain partners about a product's origin, composition, environmental impact, and circularity potential."
+  },
+  {
+    question: "When does the EU Digital Product Passport regulation take effect?",
+    answer: "The EU Ecodesign for Sustainable Products Regulation (ESPR) was adopted in 2024, with DPP requirements rolling out in phases. Batteries are first, with mandatory DPPs required from February 2027. Textiles, electronics, and other product categories will follow between 2027-2030. PhotonicTag is designed to help you prepare now, so you're compliant before deadlines arrive."
+  },
+  {
+    question: "Which products will require Digital Product Passports?",
+    answer: "Initially, batteries (including EV batteries, industrial batteries, and portable batteries) will require DPPs from 2027. The regulation will expand to cover textiles, construction materials, furniture, electronics, packaging, and eventually most manufactured goods sold in the EU. PhotonicTag supports all these categories with industry-specific templates and compliance frameworks."
+  },
+  {
+    question: "How does PhotonicTag ensure data security and prevent tampering?",
+    answer: "PhotonicTag uses cryptographic signatures and blockchain-anchored verification to create tamper-proof product identities. Each product receives a unique digital signature that cannot be forged or altered. Our platform is ISO 27001 certified, GDPR compliant, and uses end-to-end encryption. All data changes are logged in an immutable audit trail, ensuring complete traceability and regulatory compliance."
+  },
+  {
+    question: "Can PhotonicTag integrate with our existing ERP and PLM systems?",
+    answer: "Yes. PhotonicTag offers REST APIs, webhooks, and pre-built connectors for major enterprise systems including SAP, Oracle, Microsoft Dynamics, and leading PLM platforms. Our integration team provides dedicated support to ensure seamless data flow between your existing systems and the PhotonicTag platform, typically completing integrations within 2-4 weeks."
+  },
+  {
+    question: "What happens if a QR code on a product is damaged or unreadable?",
+    answer: "PhotonicTag supports multiple identification methods for redundancy. Beyond QR codes, you can link products via serial numbers, RFID/NFC tags, or digital watermarks. If a QR code is damaged, consumers can manually enter the serial number on our verification portal. For high-value products, we recommend pairing QR codes with NFC chips for maximum durability and security."
+  },
+  {
+    question: "How much does PhotonicTag cost?",
+    answer: "PhotonicTag offers flexible pricing based on your needs. Our Starter plan begins at $299/month for up to 10,000 product identities, ideal for SMEs preparing for compliance. Growth and Enterprise plans include higher volumes, advanced AI features, dedicated support, and custom integrations. All plans include a 14-day free trial. Visit our Pricing page for detailed information."
+  },
+  {
+    question: "How long does it take to implement PhotonicTag?",
+    answer: "Most customers are operational within 1-2 weeks for basic implementation. This includes account setup, product data import, QR code generation, and staff training. More complex enterprise deployments with ERP integrations and custom workflows typically take 4-8 weeks. Our implementation team provides hands-on support throughout the process."
+  },
+  {
+    question: "Do consumers need to download an app to scan product passports?",
+    answer: "No. PhotonicTag passports are web-based and work with any smartphone camera — no app download required. When a consumer scans the QR code, they're taken directly to a mobile-optimized product passport page showing authenticity verification, sustainability data, care instructions, and recycling information. This removes friction and maximizes consumer engagement."
+  },
+  {
+    question: "How does PhotonicTag help with sustainability reporting?",
+    answer: "PhotonicTag automatically calculates and tracks key sustainability metrics including carbon footprint, recycled content percentage, repairability scores, and circularity grades. Our AI-powered analytics aggregate this data across your product portfolio, generating reports aligned with EU DPP requirements, GRI standards, and CDP disclosures. This simplifies compliance and supports your ESG commitments."
+  }
+];
 
 export default function Landing() {
   return (
@@ -792,6 +842,51 @@ export default function Landing() {
               </div>
               <p className="text-sm font-medium">Optical & Digital Watermarks</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" className="py-24 px-4 sm:px-6 lg:px-8 bg-muted/30">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <Badge variant="secondary" className="mb-4 gap-1" data-testid="badge-faq">
+              <HelpCircle className="w-3 h-3" />
+              FAQ
+            </Badge>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Everything you need to know about Digital Product Passports and how PhotonicTag 
+              helps you achieve compliance and transparency.
+            </p>
+          </div>
+
+          <Accordion type="single" collapsible className="space-y-4">
+            {faqItems.map((item, index) => (
+              <AccordionItem 
+                key={index} 
+                value={`item-${index}`}
+                className="bg-card border rounded-lg px-6"
+                data-testid={`accordion-faq-${index}`}
+              >
+                <AccordionTrigger className="text-left font-medium py-4" data-testid={`trigger-faq-${index}`}>
+                  {item.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground pb-4" data-testid={`content-faq-${index}`}>
+                  {item.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+
+          <div className="mt-12 text-center">
+            <p className="text-muted-foreground mb-4">
+              Still have questions? We're here to help.
+            </p>
+            <Button variant="outline" asChild data-testid="button-faq-contact">
+              <Link href="/contact">Contact Our Team</Link>
+            </Button>
           </div>
         </div>
       </section>
