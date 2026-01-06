@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { PublicNav } from "@/components/public-nav";
+import { PublicFooter } from "@/components/public-footer";
 
 export default function Terms() {
   return (
@@ -112,6 +113,8 @@ export default function Terms() {
           </p>
         </div>
       </main>
+
+      <PublicFooter />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { PublicNav } from "@/components/public-nav";
+import { PublicFooter } from "@/components/public-footer";
 
 export default function Privacy() {
   return (
@@ -96,6 +97,8 @@ export default function Privacy() {
           </p>
         </div>
       </main>
+
+      <PublicFooter />
     </div>
   );
 }

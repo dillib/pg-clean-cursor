@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Book, Code, Zap, FileText, Settings, Users } from "lucide-react";
 import { Link } from "wouter";
 import { PublicNav } from "@/components/public-nav";
+import { PublicFooter } from "@/components/public-footer";
 
 const docSections = [
   {
@@ -108,6 +109,8 @@ export default function Docs() {
           </Card>
         </div>
       </main>
+
+      <PublicFooter />
     </div>
   );
 }

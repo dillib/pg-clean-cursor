@@ -464,6 +464,8 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
           <div className="hidden md:flex items-center gap-4">
             <Link href="/solution" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-solution">Solution</Link>
             <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-pricing">Pricing</Link>
+            <Link href="/use-cases" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-use-cases">Use Cases</Link>
+            <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-docs">Docs</Link>
             <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-contact">Contact</Link>
           </div>
           <div className="flex items-center gap-3">

@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, ArrowRight, Calculator, Sparkles, Building2, Package, Activity, QrCode, Shield, Brain } from "lucide-react";
 import { Link } from "wouter";
 import { PublicNav } from "@/components/public-nav";
+import { PublicFooter } from "@/components/public-footer";
 
 const platformTiers = [
   {
@@ -539,6 +540,8 @@ export default function Pricing() {
           </div>
         </section>
       </main>
+
+      <PublicFooter />
     </div>
   );
 }
