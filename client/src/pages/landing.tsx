@@ -106,6 +106,13 @@ export default function Landing() {
             </div>
 
             <div className="relative">
+              <div className="absolute inset-0 rounded-xl overflow-hidden opacity-20 dark:opacity-15">
+                <img 
+                  src="/assets/stock_images/person_scanning_qr_c_5dd93375.jpg" 
+                  alt="QR code scanning technology"
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div className="relative bg-card border rounded-lg p-6 shadow-lg">
                 <div className="absolute -top-3 -right-3">
                   <Badge className="gap-1">
@@ -117,7 +124,7 @@ export default function Landing() {
                   <div className="flex items-start gap-4">
                     <div className="w-24 h-24 rounded-md overflow-hidden flex-shrink-0">
                       <img 
-                        src="/assets/stock_images/lithium_ion_battery__e9545ddb.jpg" 
+                        src="/assets/stock_images/lithium_ion_battery__913af259.jpg" 
                         alt="EcoPower Li-Ion Battery Pack"
                         className="w-full h-full object-cover"
                         data-testid="img-hero-product"
