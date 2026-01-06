@@ -403,7 +403,7 @@ function UseCaseCard({ useCase, index, products }: { useCase: UseCase; index: nu
   const Icon = useCase.icon;
   const isEven = index % 2 === 0;
   
-  const matchingProduct = products.find(p => 
+  const matchingProduct = (products || []).find(p => 
     p.productName.toLowerCase().includes(useCase.demoProductSearch.toLowerCase())
   );
   
