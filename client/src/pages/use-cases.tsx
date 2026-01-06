@@ -24,9 +24,12 @@ import {
   Factory,
   Users,
   Clock,
-  Target
+  Target,
+  ExternalLink
 } from "lucide-react";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import type { Product } from "@shared/schema";
 
 interface UseCase {
   id: string;
@@ -35,8 +38,8 @@ interface UseCase {
   icon: React.ComponentType<{ className?: string }>;
   gradient: string;
   iconBg: string;
-  demoProductId: number;
   demoProductName: string;
+  demoProductSearch: string;
   challenge: {
     headline: string;
     points: string[];
@@ -65,8 +68,8 @@ const useCases: UseCase[] = [
     icon: Battery,
     gradient: "from-emerald-500/20 via-emerald-500/5 to-transparent",
     iconBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-    demoProductId: 1,
     demoProductName: "EcoPower Li-Ion Battery Pack",
+    demoProductSearch: "EcoPower",
     challenge: {
       headline: "The Battery Transparency Crisis",
       points: [
@@ -121,8 +124,8 @@ const useCases: UseCase[] = [
     icon: Shirt,
     gradient: "from-violet-500/20 via-violet-500/5 to-transparent",
     iconBg: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
-    demoProductId: 2,
     demoProductName: "Nordic Wool Premium Sweater",
+    demoProductSearch: "Nordic Wool",
     challenge: {
       headline: "Fashion's Transparency Gap",
       points: [
@@ -177,8 +180,8 @@ const useCases: UseCase[] = [
     icon: Smartphone,
     gradient: "from-blue-500/20 via-blue-500/5 to-transparent",
     iconBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-    demoProductId: 6,
-    demoProductName: "SoundWave Pro Wireless Headphones",
+    demoProductName: "SmartHome Hub Pro",
+    demoProductSearch: "SmartHome Hub",
     challenge: {
       headline: "E-Waste & Planned Obsolescence",
       points: [
@@ -233,8 +236,8 @@ const useCases: UseCase[] = [
     icon: Package,
     gradient: "from-amber-500/20 via-amber-500/5 to-transparent",
     iconBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-    demoProductId: 4,
     demoProductName: "CircularPack Modular Container",
+    demoProductSearch: "CircularPack",
     challenge: {
       headline: "The Packaging Paradox",
       points: [
@@ -289,8 +292,8 @@ const useCases: UseCase[] = [
     icon: Car,
     gradient: "from-rose-500/20 via-rose-500/5 to-transparent",
     iconBg: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
-    demoProductId: 5,
     demoProductName: "Alpine EV Charging Cable",
+    demoProductSearch: "Alpine EV",
     challenge: {
       headline: "Counterfeit Parts & Safety Risks",
       points: [
@@ -345,8 +348,8 @@ const useCases: UseCase[] = [
     icon: Home,
     gradient: "from-cyan-500/20 via-cyan-500/5 to-transparent",
     iconBg: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400",
-    demoProductId: 8,
-    demoProductName: "EcoNest Smart Thermostat Pro",
+    demoProductName: "SmartHome Hub Pro",
+    demoProductSearch: "SmartHome",
     challenge: {
       headline: "IoT Security & Lifecycle Management",
       points: [
@@ -396,9 +399,13 @@ const useCases: UseCase[] = [
   }
 ];
 
-function UseCaseCard({ useCase, index }: { useCase: UseCase; index: number }) {
+function UseCaseCard({ useCase, index, products }: { useCase: UseCase; index: number; products: Product[] }) {
   const Icon = useCase.icon;
   const isEven = index % 2 === 0;
+  
+  const matchingProduct = products.find(p => 
+    p.productName.toLowerCase().includes(useCase.demoProductSearch.toLowerCase())
+  );
   
   return (
     <section 
@@ -509,12 +516,22 @@ function UseCaseCard({ useCase, index }: { useCase: UseCase; index: number }) {
               ))}
             </div>
 
-            <Button className="w-full gap-2" asChild data-testid={`button-demo-${useCase.id}`}>
-              <Link href={`/product/${useCase.demoProductId}`}>
-                View {useCase.demoProductName}
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </Button>
+            {matchingProduct ? (
+              <Button className="w-full gap-2" asChild data-testid={`button-demo-${useCase.id}`}>
+                <Link href={`/product/${matchingProduct.id}`}>
+                  <ExternalLink className="w-4 h-4" />
+                  View {matchingProduct.productName.split(' ').slice(0, 4).join(' ')}
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
+            ) : (
+              <Button className="w-full gap-2" asChild data-testid={`button-demo-${useCase.id}`}>
+                <Link href="/scan/demo">
+                  View Demo Passport
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -523,6 +540,10 @@ function UseCaseCard({ useCase, index }: { useCase: UseCase; index: number }) {
 }
 
 export default function UseCases() {
+  const { data: products = [] } = useQuery<Product[]>({
+    queryKey: ["/api/products"],
+  });
+  
   return (
     <div className="min-h-screen bg-background">
       <nav className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md">
@@ -596,7 +617,7 @@ export default function UseCases() {
       </section>
 
       {useCases.map((useCase, index) => (
-        <UseCaseCard key={useCase.id} useCase={useCase} index={index} />
+        <UseCaseCard key={useCase.id} useCase={useCase} index={index} products={products} />
       ))}
 
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-primary/5">
