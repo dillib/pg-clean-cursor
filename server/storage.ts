@@ -2,7 +2,7 @@ import { eq, desc, and } from "drizzle-orm";
 import { db } from "./db";
 import {
   type User,
-  type InsertUser,
+  type UpsertUser,
   type Product,
   type InsertProduct,
   type Role,
@@ -23,6 +23,11 @@ import {
   type InsertIoTDevice,
   type IoTSensorReading,
   type IoTDeviceStatus,
+  type DppRegionalExtension,
+  type InsertDppRegionalExtension,
+  type DppAiInsight,
+  type InsertDppAiInsight,
+  type RegionCode,
   users,
   products,
   roles,
@@ -33,6 +38,8 @@ import {
   auditLogs,
   productPassports,
   iotDevices,
+  dppRegionalExtensions,
+  dppAiInsights,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -95,6 +102,21 @@ export interface IStorage {
   updateIoTDeviceStatus(id: string, status: IoTDeviceStatus): Promise<IoTDevice | undefined>;
   recordIoTReading(id: string, reading: IoTSensorReading): Promise<IoTDevice | undefined>;
   deleteIoTDevice(id: string): Promise<boolean>;
+
+  // DPP Regional Extensions
+  getRegionalExtension(id: string): Promise<DppRegionalExtension | undefined>;
+  getRegionalExtensionsByProductId(productId: string): Promise<DppRegionalExtension[]>;
+  getRegionalExtensionByProductAndRegion(productId: string, regionCode: RegionCode): Promise<DppRegionalExtension | undefined>;
+  createRegionalExtension(extension: InsertDppRegionalExtension): Promise<DppRegionalExtension>;
+  updateRegionalExtension(id: string, updates: Partial<InsertDppRegionalExtension>): Promise<DppRegionalExtension | undefined>;
+  deleteRegionalExtension(id: string): Promise<boolean>;
+
+  // DPP AI Insights (Enhanced)
+  getDppAiInsight(id: string): Promise<DppAiInsight | undefined>;
+  getDppAiInsightsByProductId(productId: string): Promise<DppAiInsight[]>;
+  createDppAiInsight(insight: InsertDppAiInsight): Promise<DppAiInsight>;
+  markDppInsightStale(productId: string): Promise<void>;
+  getDppAiInsightByTypeAndProduct(productId: string, insightType: string): Promise<DppAiInsight | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -363,6 +385,81 @@ export class DatabaseStorage implements IStorage {
   async deleteIoTDevice(id: string): Promise<boolean> {
     const result = await db.delete(iotDevices).where(eq(iotDevices.id, id)).returning();
     return result.length > 0;
+  }
+
+  // DPP Regional Extensions
+  async getRegionalExtension(id: string): Promise<DppRegionalExtension | undefined> {
+    const [extension] = await db.select().from(dppRegionalExtensions).where(eq(dppRegionalExtensions.id, id));
+    return extension;
+  }
+
+  async getRegionalExtensionsByProductId(productId: string): Promise<DppRegionalExtension[]> {
+    return db.select().from(dppRegionalExtensions).where(eq(dppRegionalExtensions.productId, productId));
+  }
+
+  async getRegionalExtensionByProductAndRegion(productId: string, regionCode: RegionCode): Promise<DppRegionalExtension | undefined> {
+    const [extension] = await db
+      .select()
+      .from(dppRegionalExtensions)
+      .where(and(
+        eq(dppRegionalExtensions.productId, productId),
+        eq(dppRegionalExtensions.regionCode, regionCode)
+      ));
+    return extension;
+  }
+
+  async createRegionalExtension(insertExtension: InsertDppRegionalExtension): Promise<DppRegionalExtension> {
+    const [extension] = await db.insert(dppRegionalExtensions).values(insertExtension as typeof dppRegionalExtensions.$inferInsert).returning();
+    return extension;
+  }
+
+  async updateRegionalExtension(id: string, updates: Partial<InsertDppRegionalExtension>): Promise<DppRegionalExtension | undefined> {
+    const [extension] = await db
+      .update(dppRegionalExtensions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(dppRegionalExtensions.id, id))
+      .returning();
+    return extension;
+  }
+
+  async deleteRegionalExtension(id: string): Promise<boolean> {
+    const result = await db.delete(dppRegionalExtensions).where(eq(dppRegionalExtensions.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // DPP AI Insights (Enhanced)
+  async getDppAiInsight(id: string): Promise<DppAiInsight | undefined> {
+    const [insight] = await db.select().from(dppAiInsights).where(eq(dppAiInsights.id, id));
+    return insight;
+  }
+
+  async getDppAiInsightsByProductId(productId: string): Promise<DppAiInsight[]> {
+    return db.select().from(dppAiInsights).where(eq(dppAiInsights.productId, productId));
+  }
+
+  async createDppAiInsight(insertInsight: InsertDppAiInsight): Promise<DppAiInsight> {
+    const [insight] = await db.insert(dppAiInsights).values(insertInsight as typeof dppAiInsights.$inferInsert).returning();
+    return insight;
+  }
+
+  async markDppInsightStale(productId: string): Promise<void> {
+    await db
+      .update(dppAiInsights)
+      .set({ isStale: true })
+      .where(eq(dppAiInsights.productId, productId));
+  }
+
+  async getDppAiInsightByTypeAndProduct(productId: string, insightType: string): Promise<DppAiInsight | undefined> {
+    const [insight] = await db
+      .select()
+      .from(dppAiInsights)
+      .where(and(
+        eq(dppAiInsights.productId, productId),
+        eq(dppAiInsights.insightType, insightType)
+      ))
+      .orderBy(desc(dppAiInsights.createdAt))
+      .limit(1);
+    return insight;
   }
 }
 

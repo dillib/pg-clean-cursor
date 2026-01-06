@@ -2,7 +2,265 @@ import { storage } from "./storage";
 import { qrService } from "./services/qr-service";
 import { identityService } from "./services/identity-service";
 import { traceService } from "./services/trace-service";
-import type { InsertProduct, InsertProductPassport, IoTDeviceType, AIInsightType, AISummary, SustainabilityInsight, RepairSummary, CircularityScore, RiskAssessment } from "@shared/schema";
+import type { InsertProduct, InsertProductPassport, IoTDeviceType, AIInsightType, AISummary, SustainabilityInsight, RepairSummary, CircularityScore, RiskAssessment, RegionCode, EUExtensionData, ChinaExtensionData, USExtensionData, IndiaExtensionData } from "@shared/schema";
+
+interface RegionalExtensionConfig {
+  productIndex: number;
+  regions: {
+    code: RegionCode;
+    complianceStatus: "compliant" | "pending" | "non_compliant" | "not_applicable";
+    payload: {
+      EU?: EUExtensionData;
+      CN?: ChinaExtensionData;
+      US?: USExtensionData;
+      IN?: IndiaExtensionData;
+    };
+  }[];
+}
+
+const regionalExtensionConfigs: RegionalExtensionConfig[] = [
+  {
+    productIndex: 0,
+    regions: [
+      {
+        code: "EU",
+        complianceStatus: "compliant",
+        payload: {
+          EU: {
+            espr: {
+              productCategory: "Batteries",
+              complianceStatus: "compliant",
+              dppVersion: "1.0",
+              validFrom: "2025-08-15",
+              validUntil: "2030-08-15"
+            },
+            batteryRegulation: {
+              batteryType: "industrial",
+              stateOfHealth: 100,
+              carbonFootprintClass: "B",
+              cobaltSourcingDueDiligence: true,
+              recycledContentCobalt: 18,
+              recycledContentLithium: 12,
+              recycledContentNickel: 8
+            },
+            reach: {
+              svhcPresent: false,
+              svhcSubstances: []
+            },
+            ceMarking: true,
+            eprRegistrationId: "DE-EPR-BAT-2025-0842",
+            repairabilityIndex: 7.2
+          }
+        }
+      },
+      {
+        code: "CN",
+        complianceStatus: "compliant",
+        payload: {
+          CN: {
+            ccc: {
+              certificateNumber: "CCC-2025-LI-0842",
+              required: true,
+              validUntil: "2028-08-15",
+              certificationBody: "China Quality Certification Center"
+            },
+            gbStandards: {
+              applicableStandards: ["GB 31241-2022", "GB/T 18287-2013"],
+              complianceStatus: "compliant"
+            },
+            dualCarbon: {
+              carbonIntensity: 12.5,
+              carbonQuotaStatus: "within_quota",
+              greenProductCertified: true
+            },
+            chinaRoHS: {
+              compliant: true,
+              restrictedSubstances: [],
+              exemptions: []
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    productIndex: 1,
+    regions: [
+      {
+        code: "EU",
+        complianceStatus: "compliant",
+        payload: {
+          EU: {
+            espr: {
+              productCategory: "Textiles",
+              complianceStatus: "compliant",
+              dppVersion: "1.0",
+              validFrom: "2025-03-01"
+            },
+            reach: {
+              svhcPresent: false
+            },
+            ceMarking: false,
+            repairabilityIndex: 8.5
+          }
+        }
+      },
+      {
+        code: "IN",
+        complianceStatus: "compliant",
+        payload: {
+          IN: {
+            bis: {
+              registrationNumber: "IS-17635-2025-TEX",
+              required: true,
+              productCategory: "Textiles",
+              validUntil: "2028-03-01"
+            },
+            epr: {
+              registrationNumber: "EPR-TEX-2025-1847",
+              obligationType: "producer",
+              targetYear: 2026
+            },
+            madeInIndia: {
+              localContentPercent: 0,
+              manufacturingLocation: "Imported - Sweden"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    productIndex: 2,
+    regions: [
+      {
+        code: "EU",
+        complianceStatus: "compliant",
+        payload: {
+          EU: {
+            espr: {
+              productCategory: "Electronics",
+              complianceStatus: "compliant",
+              dppVersion: "1.0"
+            },
+            reach: {
+              svhcPresent: false
+            },
+            ceMarking: true,
+            eprRegistrationId: "SI-EPR-WEEE-2025-3421",
+            repairabilityIndex: 8.0
+          }
+        }
+      },
+      {
+        code: "CN",
+        complianceStatus: "compliant",
+        payload: {
+          CN: {
+            ccc: {
+              certificateNumber: "CCC-2025-IOT-3421",
+              required: true,
+              validUntil: "2028-04-01",
+              certificationBody: "CCIC"
+            },
+            gbStandards: {
+              applicableStandards: ["GB 4943.1-2022", "GB 9254.1-2021"],
+              complianceStatus: "compliant"
+            },
+            chinaRoHS: {
+              compliant: true
+            }
+          }
+        }
+      },
+      {
+        code: "US",
+        complianceStatus: "compliant",
+        payload: {
+          US: {
+            ftc: {
+              madeInUSAClaim: false,
+              greenGuidesCompliant: true
+            },
+            stateEPR: {
+              registeredStates: ["CA", "NY", "WA"],
+              eprProgramIds: {
+                CA: "CA-WEEE-2025-3421",
+                NY: "NY-WEEE-2025-3421",
+                WA: "WA-WEEE-2025-3421"
+              }
+            },
+            californiaCompliance: {
+              prop65Warning: false
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    productIndex: 5,
+    regions: [
+      {
+        code: "EU",
+        complianceStatus: "compliant",
+        payload: {
+          EU: {
+            espr: {
+              productCategory: "Electronics",
+              complianceStatus: "compliant",
+              dppVersion: "1.0"
+            },
+            reach: {
+              svhcPresent: false
+            },
+            ceMarking: true,
+            repairabilityIndex: 6.5
+          }
+        }
+      },
+      {
+        code: "CN",
+        complianceStatus: "compliant",
+        payload: {
+          CN: {
+            ccc: {
+              certificateNumber: "CCC-2025-AUD-4592",
+              required: true,
+              certificationBody: "CQC"
+            },
+            gbStandards: {
+              applicableStandards: ["GB 8898-2011", "GB 4943.1-2022"],
+              complianceStatus: "compliant"
+            },
+            chinaRoHS: {
+              compliant: true
+            }
+          }
+        }
+      },
+      {
+        code: "US",
+        complianceStatus: "compliant",
+        payload: {
+          US: {
+            ftc: {
+              madeInUSAClaim: false,
+              greenGuidesCompliant: true
+            },
+            stateEPR: {
+              registeredStates: ["CA"],
+              eprProgramIds: { CA: "CA-WEEE-2025-4592" }
+            },
+            californiaCompliance: {
+              prop65Warning: false
+            }
+          }
+        }
+      }
+    ]
+  }
+];
 
 interface DemoProductData {
   product: InsertProduct;
@@ -859,6 +1117,21 @@ async function seedDemoData() {
         console.log(`  - AI insights generated (5 types: summary, sustainability, repair, circularity, risk)`);
       }
 
+      const regionalConfig = regionalExtensionConfigs.find(c => c.productIndex === i);
+      if (regionalConfig) {
+        for (const region of regionalConfig.regions) {
+          await storage.createRegionalExtension({
+            productId: product.id,
+            regionCode: region.code,
+            complianceStatus: region.complianceStatus,
+            payload: region.payload,
+            schemaVersion: "1.0"
+          });
+        }
+        const regionCodes = regionalConfig.regions.map(r => r.code).join(", ");
+        console.log(`  - Regional extensions created (${regionCodes})`);
+      }
+
       console.log(`  [SUCCESS] ${productData.productName}\n`);
     } catch (error) {
       console.error(`  [ERROR] Failed to create ${productData.productName}:`, error);
@@ -867,6 +1140,7 @@ async function seedDemoData() {
 
   console.log("\nDemo data seeding complete!");
   console.log("Created 8 products across industries: Batteries, Textiles, IoT Devices, Packaging, EV Accessories, Consumer Electronics, Fashion Accessories, Smart Home");
+  console.log("Regional compliance: EU (ESPR, Battery Regulation), China (CCC, GB Standards), US (FTC, State EPR), India (BIS)");
 }
 
 export { seedDemoData };

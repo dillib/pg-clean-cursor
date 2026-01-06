@@ -370,6 +370,340 @@ export type EventType =
   | "com.photonictag.ai.insights_generated";
 
 // ============================================
+// MODULAR DPP - REGIONAL EXTENSIONS
+// ============================================
+
+export type RegionCode = "EU" | "CN" | "US" | "IN" | "UK" | "JP" | "KR" | "ASEAN" | "OTHER";
+
+export interface EUExtensionData {
+  espr: {
+    productCategory: string;
+    complianceStatus: "compliant" | "pending" | "non_compliant";
+    dppVersion: string;
+    validFrom?: string;
+    validUntil?: string;
+  };
+  batteryRegulation?: {
+    batteryType: "ev" | "industrial" | "portable" | "light_means_of_transport";
+    stateOfHealth?: number;
+    carbonFootprintClass?: string;
+    cobaltSourcingDueDiligence?: boolean;
+    recycledContentCobalt?: number;
+    recycledContentLithium?: number;
+    recycledContentNickel?: number;
+  };
+  reach?: {
+    scipId?: string;
+    svhcPresent: boolean;
+    svhcSubstances?: string[];
+  };
+  ceMarking: boolean;
+  eprRegistrationId?: string;
+  repairabilityIndex?: number;
+}
+
+export interface ChinaExtensionData {
+  ccc: {
+    certificateNumber?: string;
+    required: boolean;
+    validUntil?: string;
+    certificationBody?: string;
+  };
+  gbStandards: {
+    applicableStandards: string[];
+    complianceStatus: "compliant" | "pending" | "non_compliant";
+  };
+  dualCarbon?: {
+    carbonIntensity?: number;
+    carbonQuotaStatus?: string;
+    greenProductCertified?: boolean;
+  };
+  chinaRoHS?: {
+    compliant: boolean;
+    restrictedSubstances?: string[];
+    exemptions?: string[];
+  };
+  recyclerRegistration?: {
+    registeredRecyclers: string[];
+    collectionNetwork?: string;
+  };
+}
+
+export interface USExtensionData {
+  ftc: {
+    madeInUSAClaim: boolean;
+    greenGuidesCompliant: boolean;
+    substantiationDocuments?: string[];
+  };
+  stateEPR: {
+    registeredStates: string[];
+    eprProgramIds: Record<string, string>;
+  };
+  secClimate?: {
+    scope3Included: boolean;
+    climateDisclosureStatus?: string;
+  };
+  californiaCompliance?: {
+    prop65Warning: boolean;
+    prop65Chemicals?: string[];
+    sbCompliance?: string[];
+  };
+}
+
+export interface IndiaExtensionData {
+  bis: {
+    registrationNumber?: string;
+    required: boolean;
+    productCategory?: string;
+    validUntil?: string;
+  };
+  eWasteRules?: {
+    categoryCode?: string;
+    proMembership?: string;
+    collectionTargetPercent?: number;
+  };
+  epr: {
+    registrationNumber?: string;
+    obligationType?: string;
+    targetYear?: number;
+  };
+  madeInIndia?: {
+    localContentPercent?: number;
+    manufacturingLocation?: string;
+  };
+}
+
+export interface RegionalExtensionPayload {
+  EU?: EUExtensionData;
+  CN?: ChinaExtensionData;
+  US?: USExtensionData;
+  IN?: IndiaExtensionData;
+  OTHER?: Record<string, unknown>;
+}
+
+export const dppRegionalExtensions = pgTable("dpp_regional_extensions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").references(() => products.id).notNull(),
+  regionCode: text("region_code").$type<RegionCode>().notNull(),
+  schemaVersion: text("schema_version").default("1.0").notNull(),
+  complianceStatus: text("compliance_status").$type<"compliant" | "pending" | "non_compliant" | "not_applicable">().default("pending").notNull(),
+  payload: jsonb("payload").$type<RegionalExtensionPayload>().default({}).notNull(),
+  validatedAt: timestamp("validated_at"),
+  validatedBy: varchar("validated_by"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertDppRegionalExtensionSchema = createInsertSchema(dppRegionalExtensions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertDppRegionalExtension = z.infer<typeof insertDppRegionalExtensionSchema>;
+export type DppRegionalExtension = typeof dppRegionalExtensions.$inferSelect;
+
+// Zod schemas for regional extension validation
+export const euExtensionSchema = z.object({
+  espr: z.object({
+    productCategory: z.string(),
+    complianceStatus: z.enum(["compliant", "pending", "non_compliant"]),
+    dppVersion: z.string(),
+    validFrom: z.string().optional(),
+    validUntil: z.string().optional(),
+  }),
+  batteryRegulation: z.object({
+    batteryType: z.enum(["ev", "industrial", "portable", "light_means_of_transport"]),
+    stateOfHealth: z.number().optional(),
+    carbonFootprintClass: z.string().optional(),
+    cobaltSourcingDueDiligence: z.boolean().optional(),
+    recycledContentCobalt: z.number().optional(),
+    recycledContentLithium: z.number().optional(),
+    recycledContentNickel: z.number().optional(),
+  }).optional(),
+  reach: z.object({
+    scipId: z.string().optional(),
+    svhcPresent: z.boolean(),
+    svhcSubstances: z.array(z.string()).optional(),
+  }).optional(),
+  ceMarking: z.boolean(),
+  eprRegistrationId: z.string().optional(),
+  repairabilityIndex: z.number().optional(),
+});
+
+export const chinaExtensionSchema = z.object({
+  ccc: z.object({
+    certificateNumber: z.string().optional(),
+    required: z.boolean(),
+    validUntil: z.string().optional(),
+    certificationBody: z.string().optional(),
+  }),
+  gbStandards: z.object({
+    applicableStandards: z.array(z.string()),
+    complianceStatus: z.enum(["compliant", "pending", "non_compliant"]),
+  }),
+  dualCarbon: z.object({
+    carbonIntensity: z.number().optional(),
+    carbonQuotaStatus: z.string().optional(),
+    greenProductCertified: z.boolean().optional(),
+  }).optional(),
+  chinaRoHS: z.object({
+    compliant: z.boolean(),
+    restrictedSubstances: z.array(z.string()).optional(),
+    exemptions: z.array(z.string()).optional(),
+  }).optional(),
+  recyclerRegistration: z.object({
+    registeredRecyclers: z.array(z.string()),
+    collectionNetwork: z.string().optional(),
+  }).optional(),
+});
+
+export const usExtensionSchema = z.object({
+  ftc: z.object({
+    madeInUSAClaim: z.boolean(),
+    greenGuidesCompliant: z.boolean(),
+    substantiationDocuments: z.array(z.string()).optional(),
+  }),
+  stateEPR: z.object({
+    registeredStates: z.array(z.string()),
+    eprProgramIds: z.record(z.string()),
+  }),
+  secClimate: z.object({
+    scope3Included: z.boolean(),
+    climateDisclosureStatus: z.string().optional(),
+  }).optional(),
+  californiaCompliance: z.object({
+    prop65Warning: z.boolean(),
+    prop65Chemicals: z.array(z.string()).optional(),
+    sbCompliance: z.array(z.string()).optional(),
+  }).optional(),
+});
+
+export const indiaExtensionSchema = z.object({
+  bis: z.object({
+    registrationNumber: z.string().optional(),
+    required: z.boolean(),
+    productCategory: z.string().optional(),
+    validUntil: z.string().optional(),
+  }),
+  eWasteRules: z.object({
+    categoryCode: z.string().optional(),
+    proMembership: z.string().optional(),
+    collectionTargetPercent: z.number().optional(),
+  }).optional(),
+  epr: z.object({
+    registrationNumber: z.string().optional(),
+    obligationType: z.string().optional(),
+    targetYear: z.number().optional(),
+  }),
+  madeInIndia: z.object({
+    localContentPercent: z.number().optional(),
+    manufacturingLocation: z.string().optional(),
+  }).optional(),
+});
+
+// ============================================
+// ENHANCED AI INSIGHTS (with cache invalidation)
+// ============================================
+
+export const dppAiInsights = pgTable("dpp_ai_insights", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").references(() => products.id).notNull(),
+  insightType: text("insight_type").$type<AIInsightType>().notNull(),
+  content: jsonb("content").$type<Record<string, unknown>>().notNull(),
+  confidence: integer("confidence"),
+  modelVersion: text("model_version"),
+  modelName: text("model_name"),
+  inputHash: text("input_hash"),
+  sourceSnapshot: jsonb("source_snapshot").$type<Record<string, unknown>>(),
+  promptTokens: integer("prompt_tokens"),
+  completionTokens: integer("completion_tokens"),
+  isStale: boolean("is_stale").default(false).notNull(),
+  version: integer("version").default(1).notNull(),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  expiresAt: timestamp("expires_at"),
+});
+
+export const insertDppAiInsightSchema = createInsertSchema(dppAiInsights).omit({
+  id: true,
+  createdAt: true,
+  version: true,
+});
+
+export type InsertDppAiInsight = z.infer<typeof insertDppAiInsightSchema>;
+export type DppAiInsight = typeof dppAiInsights.$inferSelect;
+
+// ============================================
+// DPP MODULE SUMMARY (Unified view helper types)
+// ============================================
+
+export interface DppModuleSummary {
+  coreIdentity: {
+    id: string;
+    productName: string;
+    manufacturer: string;
+    countryOfOrigin?: string;
+    batchNumber: string;
+    lotNumber?: string;
+  };
+  productInfo: {
+    category?: string;
+    modelNumber?: string;
+    sku?: string;
+    manufacturerAddress?: string;
+  };
+  materials: {
+    description: string;
+    breakdown: MaterialBreakdown[];
+    hazardousMaterials?: string;
+  };
+  sustainability: {
+    carbonFootprint: number;
+    waterUsage?: number;
+    energyConsumption?: number;
+    recycledContentPercent?: number;
+    recyclabilityPercent?: number;
+    environmentalCertifications: string[];
+  };
+  durability: {
+    repairabilityScore: number;
+    expectedLifespanYears?: number;
+    sparePartsAvailable?: boolean;
+    warrantyInfo: string;
+    serviceCenters: ServiceCenter[];
+  };
+  lifecycle: {
+    dateOfManufacture?: Date;
+    dateOfFirstSale?: Date;
+    ownershipHistory: OwnershipEntry[];
+  };
+  endOfLife: {
+    recyclingInstructions: string;
+    disassemblyInstructions?: string;
+    hazardWarnings?: string;
+    takeBackPrograms: string[];
+  };
+  compliance: {
+    ceMarking?: boolean;
+    safetyCertifications: string[];
+  };
+  aiInsights: {
+    summary?: AISummary;
+    sustainability?: SustainabilityInsight;
+    repair?: RepairSummary;
+    circularity?: CircularityScore;
+    riskAssessment?: RiskAssessment;
+  };
+  regionalExtensions: {
+    EU?: EUExtensionData;
+    CN?: ChinaExtensionData;
+    US?: USExtensionData;
+    IN?: IndiaExtensionData;
+  };
+}
+
+// ============================================
 // AI RESPONSE TYPES (kept for API compatibility)
 // ============================================
 
