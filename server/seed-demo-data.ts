@@ -747,6 +747,67 @@ const demoProducts: DemoProductData[] = [
       environmentalDeclarations: { category: "Smart Home", industry: "Electronics" },
       endOfLifeInstructions: "Return for trade-in credit. Device can be refurbished for second life program."
     }
+  },
+  {
+    product: {
+      productName: "Lakhotia Heavy-Duty Conveyor Belt EP400/3",
+      productCategory: "Industrial Belting",
+      modelNumber: "LB-EP400-3-1200",
+      sku: "LKB-CVB-EP400-1200",
+      manufacturer: "Lakhotia Beltings Pvt. Ltd.",
+      manufacturerAddress: "Plot 42, Industrial Area Phase II, Faridabad, Haryana 121003, India",
+      countryOfOrigin: "India",
+      batchNumber: "LKB-CVB-2025-EP400-2847",
+      lotNumber: "LOT-2025-DEC-2847",
+      productImage: null,
+      materials: "Polyester-Nylon (EP) Fabric Plies, Natural Rubber Cover, Synthetic Rubber Compound, Steel Cord Reinforcement",
+      materialBreakdown: [
+        { material: "Natural Rubber", percentage: 45, recyclable: true },
+        { material: "Synthetic Rubber", percentage: 20, recyclable: true },
+        { material: "Polyester-Nylon Fabric", percentage: 25, recyclable: true },
+        { material: "Steel Cord", percentage: 10, recyclable: true }
+      ],
+      recycledContentPercent: 15,
+      recyclabilityPercent: 85,
+      hazardousMaterials: null,
+      carbonFootprint: 180,
+      waterUsage: 4500,
+      energyConsumption: 320,
+      environmentalCertifications: ["ISO 14001", "BIS Certified", "REACH Compliant"],
+      repairabilityScore: 7,
+      expectedLifespanYears: 12,
+      sparePartsAvailable: true,
+      repairInstructions: "Hot vulcanization for splice repairs. Cold bonding for minor cuts. Belt edge repair kits available. Professional installation recommended for major repairs.",
+      serviceCenters: [
+        { name: "Lakhotia Faridabad Service Center", location: "Faridabad, India", contact: "+91 129 4567890" },
+        { name: "Lakhotia Mumbai Regional Hub", location: "Mumbai, India", contact: "+91 22 9876543" },
+        { name: "Lakhotia Middle East Service", location: "Dubai, UAE", contact: "+971 4 1234567" }
+      ],
+      warrantyInfo: "3-year warranty against manufacturing defects. Extended warranty available for premium installations. 24/7 emergency support for industrial clients.",
+      dateOfManufacture: new Date("2025-12-01"),
+      dateOfFirstSale: null,
+      ownershipHistory: [
+        { owner: "Lakhotia Beltings Pvt. Ltd.", date: "2025-12-01", action: "Manufactured in Faridabad" },
+        { owner: "Industrial Equipment Distributors", date: "2025-12-10", action: "Distribution" }
+      ],
+      ceMarking: false,
+      safetyCertifications: ["IS 1891:2018", "DIN 22102", "ISO 22721", "MSHA Approved"],
+      recyclingInstructions: "Worn belts can be retreaded, recycled into rubber mulch, or used for secondary applications. Contact certified industrial recycler.",
+      disassemblyInstructions: "Cut belt into manageable sections. Separate steel cord from rubber using specialized equipment. Rubber can be ground for recycling.",
+      hazardWarnings: "Heavy industrial equipment - professional installation only. Pinch point hazard during operation. Follow lockout/tagout procedures.",
+      takeBackPrograms: ["Lakhotia Belt Retread Program", "Industrial Rubber Recycling Network"]
+    },
+    passport: {
+      complianceData: {
+        industrialGrade: true,
+        loadCapacity: "400 N/mm tensile strength per ply, 3-ply construction",
+        operatingConditions: "Temperature range: -25C to +80C, Oil and abrasion resistant",
+        qualityTesting: "100% visual inspection, tensile testing per batch, adhesion testing"
+      },
+      certifications: ["IS 1891:2018 Certified", "ISO 9001:2015", "ISO 14001:2015", "DIN 22102 Compliant"],
+      environmentalDeclarations: { category: "Industrial Belting", industry: "Manufacturing Equipment" },
+      endOfLifeInstructions: "Contact Lakhotia for belt retread assessment. Worn belts eligible for recycling program with credit toward new purchase."
+    }
   }
 ];
 
@@ -758,7 +819,8 @@ const iotDeviceConfigs: { productIndex: number; deviceType: IoTDeviceType; devic
   { productIndex: 4, deviceType: "qr", deviceId: "QR-EVC-2025-7500", manufacturer: "PhotonicTag", model: "Optical QR" },
   { productIndex: 5, deviceType: "nfc", deviceId: "NFC-AUD-2025-4592", manufacturer: "NXP Semiconductors", model: "NTAG 424 DNA" },
   { productIndex: 6, deviceType: "rfid", deviceId: "RFID-LEA-2025-2847", manufacturer: "Impinj", model: "Monza R6-P" },
-  { productIndex: 7, deviceType: "ble", deviceId: "BLE-SMH-2025-8834", manufacturer: "Nordic Semiconductor", model: "nRF52832" }
+  { productIndex: 7, deviceType: "ble", deviceId: "BLE-SMH-2025-8834", manufacturer: "Nordic Semiconductor", model: "nRF52832" },
+  { productIndex: 8, deviceType: "rfid", deviceId: "RFID-CVB-2025-2847", manufacturer: "Alien Technology", model: "Higgs-EC" }
 ];
 
 interface AIInsightsBundle {
@@ -1049,6 +1111,42 @@ const demoAIInsights: AIInsightsBundle[] = [
       complianceIssues: [],
       recommendations: ["Maintain GDPR compliance documentation for data handling"]
     }
+  },
+  {
+    summary: {
+      summary: "The Lakhotia Heavy-Duty Conveyor Belt EP400/3 is a premium industrial belting solution designed for demanding material handling applications with excellent durability and comprehensive service support.",
+      keyFeatures: ["400 N/mm tensile strength per ply", "3-ply EP fabric construction", "12-year expected lifespan", "Hot vulcanization repair capable", "24/7 industrial support"]
+    },
+    sustainability: {
+      overallScore: 72,
+      carbonAnalysis: "180kg CO2e reflects intensive rubber manufacturing and steel cord production. Long 12-year lifespan significantly reduces lifecycle impact per operational hour.",
+      circularityRecommendations: ["Increase recycled rubber content to 25%", "Develop belt retread program for extended life", "Partner with industrial recyclers for end-of-life processing"],
+      improvements: ["Explore bio-based rubber alternatives", "Reduce water usage in vulcanization process", "Implement solar energy for manufacturing"]
+    },
+    repair: {
+      repairabilityRating: "Good",
+      repairInstructions: ["Hot vulcanization for permanent splice repairs", "Cold bonding adhesives for emergency field repairs", "Belt edge damage repair using specialized kits", "Professional tensioning and tracking adjustment recommended annually"],
+      commonIssues: ["Belt tracking misalignment", "Edge wear from material spillage", "Splice joint separation under high tension", "Cover rubber wear in high-abrasion applications"],
+      partsAvailability: "Good - splice kits, repair patches, and edge strips available. Regional service centers stock common components."
+    },
+    circularity: {
+      score: 75,
+      grade: "B",
+      recyclabilityAnalysis: "85% of materials can be recovered. Steel cord is fully recyclable. Rubber can be ground into crumb rubber for secondary applications.",
+      materialEfficiency: "Multi-ply design maximizes strength-to-weight ratio. Steel cord reinforcement provides durability without excess material.",
+      endOfLifeOptions: ["Belt retreading", "Rubber crumb recycling", "Steel cord recovery", "Secondary use applications (dock bumpers, floor mats)"],
+      recommendations: ["Document belt wear patterns for predictive replacement", "Explore closed-loop recycling partnerships"]
+    },
+    risk: {
+      overallRisk: "Low",
+      riskFlags: [
+        { type: "Installation Safety", severity: "Medium", description: "Professional installation required - pinch point hazards during operation" }
+      ],
+      dataCompleteness: 92,
+      counterfeitRisk: "Low - RFID tag embedded in belt edge, unique batch tracking, manufacturer verification through PhotonicTag",
+      complianceIssues: [],
+      recommendations: ["Maintain IS 1891:2018 certification documentation", "Document installation and maintenance history for warranty"]
+    }
   }
 ];
 
@@ -1139,7 +1237,7 @@ async function seedDemoData() {
   }
 
   console.log("\nDemo data seeding complete!");
-  console.log("Created 8 products across industries: Batteries, Textiles, IoT Devices, Packaging, EV Accessories, Consumer Electronics, Fashion Accessories, Smart Home");
+  console.log("Created 9 products across industries: Batteries, Textiles, IoT Devices, Packaging, EV Accessories, Consumer Electronics, Fashion Accessories, Smart Home, Industrial Belting");
   console.log("Regional compliance: EU (ESPR, Battery Regulation), China (CCC, GB Standards), US (FTC, State EPR), India (BIS)");
 }
 
