@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Package, LayoutDashboard, Plus, LogOut, QrCode, Wifi } from "lucide-react";
+import { Package, LayoutDashboard, Plus, LogOut, QrCode, Wifi, Plug } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,11 @@ const navigationItems = [
     title: "IoT Devices",
     url: "/iot-devices",
     icon: Wifi,
+  },
+  {
+    title: "SAP Connector",
+    url: "/integrations/sap",
+    icon: Plug,
   },
   {
     title: "Create Product",

@@ -28,6 +28,10 @@ import {
   type DppAiInsight,
   type InsertDppAiInsight,
   type RegionCode,
+  type EnterpriseConnector,
+  type InsertEnterpriseConnector,
+  type IntegrationSyncLog,
+  type InsertIntegrationSyncLog,
   users,
   products,
   roles,
@@ -40,6 +44,8 @@ import {
   iotDevices,
   dppRegionalExtensions,
   dppAiInsights,
+  enterpriseConnectors,
+  integrationSyncLogs,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -117,6 +123,19 @@ export interface IStorage {
   createDppAiInsight(insight: InsertDppAiInsight): Promise<DppAiInsight>;
   markDppInsightStale(productId: string): Promise<void>;
   getDppAiInsightByTypeAndProduct(productId: string, insightType: string): Promise<DppAiInsight | undefined>;
+
+  // Enterprise Connectors
+  getEnterpriseConnector(id: string): Promise<EnterpriseConnector | undefined>;
+  getAllEnterpriseConnectors(): Promise<EnterpriseConnector[]>;
+  createEnterpriseConnector(connector: InsertEnterpriseConnector): Promise<EnterpriseConnector>;
+  updateEnterpriseConnector(id: string, updates: Partial<InsertEnterpriseConnector>): Promise<EnterpriseConnector | undefined>;
+  deleteEnterpriseConnector(id: string): Promise<boolean>;
+
+  // Integration Sync Logs
+  getIntegrationSyncLog(id: string): Promise<IntegrationSyncLog | undefined>;
+  getSyncLogsByConnectorId(connectorId: string): Promise<IntegrationSyncLog[]>;
+  createIntegrationSyncLog(log: InsertIntegrationSyncLog): Promise<IntegrationSyncLog>;
+  updateIntegrationSyncLog(id: string, updates: Partial<IntegrationSyncLog>): Promise<IntegrationSyncLog | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -460,6 +479,59 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(dppAiInsights.createdAt))
       .limit(1);
     return insight;
+  }
+
+  // Enterprise Connectors
+  async getEnterpriseConnector(id: string): Promise<EnterpriseConnector | undefined> {
+    const [connector] = await db.select().from(enterpriseConnectors).where(eq(enterpriseConnectors.id, id));
+    return connector;
+  }
+
+  async getAllEnterpriseConnectors(): Promise<EnterpriseConnector[]> {
+    return db.select().from(enterpriseConnectors).orderBy(desc(enterpriseConnectors.createdAt));
+  }
+
+  async createEnterpriseConnector(insertConnector: InsertEnterpriseConnector): Promise<EnterpriseConnector> {
+    const [connector] = await db.insert(enterpriseConnectors).values(insertConnector as typeof enterpriseConnectors.$inferInsert).returning();
+    return connector;
+  }
+
+  async updateEnterpriseConnector(id: string, updates: Partial<InsertEnterpriseConnector>): Promise<EnterpriseConnector | undefined> {
+    const [connector] = await db
+      .update(enterpriseConnectors)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(enterpriseConnectors.id, id))
+      .returning();
+    return connector;
+  }
+
+  async deleteEnterpriseConnector(id: string): Promise<boolean> {
+    const result = await db.delete(enterpriseConnectors).where(eq(enterpriseConnectors.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Integration Sync Logs
+  async getIntegrationSyncLog(id: string): Promise<IntegrationSyncLog | undefined> {
+    const [log] = await db.select().from(integrationSyncLogs).where(eq(integrationSyncLogs.id, id));
+    return log;
+  }
+
+  async getSyncLogsByConnectorId(connectorId: string): Promise<IntegrationSyncLog[]> {
+    return db.select().from(integrationSyncLogs).where(eq(integrationSyncLogs.connectorId, connectorId)).orderBy(desc(integrationSyncLogs.startedAt));
+  }
+
+  async createIntegrationSyncLog(insertLog: InsertIntegrationSyncLog): Promise<IntegrationSyncLog> {
+    const [log] = await db.insert(integrationSyncLogs).values(insertLog as typeof integrationSyncLogs.$inferInsert).returning();
+    return log;
+  }
+
+  async updateIntegrationSyncLog(id: string, updates: Partial<IntegrationSyncLog>): Promise<IntegrationSyncLog | undefined> {
+    const [log] = await db
+      .update(integrationSyncLogs)
+      .set(updates)
+      .where(eq(integrationSyncLogs.id, id))
+      .returning();
+    return log;
   }
 }
 

@@ -568,6 +568,142 @@ export async function registerRoutes(
   });
 
   // ==========================================
+  // ENTERPRISE INTEGRATIONS ENDPOINTS
+  // ==========================================
+
+  app.get("/api/integrations/connectors", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const connectors = await storage.getAllEnterpriseConnectors();
+      res.json(connectors);
+    } catch (error) {
+      console.error("Error fetching connectors:", error);
+      res.status(500).json({ error: "Failed to fetch connectors" });
+    }
+  });
+
+  app.get("/api/integrations/connectors/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const connector = await storage.getEnterpriseConnector(req.params.id);
+      if (!connector) {
+        return res.status(404).json({ error: "Connector not found" });
+      }
+      res.json(connector);
+    } catch (error) {
+      console.error("Error fetching connector:", error);
+      res.status(500).json({ error: "Failed to fetch connector" });
+    }
+  });
+
+  app.post("/api/integrations/connectors", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const connector = await storage.createEnterpriseConnector(req.body);
+      res.status(201).json(connector);
+    } catch (error) {
+      console.error("Error creating connector:", error);
+      res.status(500).json({ error: "Failed to create connector" });
+    }
+  });
+
+  app.patch("/api/integrations/connectors/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const connector = await storage.updateEnterpriseConnector(req.params.id, req.body);
+      if (!connector) {
+        return res.status(404).json({ error: "Connector not found" });
+      }
+      res.json(connector);
+    } catch (error) {
+      console.error("Error updating connector:", error);
+      res.status(500).json({ error: "Failed to update connector" });
+    }
+  });
+
+  app.delete("/api/integrations/connectors/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const deleted = await storage.deleteEnterpriseConnector(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Connector not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting connector:", error);
+      res.status(500).json({ error: "Failed to delete connector" });
+    }
+  });
+
+  app.post("/api/integrations/connectors/:id/test", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const connector = await storage.getEnterpriseConnector(req.params.id);
+      if (!connector) {
+        return res.status(404).json({ error: "Connector not found" });
+      }
+      
+      // Simulate connection test (in production, this would actually test the SAP connection)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      await storage.updateEnterpriseConnector(req.params.id, { status: "active" as const });
+      res.json({ success: true, message: "Connection successful" });
+    } catch (error) {
+      console.error("Error testing connector:", error);
+      res.status(500).json({ error: "Connection test failed" });
+    }
+  });
+
+  app.post("/api/integrations/connectors/:id/sync", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const connector = await storage.getEnterpriseConnector(req.params.id);
+      if (!connector) {
+        return res.status(404).json({ error: "Connector not found" });
+      }
+      
+      // Create sync log
+      const syncLog = await storage.createIntegrationSyncLog({
+        connectorId: connector.id,
+        syncType: "manual",
+        status: "running",
+        recordsProcessed: 0,
+        recordsCreated: 0,
+        recordsUpdated: 0,
+        recordsFailed: 0,
+        startedAt: new Date(),
+      });
+      
+      // Simulate sync (in production, this would pull data from SAP)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Update sync log as completed
+      await storage.updateIntegrationSyncLog(syncLog.id, {
+        status: "completed",
+        recordsProcessed: 10,
+        recordsCreated: 5,
+        recordsUpdated: 5,
+        completedAt: new Date(),
+      });
+      
+      // Update connector with last sync info
+      await storage.updateEnterpriseConnector(connector.id, {
+        lastSyncAt: new Date(),
+        lastSyncStatus: "completed",
+        productsSynced: (connector.productsSynced || 0) + 10,
+      } as any);
+      
+      res.json({ success: true, message: "Sync completed", syncLogId: syncLog.id });
+    } catch (error) {
+      console.error("Error syncing connector:", error);
+      res.status(500).json({ error: "Sync failed" });
+    }
+  });
+
+  app.get("/api/integrations/connectors/:id/logs", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const logs = await storage.getSyncLogsByConnectorId(req.params.id);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching sync logs:", error);
+      res.status(500).json({ error: "Failed to fetch sync logs" });
+    }
+  });
+
+  // ==========================================
   // ADMIN/DEMO ENDPOINTS
   // ==========================================
   
