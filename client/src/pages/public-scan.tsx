@@ -374,6 +374,10 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
     enabled: !isDemo && !!params.id,
   });
 
+  const { data: allProducts = [] } = useQuery<Product[]>({
+    queryKey: ["/api/products"],
+  });
+
   const scanMutation = useMutation({
     mutationFn: async (qrId: string) => {
       await apiRequest("POST", `/api/qr/${qrId}/scan`);
@@ -462,10 +466,10 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
             </div>
           </Link>
           <div className="hidden md:flex items-center gap-4">
+            <Link href="/demo" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors" data-testid="link-demo-gallery">Browse Demos</Link>
             <Link href="/solution" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-solution">Solution</Link>
             <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-pricing">Pricing</Link>
             <Link href="/use-cases" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-use-cases">Use Cases</Link>
-            <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-docs">Docs</Link>
             <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-contact">Contact</Link>
           </div>
           <div className="flex items-center gap-3">
@@ -1215,6 +1219,58 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
           </Card>
         )}
 
+        {allProducts.length > 1 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Package className="h-5 w-5" />
+                Explore More Digital Product Passports
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {allProducts
+                  .filter(p => p.id !== product.id)
+                  .slice(0, 6)
+                  .map(p => (
+                    <Link key={p.id} href={`/product/${p.id}`}>
+                      <div className="group p-3 rounded-lg border hover-elevate cursor-pointer transition-all">
+                        {p.productImage && (
+                          <div className="aspect-video w-full rounded-md overflow-hidden bg-muted mb-2">
+                            <img 
+                              src={p.productImage} 
+                              alt={p.productName || "Product"} 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="space-y-1">
+                          <p className="font-medium text-sm line-clamp-1 group-hover:text-primary transition-colors">
+                            {p.productName}
+                          </p>
+                          <p className="text-xs text-muted-foreground line-clamp-1">
+                            {p.manufacturer}
+                          </p>
+                          <Badge variant="secondary" className="text-xs">
+                            {p.productCategory}
+                          </Badge>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+              </div>
+              <div className="mt-4 text-center">
+                <Link href="/demo">
+                  <Button variant="outline" size="sm" data-testid="button-view-all-demos">
+                    View All Demo Passports
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <footer className="text-center py-8 border-t">
           <div className="flex flex-col items-center gap-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -1226,6 +1282,11 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
             <p className="text-xs text-muted-foreground">
               Identity, at the speed of light.
             </p>
+            <Link href="/demo">
+              <Badge variant="outline" className="cursor-pointer" data-testid="badge-browse-demos">
+                Browse All Industry Demos
+              </Badge>
+            </Link>
           </div>
         </footer>
       </main>
