@@ -30,6 +30,7 @@ import Contact from "@/pages/contact";
 import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 import Solution from "@/pages/solution";
+import DemoGallery from "@/pages/demo-gallery";
 import NotFound from "@/pages/not-found";
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -122,6 +123,7 @@ function Router() {
       <Route path="/scan/demo">
         <PublicScan isDemo />
       </Route>
+      <Route path="/demo" component={DemoGallery} />
       <Route path="/solution" component={Solution} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/integrations" component={Integrations} />
