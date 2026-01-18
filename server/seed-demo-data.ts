@@ -750,14 +750,14 @@ const demoProducts: DemoProductData[] = [
   },
   {
     product: {
-      productName: "Lakhotia Heavy-Duty Conveyor Belt EP400/3",
+      productName: "Heavy-Duty Conveyor Belt EP400/3",
       productCategory: "Industrial Belting",
-      modelNumber: "LB-EP400-3-1200",
-      sku: "LKB-CVB-EP400-1200",
-      manufacturer: "Lakhotia Beltings Pvt. Ltd.",
-      manufacturerAddress: "Plot 42, Industrial Area Phase II, Faridabad, Haryana 121003, India",
+      modelNumber: "IP-EP400-3-1200",
+      sku: "IND-CVB-EP400-1200",
+      manufacturer: "IndustrialPro Beltings",
+      manufacturerAddress: "Industrial Area Phase II, Faridabad, Haryana 121003, India",
       countryOfOrigin: "India",
-      batchNumber: "LKB-CVB-2025-EP400-2847",
+      batchNumber: "IPB-CVB-2025-EP400-2847",
       lotNumber: "LOT-2025-DEC-2847",
       productImage: null,
       materials: "Polyester-Nylon (EP) Fabric Plies, Natural Rubber Cover, Synthetic Rubber Compound, Steel Cord Reinforcement",
@@ -779,15 +779,15 @@ const demoProducts: DemoProductData[] = [
       sparePartsAvailable: true,
       repairInstructions: "Hot vulcanization for splice repairs. Cold bonding for minor cuts. Belt edge repair kits available. Professional installation recommended for major repairs.",
       serviceCenters: [
-        { name: "Lakhotia Faridabad Service Center", location: "Faridabad, India", contact: "+91 129 4567890" },
-        { name: "Lakhotia Mumbai Regional Hub", location: "Mumbai, India", contact: "+91 22 9876543" },
-        { name: "Lakhotia Middle East Service", location: "Dubai, UAE", contact: "+971 4 1234567" }
+        { name: "Faridabad Service Center", location: "Faridabad, India", contact: "+91 129 4567890" },
+        { name: "Mumbai Regional Hub", location: "Mumbai, India", contact: "+91 22 9876543" },
+        { name: "Middle East Service Center", location: "Dubai, UAE", contact: "+971 4 1234567" }
       ],
       warrantyInfo: "3-year warranty against manufacturing defects. Extended warranty available for premium installations. 24/7 emergency support for industrial clients.",
       dateOfManufacture: new Date("2025-12-01"),
       dateOfFirstSale: null,
       ownershipHistory: [
-        { owner: "Lakhotia Beltings Pvt. Ltd.", date: "2025-12-01", action: "Manufactured in Faridabad" },
+        { owner: "IndustrialPro Beltings", date: "2025-12-01", action: "Manufactured in Faridabad" },
         { owner: "Industrial Equipment Distributors", date: "2025-12-10", action: "Distribution" }
       ],
       ceMarking: false,
@@ -795,7 +795,7 @@ const demoProducts: DemoProductData[] = [
       recyclingInstructions: "Worn belts can be retreaded, recycled into rubber mulch, or used for secondary applications. Contact certified industrial recycler.",
       disassemblyInstructions: "Cut belt into manageable sections. Separate steel cord from rubber using specialized equipment. Rubber can be ground for recycling.",
       hazardWarnings: "Heavy industrial equipment - professional installation only. Pinch point hazard during operation. Follow lockout/tagout procedures.",
-      takeBackPrograms: ["Lakhotia Belt Retread Program", "Industrial Rubber Recycling Network"]
+      takeBackPrograms: ["Belt Retread Program", "Industrial Rubber Recycling Network"]
     },
     passport: {
       complianceData: {
@@ -806,7 +806,68 @@ const demoProducts: DemoProductData[] = [
       },
       certifications: ["IS 1891:2018 Certified", "ISO 9001:2015", "ISO 14001:2015", "DIN 22102 Compliant"],
       environmentalDeclarations: { category: "Industrial Belting", industry: "Manufacturing Equipment" },
-      endOfLifeInstructions: "Contact Lakhotia for belt retread assessment. Worn belts eligible for recycling program with credit toward new purchase."
+      endOfLifeInstructions: "Contact manufacturer for belt retread assessment. Worn belts eligible for recycling program with credit toward new purchase."
+    }
+  },
+  {
+    product: {
+      productName: "Precision Conveyor Roller System DR-50",
+      productCategory: "Industrial Rollers",
+      modelNumber: "CT-DR50-800-S",
+      sku: "IND-ROL-DR50-800",
+      manufacturer: "ConveyorTech Systems",
+      manufacturerAddress: "Industrial Zone B, Pune, Maharashtra 411018, India",
+      countryOfOrigin: "India",
+      batchNumber: "CTS-ROL-2025-DR50-1423",
+      lotNumber: "LOT-2025-DEC-1423",
+      productImage: null,
+      materials: "Precision Steel Tube, Deep Groove Ball Bearings, Galvanized Steel Shaft, Polyurethane Coating",
+      materialBreakdown: [
+        { material: "Carbon Steel Tube", percentage: 55, recyclable: true },
+        { material: "Ball Bearings", percentage: 15, recyclable: true },
+        { material: "Galvanized Steel Shaft", percentage: 20, recyclable: true },
+        { material: "Polyurethane Coating", percentage: 10, recyclable: false }
+      ],
+      recycledContentPercent: 30,
+      recyclabilityPercent: 90,
+      hazardousMaterials: null,
+      carbonFootprint: 45,
+      waterUsage: 1200,
+      energyConsumption: 85,
+      environmentalCertifications: ["ISO 14001", "ISO 9001", "REACH Compliant"],
+      repairabilityScore: 8,
+      expectedLifespanYears: 15,
+      sparePartsAvailable: true,
+      repairInstructions: "Bearing replacement is straightforward with standard tools. Shaft and tube replacement available. Polyurethane coating can be reapplied for worn rollers.",
+      serviceCenters: [
+        { name: "Pune Service Center", location: "Pune, India", contact: "+91 20 1234567" },
+        { name: "Delhi Regional Hub", location: "New Delhi, India", contact: "+91 11 9876543" },
+        { name: "Singapore Asia-Pacific Center", location: "Singapore", contact: "+65 6123 4567" }
+      ],
+      warrantyInfo: "5-year warranty on roller body and bearings. Extended warranty available. Global spare parts network.",
+      dateOfManufacture: new Date("2025-12-05"),
+      dateOfFirstSale: null,
+      ownershipHistory: [
+        { owner: "ConveyorTech Systems", date: "2025-12-05", action: "Manufactured in Pune" },
+        { owner: "Material Handling Solutions", date: "2025-12-15", action: "Distribution" }
+      ],
+      ceMarking: true,
+      safetyCertifications: ["ISO 22721", "DIN 15207", "EN 620", "CE Marked"],
+      recyclingInstructions: "Steel components are fully recyclable. Bearings should be separated for specialized recycling. Polyurethane coating requires proper disposal.",
+      disassemblyInstructions: "Remove end caps. Extract shaft and bearings. Steel tube can be directly recycled. Separate polyurethane coating if present.",
+      hazardWarnings: "Heavy components - use appropriate lifting equipment. Rotating parts hazard during operation.",
+      takeBackPrograms: ["Roller Refurbishment Program", "Steel Recycling Partnership"]
+    },
+    passport: {
+      complianceData: {
+        industrialGrade: true,
+        loadCapacity: "500 kg per roller, 800mm tube length, 50mm diameter",
+        operatingConditions: "Temperature range: -20C to +60C, suitable for dusty environments",
+        qualityTesting: "100% runout testing, bearing preload verification, concentricity check"
+      },
+      certifications: ["ISO 9001:2015 Certified", "ISO 14001:2015", "DIN 15207 Compliant", "CE Marked"],
+      environmentalDeclarations: { category: "Industrial Rollers", industry: "Material Handling Equipment" },
+      endOfLifeInstructions: "Contact manufacturer for roller refurbishment. Steel components have high recycling value."
     }
   }
 ];
@@ -820,7 +881,8 @@ const iotDeviceConfigs: { productIndex: number; deviceType: IoTDeviceType; devic
   { productIndex: 5, deviceType: "nfc", deviceId: "NFC-AUD-2025-4592", manufacturer: "NXP Semiconductors", model: "NTAG 424 DNA" },
   { productIndex: 6, deviceType: "rfid", deviceId: "RFID-LEA-2025-2847", manufacturer: "Impinj", model: "Monza R6-P" },
   { productIndex: 7, deviceType: "ble", deviceId: "BLE-SMH-2025-8834", manufacturer: "Nordic Semiconductor", model: "nRF52832" },
-  { productIndex: 8, deviceType: "rfid", deviceId: "RFID-CVB-2025-2847", manufacturer: "Alien Technology", model: "Higgs-EC" }
+  { productIndex: 8, deviceType: "rfid", deviceId: "RFID-CVB-2025-2847", manufacturer: "Alien Technology", model: "Higgs-EC" },
+  { productIndex: 9, deviceType: "rfid", deviceId: "RFID-ROL-2025-1423", manufacturer: "Impinj", model: "Monza R6-P" }
 ];
 
 interface AIInsightsBundle {
@@ -1114,7 +1176,7 @@ const demoAIInsights: AIInsightsBundle[] = [
   },
   {
     summary: {
-      summary: "The Lakhotia Heavy-Duty Conveyor Belt EP400/3 is a premium industrial belting solution designed for demanding material handling applications with excellent durability and comprehensive service support.",
+      summary: "The Heavy-Duty Conveyor Belt EP400/3 is a premium industrial belting solution designed for demanding material handling applications with excellent durability and comprehensive service support.",
       keyFeatures: ["400 N/mm tensile strength per ply", "3-ply EP fabric construction", "12-year expected lifespan", "Hot vulcanization repair capable", "24/7 industrial support"]
     },
     sustainability: {
@@ -1146,6 +1208,42 @@ const demoAIInsights: AIInsightsBundle[] = [
       counterfeitRisk: "Low - RFID tag embedded in belt edge, unique batch tracking, manufacturer verification through PhotonicTag",
       complianceIssues: [],
       recommendations: ["Maintain IS 1891:2018 certification documentation", "Document installation and maintenance history for warranty"]
+    }
+  },
+  {
+    summary: {
+      summary: "The Precision Conveyor Roller System DR-50 is a high-performance industrial roller designed for smooth material handling with precision bearings and durable construction for long-term reliability.",
+      keyFeatures: ["500 kg load capacity", "Precision ball bearings", "15-year expected lifespan", "Polyurethane coating option", "Global service network"]
+    },
+    sustainability: {
+      overallScore: 78,
+      carbonAnalysis: "45kg CO2e reflects efficient steel manufacturing with 30% recycled content. Long 15-year lifespan and high recyclability minimize environmental impact.",
+      circularityRecommendations: ["Increase recycled steel content to 50%", "Develop bearing refurbishment program", "Implement closed-loop steel recycling"],
+      improvements: ["Explore bio-based polyurethane alternatives", "Reduce energy consumption in manufacturing", "Optimize packaging for reduced material usage"]
+    },
+    repair: {
+      repairabilityRating: "Excellent",
+      repairInstructions: ["Bearing replacement is straightforward with standard tools", "Shaft replacement available for worn components", "Polyurethane coating can be reapplied", "Annual lubrication recommended for optimal performance"],
+      commonIssues: ["Bearing wear after extended use", "Shaft runout from heavy loads", "Polyurethane coating wear in abrasive environments", "End cap loosening under vibration"],
+      partsAvailability: "Excellent - bearings, shafts, and end caps readily available. Global spare parts distribution network."
+    },
+    circularity: {
+      score: 85,
+      grade: "A",
+      recyclabilityAnalysis: "90% of materials can be recovered. Steel components are fully recyclable with established infrastructure. Bearings can be refurbished or recycled.",
+      materialEfficiency: "Optimized tube diameter and wall thickness maximize strength while minimizing material. Precision manufacturing reduces waste.",
+      endOfLifeOptions: ["Roller refurbishment", "Steel recycling", "Bearing refurbishment", "Component harvesting for repair parts"],
+      recommendations: ["Implement roller tracking for predictive maintenance", "Document wear patterns for design improvements"]
+    },
+    risk: {
+      overallRisk: "Low",
+      riskFlags: [
+        { type: "Installation Safety", severity: "Low", description: "Proper lifting equipment required for installation due to component weight" }
+      ],
+      dataCompleteness: 94,
+      counterfeitRisk: "Low - RFID tag on each roller, unique serial number, manufacturer verification through PhotonicTag platform",
+      complianceIssues: [],
+      recommendations: ["Maintain ISO 9001 and CE certification documentation", "Document installation and service history"]
     }
   }
 ];
@@ -1237,7 +1335,7 @@ async function seedDemoData() {
   }
 
   console.log("\nDemo data seeding complete!");
-  console.log("Created 9 products across industries: Batteries, Textiles, IoT Devices, Packaging, EV Accessories, Consumer Electronics, Fashion Accessories, Smart Home, Industrial Belting");
+  console.log("Created 10 products across industries: Batteries, Textiles, IoT Devices, Packaging, EV Accessories, Consumer Electronics, Fashion Accessories, Smart Home, Industrial Belting, Industrial Rollers");
   console.log("Regional compliance: EU (ESPR, Battery Regulation), China (CCC, GB Standards), US (FTC, State EPR), India (BIS)");
 }
 
