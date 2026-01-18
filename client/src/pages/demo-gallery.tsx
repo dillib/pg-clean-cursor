@@ -73,7 +73,17 @@ const demoCategories: DemoCategory[] = [
 
 function ProductCard({ product }: { product: Product }) {
   return (
-    <Card className="hover-elevate transition-all duration-200">
+    <Card className="hover-elevate transition-all duration-200 overflow-hidden">
+      {product.productImage && (
+        <div className="aspect-video w-full overflow-hidden bg-muted">
+          <img 
+            src={product.productImage} 
+            alt={product.productName || "Product image"}
+            className="w-full h-full object-cover"
+            data-testid={`img-product-${product.id}`}
+          />
+        </div>
+      )}
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">

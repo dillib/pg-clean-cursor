@@ -759,7 +759,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "India",
       batchNumber: "IPB-CVB-2025-EP400-2847",
       lotNumber: "LOT-2025-DEC-2847",
-      productImage: null,
+      productImage: "/assets/stock_images/industrial_rubber_co_6782e308.jpg",
       materials: "Polyester-Nylon (EP) Fabric Plies, Natural Rubber Cover, Synthetic Rubber Compound, Steel Cord Reinforcement",
       materialBreakdown: [
         { material: "Natural Rubber", percentage: 45, recyclable: true },
@@ -820,7 +820,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "India",
       batchNumber: "CTS-ROL-2025-DR50-1423",
       lotNumber: "LOT-2025-DEC-1423",
-      productImage: null,
+      productImage: "/assets/stock_images/industrial_steel_con_6d4421ed.jpg",
       materials: "Precision Steel Tube, Deep Groove Ball Bearings, Galvanized Steel Shaft, Polyurethane Coating",
       materialBreakdown: [
         { material: "Carbon Steel Tube", percentage: 55, recyclable: true },
