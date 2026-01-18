@@ -704,6 +704,80 @@ export interface DppModuleSummary {
 }
 
 // ============================================
+// ENTERPRISE INTEGRATIONS
+// ============================================
+
+export type ConnectorType = "sap" | "oracle" | "microsoft_dynamics" | "siemens" | "infor" | "custom";
+export type ConnectorStatus = "active" | "inactive" | "error" | "pending";
+export type SyncDirection = "inbound" | "outbound" | "bidirectional";
+
+export interface SAPConfig {
+  systemType: "S4HANA" | "ECC" | "Business_One";
+  hostname: string;
+  port: number;
+  client: string;
+  systemId: string;
+  apiType: "OData" | "RFC" | "IDoc";
+  oauthEnabled: boolean;
+  syncFrequency: "realtime" | "hourly" | "daily" | "manual";
+}
+
+export interface FieldMapping {
+  sourceField: string;
+  targetField: string;
+  transformation?: string;
+}
+
+export const enterpriseConnectors = pgTable("enterprise_connectors", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  connectorType: text("connector_type").$type<ConnectorType>().notNull(),
+  status: text("status").$type<ConnectorStatus>().default("inactive").notNull(),
+  syncDirection: text("sync_direction").$type<SyncDirection>().default("inbound").notNull(),
+  config: jsonb("config").$type<SAPConfig | Record<string, unknown>>().default({}).notNull(),
+  fieldMappings: jsonb("field_mappings").$type<FieldMapping[]>().default([]),
+  lastSyncAt: timestamp("last_sync_at"),
+  lastSyncStatus: text("last_sync_status"),
+  productsSynced: integer("products_synced").default(0),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertEnterpriseConnectorSchema = createInsertSchema(enterpriseConnectors).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastSyncAt: true,
+  lastSyncStatus: true,
+  productsSynced: true,
+});
+
+export type InsertEnterpriseConnector = z.infer<typeof insertEnterpriseConnectorSchema>;
+export type EnterpriseConnector = typeof enterpriseConnectors.$inferSelect;
+
+export const integrationSyncLogs = pgTable("integration_sync_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  connectorId: varchar("connector_id").references(() => enterpriseConnectors.id).notNull(),
+  syncType: text("sync_type").$type<"full" | "delta" | "manual">().notNull(),
+  status: text("status").$type<"running" | "completed" | "failed">().notNull(),
+  recordsProcessed: integer("records_processed").default(0),
+  recordsCreated: integer("records_created").default(0),
+  recordsUpdated: integer("records_updated").default(0),
+  recordsFailed: integer("records_failed").default(0),
+  errorMessage: text("error_message"),
+  startedAt: timestamp("started_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  completedAt: timestamp("completed_at"),
+});
+
+export const insertIntegrationSyncLogSchema = createInsertSchema(integrationSyncLogs).omit({
+  id: true,
+  completedAt: true,
+});
+
+export type InsertIntegrationSyncLog = z.infer<typeof insertIntegrationSyncLogSchema>;
+export type IntegrationSyncLog = typeof integrationSyncLogs.$inferSelect;
+
+// ============================================
 // AI RESPONSE TYPES (kept for API compatibility)
 // ============================================
 
