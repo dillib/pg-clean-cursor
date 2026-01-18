@@ -4,6 +4,8 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import { setupEventHandlers } from "./events/handlers";
+import { storage } from "./storage";
+import { seedDemoData } from "./seed-demo-data";
 
 const app = express();
 const httpServer = createServer(app);
@@ -68,6 +70,20 @@ app.use((req, res, next) => {
   setupEventHandlers();
   
   await registerRoutes(httpServer, app);
+
+  // Auto-seed demo data if database is empty
+  try {
+    const existingProducts = await storage.getAllProducts();
+    if (existingProducts.length === 0) {
+      log("No products found in database. Seeding demo data...");
+      await seedDemoData();
+      log("Demo data seeded successfully!");
+    } else {
+      log(`Database has ${existingProducts.length} products`);
+    }
+  } catch (error) {
+    log(`Error checking/seeding demo data: ${error}`);
+  }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
