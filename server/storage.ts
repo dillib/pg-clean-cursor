@@ -52,7 +52,7 @@ export interface IStorage {
   // Users
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  createUser(user: UpsertUser): Promise<User>;
   
   // Products
   getProduct(id: string): Promise<Product | undefined>;
@@ -150,7 +150,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async createUser(insertUser: UpsertUser): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
@@ -496,10 +496,10 @@ export class DatabaseStorage implements IStorage {
     return connector;
   }
 
-  async updateEnterpriseConnector(id: string, updates: Partial<InsertEnterpriseConnector>): Promise<EnterpriseConnector | undefined> {
+  async updateEnterpriseConnector(id: string, updates: Partial<InsertEnterpriseConnector> & Record<string, unknown>): Promise<EnterpriseConnector | undefined> {
     const [connector] = await db
       .update(enterpriseConnectors)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...updates, updatedAt: new Date() } as typeof enterpriseConnectors.$inferInsert)
       .where(eq(enterpriseConnectors.id, id))
       .returning();
     return connector;

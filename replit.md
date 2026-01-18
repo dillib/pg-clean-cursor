@@ -17,6 +17,15 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### January 2026
+- **Enterprise SAP Integration**: Complete SAP connector configuration for enterprise ERP integration:
+  - SAP Connector admin page with connection configuration (S/4HANA, ECC, Business One)
+  - Field mapping between SAP material master fields and DPP fields
+  - Sync status monitoring with products synced count and last sync time
+  - Support for OData, RFC, and IDoc API types
+  - Bidirectional sync options (inbound, outbound, bidirectional)
+  - Sync frequency options (real-time, hourly, daily, manual)
+  - Added enterpriseConnectors and integrationSyncLogs tables to schema
+  - API endpoints: /api/integrations/connectors (CRUD), /test, /sync, /logs
 - **AI-Generated Insights**: Complete 5-type AI insights system with fetch-or-generate pattern:
   - AI Summary: Product highlights and key features
   - AI Sustainability Analysis: Carbon footprint scoring and circularity recommendations
@@ -83,6 +92,8 @@ Preferred communication style: Simple, everyday language.
   - End-of-Life & Recycling: recyclingInstructions, disassemblyInstructions, hazardWarnings, takeBackPrograms
 - **Users**: OAuth-based user model with Replit Auth fields (email, firstName, lastName, profileImageUrl)
 - **IoT Devices**: NFC/RFID/BLE device registry with device ID, type, status, manufacturer, model, firmware version, linked product ID, and last seen timestamp
+- **Enterprise Connectors**: SAP and other ERP system integrations with connector type, status, config, field mappings, and sync history
+- **Integration Sync Logs**: Sync operation history with records processed/created/updated/failed counts
 - **Conversations/Messages**: Chat functionality schema for AI interactions
 - **Audit Logs**: Event tracking for compliance and traceability
 

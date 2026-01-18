@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { type Server } from "http";
-import { insertProductSchema, insertIoTDeviceSchema } from "@shared/schema";
+import { insertProductSchema, insertIoTDeviceSchema, insertEnterpriseConnectorSchema } from "@shared/schema";
 import { productService } from "./services/product-service";
 import { qrService } from "./services/qr-service";
 import { identityService } from "./services/identity-service";
@@ -596,7 +596,11 @@ export async function registerRoutes(
 
   app.post("/api/integrations/connectors", isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const connector = await storage.createEnterpriseConnector(req.body);
+      const parsed = insertEnterpriseConnectorSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid connector data", details: parsed.error.issues });
+      }
+      const connector = await storage.createEnterpriseConnector(parsed.data);
       res.status(201).json(connector);
     } catch (error) {
       console.error("Error creating connector:", error);

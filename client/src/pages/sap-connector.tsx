@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -69,18 +69,36 @@ export default function SAPConnector() {
   const form = useForm<SAPConfigForm>({
     resolver: zodResolver(sapConfigSchema),
     defaultValues: {
-      name: sapConnector?.name || "SAP Production",
-      systemType: (sapConnector?.config as SAPConfig)?.systemType || "S4HANA",
-      hostname: (sapConnector?.config as SAPConfig)?.hostname || "",
-      port: (sapConnector?.config as SAPConfig)?.port || 443,
-      client: (sapConnector?.config as SAPConfig)?.client || "100",
-      systemId: (sapConnector?.config as SAPConfig)?.systemId || "",
-      apiType: (sapConnector?.config as SAPConfig)?.apiType || "OData",
-      oauthEnabled: (sapConnector?.config as SAPConfig)?.oauthEnabled || false,
-      syncDirection: sapConnector?.syncDirection || "inbound",
-      syncFrequency: (sapConnector?.config as SAPConfig)?.syncFrequency || "daily",
+      name: "SAP Production",
+      systemType: "S4HANA",
+      hostname: "",
+      port: 443,
+      client: "100",
+      systemId: "",
+      apiType: "OData",
+      oauthEnabled: false,
+      syncDirection: "inbound",
+      syncFrequency: "daily",
     },
   });
+
+  useEffect(() => {
+    if (sapConnector) {
+      const config = sapConnector.config as SAPConfig;
+      form.reset({
+        name: sapConnector.name,
+        systemType: config?.systemType || "S4HANA",
+        hostname: config?.hostname || "",
+        port: config?.port || 443,
+        client: config?.client || "100",
+        systemId: config?.systemId || "",
+        apiType: config?.apiType || "OData",
+        oauthEnabled: config?.oauthEnabled || false,
+        syncDirection: sapConnector.syncDirection || "inbound",
+        syncFrequency: config?.syncFrequency || "daily",
+      });
+    }
+  }, [sapConnector, form]);
 
   const saveConnector = useMutation({
     mutationFn: async (data: SAPConfigForm) => {
