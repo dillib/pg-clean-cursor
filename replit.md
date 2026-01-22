@@ -17,6 +17,17 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### January 2026
+- **SAP Integration Demo Dashboard**: Visual demo showing bidirectional sync with mock SAP system:
+  - Mock SAP OData service with 100 realistic material master records (MARA/MARC structures)
+  - Split-screen dashboard showing SAP materials vs PhotonicTag products
+  - "Sync from SAP" button imports materials as DPP products
+  - "Sync to SAP" button exports product changes back to SAP
+  - "Full Bidirectional Sync" for complete two-way synchronization
+  - Conflict detection when data differs in both systems
+  - Conflict resolution UI with side-by-side value comparison
+  - Sync audit trail logging all sync events with timestamps
+  - Progress animations during sync operations
+  - Routes: /integrations/sap-demo (protected), API: /api/sap/* endpoints
 - **Enterprise SAP Integration**: Complete SAP connector configuration for enterprise ERP integration:
   - SAP Connector admin page with connection configuration (S/4HANA, ECC, Business One)
   - Field mapping between SAP material master fields and DPP fields

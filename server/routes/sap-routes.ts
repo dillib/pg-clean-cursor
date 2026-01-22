@@ -1,0 +1,340 @@
+import { Router, Request, Response } from "express";
+import { sapMockService, SAPMaterial, SAPConflict } from "../services/sap-mock-service";
+import { storage } from "../storage";
+import type { InsertProduct } from "@shared/schema";
+
+const router = Router();
+
+router.get("/materials", async (_req: Request, res: Response) => {
+  try {
+    const materials = sapMockService.getAllMaterials();
+    res.json(materials);
+  } catch (error) {
+    console.error("[SAP API] Error fetching materials:", error);
+    res.status(500).json({ error: "Failed to fetch SAP materials" });
+  }
+});
+
+router.get("/materials/:matnr", async (req: Request, res: Response) => {
+  try {
+    const material = sapMockService.getMaterial(req.params.matnr);
+    if (!material) {
+      return res.status(404).json({ error: "Material not found" });
+    }
+    res.json(material);
+  } catch (error) {
+    console.error("[SAP API] Error fetching material:", error);
+    res.status(500).json({ error: "Failed to fetch SAP material" });
+  }
+});
+
+router.get("/stats", async (_req: Request, res: Response) => {
+  try {
+    const stats = sapMockService.getStats();
+    const photonicTagProducts = await storage.getAllProducts();
+    res.json({
+      sap: stats,
+      photonicTag: {
+        totalProducts: photonicTagProducts.length,
+      },
+    });
+  } catch (error) {
+    console.error("[SAP API] Error fetching stats:", error);
+    res.status(500).json({ error: "Failed to fetch stats" });
+  }
+});
+
+router.get("/sync-events", async (_req: Request, res: Response) => {
+  try {
+    const events = sapMockService.getSyncEvents();
+    res.json(events);
+  } catch (error) {
+    console.error("[SAP API] Error fetching sync events:", error);
+    res.status(500).json({ error: "Failed to fetch sync events" });
+  }
+});
+
+router.get("/conflicts", async (_req: Request, res: Response) => {
+  try {
+    const conflicts = sapMockService.getConflicts();
+    res.json(conflicts);
+  } catch (error) {
+    console.error("[SAP API] Error fetching conflicts:", error);
+    res.status(500).json({ error: "Failed to fetch conflicts" });
+  }
+});
+
+router.post("/sync/from-sap", async (req: Request, res: Response) => {
+  try {
+    const { matnrs, limit = 10 } = req.body;
+    const materials = sapMockService.getAllMaterials();
+    
+    let toSync: SAPMaterial[];
+    if (matnrs && Array.isArray(matnrs)) {
+      toSync = materials.filter(m => matnrs.includes(m.MARA.MATNR));
+    } else {
+      toSync = materials
+        .filter(m => m.syncStatus === "pending" && !m.photonicTagId)
+        .slice(0, limit);
+    }
+
+    let created = 0;
+    let updated = 0;
+    let failed = 0;
+    const conflicts: SAPConflict[] = [];
+
+    for (const material of toSync) {
+      try {
+        const existingProducts = await storage.getAllProducts();
+        const existing = existingProducts.find(p => p.modelNumber === material.MARA.MATNR);
+
+        if (existing) {
+          const detectedConflicts = sapMockService.detectConflicts(material, existing);
+          if (detectedConflicts.length > 0) {
+            for (const conflict of detectedConflicts) {
+              const savedConflict = sapMockService.addConflict(conflict);
+              conflicts.push(savedConflict);
+            }
+            material.syncStatus = "conflict";
+          } else {
+            const mappedData = sapMockService.mapToPhotonicTagProduct(material);
+            await storage.updateProduct(existing.id, mappedData);
+            sapMockService.linkToPhotonicTag(material.MARA.MATNR, existing.id);
+            updated++;
+          }
+        } else {
+          const mappedData = sapMockService.mapToPhotonicTagProduct(material);
+          const newProduct = await storage.createProduct({
+            ...mappedData,
+            description: `Imported from SAP Material ${material.MARA.MATNR}`,
+            materials: "",
+            safetyCertifications: [],
+          } as unknown as InsertProduct);
+          
+          sapMockService.linkToPhotonicTag(material.MARA.MATNR, newProduct.id);
+          created++;
+        }
+      } catch (err) {
+        console.error(`[SAP Sync] Failed to sync ${material.MARA.MATNR}:`, err);
+        material.syncStatus = "error";
+        failed++;
+      }
+    }
+
+    const syncEvent = sapMockService.recordSyncEvent({
+      direction: "sap_to_pt",
+      status: failed > 0 ? (created + updated > 0 ? "partial" : "failed") : 
+              conflicts.length > 0 ? "conflict" : "success",
+      materialsProcessed: toSync.length,
+      materialsCreated: created,
+      materialsUpdated: updated,
+      materialsFailed: failed,
+      conflicts,
+      details: `Synced ${created} new, ${updated} updated from SAP to PhotonicTag`,
+    });
+
+    res.json({
+      syncEvent,
+      created,
+      updated,
+      failed,
+      conflicts,
+    });
+  } catch (error) {
+    console.error("[SAP API] Error syncing from SAP:", error);
+    res.status(500).json({ error: "Failed to sync from SAP" });
+  }
+});
+
+router.post("/sync/to-sap", async (req: Request, res: Response) => {
+  try {
+    const { productIds } = req.body;
+    const materials = sapMockService.getAllMaterials();
+    const linkedMaterials = materials.filter(m => m.photonicTagId);
+    
+    let toSync: SAPMaterial[];
+    if (productIds && Array.isArray(productIds)) {
+      toSync = linkedMaterials.filter(m => productIds.includes(m.photonicTagId));
+    } else {
+      toSync = linkedMaterials.filter(m => m.syncStatus === "pending" || m.syncStatus === "synced");
+    }
+
+    let updated = 0;
+    let failed = 0;
+    const conflicts: SAPConflict[] = [];
+
+    for (const material of toSync) {
+      try {
+        if (!material.photonicTagId) continue;
+        
+        const product = await storage.getProduct(material.photonicTagId);
+        if (!product) {
+          sapMockService.unlinkFromPhotonicTag(material.MARA.MATNR);
+          continue;
+        }
+
+        const detectedConflicts = sapMockService.detectConflicts(material, product);
+        if (detectedConflicts.length > 0 && material.syncStatus === "synced") {
+          for (const conflict of detectedConflicts) {
+            const savedConflict = sapMockService.addConflict(conflict);
+            conflicts.push(savedConflict);
+          }
+          material.syncStatus = "conflict";
+        } else {
+          const updates = sapMockService.mapFromPhotonicTagProduct(product, material.MARA.MATNR);
+          sapMockService.updateMaterial(material.MARA.MATNR, updates);
+          material.syncStatus = "synced";
+          material.lastSyncedAt = new Date().toISOString();
+          updated++;
+        }
+      } catch (err) {
+        console.error(`[SAP Sync] Failed to sync to SAP ${material.MARA.MATNR}:`, err);
+        material.syncStatus = "error";
+        failed++;
+      }
+    }
+
+    const syncEvent = sapMockService.recordSyncEvent({
+      direction: "pt_to_sap",
+      status: failed > 0 ? (updated > 0 ? "partial" : "failed") :
+              conflicts.length > 0 ? "conflict" : "success",
+      materialsProcessed: toSync.length,
+      materialsCreated: 0,
+      materialsUpdated: updated,
+      materialsFailed: failed,
+      conflicts,
+      details: `Synced ${updated} products from PhotonicTag to SAP`,
+    });
+
+    res.json({
+      syncEvent,
+      updated,
+      failed,
+      conflicts,
+    });
+  } catch (error) {
+    console.error("[SAP API] Error syncing to SAP:", error);
+    res.status(500).json({ error: "Failed to sync to SAP" });
+  }
+});
+
+router.post("/sync/bidirectional", async (req: Request, res: Response) => {
+  try {
+    const { limit = 20 } = req.body;
+    const materials = sapMockService.getAllMaterials();
+    
+    let created = 0;
+    let updated = 0;
+    let failed = 0;
+    const conflicts: SAPConflict[] = [];
+
+    const unlinked = materials.filter(m => !m.photonicTagId).slice(0, limit);
+    for (const material of unlinked) {
+      try {
+        const mappedData = sapMockService.mapToPhotonicTagProduct(material);
+        const newProduct = await storage.createProduct({
+          ...mappedData,
+          description: `Imported from SAP Material ${material.MARA.MATNR}`,
+          materials: "",
+          safetyCertifications: [],
+        } as unknown as InsertProduct);
+        
+        sapMockService.linkToPhotonicTag(material.MARA.MATNR, newProduct.id);
+        created++;
+      } catch (err) {
+        console.error(`[SAP Sync] Failed to create from ${material.MARA.MATNR}:`, err);
+        failed++;
+      }
+    }
+
+    const linked = materials.filter(m => m.photonicTagId);
+    for (const material of linked) {
+      try {
+        const product = await storage.getProduct(material.photonicTagId!);
+        if (!product) {
+          sapMockService.unlinkFromPhotonicTag(material.MARA.MATNR);
+          continue;
+        }
+
+        const detectedConflicts = sapMockService.detectConflicts(material, product);
+        if (detectedConflicts.length > 0) {
+          for (const conflict of detectedConflicts) {
+            const savedConflict = sapMockService.addConflict(conflict);
+            conflicts.push(savedConflict);
+          }
+          material.syncStatus = "conflict";
+        } else {
+          material.syncStatus = "synced";
+          material.lastSyncedAt = new Date().toISOString();
+          updated++;
+        }
+      } catch (err) {
+        console.error(`[SAP Sync] Failed to check ${material.MARA.MATNR}:`, err);
+        failed++;
+      }
+    }
+
+    const syncEvent = sapMockService.recordSyncEvent({
+      direction: "bidirectional",
+      status: failed > 0 ? "partial" : conflicts.length > 0 ? "conflict" : "success",
+      materialsProcessed: unlinked.length + linked.length,
+      materialsCreated: created,
+      materialsUpdated: updated,
+      materialsFailed: failed,
+      conflicts,
+      details: `Bidirectional sync: ${created} created, ${updated} verified, ${conflicts.length} conflicts`,
+    });
+
+    res.json({
+      syncEvent,
+      created,
+      updated,
+      failed,
+      conflicts,
+    });
+  } catch (error) {
+    console.error("[SAP API] Error in bidirectional sync:", error);
+    res.status(500).json({ error: "Failed to perform bidirectional sync" });
+  }
+});
+
+router.post("/conflicts/:id/resolve", async (req: Request, res: Response) => {
+  try {
+    const { resolvedBy } = req.body;
+    if (!["sap", "photonictag", "manual"].includes(resolvedBy)) {
+      return res.status(400).json({ error: "Invalid resolution type" });
+    }
+
+    const conflict = sapMockService.resolveConflict(req.params.id, resolvedBy);
+    if (!conflict) {
+      return res.status(404).json({ error: "Conflict not found" });
+    }
+
+    const material = sapMockService.getMaterial(conflict.matnr);
+    if (material) {
+      material.syncStatus = "synced";
+      material.lastSyncedAt = new Date().toISOString();
+    }
+
+    res.json(conflict);
+  } catch (error) {
+    console.error("[SAP API] Error resolving conflict:", error);
+    res.status(500).json({ error: "Failed to resolve conflict" });
+  }
+});
+
+router.post("/materials/:matnr/update", async (req: Request, res: Response) => {
+  try {
+    const { updates } = req.body;
+    const material = sapMockService.updateMaterial(req.params.matnr, updates);
+    if (!material) {
+      return res.status(404).json({ error: "Material not found" });
+    }
+    res.json(material);
+  } catch (error) {
+    console.error("[SAP API] Error updating material:", error);
+    res.status(500).json({ error: "Failed to update material" });
+  }
+});
+
+export default router;

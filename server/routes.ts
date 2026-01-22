@@ -11,6 +11,7 @@ import { iotService } from "./services/iot-service";
 import { seedDemoData } from "./seed-demo-data";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { storage } from "./storage";
+import sapRoutes from "./routes/sap-routes";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -720,6 +721,11 @@ export async function registerRoutes(
       res.status(500).json({ error: "Failed to seed demo data" });
     }
   });
+
+  // ==========================================
+  // SAP INTEGRATION ENDPOINTS (Protected)
+  // ==========================================
+  app.use("/api/sap", isAuthenticated, sapRoutes);
 
   return httpServer;
 }
