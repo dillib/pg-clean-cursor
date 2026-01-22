@@ -17,6 +17,14 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### January 2026
+- **Enhanced Pricing Page**: Comprehensive pricing improvements for enterprise buyers:
+  - Added Free tier (100 products, no credit card required)
+  - Value anchoring with EU DPP compliance penalties (€10K-100K+ per violation)
+  - ROI visibility section showing compliance savings, time efficiency, SAP integration value
+  - SAP integration highlighted as Enterprise tier differentiator
+  - Annual discount increased from 10% to 20% (industry standard)
+  - Competitive comparison table vs DIY, Legacy PLM, Generic QR solutions
+  - EU DPP compliance deadline reminders (2027 batteries, 2030 all products)
 - **SAP Integration Demo Dashboard**: Visual demo showing bidirectional sync with mock SAP system:
   - Mock SAP OData service with 100 realistic material master records (MARA/MARC structures)
   - Split-screen dashboard showing SAP materials vs PhotonicTag products
