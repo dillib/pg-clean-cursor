@@ -1,0 +1,145 @@
+Connect Everything
+Connect Your Entire
+Product Ecosystem
+PhotonicTag integrates with your existing ERP, e-commerce, and supply chain systems. No data silos. No manual exports. Just seamless, real-time product data flow.
+
+Explore SAP Integration
+API Documentation
+Featured Integration
+SAP
+SAP S/4HANA Integration
+Enterprise-grade bidirectional sync
+
+Our deep SAP integration is built for enterprises. Sync your Material Master data, batch numbers, and product attributes in real-time. No middleware required.
+
+Bidirectional Sync
+Changes in SAP automatically reflect in DPP, and vice versa
+
+Real-time Updates
+Sub-second sync latency for critical product data
+
+Enterprise Security
+OAuth 2.0, encrypted connections, audit logging
+
+No Data Silos
+Single source of truth across all systems
+
+Configure SAP Connection
+Full Feature List
+Everything included in SAP integration
+Real-time bidirectional sync with SAP S/4HANA
+Material Master (MARA/MARC/MAKT) integration
+Batch and serial number management
+Plant and storage location mapping
+OData v2/v4 and RFC support
+OAuth 2.0 authentication
+Configurable field mapping
+Conflict resolution with audit trail
+Scheduled and on-demand sync
+SAP Business One support
+All Integrations
+Connect PhotonicTag with your existing tech stack. From ERP systems to e-commerce platforms.
+
+
+Enterprise ERP
+
+Identity Tech
+
+E-commerce
+
+Supply Chain
+SAP
+SAP S/4HANA
+Live
+Full bidirectional sync with SAP's flagship ERP system
+
+Material Master sync
+Batch management
+OData API
+Setup: 2-4 hours
+View Docs
+SAP
+SAP Business One
+Live
+Connect small and medium business SAP environments
+
+Item master sync
+Inventory tracking
+Service Layer API
+Setup: 1-2 hours
+View Docs
+SAP
+SAP ECC
+Live
+Legacy SAP ECC system support via RFC and IDoc
+
+RFC connectivity
+IDoc processing
+BAPI support
+Setup: 4-8 hours
+View Docs
+Oracle
+Oracle NetSuite
+Beta
+Cloud ERP integration for product and inventory data
+
+Item records sync
+Inventory levels
+REST API
+Setup: 2-3 hours
+Microsoft
+Microsoft Dynamics 365
+Coming Soon
+Integration with Microsoft's business applications
+
+Product catalog
+Supply chain
+Dataverse API
+Setup: 3-4 hours
+Infor
+Infor CloudSuite
+Coming Soon
+Industry-specific ERP for manufacturing
+
+Item master
+Lot tracking
+ION API
+Setup: 3-5 hours
+Developer-First
+Build Custom Integrations
+Our comprehensive API lets you build exactly what you need. RESTful endpoints, webhooks for real-time events, and SDKs in your favorite languages.
+
+RESTful API
+Standard REST endpoints with JSON responses
+
+Webhooks
+Real-time event notifications to your systems
+
+GraphQL
+Flexible queries for complex data needs
+
+SDKs
+Libraries for Node.js, Python, Java, and more
+
+API Reference
+SDKs on GitHub
+api-example.ts
+// Create a Digital Product Passport
+const passport = await photonictag.passports.create({
+  productName: "EcoPower Battery 5000mAh",
+  manufacturer: "GreenTech Industries",
+  batchNumber: "BAT-2025-001",
+  materials: ["Lithium", "Cobalt", "Graphite"],
+  carbonFootprint: 12.5,
+  repairabilityScore: 8.2,
+  certifications: ["EU_DPP", "ISO_14001"]
+});
+
+// Generate QR code
+const qr = await passport.generateQR({
+  format: "svg",
+  size: 256
+});
+
+console.log(passport.id); // "dpp_abc123..."
+console.log(qr.url); // "https://scan.photonictag.com/..."
