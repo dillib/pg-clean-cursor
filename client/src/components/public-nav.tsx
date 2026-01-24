@@ -39,7 +39,7 @@ export function PublicNav() {
             <ThemeToggle />
             <Button asChild data-testid="button-book-demo">
               <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer">
-                Book a Demo
+                Book a 30-min Demo
               </a>
             </Button>
           </div>
