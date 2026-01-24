@@ -32,6 +32,11 @@ import {
   type InsertEnterpriseConnector,
   type IntegrationSyncLog,
   type InsertIntegrationSyncLog,
+  type Lead,
+  type InsertLead,
+  type LeadActivity,
+  type InsertLeadActivity,
+  type LeadStatus,
   users,
   products,
   roles,
@@ -46,6 +51,8 @@ import {
   dppAiInsights,
   enterpriseConnectors,
   integrationSyncLogs,
+  leads,
+  leadActivities,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -532,6 +539,97 @@ export class DatabaseStorage implements IStorage {
       .where(eq(integrationSyncLogs.id, id))
       .returning();
     return log;
+  }
+
+  // Leads CRM
+  async getAllLeads(): Promise<Lead[]> {
+    return db.select().from(leads).orderBy(desc(leads.createdAt));
+  }
+
+  async getLead(id: string): Promise<Lead | undefined> {
+    const [lead] = await db.select().from(leads).where(eq(leads.id, id));
+    return lead;
+  }
+
+  async getLeadByEmail(email: string): Promise<Lead | undefined> {
+    const [lead] = await db.select().from(leads).where(eq(leads.email, email));
+    return lead;
+  }
+
+  async createLead(insertLead: InsertLead): Promise<Lead> {
+    const [lead] = await db.insert(leads).values(insertLead as typeof leads.$inferInsert).returning();
+    return lead;
+  }
+
+  async updateLead(id: string, updates: Partial<Lead>): Promise<Lead | undefined> {
+    const [lead] = await db
+      .update(leads)
+      .set({ ...updates, updatedAt: new Date() } as typeof leads.$inferInsert)
+      .where(eq(leads.id, id))
+      .returning();
+    return lead;
+  }
+
+  async deleteLead(id: string): Promise<boolean> {
+    const result = await db.delete(leads).where(eq(leads.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async getLeadsByStatus(status: LeadStatus): Promise<Lead[]> {
+    return db.select().from(leads).where(eq(leads.status, status)).orderBy(desc(leads.createdAt));
+  }
+
+  // Lead Activities
+  async getLeadActivities(leadId: string): Promise<LeadActivity[]> {
+    return db.select().from(leadActivities).where(eq(leadActivities.leadId, leadId)).orderBy(desc(leadActivities.createdAt));
+  }
+
+  async createLeadActivity(insertActivity: InsertLeadActivity): Promise<LeadActivity> {
+    const [activity] = await db.insert(leadActivities).values(insertActivity as typeof leadActivities.$inferInsert).returning();
+    return activity;
+  }
+
+  // Lead Stats for VC Metrics
+  async getLeadStats(): Promise<{
+    total: number;
+    byStatus: Record<string, number>;
+    byTier: Record<string, number>;
+    bySource: Record<string, number>;
+    thisWeek: number;
+    lastWeek: number;
+  }> {
+    const allLeads = await this.getAllLeads();
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+
+    const byStatus: Record<string, number> = {};
+    const byTier: Record<string, number> = {};
+    const bySource: Record<string, number> = {};
+    let thisWeek = 0;
+    let lastWeek = 0;
+
+    for (const lead of allLeads) {
+      byStatus[lead.status] = (byStatus[lead.status] || 0) + 1;
+      byTier[lead.tierInterest] = (byTier[lead.tierInterest] || 0) + 1;
+      bySource[lead.source] = (bySource[lead.source] || 0) + 1;
+
+      const createdAt = new Date(lead.createdAt);
+      if (createdAt >= weekAgo) {
+        thisWeek++;
+      } else if (createdAt >= twoWeeksAgo) {
+        lastWeek++;
+      }
+    }
+
+    return {
+      total: allLeads.length,
+      byStatus,
+      byTier,
+      bySource,
+      thisWeek,
+      lastWeek,
+    };
   }
 }
 

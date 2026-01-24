@@ -32,6 +32,7 @@ import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 import Solution from "@/pages/solution";
 import DemoGallery from "@/pages/demo-gallery";
+import CRM from "@/pages/crm";
 import NotFound from "@/pages/not-found";
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -121,6 +122,11 @@ function Router() {
       <Route path="/integrations/sap-demo">
         <ProtectedRoute>
           <SAPDemo />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/crm">
+        <ProtectedRoute>
+          <CRM />
         </ProtectedRoute>
       </Route>
       <Route path="/product/:id">

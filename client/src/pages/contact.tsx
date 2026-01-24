@@ -1,32 +1,81 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, MessageSquare, Phone, MapPin } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Mail, MessageSquare, MapPin, Calendar, Building, Users } from "lucide-react";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
+
+const contactFormSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Valid email is required"),
+  phone: z.string().optional(),
+  company: z.string().optional(),
+  jobTitle: z.string().optional(),
+  tierInterest: z.enum(["free", "starter", "growth", "enterprise"]).default("enterprise"),
+  estimatedVolume: z.string().optional(),
+  message: z.string().min(10, "Please provide some details about your needs"),
+  source: z.enum(["pricing_page", "contact_form", "demo_request", "waitlist", "referral", "other"]).default("contact_form"),
+});
+
+type ContactFormData = z.infer<typeof contactFormSchema>;
+
+const CALENDLY_LINK = "https://calendar.app.google/Aa9nfUnJiZvcjXi28";
 
 export default function Contact() {
   const { toast } = useToast();
-  const form = useForm({
+  const [, setLocation] = useLocation();
+  
+  const form = useForm<ContactFormData>({
+    resolver: zodResolver(contactFormSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
+      phone: "",
       company: "",
+      jobTitle: "",
+      tierInterest: "enterprise",
+      estimatedVolume: "",
       message: "",
+      source: "contact_form",
     },
   });
 
-  const onSubmit = (data: any) => {
-    toast({
-      title: "Message Sent",
-      description: "Thank you for reaching out. We'll get back to you within 24 hours.",
-    });
-    form.reset();
+  const submitMutation = useMutation({
+    mutationFn: async (data: ContactFormData) => {
+      const response = await apiRequest("POST", "/api/leads", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Message Sent Successfully",
+        description: "Thank you for reaching out. Our team will contact you within 24 hours.",
+      });
+      form.reset();
+    },
+    onError: (error) => {
+      toast({
+        title: "Submission Failed",
+        description: error instanceof Error ? error.message : "Please try again or email us directly.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmit = (data: ContactFormData) => {
+    submitMutation.mutate(data);
   };
 
   return (
@@ -35,12 +84,12 @@ export default function Contact() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-16">
-          <Badge variant="secondary" className="mb-4">Contact</Badge>
+          <Badge variant="secondary" className="mb-4">Contact Sales</Badge>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4" data-testid="text-contact-title">
-            Get in Touch
+            Let's Talk About Your DPP Needs
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Have questions about PhotonicTag? Our team is here to help.
+            Ready to get started with PhotonicTag? Fill out the form below and our team will reach out within 24 hours.
           </p>
         </div>
 
@@ -48,59 +97,143 @@ export default function Contact() {
           <div>
             <Card>
               <CardHeader>
-                <CardTitle>Send Us a Message</CardTitle>
+                <CardTitle>Request a Consultation</CardTitle>
+                <CardDescription>Tell us about your product compliance needs</CardDescription>
               </CardHeader>
               <CardContent>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Your name" {...field} data-testid="input-name" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>First Name *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="John" {...field} data-testid="input-first-name" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Last Name *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Smith" {...field} data-testid="input-last-name" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
                     <FormField
                       control={form.control}
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Email</FormLabel>
+                          <FormLabel>Work Email *</FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="you@company.com" {...field} data-testid="input-email" />
+                            <Input type="email" placeholder="john@company.com" {...field} data-testid="input-email" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="company"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Company (Optional)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Your company" {...field} data-testid="input-company" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="company"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Company</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Acme Corp" {...field} data-testid="input-company" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="jobTitle"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Job Title</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Head of Compliance" {...field} data-testid="input-job-title" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="tierInterest"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Plan Interest</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger data-testid="select-tier">
+                                  <SelectValue placeholder="Select a plan" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="free">Free (100 products)</SelectItem>
+                                <SelectItem value="starter">Starter ($99/mo)</SelectItem>
+                                <SelectItem value="growth">Growth ($499/mo)</SelectItem>
+                                <SelectItem value="enterprise">Enterprise (Custom)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="estimatedVolume"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Product Volume</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger data-testid="select-volume">
+                                  <SelectValue placeholder="Select volume" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="under-1k">Under 1,000</SelectItem>
+                                <SelectItem value="1k-10k">1,000 - 10,000</SelectItem>
+                                <SelectItem value="10k-100k">10,000 - 100,000</SelectItem>
+                                <SelectItem value="100k-1m">100,000 - 1M</SelectItem>
+                                <SelectItem value="over-1m">Over 1M</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
                     <FormField
                       control={form.control}
                       name="message"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Message</FormLabel>
+                          <FormLabel>How can we help? *</FormLabel>
                           <FormControl>
                             <Textarea 
-                              placeholder="How can we help you?" 
+                              placeholder="Tell us about your compliance needs, timeline, and any questions you have..." 
                               className="min-h-32"
                               {...field} 
                               data-testid="input-message"
@@ -110,8 +243,14 @@ export default function Contact() {
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" className="w-full" data-testid="button-submit">
-                      Send Message
+
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={submitMutation.isPending}
+                      data-testid="button-submit"
+                    >
+                      {submitMutation.isPending ? "Submitting..." : "Submit Request"}
                     </Button>
                   </form>
                 </Form>
@@ -120,6 +259,27 @@ export default function Contact() {
           </div>
 
           <div className="space-y-6">
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Calendar className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg mb-2">Book a Demo Call</h3>
+                    <p className="text-muted-foreground text-sm mb-4">
+                      See PhotonicTag in action. Schedule a personalized demo with our team.
+                    </p>
+                    <Button asChild data-testid="button-book-demo">
+                      <a href={CALENDLY_LINK} target="_blank" rel="noopener noreferrer">
+                        Book a 30-min Demo
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardContent className="p-6 flex items-start gap-4">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -138,13 +298,13 @@ export default function Contact() {
             <Card>
               <CardContent className="p-6 flex items-start gap-4">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <MessageSquare className="w-5 h-5 text-primary" />
+                  <Building className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1">Sales Inquiries</h3>
-                  <p className="text-muted-foreground text-sm mb-2">Talk to our sales team about enterprise solutions</p>
-                  <a href="mailto:sales@photonictag.com" className="text-primary hover:underline" data-testid="link-email-sales">
-                    sales@photonictag.com
+                  <h3 className="font-semibold mb-1">Enterprise Sales</h3>
+                  <p className="text-muted-foreground text-sm mb-2">For SAP integration and custom solutions</p>
+                  <a href="mailto:enterprise@photonictag.com" className="text-primary hover:underline" data-testid="link-email-enterprise">
+                    enterprise@photonictag.com
                   </a>
                 </div>
               </CardContent>
@@ -167,11 +327,16 @@ export default function Contact() {
             </Card>
 
             <div className="p-6 bg-muted/30 rounded-lg">
-              <h3 className="font-semibold mb-2">Response Time</h3>
-              <p className="text-sm text-muted-foreground">
-                We typically respond within 24 hours during business days. For urgent matters, 
-                please indicate so in your message subject.
-              </p>
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">Why Companies Choose Us</h3>
+              </div>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>EU DPP compliant from day one</li>
+                <li>SAP S/4HANA integration ready</li>
+                <li>AI-powered insights included</li>
+                <li>Free tier to get started</li>
+              </ul>
             </div>
           </div>
         </div>

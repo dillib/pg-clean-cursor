@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, ArrowRight, Calculator, Sparkles, Building2, Package, Activity, QrCode, Shield, Brain, AlertTriangle, TrendingUp, Zap, Database, Users, Clock } from "lucide-react";
+import { Check, ArrowRight, Calculator, Sparkles, Building2, Package, Activity, QrCode, Shield, Brain, AlertTriangle, TrendingUp, Zap, Database, Users, Clock, Calendar } from "lucide-react";
 import { Link } from "wouter";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
@@ -737,6 +737,12 @@ export default function Pricing() {
                 <a href="/api/login" className="gap-2">
                   Start Free
                   <ArrowRight className="w-4 h-4" />
+                </a>
+              </Button>
+              <Button size="lg" variant="outline" asChild data-testid="button-book-demo">
+                <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer" className="gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Book a Demo
                 </a>
               </Button>
               <Button size="lg" variant="outline" asChild data-testid="button-talk-sales">

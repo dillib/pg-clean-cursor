@@ -821,3 +821,73 @@ export interface RiskAssessment {
   complianceIssues: string[];
   recommendations: string[];
 }
+
+// ============================================
+// LEADS & CRM (Market Validation)
+// ============================================
+
+export type LeadStatus = "new" | "contacted" | "demo_scheduled" | "qualified" | "won" | "lost";
+export type LeadSource = "pricing_page" | "contact_form" | "demo_request" | "waitlist" | "referral" | "other";
+export type TierInterest = "free" | "starter" | "growth" | "enterprise";
+
+export const leads = pgTable("leads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Contact Info
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  company: text("company"),
+  jobTitle: text("job_title"),
+  
+  // Lead Qualification
+  tierInterest: text("tier_interest").$type<TierInterest>().default("free").notNull(),
+  estimatedVolume: text("estimated_volume"),
+  message: text("message"),
+  
+  // Pipeline Tracking
+  status: text("status").$type<LeadStatus>().default("new").notNull(),
+  source: text("source").$type<LeadSource>().default("contact_form").notNull(),
+  
+  // Follow-up
+  notes: text("notes"),
+  nextFollowUp: timestamp("next_follow_up"),
+  assignedTo: varchar("assigned_to"),
+  
+  // Timestamps
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  convertedAt: timestamp("converted_at"),
+});
+
+export const insertLeadSchema = createInsertSchema(leads).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  convertedAt: true,
+});
+
+export type InsertLead = z.infer<typeof insertLeadSchema>;
+export type Lead = typeof leads.$inferSelect;
+
+// Lead Activity Log (for tracking interactions)
+export type LeadActivityType = "email_sent" | "call_made" | "demo_booked" | "note_added" | "status_changed" | "tier_changed";
+
+export const leadActivities = pgTable("lead_activities", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leadId: varchar("lead_id").references(() => leads.id).notNull(),
+  activityType: text("activity_type").$type<LeadActivityType>().notNull(),
+  description: text("description"),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
+  createdBy: varchar("created_by"),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertLeadActivitySchema = createInsertSchema(leadActivities).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertLeadActivity = z.infer<typeof insertLeadActivitySchema>;
+export type LeadActivity = typeof leadActivities.$inferSelect;
