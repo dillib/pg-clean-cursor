@@ -71,10 +71,10 @@ export default function LandingValidation() {
                 Book a Demo
               </a>
             </Button>
-            <Button size="lg" variant="outline" asChild data-testid="button-hero-contact">
-              <Link href="/contact" className="gap-2">
-                Talk to Us
-                <ArrowRight className="w-4 h-4" />
+            <Button size="lg" variant="outline" asChild data-testid="button-hero-see-demo">
+              <Link href="/scan/demo" className="gap-2">
+                <QrCode className="w-4 h-4" />
+                See Product Passports
               </Link>
             </Button>
           </div>
