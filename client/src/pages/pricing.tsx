@@ -12,7 +12,7 @@ const platformTiers = [
     price: 0,
     description: "Get started with DPP compliance before EU deadlines",
     features: [
-      "Up to 100 products",
+      "Up to 100 product identities",
       "Basic admin dashboard",
       "QR code generation",
       "Public scan pages",
@@ -26,7 +26,7 @@ const platformTiers = [
     price: 99,
     description: "For small brands scaling their digital product passports",
     features: [
-      "Up to 1,000 products",
+      "Up to 1,000 product identities",
       "Full admin dashboard",
       "API access",
       "Basic analytics",
@@ -40,7 +40,7 @@ const platformTiers = [
     price: 499,
     description: "For growing businesses with advanced traceability needs",
     features: [
-      "Up to 25,000 products",
+      "Up to 25,000 product identities",
       "Advanced analytics",
       "Full API access",
       "3 team members",
@@ -54,7 +54,7 @@ const platformTiers = [
     price: 2000,
     description: "For large organizations with SAP and ERP integration needs",
     features: [
-      "Unlimited products",
+      "Unlimited product identities",
       "SAP S/4HANA integration",
       "ERP bidirectional sync",
       "Dedicated account manager",
@@ -230,6 +230,9 @@ export default function Pricing() {
           <div className="text-center mb-10">
             <h2 className="text-2xl font-bold mb-2">Usage-Based Add-Ons</h2>
             <p className="text-muted-foreground">Pay for what you use</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Product identity = 1 Digital Product Passport + QR code
+            </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card>
@@ -237,10 +240,10 @@ export default function Pricing() {
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Package className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="font-semibold">Extra Products</h3>
-                <p className="text-sm text-muted-foreground">Add more products beyond your plan limit</p>
+                <h3 className="font-semibold">Extra Identities</h3>
+                <p className="text-sm text-muted-foreground">Add more product identities beyond your plan</p>
                 <div className="pt-2 border-t">
-                  <p className="text-sm"><span className="font-bold text-primary">$0.02 - $0.10</span> per product</p>
+                  <p className="text-sm"><span className="font-bold text-primary">$0.02 - $0.10</span> per identity</p>
                 </div>
               </CardContent>
             </Card>
