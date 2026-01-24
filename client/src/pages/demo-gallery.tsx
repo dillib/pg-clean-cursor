@@ -112,7 +112,7 @@ export default function DemoGallery() {
               <Button asChild data-testid="button-book-demo">
                 <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer" className="gap-2">
                   <Calendar className="w-4 h-4" />
-                  Book a 30-min Demo
+                  Book a Demo
                 </a>
               </Button>
               <Link href="/contact">

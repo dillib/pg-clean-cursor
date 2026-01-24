@@ -57,7 +57,7 @@ export default function LandingValidation() {
             <Button size="lg" asChild data-testid="button-hero-demo">
               <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer" className="gap-2">
                 <Calendar className="w-4 h-4" />
-                Book a 30-min Demo
+                Book a Demo
               </a>
             </Button>
             <Button size="lg" variant="outline" asChild data-testid="button-hero-see-demo">
@@ -231,7 +231,7 @@ export default function LandingValidation() {
             <Button size="lg" variant="secondary" asChild data-testid="button-cta-demo">
               <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer" className="gap-2">
                 <Calendar className="w-4 h-4" />
-                Book a 30-min Demo
+                Book a Demo
               </a>
             </Button>
             <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10" asChild data-testid="button-cta-contact">

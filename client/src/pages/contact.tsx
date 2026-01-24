@@ -279,7 +279,7 @@ export default function Contact() {
                     </p>
                     <Button asChild data-testid="button-book-demo">
                       <a href={CALENDLY_LINK} target="_blank" rel="noopener noreferrer">
-                        Book a 30-min Demo
+                        Book a Demo
                       </a>
                     </Button>
                   </div>
