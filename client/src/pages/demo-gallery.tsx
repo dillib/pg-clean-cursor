@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
-import { QrCode, Shield, Leaf, ArrowRight, Calendar } from "lucide-react";
+import { QrCode, Shield, Leaf, ArrowRight, Clock, Calendar } from "lucide-react";
 import type { Product } from "@shared/schema";
 
 const categoryDeadlinePriority: Record<string, number> = {
@@ -22,24 +22,59 @@ const categoryDeadlinePriority: Record<string, number> = {
   "Industrial Rollers": 6,
 };
 
+const categoryDeadlineInfo: Record<string, { date: string; urgent: boolean }> = {
+  "Batteries": { date: "Feb 18, 2027", urgent: true },
+  "EV Accessories": { date: "Feb 2027", urgent: true },
+  "Apparel": { date: "Late 2027", urgent: false },
+  "Fashion Accessories": { date: "Late 2027", urgent: false },
+  "Consumer Electronics": { date: "Late 2027", urgent: false },
+  "IoT Devices": { date: "Late 2027", urgent: false },
+  "Smart Home": { date: "Late 2027", urgent: false },
+  "Industrial Packaging": { date: "2028-2029", urgent: false },
+  "Industrial Belting": { date: "By 2030", urgent: false },
+  "Industrial Rollers": { date: "By 2030", urgent: false },
+};
+
 function getCategoryPriority(category: string | null): number {
   if (!category) return 99;
   return categoryDeadlinePriority[category] ?? 99;
 }
 
+function getCategoryDeadline(category: string | null): { date: string; urgent: boolean } {
+  if (!category) return { date: "By 2030", urgent: false };
+  return categoryDeadlineInfo[category] ?? { date: "By 2030", urgent: false };
+}
+
 function ProductCard({ product }: { product: Product }) {
+  const deadline = getCategoryDeadline(product.productCategory);
+  
   return (
     <Card className="hover-elevate transition-all duration-200 overflow-hidden">
-      {product.productImage && (
-        <div className="aspect-video w-full overflow-hidden bg-muted">
+      <div className="aspect-video w-full overflow-hidden bg-muted relative">
+        {product.productImage ? (
           <img 
             src={product.productImage} 
             alt={product.productName || "Product image"}
             className="w-full h-full object-cover"
             data-testid={`img-product-${product.id}`}
           />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <QrCode className="h-12 w-12 text-muted-foreground" />
+          </div>
+        )}
+        <div 
+          className={`absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 ${
+            deadline.urgent 
+              ? 'bg-destructive text-destructive-foreground' 
+              : 'bg-amber-500 text-white'
+          }`}
+          data-testid={`badge-deadline-${product.id}`}
+        >
+          <Clock className="h-3 w-3" />
+          DPP Deadline: {deadline.date}
         </div>
-      )}
+      </div>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">

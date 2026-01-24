@@ -46,6 +46,24 @@ import {
 import type { Product, TraceEvent, QRCode as QRCodeType, DppRegionalExtension, AIInsight } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
+const categoryDeadlineInfo: Record<string, { date: string; urgent: boolean; description: string }> = {
+  "Batteries": { date: "February 18, 2027", urgent: true, description: "EU Battery Regulation requires Digital Product Passports for all industrial and EV batteries." },
+  "EV Accessories": { date: "February 2027", urgent: true, description: "Battery-related products fall under EU Battery Regulation compliance requirements." },
+  "Apparel": { date: "Late 2027", urgent: false, description: "Textiles and apparel require DPPs under ESPR Regulation (EU) 2024/1781." },
+  "Fashion Accessories": { date: "Late 2027", urgent: false, description: "Fashion accessories fall under textile DPP requirements." },
+  "Consumer Electronics": { date: "Late 2027", urgent: false, description: "Electronics require DPPs for sustainability and repairability transparency." },
+  "IoT Devices": { date: "Late 2027", urgent: false, description: "Smart devices fall under electronics DPP requirements." },
+  "Smart Home": { date: "Late 2027", urgent: false, description: "Smart home devices require DPPs for electronics compliance." },
+  "Industrial Packaging": { date: "2028-2029", urgent: false, description: "Packaging materials subject to upcoming ESPR requirements." },
+  "Industrial Belting": { date: "By 2030", urgent: false, description: "Industrial equipment included in universal DPP mandate." },
+  "Industrial Rollers": { date: "By 2030", urgent: false, description: "Industrial equipment included in universal DPP mandate." },
+};
+
+function getCategoryDeadline(category: string | null): { date: string; urgent: boolean; description: string } {
+  if (!category) return { date: "By 2030", urgent: false, description: "Subject to EU ESPR regulation requirements." };
+  return categoryDeadlineInfo[category] ?? { date: "By 2030", urgent: false, description: "Subject to EU ESPR regulation requirements." };
+}
+
 const demoProduct: Partial<Product> & { id: string; productName: string; manufacturer: string; batchNumber: string; materials: string; carbonFootprint: number; repairabilityScore: number; warrantyInfo: string; recyclingInstructions: string } = {
   id: "demo",
   productName: "EcoPower Li-Ion Battery Pack 5000mAh",
@@ -517,6 +535,37 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
                 Verified
               </Badge>
             </div>
+            
+            {(() => {
+              const deadline = getCategoryDeadline(product.productCategory || null);
+              return (
+                <Card className={`mt-4 ${deadline.urgent ? 'border-destructive bg-destructive/5' : 'border-amber-500/50 bg-amber-500/5'}`} data-testid="card-compliance-deadline">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className={`p-2 rounded-full ${deadline.urgent ? 'bg-destructive/10' : 'bg-amber-500/10'}`}>
+                        <Clock className={`h-5 w-5 ${deadline.urgent ? 'text-destructive' : 'text-amber-600'}`} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold text-sm">EU DPP Compliance Deadline</h3>
+                          <Badge variant={deadline.urgent ? "destructive" : "secondary"} className="text-xs">
+                            {deadline.date}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {deadline.description}
+                        </p>
+                        <p className="text-xs mt-2">
+                          <span className="font-medium">Category:</span> {product.productCategory || "General"} 
+                          <span className="mx-2">|</span>
+                          <span className="font-medium">Regulation:</span> ESPR (EU) 2024/1781
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })()}
           </div>
 
           <div className="space-y-4">
