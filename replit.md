@@ -17,6 +17,15 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### January 2026
+- **Validation Build Finalized**: Market validation launch ready with all public pages:
+  - Public pages: Landing, Examples (/scan/demo), Integrations, Pricing, Contact, Privacy, Terms
+  - No login pages in navigation - validation build is public-only
+  - CRM dashboard remains protected behind auth for internal lead management
+  - Custom PhotonicTag favicon/app icon generated
+  - SEO complete with react-helmet-async: Page-specific titles, meta descriptions, OG tags
+  - Six Integrated Modules section on landing and pricing pages
+  - Book a Demo button links to Google Calendar booking
+  - Demo booking link: https://calendar.app.google/Aa9nfUnJiZvcjXi28
 - **Lead Capture & CRM System**: Complete lead management for market validation launch:
   - Leads database table with status pipeline (new → contacted → demo_scheduled → qualified → won/lost)
   - Lead activities table for tracking interactions and notes
