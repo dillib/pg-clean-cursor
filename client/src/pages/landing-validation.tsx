@@ -54,7 +54,7 @@ export default function LandingValidation() {
             <Button size="lg" variant="outline" asChild data-testid="button-hero-see-demo">
               <Link href="/scan/demo" className="gap-2">
                 <QrCode className="w-4 h-4" />
-                See Product Passports
+                View Examples
               </Link>
             </Button>
           </div>

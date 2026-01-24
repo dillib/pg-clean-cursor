@@ -4,7 +4,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { QrCode } from "lucide-react";
 
 const navLinks = [
-  { href: "/scan/demo", label: "See Demo" },
+  { href: "/scan/demo", label: "Examples" },
   { href: "/pricing", label: "Pricing" },
   { href: "/contact", label: "Contact" },
 ];

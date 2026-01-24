@@ -14,7 +14,7 @@ export function PublicFooter() {
           </div>
           
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link href="/scan/demo" className="hover:text-foreground transition-colors">Demo</Link>
+            <Link href="/scan/demo" className="hover:text-foreground transition-colors">Examples</Link>
             <Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
             <Link href="/contact" className="hover:text-foreground transition-colors">Contact</Link>
             <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>

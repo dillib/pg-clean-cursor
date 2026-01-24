@@ -3,75 +3,10 @@ import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
-import { Factory, Tag, Store, Recycle, QrCode, Shield, Leaf, ArrowRight, Calendar } from "lucide-react";
+import { QrCode, Shield, Leaf, ArrowRight, Calendar } from "lucide-react";
 import type { Product } from "@shared/schema";
-
-interface DemoCategory {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  benefits: string[];
-  productCategories: string[];
-}
-
-const demoCategories: DemoCategory[] = [
-  {
-    id: "manufacturers",
-    title: "For Manufacturers",
-    description: "Showcase product authenticity, compliance, and supply chain transparency",
-    icon: <Factory className="h-6 w-6" />,
-    benefits: [
-      "EU DPP compliance ready",
-      "Real-time production tracking",
-      "Quality certifications display",
-      "Supply chain visibility"
-    ],
-    productCategories: ["Industrial Belting", "Industrial Rollers", "Industrial Packaging", "Batteries"]
-  },
-  {
-    id: "brands",
-    title: "For Brands",
-    description: "Build consumer trust with transparent product stories and sustainability data",
-    icon: <Tag className="h-6 w-6" />,
-    benefits: [
-      "Brand authenticity verification",
-      "Sustainability storytelling",
-      "Consumer engagement",
-      "Anti-counterfeiting protection"
-    ],
-    productCategories: ["Apparel", "Fashion Accessories", "Consumer Electronics", "Smart Home"]
-  },
-  {
-    id: "marketplaces",
-    title: "For Marketplaces",
-    description: "Verify product authenticity and provide buyers with complete product information",
-    icon: <Store className="h-6 w-6" />,
-    benefits: [
-      "Product authentication",
-      "Seller verification",
-      "Complete product data",
-      "Trust & transparency"
-    ],
-    productCategories: ["Consumer Electronics", "Fashion Accessories", "EV Accessories", "Smart Home"]
-  },
-  {
-    id: "recyclers",
-    title: "For Recyclers",
-    description: "Access material composition and end-of-life instructions for circular economy",
-    icon: <Recycle className="h-6 w-6" />,
-    benefits: [
-      "Material composition data",
-      "Disassembly instructions",
-      "Recyclability scores",
-      "Take-back program info"
-    ],
-    productCategories: ["Batteries", "Industrial Packaging", "Consumer Electronics", "Industrial Belting"]
-  }
-];
 
 function ProductCard({ product }: { product: Product }) {
   return (
@@ -120,51 +55,12 @@ function ProductCard({ product }: { product: Product }) {
 
         <Link href={`/product/${product.id}`}>
           <Button className="w-full" variant="default" size="sm" data-testid={`button-view-dpp-${product.id}`}>
-            View Digital Product Passport
+            View Product Passport
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>
       </CardContent>
     </Card>
-  );
-}
-
-function CategorySection({ category, products }: { category: DemoCategory; products: Product[] }) {
-  const filteredProducts = products.filter(p => 
-    category.productCategories.includes(p.productCategory || "")
-  );
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/50">
-        <div className="p-3 rounded-lg bg-primary/10 text-primary">
-          {category.icon}
-        </div>
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold">{category.title}</h3>
-          <p className="text-sm text-muted-foreground mt-1">{category.description}</p>
-          <div className="flex flex-wrap gap-2 mt-3">
-            {category.benefits.map((benefit, i) => (
-              <Badge key={i} variant="outline" className="text-xs">
-                {benefit}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {filteredProducts.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredProducts.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-8 text-muted-foreground">
-          No demo products available for this category yet.
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -177,23 +73,14 @@ export default function DemoGallery() {
     <div className="min-h-screen bg-background">
       <PublicNav />
       
-      <header className="border-b bg-card mt-16">
-        <div className="container mx-auto px-4 py-6">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold tracking-tight">Digital Product Passport Demo</h1>
-            <p className="text-muted-foreground mt-1">
-              See how PhotonicTag creates secure, verifiable product identities
-            </p>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-8">
+      <main className="container mx-auto px-4 py-8 mt-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <h1 className="text-3xl font-bold tracking-tight mb-3">
+              Digital Product Passport Examples
+            </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              See how PhotonicTag transforms product identity with secure, intelligent Digital Product Passports. 
-              Click any product to view its complete DPP.
+              Click any product to see its complete Digital Product Passport — the same experience your customers will have when they scan your products.
             </p>
           </div>
 
@@ -202,33 +89,17 @@ export default function DemoGallery() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : (
-            <Tabs defaultValue="manufacturers" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 h-auto gap-2 bg-transparent p-0">
-                {demoCategories.map(category => (
-                  <TabsTrigger
-                    key={category.id}
-                    value={category.id}
-                    className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-3"
-                    data-testid={`tab-${category.id}`}
-                  >
-                    {category.icon}
-                    <span className="hidden sm:inline">{category.title.replace("For ", "")}</span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
-              {demoCategories.map(category => (
-                <TabsContent key={category.id} value={category.id} className="mt-6">
-                  <CategorySection category={category} products={products} />
-                </TabsContent>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {products.map(product => (
+                <ProductCard key={product.id} product={product} />
               ))}
-            </Tabs>
+            </div>
           )}
 
-          <div className="mt-12 p-6 rounded-lg border bg-card text-center">
-            <h3 className="text-lg font-semibold mb-2">Ready to see PhotonicTag for your products?</h3>
-            <p className="text-muted-foreground mb-4">
-              Let's discuss how Digital Product Passports can work for your business
+          <div className="mt-16 p-8 rounded-lg border bg-card text-center">
+            <h2 className="text-xl font-semibold mb-2">Ready for your products?</h2>
+            <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
+              Let's discuss how Digital Product Passports can help your business meet EU compliance and build customer trust.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Button asChild data-testid="button-book-demo">
