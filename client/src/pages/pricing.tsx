@@ -1,36 +1,21 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, ArrowRight, Sparkles, Building2, Package, Activity, QrCode, Shield, Brain, AlertTriangle, Zap, Database, Clock, Calendar } from "lucide-react";
+import { Check, ArrowRight, Building2, Shield, AlertTriangle, Zap, Database, Clock, Calendar, Brain, Wifi, BarChart3, Package, Factory, Gem } from "lucide-react";
 import { Link } from "wouter";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
 
 const platformTiers = [
   {
-    name: "Free",
-    price: 0,
-    description: "Get started with DPP compliance before EU deadlines",
-    features: [
-      "Up to 100 product identities*",
-      "Basic admin dashboard",
-      "QR code generation",
-      "Public scan pages",
-      "Community support",
-      "EU DPP compliance templates",
-    ],
-    popular: false,
-  },
-  {
     name: "Starter",
     price: 99,
-    description: "For small brands scaling their digital product passports",
+    description: "For small brands getting started with DPP",
     features: [
-      "Up to 1,000 product identities*",
-      "Full admin dashboard",
+      "Admin dashboard",
+      "QR code generation",
+      "Public scan pages",
       "API access",
-      "Basic analytics",
-      "1 team member",
       "Email support",
     ],
     popular: false,
@@ -38,11 +23,10 @@ const platformTiers = [
   {
     name: "Growth",
     price: 499,
-    description: "For growing businesses with advanced traceability needs",
+    description: "For growing businesses with traceability needs",
     features: [
-      "Up to 25,000 product identities*",
+      "Everything in Starter",
       "Advanced analytics",
-      "Full API access",
       "3 team members",
       "Priority support",
       "IoT device integration",
@@ -51,17 +35,74 @@ const platformTiers = [
   },
   {
     name: "Enterprise",
-    price: 2000,
-    description: "For large organizations with SAP and ERP integration needs",
+    price: null,
+    description: "For large organizations with SAP/ERP needs",
     features: [
-      "Unlimited product identities*",
+      "Everything in Growth",
       "SAP S/4HANA integration",
-      "ERP bidirectional sync",
-      "Dedicated account manager",
       "Unlimited team members",
+      "Dedicated account manager",
       "SLA guarantee (99.9%)",
+      "On-premise option",
     ],
     popular: false,
+  },
+];
+
+const identityPricing = [
+  {
+    category: "Standard",
+    icon: Factory,
+    description: "High-volume, low-cost products",
+    examples: "AA batteries, basic packaging, commodity textiles",
+    pricing: "$0.01 - $0.05",
+    unit: "per batch",
+    note: "Recommended for commodities — one identity per manufacturing batch or lot",
+  },
+  {
+    category: "Premium",
+    icon: Package,
+    description: "Mid-value electronics and goods",
+    examples: "Consumer electronics, EV batteries, appliances",
+    pricing: "$0.05 - $0.25",
+    unit: "per product",
+    note: "One identity per individual product",
+  },
+  {
+    category: "Luxury",
+    icon: Gem,
+    description: "High-value, low-volume products",
+    examples: "Watches, handbags, jewelry, designer goods",
+    pricing: "$0.50 - $2.00",
+    unit: "per product",
+    note: "Enhanced authentication and provenance tracking",
+  },
+];
+
+const valueFeatures = [
+  {
+    name: "SAP Integration",
+    icon: Database,
+    description: "Bidirectional sync with SAP S/4HANA. No middleware, no duplicate data entry.",
+    tier: "Enterprise",
+  },
+  {
+    name: "AI Insights",
+    icon: Brain,
+    description: "Sustainability scoring, repair guides, circularity analysis powered by AI.",
+    tier: "Add-on",
+  },
+  {
+    name: "IoT Tagging",
+    icon: Wifi,
+    description: "NFC, RFID, and BLE device integration for tap-to-scan product passports.",
+    tier: "Growth+",
+  },
+  {
+    name: "Supply Chain Tracking",
+    icon: BarChart3,
+    description: "Full traceability from raw materials to end consumer.",
+    tier: "Growth+",
   },
 ];
 
@@ -70,48 +111,28 @@ export default function Pricing() {
     <div className="min-h-screen bg-background">
       <PublicNav />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-16">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center mb-12">
           <Badge variant="secondary" className="mb-4">Pricing</Badge>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4" data-testid="text-pricing-title">
-            Simple, Transparent Pricing
+            Simple, Value-Based Pricing
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Choose the plan that fits your business. All plans include EU DPP compliance features.
+            Platform fee + product identity cost based on your product type. No surprises.
           </p>
         </div>
 
-        <section className="mb-16">
-          <Card className="border-destructive/30 bg-destructive/10 dark:bg-destructive/5" data-testid="card-compliance-warning">
+        <section className="mb-12">
+          <Card className="border-destructive/30 bg-destructive/5" data-testid="card-compliance-warning">
             <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row items-start gap-6">
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-destructive/10 flex items-center justify-center">
-                  <AlertTriangle className="w-6 h-6 text-destructive" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold mb-2">EU DPP Non-Compliance Costs Far More</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Starting 2027, EU regulations require Digital Product Passports for batteries, textiles, and electronics. 
-                    Non-compliance penalties range from <span className="font-bold text-destructive">€10,000 to €100,000+ per violation</span>.
+              <div className="flex items-start gap-4">
+                <AlertTriangle className="w-6 h-6 text-destructive shrink-0 mt-1" />
+                <div>
+                  <h3 className="font-bold mb-1">EU DPP Deadline: 2027</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Non-compliance penalties: <span className="font-semibold text-destructive">€10,000 - €100,000+ per violation</span>. 
+                    PhotonicTag costs a fraction of one penalty.
                   </p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center p-3 rounded-lg bg-background">
-                      <p className="text-2xl font-bold text-destructive">€10K+</p>
-                      <p className="text-xs text-muted-foreground">Per violation fine</p>
-                    </div>
-                    <div className="text-center p-3 rounded-lg bg-background">
-                      <p className="text-2xl font-bold text-destructive">100%</p>
-                      <p className="text-xs text-muted-foreground">Market access risk</p>
-                    </div>
-                    <div className="text-center p-3 rounded-lg bg-background">
-                      <p className="text-2xl font-bold text-primary">2027</p>
-                      <p className="text-xs text-muted-foreground">Batteries deadline</p>
-                    </div>
-                    <div className="text-center p-3 rounded-lg bg-background">
-                      <p className="text-2xl font-bold text-primary">2030</p>
-                      <p className="text-xs text-muted-foreground">All products</p>
-                    </div>
-                  </div>
                 </div>
               </div>
             </CardContent>
@@ -120,67 +141,10 @@ export default function Pricing() {
 
         <section className="mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold mb-2">Your Return on Investment</h2>
-            <p className="text-muted-foreground">PhotonicTag pays for itself through compliance savings</p>
+            <h2 className="text-2xl font-bold mb-2">Platform Plans</h2>
+            <p className="text-muted-foreground">Monthly fee for features and support</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            <Card>
-              <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-primary" />
-                </div>
-                <h3 className="font-semibold">Avoid Penalties</h3>
-                <p className="text-sm text-muted-foreground">Single violation fine exceeds 2+ years of subscription</p>
-                <div className="pt-2 border-t">
-                  <p className="text-2xl font-bold text-primary">50-100x</p>
-                  <p className="text-xs text-muted-foreground">ROI vs. penalty cost</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-primary" />
-                </div>
-                <h3 className="font-semibold">Save Time</h3>
-                <p className="text-sm text-muted-foreground">Automate product data and compliance reporting</p>
-                <div className="pt-2 border-t">
-                  <p className="text-2xl font-bold text-primary">80%</p>
-                  <p className="text-xs text-muted-foreground">Time saved on compliance</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Database className="w-5 h-5 text-primary" />
-                </div>
-                <h3 className="font-semibold">SAP Integration</h3>
-                <p className="text-sm text-muted-foreground">Bidirectional sync eliminates duplicate data entry</p>
-                <div className="pt-2 border-t">
-                  <p className="text-2xl font-bold text-primary">$150K+</p>
-                  <p className="text-xs text-muted-foreground">Annual savings</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        <section className="mb-16">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold mb-2">Platform Plans</h2>
-            <p className="text-muted-foreground">Choose your base tier</p>
-            <Badge variant="secondary" className="mt-2">Save 20% with annual billing</Badge>
-            <div className="mt-4 p-3 bg-primary/5 rounded-lg inline-block">
-              <p className="text-sm font-medium">
-                <span className="text-primary">*</span> Product Identity = each unique Digital Product Passport + QR code you create
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">Priced per individual product, not per category or SKU</p>
-            </div>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {platformTiers.map((plan) => (
               <Card 
                 key={plan.name} 
@@ -195,13 +159,13 @@ export default function Pricing() {
                 <CardHeader className="text-center pb-2">
                   <CardTitle className="text-xl">{plan.name}</CardTitle>
                   <div className="mt-4">
-                    {plan.price === 0 ? (
-                      <span className="text-4xl font-bold">Free</span>
-                    ) : (
+                    {plan.price ? (
                       <>
-                        <span className="text-4xl font-bold">${plan.price.toLocaleString()}{plan.name === "Enterprise" && "+"}</span>
+                        <span className="text-4xl font-bold">${plan.price}</span>
                         <span className="text-muted-foreground">/mo</span>
                       </>
+                    ) : (
+                      <span className="text-4xl font-bold">Custom</span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground mt-2">{plan.description}</p>
@@ -233,63 +197,90 @@ export default function Pricing() {
         </section>
 
         <section className="mb-16">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold mb-2">Usage-Based Add-Ons</h2>
-            <p className="text-muted-foreground">Pay for what you use</p>
-            <p className="text-xs text-muted-foreground mt-2">
-              Product identity = 1 Digital Product Passport + QR code
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold mb-2">Product Identity Pricing</h2>
+            <p className="text-muted-foreground">Pay based on your product type and volume</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            {identityPricing.map((tier) => (
+              <Card key={tier.category} data-testid={`card-identity-${tier.category.toLowerCase()}`}>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <tier.icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-bold">{tier.category}</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-2">{tier.description}</p>
+                  <p className="text-xs text-muted-foreground mb-4 italic">{tier.examples}</p>
+                  <div className="border-t pt-4">
+                    <p className="text-2xl font-bold text-primary">{tier.pricing}</p>
+                    <p className="text-sm text-muted-foreground">{tier.unit}</p>
+                    <p className="text-xs text-muted-foreground mt-2">{tier.note}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              Volume discounts available. <Link href="/contact" className="text-primary underline">Contact us</Link> for custom pricing.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        </section>
+
+        <section className="mb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold mb-2">Value Features</h2>
+            <p className="text-muted-foreground">What sets PhotonicTag apart</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            {valueFeatures.map((feature) => (
+              <Card key={feature.name}>
+                <CardContent className="p-6 flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <feature.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold">{feature.name}</h3>
+                      <Badge variant="outline" className="text-xs">{feature.tier}</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold mb-2">Your ROI</h2>
+            <p className="text-muted-foreground">PhotonicTag pays for itself</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
             <Card>
-              <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Package className="w-5 h-5 text-primary" />
-                </div>
-                <h3 className="font-semibold">Extra Identities</h3>
-                <p className="text-sm text-muted-foreground">Add more product identities beyond your plan</p>
-                <div className="pt-2 border-t">
-                  <p className="text-sm"><span className="font-bold text-primary">$0.02 - $0.10</span> per identity</p>
-                </div>
+              <CardContent className="p-6 text-center">
+                <Shield className="w-8 h-8 text-primary mx-auto mb-3" />
+                <p className="text-3xl font-bold text-primary">50-100x</p>
+                <p className="text-sm text-muted-foreground">ROI vs. one compliance penalty</p>
               </CardContent>
             </Card>
-
             <Card>
-              <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Activity className="w-5 h-5 text-primary" />
-                </div>
-                <h3 className="font-semibold">Supply Chain Events</h3>
-                <p className="text-sm text-muted-foreground">Track every supply chain event</p>
-                <div className="pt-2 border-t">
-                  <p className="text-sm"><span className="font-bold text-primary">$0.001 - $0.01</span> per event</p>
-                </div>
+              <CardContent className="p-6 text-center">
+                <Clock className="w-8 h-8 text-primary mx-auto mb-3" />
+                <p className="text-3xl font-bold text-primary">80%</p>
+                <p className="text-sm text-muted-foreground">Time saved on compliance</p>
               </CardContent>
             </Card>
-
             <Card>
-              <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <QrCode className="w-5 h-5 text-primary" />
-                </div>
-                <h3 className="font-semibold">Scan Analytics</h3>
-                <p className="text-sm text-muted-foreground">Detailed scan tracking and insights</p>
-                <div className="pt-2 border-t">
-                  <p className="text-sm"><span className="font-bold text-primary">$0.05 - $0.25</span> per scan</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Brain className="w-5 h-5 text-primary" />
-                </div>
-                <h3 className="font-semibold">AI Intelligence</h3>
-                <p className="text-sm text-muted-foreground">Sustainability and repair insights</p>
-                <div className="pt-2 border-t">
-                  <p className="text-sm"><span className="font-bold text-primary">$99 - $2,000</span>/month</p>
-                </div>
+              <CardContent className="p-6 text-center">
+                <Zap className="w-8 h-8 text-primary mx-auto mb-3" />
+                <p className="text-3xl font-bold text-primary">Days</p>
+                <p className="text-sm text-muted-foreground">To deploy vs. months for legacy</p>
               </CardContent>
             </Card>
           </div>
@@ -298,91 +289,22 @@ export default function Pricing() {
         <section className="mb-16">
           <Card className="bg-muted/30 border-dashed">
             <CardContent className="p-8">
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="flex-shrink-0">
-                  <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Building2 className="w-8 h-8 text-primary" />
-                  </div>
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Building2 className="w-7 h-7 text-primary" />
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h2 className="text-2xl font-bold mb-2">Enterprise Licensing</h2>
-                  <p className="text-muted-foreground mb-4">
-                    For large manufacturers needing custom solutions, on-premise deployment, and dedicated support.
+                  <h2 className="text-xl font-bold mb-2">Enterprise & High-Volume</h2>
+                  <p className="text-muted-foreground">
+                    Custom pricing for manufacturers with 1M+ products, on-premise needs, or complex ERP integrations.
                   </p>
-                  <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-                    <Badge variant="secondary" className="gap-1">
-                      <Check className="w-3 h-3" /> Custom SLAs
-                    </Badge>
-                    <Badge variant="secondary" className="gap-1">
-                      <Check className="w-3 h-3" /> On-prem option
-                    </Badge>
-                    <Badge variant="secondary" className="gap-1">
-                      <Check className="w-3 h-3" /> Dedicated support
-                    </Badge>
-                  </div>
                 </div>
-                <div className="flex-shrink-0">
-                  <Button size="lg" asChild data-testid="button-enterprise-contact">
-                    <Link href="/contact" className="gap-2">
-                      Contact Sales
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-
-        <section className="mb-16">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold mb-2">Why PhotonicTag?</h2>
-            <p className="text-muted-foreground">See how we compare</p>
-          </div>
-          <Card data-testid="card-comparison">
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-4 font-semibold">Feature</th>
-                      <th className="text-center p-4 font-semibold bg-primary/5">
-                        <div className="flex flex-col items-center gap-1">
-                          <Zap className="w-4 h-4 text-primary" />
-                          <span>PhotonicTag</span>
-                        </div>
-                      </th>
-                      <th className="text-center p-4 font-semibold text-muted-foreground">DIY</th>
-                      <th className="text-center p-4 font-semibold text-muted-foreground">Legacy PLM</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b">
-                      <td className="p-4">EU DPP Compliance</td>
-                      <td className="p-4 text-center bg-primary/5"><Check className="w-4 h-4 text-primary mx-auto" /></td>
-                      <td className="p-4 text-center text-muted-foreground">Manual</td>
-                      <td className="p-4 text-center text-muted-foreground">Partial</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-4">SAP Integration</td>
-                      <td className="p-4 text-center bg-primary/5"><Check className="w-4 h-4 text-primary mx-auto" /></td>
-                      <td className="p-4 text-center text-muted-foreground">No</td>
-                      <td className="p-4 text-center text-muted-foreground">$200K+ custom</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-4">AI Insights</td>
-                      <td className="p-4 text-center bg-primary/5"><Check className="w-4 h-4 text-primary mx-auto" /></td>
-                      <td className="p-4 text-center text-muted-foreground">No</td>
-                      <td className="p-4 text-center text-muted-foreground">No</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-4">Time to Deploy</td>
-                      <td className="p-4 text-center bg-primary/5 font-semibold text-primary">Days</td>
-                      <td className="p-4 text-center text-muted-foreground">Months</td>
-                      <td className="p-4 text-center text-muted-foreground">6-12 months</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <Button size="lg" asChild data-testid="button-enterprise-contact">
+                  <Link href="/contact" className="gap-2">
+                    Contact Sales
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -390,10 +312,9 @@ export default function Pricing() {
 
         <section className="text-center">
           <div className="bg-primary/5 rounded-lg p-8">
-            <Sparkles className="w-10 h-10 text-primary mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-2">Ready to Get Started?</h2>
-            <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              Talk to our team to find the right plan for your business.
+            <p className="text-muted-foreground mb-6">
+              Talk to our team to find the right plan for your products.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" asChild data-testid="button-contact-sales">
