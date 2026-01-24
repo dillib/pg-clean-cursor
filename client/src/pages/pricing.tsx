@@ -86,7 +86,7 @@ export default function Pricing() {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>Pricing - PhotonicTag | EU DPP Compliance Platform</title>
-        <meta name="description" content="Simple, transparent pricing for EU Digital Product Passport compliance. Platform plans from €99/month plus usage-based product identity pricing. Compare plans and get started." />
+        <meta name="description" content="Simple, transparent pricing for EU Digital Product Passport compliance under ESPR 2024/1781. Platform plans from €99/month. Battery deadline Feb 2027, all products by 2030." />
         <meta property="og:title" content="PhotonicTag Pricing - EU DPP Compliance Platform" />
         <meta property="og:description" content="Affordable EU DPP compliance. Platform plans from €99/month. Avoid €100K+ penalties." />
       </Helmet>
@@ -109,8 +109,9 @@ export default function Pricing() {
               <div className="flex items-start gap-4">
                 <AlertTriangle className="w-6 h-6 text-destructive shrink-0 mt-1" />
                 <div>
-                  <h3 className="font-bold mb-1">EU DPP Deadline: 2027</h3>
+                  <h3 className="font-bold mb-1">EU DPP Deadlines: Feb 2027 - 2030</h3>
                   <p className="text-sm text-muted-foreground">
+                    Batteries by Feb 18, 2027. Textiles & electronics by late 2027. All products by 2030. 
                     Non-compliance penalties: <span className="font-semibold text-destructive">€10,000 - €100,000+ per violation</span>. 
                     PhotonicTag costs a fraction of one penalty.
                   </p>

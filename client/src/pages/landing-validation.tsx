@@ -22,7 +22,7 @@ export default function LandingValidation() {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>PhotonicTag - EU Digital Product Passport Compliance | DPP Platform</title>
-        <meta name="description" content="Get EU Digital Product Passport compliant before 2027. PhotonicTag provides tamper-proof product identity, QR-based traceability, and SAP integration. Avoid €100K+ penalties." />
+        <meta name="description" content="Get EU Digital Product Passport compliant under ESPR 2024/1781. Battery deadline Feb 18, 2027. PhotonicTag provides tamper-proof product identity, QR traceability, and SAP integration." />
         <meta property="og:title" content="PhotonicTag - EU DPP Compliance Made Simple" />
         <meta property="og:description" content="Digital Product Passports for EU compliance. Avoid €100K+ penalties. SAP integration. Go live in weeks." />
         <meta property="og:type" content="website" />
@@ -39,7 +39,7 @@ export default function LandingValidation() {
         <div className="relative max-w-4xl mx-auto text-center">
           <Badge variant="destructive" className="gap-1 mb-6" data-testid="badge-deadline">
             <AlertTriangle className="w-3 h-3" />
-            EU DPP Deadline: February 2027
+            Battery Passport Deadline: Feb 18, 2027
           </Badge>
           
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-6" data-testid="text-hero-title">
@@ -48,7 +48,7 @@ export default function LandingValidation() {
           </h1>
           
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-8" data-testid="text-hero-subtitle">
-            The EU mandates Digital Product Passports starting 2027. 
+            Under ESPR Regulation (EU) 2024/1781, Digital Product Passports become mandatory starting 2027. 
             Non-compliance means penalties up to €100,000+ per violation.
             PhotonicTag gets you compliant in weeks, not months.
           </p>
@@ -106,7 +106,7 @@ export default function LandingValidation() {
                 </div>
                 <h3 className="font-semibold mb-2">Tight Deadlines</h3>
                 <p className="text-sm text-muted-foreground">
-                  Batteries require DPPs by Feb 2027. Textiles, electronics follow. Most companies aren't ready.
+                  Batteries by Feb 2027. Textiles & electronics by late 2027. All products by 2030. Most companies aren't ready.
                 </p>
               </CardContent>
             </Card>
@@ -211,6 +211,8 @@ export default function LandingValidation() {
             <Badge variant="secondary" className="text-sm py-2 px-4">Electronics & Consumer Goods</Badge>
             <Badge variant="secondary" className="text-sm py-2 px-4">Automotive & EV Components</Badge>
             <Badge variant="secondary" className="text-sm py-2 px-4">Packaging & Materials</Badge>
+            <Badge variant="secondary" className="text-sm py-2 px-4">Furniture & Home Goods</Badge>
+            <Badge variant="secondary" className="text-sm py-2 px-4">Construction Materials</Badge>
           </div>
         </div>
       </section>
