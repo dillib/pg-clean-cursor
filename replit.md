@@ -17,6 +17,18 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### January 2026
+- **Lead Capture & CRM System**: Complete lead management for market validation launch:
+  - Leads database table with status pipeline (new → contacted → demo_scheduled → qualified → won/lost)
+  - Lead activities table for tracking interactions and notes
+  - Public contact form at /contact with qualification fields (tier interest, volume, company)
+  - Protected CRM dashboard at /crm for lead management
+  - VC validation metrics: lead volume, lead velocity (week-over-week growth %), conversion rate, enterprise interest count
+  - Tier interest breakdown chart (Enterprise, Growth, Starter, Free)
+  - Pipeline status distribution visualization
+  - Search and filtering for lead list
+  - Status update workflow with activity logging
+  - Book a Demo integration with Google Calendar booking link
+  - API endpoints: POST /api/leads (public), GET/PATCH /api/leads (protected), GET /api/leads/stats
 - **Enhanced Pricing Page**: Comprehensive pricing improvements for enterprise buyers:
   - Added Free tier (100 products, no credit card required)
   - Value anchoring with EU DPP compliance penalties (€10K-100K+ per violation)
