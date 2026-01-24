@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, ArrowRight, Building2, Shield, AlertTriangle, Zap, Database, Clock, Calendar, Brain, Wifi, BarChart3, Package, Factory, Gem } from "lucide-react";
+import { Check, ArrowRight, Building2, Shield, AlertTriangle, Zap, Database, Clock, Calendar, Brain, Wifi, BarChart3, Layers, GitBranch, Award } from "lucide-react";
 import { Link } from "wouter";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
@@ -10,9 +10,9 @@ const platformTiers = [
   {
     name: "Starter",
     price: 99,
-    description: "For small brands getting started with DPP",
+    description: "Everything you need to achieve EU DPP compliance",
     features: [
-      "Admin dashboard",
+      "Full admin dashboard",
       "QR code generation",
       "Public scan pages",
       "API access",
@@ -23,11 +23,11 @@ const platformTiers = [
   {
     name: "Growth",
     price: 499,
-    description: "For growing businesses with traceability needs",
+    description: "Enhanced features for teams with advanced needs",
     features: [
       "Everything in Starter",
       "Advanced analytics",
-      "3 team members",
+      "Up to 5 team members",
       "Priority support",
       "IoT device integration",
     ],
@@ -36,14 +36,14 @@ const platformTiers = [
   {
     name: "Enterprise",
     price: null,
-    description: "For large organizations with SAP/ERP needs",
+    description: "Tailored solutions with dedicated support",
     features: [
       "Everything in Growth",
       "SAP S/4HANA integration",
       "Unlimited team members",
       "Dedicated account manager",
       "SLA guarantee (99.9%)",
-      "On-premise option",
+      "On-premise deployment",
     ],
     popular: false,
   },
@@ -51,31 +51,31 @@ const platformTiers = [
 
 const identityPricing = [
   {
-    category: "Standard",
-    icon: Factory,
-    description: "High-volume, low-cost products",
-    examples: "AA batteries, basic packaging, commodity textiles",
+    category: "Batch Tracking",
+    icon: Layers,
+    description: "For products manufactured in batches or lots",
+    examples: "Batteries, textiles, packaging, components",
     pricing: "$0.01 - $0.05",
-    unit: "per batch",
-    note: "Recommended for commodities — one identity per manufacturing batch or lot",
+    unit: "per batch identity",
+    note: "One Digital Product Passport per manufacturing batch",
   },
   {
-    category: "Premium",
-    icon: Package,
-    description: "Mid-value electronics and goods",
-    examples: "Consumer electronics, EV batteries, appliances",
+    category: "Serial Tracking",
+    icon: GitBranch,
+    description: "For products requiring individual identification",
+    examples: "Electronics, appliances, automotive parts",
     pricing: "$0.05 - $0.25",
-    unit: "per product",
-    note: "One identity per individual product",
+    unit: "per product identity",
+    note: "One Digital Product Passport per individual unit",
   },
   {
-    category: "Luxury",
-    icon: Gem,
-    description: "High-value, low-volume products",
-    examples: "Watches, handbags, jewelry, designer goods",
+    category: "Provenance Tracking",
+    icon: Award,
+    description: "For products requiring full ownership history",
+    examples: "Timepieces, accessories, collectibles, art",
     pricing: "$0.50 - $2.00",
-    unit: "per product",
-    note: "Enhanced authentication and provenance tracking",
+    unit: "per product identity",
+    note: "Enhanced authentication and ownership transfer records",
   },
 ];
 
@@ -115,10 +115,10 @@ export default function Pricing() {
         <div className="text-center mb-12">
           <Badge variant="secondary" className="mb-4">Pricing</Badge>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4" data-testid="text-pricing-title">
-            Simple, Value-Based Pricing
+            Pricing That Fits Your Needs
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Platform fee + product identity cost based on your product type. No surprises.
+            Choose your platform plan, then select the tracking approach that matches your compliance requirements.
           </p>
         </div>
 
@@ -142,7 +142,7 @@ export default function Pricing() {
         <section className="mb-16">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold mb-2">Platform Plans</h2>
-            <p className="text-muted-foreground">Monthly fee for features and support</p>
+            <p className="text-muted-foreground">Select the features and support level you need</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {platformTiers.map((plan) => (
@@ -199,12 +199,15 @@ export default function Pricing() {
         <section className="mb-16">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold mb-2">Product Identity Pricing</h2>
-            <p className="text-muted-foreground">Pay based on your product type and volume</p>
+            <p className="text-muted-foreground">Choose based on your compliance requirements</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Every option delivers full EU DPP compliance — select the tracking approach that fits your products
+            </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
             {identityPricing.map((tier) => (
-              <Card key={tier.category} data-testid={`card-identity-${tier.category.toLowerCase()}`}>
+              <Card key={tier.category} data-testid={`card-identity-${tier.category.toLowerCase().replace(' ', '-')}`}>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -213,7 +216,7 @@ export default function Pricing() {
                     <h3 className="text-lg font-bold">{tier.category}</h3>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">{tier.description}</p>
-                  <p className="text-xs text-muted-foreground mb-4 italic">{tier.examples}</p>
+                  <p className="text-xs text-muted-foreground mb-4">{tier.examples}</p>
                   <div className="border-t pt-4">
                     <p className="text-2xl font-bold text-primary">{tier.pricing}</p>
                     <p className="text-sm text-muted-foreground">{tier.unit}</p>
@@ -226,15 +229,15 @@ export default function Pricing() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
-              Volume discounts available. <Link href="/contact" className="text-primary underline">Contact us</Link> for custom pricing.
+              Volume discounts available for all tracking options. <Link href="/contact" className="text-primary underline">Contact us</Link> for details.
             </p>
           </div>
         </section>
 
         <section className="mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold mb-2">Value Features</h2>
-            <p className="text-muted-foreground">What sets PhotonicTag apart</p>
+            <h2 className="text-2xl font-bold mb-2">Platform Capabilities</h2>
+            <p className="text-muted-foreground">Powerful features available across all plans</p>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             {valueFeatures.map((feature) => (
@@ -258,29 +261,28 @@ export default function Pricing() {
 
         <section className="mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold mb-2">Your ROI</h2>
-            <p className="text-muted-foreground">PhotonicTag pays for itself</p>
+            <h2 className="text-2xl font-bold mb-2">The PhotonicTag Advantage</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             <Card>
               <CardContent className="p-6 text-center">
                 <Shield className="w-8 h-8 text-primary mx-auto mb-3" />
                 <p className="text-3xl font-bold text-primary">50-100x</p>
-                <p className="text-sm text-muted-foreground">ROI vs. one compliance penalty</p>
+                <p className="text-sm text-muted-foreground">Return vs. one compliance penalty</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-6 text-center">
                 <Clock className="w-8 h-8 text-primary mx-auto mb-3" />
                 <p className="text-3xl font-bold text-primary">80%</p>
-                <p className="text-sm text-muted-foreground">Time saved on compliance</p>
+                <p className="text-sm text-muted-foreground">Time saved on compliance work</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-6 text-center">
                 <Zap className="w-8 h-8 text-primary mx-auto mb-3" />
                 <p className="text-3xl font-bold text-primary">Days</p>
-                <p className="text-sm text-muted-foreground">To deploy vs. months for legacy</p>
+                <p className="text-sm text-muted-foreground">To deploy, not months</p>
               </CardContent>
             </Card>
           </div>
@@ -294,14 +296,14 @@ export default function Pricing() {
                   <Building2 className="w-7 h-7 text-primary" />
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h2 className="text-xl font-bold mb-2">Enterprise & High-Volume</h2>
+                  <h2 className="text-xl font-bold mb-2">Need a Custom Solution?</h2>
                   <p className="text-muted-foreground">
-                    Custom pricing for manufacturers with 1M+ products, on-premise needs, or complex ERP integrations.
+                    We work with organizations of all sizes. Let's discuss your specific requirements, volume needs, and integration goals.
                   </p>
                 </div>
                 <Button size="lg" asChild data-testid="button-enterprise-contact">
                   <Link href="/contact" className="gap-2">
-                    Contact Sales
+                    Let's Talk
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                 </Button>
@@ -314,7 +316,7 @@ export default function Pricing() {
           <div className="bg-primary/5 rounded-lg p-8">
             <h2 className="text-2xl font-bold mb-2">Ready to Get Started?</h2>
             <p className="text-muted-foreground mb-6">
-              Talk to our team to find the right plan for your products.
+              Our team is here to help you find the right solution.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" asChild data-testid="button-contact-sales">
