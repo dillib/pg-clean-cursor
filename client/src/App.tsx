@@ -10,7 +10,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
-import Landing from "@/pages/landing";
+import Landing from "@/pages/landing-validation";
 import Dashboard from "@/pages/dashboard";
 import Products from "@/pages/products";
 import ProductForm from "@/pages/product-form";
