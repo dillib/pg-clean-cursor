@@ -8,7 +8,10 @@ import {
   Shield, 
   Database,
   CheckCircle,
-  Calendar
+  Calendar,
+  QrCode,
+  Wifi,
+  Radio
 } from "lucide-react";
 import { Link } from "wouter";
 import { PublicNav } from "@/components/public-nav";
@@ -24,9 +27,15 @@ const sapHighlights = [
   "SAP Business One support"
 ];
 
-const otherIntegrations = [
-  { name: "Oracle NetSuite", status: "Beta" },
-  { name: "Microsoft Dynamics 365", status: "Coming Soon" },
+const identityTech = [
+  { name: "QR Codes", description: "Dynamic QR codes with analytics", icon: QrCode },
+  { name: "NFC Tags", description: "Tap-to-scan product passports", icon: Wifi },
+  { name: "RFID", description: "Industrial tracking & inventory", icon: Radio },
+];
+
+const erpIntegrations = [
+  { name: "Oracle NetSuite", status: "Coming Soon" },
+  { name: "Microsoft Dynamics", status: "Coming Soon" },
   { name: "Shopify", status: "Coming Soon" },
 ];
 
@@ -43,20 +52,33 @@ export default function Integrations() {
               Connect Your Product Ecosystem
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              PhotonicTag integrates with your existing ERP systems. No data silos. No manual exports. Real-time product data flow.
+              PhotonicTag integrates with your ERP systems and identity technologies. No data silos. Real-time product data flow.
             </p>
           </div>
         </section>
 
         <section className="py-12 px-4 sm:px-6 lg:px-8 bg-muted/30">
           <div className="max-w-4xl mx-auto">
+            <h2 className="text-xl font-semibold mb-6 text-center">Identity Technologies</h2>
+            <div className="grid md:grid-cols-3 gap-4 mb-12">
+              {identityTech.map((tech) => (
+                <Card key={tech.name}>
+                  <CardContent className="p-6 text-center">
+                    <tech.icon className="w-8 h-8 mx-auto mb-3 text-primary" />
+                    <h3 className="font-semibold mb-1">{tech.name}</h3>
+                    <p className="text-sm text-muted-foreground">{tech.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <h2 className="text-xl font-semibold mb-6 text-center">Enterprise ERP</h2>
             <Card className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="grid md:grid-cols-2">
                   <div className="p-8 bg-blue-600 text-white">
                     <div className="flex items-center gap-3 mb-4">
                       <SiSap className="w-10 h-10" />
-                      <Badge variant="secondary" className="bg-white/20 text-white border-0">Live</Badge>
                     </div>
                     <h2 className="text-2xl font-bold mb-2">SAP Integration</h2>
                     <p className="text-blue-100 mb-6">
@@ -95,32 +117,22 @@ export default function Integrations() {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </section>
 
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-xl font-semibold mb-6 text-center">More Integrations</h2>
-            <div className="grid md:grid-cols-3 gap-4">
-              {otherIntegrations.map((integration) => (
+            <div className="grid md:grid-cols-3 gap-4 mt-6">
+              {erpIntegrations.map((integration) => (
                 <Card key={integration.name}>
                   <CardContent className="p-6 text-center">
                     <Database className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
                     <h3 className="font-semibold mb-2">{integration.name}</h3>
-                    <Badge variant={integration.status === "Beta" ? "secondary" : "outline"}>
-                      {integration.status}
-                    </Badge>
+                    <Badge variant="outline">{integration.status}</Badge>
                   </CardContent>
                 </Card>
               ))}
             </div>
-            <p className="text-center text-sm text-muted-foreground mt-6">
-              REST API available for custom integrations
-            </p>
           </div>
         </section>
 
-        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-muted/30">
+        <section className="py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-2xl font-bold mb-4">Ready to Connect?</h2>
             <p className="text-muted-foreground mb-6">
