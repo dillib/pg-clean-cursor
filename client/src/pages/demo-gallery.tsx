@@ -4,7 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Factory, Tag, Store, Recycle, QrCode, Shield, Leaf, ArrowRight, ExternalLink } from "lucide-react";
+import { PublicNav } from "@/components/public-nav";
+import { PublicFooter } from "@/components/public-footer";
+import { Factory, Tag, Store, Recycle, QrCode, Shield, Leaf, ArrowRight, Calendar } from "lucide-react";
 import type { Product } from "@shared/schema";
 
 interface DemoCategory {
@@ -173,21 +175,15 @@ export default function DemoGallery() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+      <PublicNav />
+      
+      <header className="border-b bg-card mt-16">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">PhotonicTag Demo Gallery</h1>
-              <p className="text-muted-foreground mt-1">
-                Explore Digital Product Passports across industries
-              </p>
-            </div>
-            <Link href="/">
-              <Button variant="outline" size="sm" data-testid="button-back-home">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Main Site
-              </Button>
-            </Link>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold tracking-tight">Digital Product Passport Demo</h1>
+            <p className="text-muted-foreground mt-1">
+              See how PhotonicTag creates secure, verifiable product identities
+            </p>
           </div>
         </div>
       </header>
@@ -232,23 +228,26 @@ export default function DemoGallery() {
           <div className="mt-12 p-6 rounded-lg border bg-card text-center">
             <h3 className="text-lg font-semibold mb-2">Ready to see PhotonicTag for your products?</h3>
             <p className="text-muted-foreground mb-4">
-              Contact us for a personalized demo with your product data
+              Let's discuss how Digital Product Passports can work for your business
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/">
-                <Button data-testid="button-learn-more">Learn More</Button>
-              </Link>
-              <Button variant="outline" data-testid="button-contact">
-                Contact Sales
+              <Button asChild data-testid="button-book-demo">
+                <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer" className="gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Book a Demo
+                </a>
               </Button>
+              <Link href="/contact">
+                <Button variant="outline" data-testid="button-contact">
+                  Contact Us
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
       </main>
 
-      <footer className="border-t mt-12 py-6 text-center text-sm text-muted-foreground">
-        <p>PhotonicTag - Identity, at the speed of light.</p>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }
