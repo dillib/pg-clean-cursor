@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
+import { PublicNav } from "@/components/public-nav";
+import { PublicFooter } from "@/components/public-footer";
 import {
   Package,
   Factory,
@@ -452,51 +454,18 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-          <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
-                <QrCode className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-semibold text-sm">PhotonicTag</span>
-                <span className="text-xs text-muted-foreground hidden sm:block">Digital Product Passport</span>
-              </div>
-            </div>
-          </Link>
-          <div className="hidden md:flex items-center gap-4">
-            <Link href="/demo" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors" data-testid="link-demo-gallery">Browse Demos</Link>
-            <Link href="/solution" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-solution">Solution</Link>
-            <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-pricing">Pricing</Link>
-            <Link href="/use-cases" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-use-cases">Use Cases</Link>
-            <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-contact">Contact</Link>
-          </div>
-          <div className="flex items-center gap-3">
-            {isDemo ? (
-              <Badge variant="outline" className="gap-1 border-primary text-primary">
-                <Sparkles className="h-3 w-3" />
-                Demo
-              </Badge>
-            ) : (
-              <Badge variant="secondary" className="gap-1">
-                <CheckCircle2 className="h-3 w-3" />
-                Verified
-              </Badge>
-            )}
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
+      <PublicNav />
 
       {isDemo && (
-        <div className="bg-primary/10 border-b border-primary/20">
+        <div className="bg-primary/10 border-b border-primary/20 mt-16">
           <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
             <p className="text-sm">
-              This is a demo passport. Create your own product passports for free.
+              This is an example passport. See how PhotonicTag can work for your products.
             </p>
             <Button size="sm" asChild data-testid="button-demo-signup">
-              <a href="/api/login">Get Started</a>
+              <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer">
+                Book a Demo
+              </a>
             </Button>
           </div>
         </div>
@@ -1260,9 +1229,9 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
                   ))}
               </div>
               <div className="mt-4 text-center">
-                <Link href="/demo">
+                <Link href="/scan/demo">
                   <Button variant="outline" size="sm" data-testid="button-view-all-demos">
-                    View All Demo Passports
+                    View More Examples
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
@@ -1270,26 +1239,9 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
             </CardContent>
           </Card>
         )}
-
-        <footer className="text-center py-8 border-t">
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <div className="h-6 w-6 rounded-md bg-primary flex items-center justify-center">
-                <QrCode className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <span className="font-medium">PhotonicTag</span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Identity, at the speed of light.
-            </p>
-            <Link href="/demo">
-              <Badge variant="outline" className="cursor-pointer" data-testid="badge-browse-demos">
-                Browse All Industry Demos
-              </Badge>
-            </Link>
-          </div>
-        </footer>
       </main>
+      
+      <PublicFooter />
     </div>
   );
 }
