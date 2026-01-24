@@ -4,10 +4,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { QrCode } from "lucide-react";
 
 const navLinks = [
-  { href: "/solution", label: "Solution" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/use-cases", label: "Use Cases" },
-  { href: "/docs", label: "Docs" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -38,11 +35,10 @@ export function PublicNav() {
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Button variant="ghost" asChild data-testid="button-login">
-              <a href="/api/login">Log In</a>
-            </Button>
-            <Button asChild data-testid="button-get-started">
-              <a href="/api/login">Get Started</a>
+            <Button asChild data-testid="button-book-demo">
+              <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer">
+                Book a Demo
+              </a>
             </Button>
           </div>
         </div>
