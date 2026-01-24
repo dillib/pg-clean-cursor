@@ -9,6 +9,24 @@ import { PublicFooter } from "@/components/public-footer";
 import { QrCode, Shield, Leaf, ArrowRight, Calendar } from "lucide-react";
 import type { Product } from "@shared/schema";
 
+const categoryDeadlinePriority: Record<string, number> = {
+  "Batteries": 1,
+  "EV Accessories": 2,
+  "Apparel": 3,
+  "Fashion Accessories": 3,
+  "Consumer Electronics": 4,
+  "IoT Devices": 4,
+  "Smart Home": 4,
+  "Industrial Packaging": 5,
+  "Industrial Belting": 6,
+  "Industrial Rollers": 6,
+};
+
+function getCategoryPriority(category: string | null): number {
+  if (!category) return 99;
+  return categoryDeadlinePriority[category] ?? 99;
+}
+
 function ProductCard({ product }: { product: Product }) {
   return (
     <Card className="hover-elevate transition-all duration-200 overflow-hidden">
@@ -70,6 +88,10 @@ export default function DemoGallery() {
     queryKey: ["/api/products"],
   });
 
+  const sortedProducts = [...products].sort((a, b) => 
+    getCategoryPriority(a.productCategory) - getCategoryPriority(b.productCategory)
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
@@ -97,7 +119,7 @@ export default function DemoGallery() {
             </div>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {products.map(product => (
+              {sortedProducts.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
