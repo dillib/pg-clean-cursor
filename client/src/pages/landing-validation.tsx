@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
+import { ModulesSection } from "@/components/modules-section";
 import { 
   QrCode, 
   Shield, 
@@ -75,6 +76,10 @@ export default function LandingValidation() {
           </div>
         </div>
       </section>
+
+      <div className="bg-muted/30 border-y">
+        <ModulesSection />
+      </div>
 
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-destructive/5 border-y">
         <div className="max-w-4xl mx-auto">

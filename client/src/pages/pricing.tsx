@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, ArrowRight, Building2, Shield, AlertTriangle, Zap, Database, Clock, Calendar, Brain, Wifi, BarChart3, Layers, GitBranch, Award } from "lucide-react";
+import { Check, ArrowRight, Building2, Shield, AlertTriangle, Zap, Clock, Calendar, Layers, GitBranch, Award } from "lucide-react";
 import { Link } from "wouter";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
+import { ModulesSection } from "@/components/modules-section";
 
 const platformTiers = [
   {
@@ -76,33 +77,6 @@ const identityPricing = [
     pricing: "$0.50 - $2.00",
     unit: "per product identity",
     note: "Enhanced authentication and ownership transfer records",
-  },
-];
-
-const valueFeatures = [
-  {
-    name: "SAP Integration",
-    icon: Database,
-    description: "Bidirectional sync with SAP S/4HANA. No middleware, no duplicate data entry.",
-    tier: "Enterprise",
-  },
-  {
-    name: "AI Insights",
-    icon: Brain,
-    description: "Sustainability scoring, repair guides, circularity analysis powered by AI.",
-    tier: "Add-on",
-  },
-  {
-    name: "IoT Tagging",
-    icon: Wifi,
-    description: "NFC, RFID, and BLE device integration for tap-to-scan product passports.",
-    tier: "Growth+",
-  },
-  {
-    name: "Supply Chain Tracking",
-    icon: BarChart3,
-    description: "Full traceability from raw materials to end consumer.",
-    tier: "Growth+",
   },
 ];
 
@@ -234,30 +208,9 @@ export default function Pricing() {
           </div>
         </section>
 
-        <section className="mb-16">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold mb-2">Platform Capabilities</h2>
-            <p className="text-muted-foreground">Powerful features available across all plans</p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-4">
-            {valueFeatures.map((feature) => (
-              <Card key={feature.name}>
-                <CardContent className="p-6 flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <feature.icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold">{feature.name}</h3>
-                      <Badge variant="outline" className="text-xs">{feature.tier}</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+        <div className="mb-16 -mx-4 sm:-mx-6 lg:-mx-8 bg-muted/30">
+          <ModulesSection compact />
+        </div>
 
         <section className="mb-16">
           <div className="text-center mb-8">
