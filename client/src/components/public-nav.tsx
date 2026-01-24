@@ -5,6 +5,7 @@ import { QrCode } from "lucide-react";
 
 const navLinks = [
   { href: "/scan/demo", label: "Examples" },
+  { href: "/integrations", label: "Integrations" },
   { href: "/pricing", label: "Pricing" },
   { href: "/contact", label: "Contact" },
 ];

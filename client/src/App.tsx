@@ -20,6 +20,7 @@ import SAPConnector from "@/pages/sap-connector";
 import SAPDemo from "@/pages/sap-demo";
 import PublicScan from "@/pages/public-scan";
 import Pricing from "@/pages/pricing";
+import Integrations from "@/pages/integrations";
 import Contact from "@/pages/contact";
 import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
@@ -125,6 +126,7 @@ function Router() {
         <PublicScan />
       </Route>
       <Route path="/scan/demo" component={DemoGallery} />
+      <Route path="/integrations" component={Integrations} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/contact" component={Contact} />
       <Route path="/privacy" component={Privacy} />
