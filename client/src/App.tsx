@@ -20,17 +20,9 @@ import SAPConnector from "@/pages/sap-connector";
 import SAPDemo from "@/pages/sap-demo";
 import PublicScan from "@/pages/public-scan";
 import Pricing from "@/pages/pricing";
-import Integrations from "@/pages/integrations";
-import Docs from "@/pages/docs";
-import Blog from "@/pages/blog";
-import CaseStudies from "@/pages/case-studies";
-import UseCases from "@/pages/use-cases";
-import EuDppGuide from "@/pages/eu-dpp-guide";
-import Careers from "@/pages/careers";
 import Contact from "@/pages/contact";
 import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
-import Solution from "@/pages/solution";
 import DemoGallery from "@/pages/demo-gallery";
 import CRM from "@/pages/crm";
 import NotFound from "@/pages/not-found";
@@ -132,19 +124,8 @@ function Router() {
       <Route path="/product/:id">
         <PublicScan />
       </Route>
-      <Route path="/scan/demo">
-        <PublicScan isDemo />
-      </Route>
-      <Route path="/demo" component={DemoGallery} />
-      <Route path="/solution" component={Solution} />
+      <Route path="/scan/demo" component={DemoGallery} />
       <Route path="/pricing" component={Pricing} />
-      <Route path="/integrations" component={Integrations} />
-      <Route path="/docs" component={Docs} />
-      <Route path="/blog" component={Blog} />
-      <Route path="/case-studies" component={CaseStudies} />
-      <Route path="/use-cases" component={UseCases} />
-      <Route path="/eu-dpp-guide" component={EuDppGuide} />
-      <Route path="/careers" component={Careers} />
       <Route path="/contact" component={Contact} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
