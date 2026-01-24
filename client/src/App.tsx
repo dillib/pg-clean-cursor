@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
+import { HelmetProvider } from "react-helmet-async";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -138,15 +139,17 @@ function Router() {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="photonictag-theme">
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <ScrollToTop />
-          <Router />
-          <Toaster />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider defaultTheme="light" storageKey="photonictag-theme">
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <ScrollToTop />
+            <Router />
+            <Toaster />
+          </TooltipProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
 

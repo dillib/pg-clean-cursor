@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Badge } from "@/components/ui/badge";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
@@ -5,6 +6,10 @@ import { PublicFooter } from "@/components/public-footer";
 export default function Privacy() {
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Privacy Policy - PhotonicTag</title>
+        <meta name="description" content="PhotonicTag privacy policy. Learn how we collect, use, and protect your data on our EU Digital Product Passport platform." />
+      </Helmet>
       <PublicNav />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

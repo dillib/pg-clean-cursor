@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -71,6 +72,12 @@ export default function DemoGallery() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Examples - PhotonicTag | Digital Product Passport Demos</title>
+        <meta name="description" content="Explore real Digital Product Passport examples. See how products display sustainability data, repair guides, and traceability information through scannable QR codes." />
+        <meta property="og:title" content="Digital Product Passport Examples - PhotonicTag" />
+        <meta property="og:description" content="See real DPP examples. Sustainability scores, repair guides, full traceability." />
+      </Helmet>
       <PublicNav />
       
       <main className="container mx-auto px-4 py-8 mt-16">

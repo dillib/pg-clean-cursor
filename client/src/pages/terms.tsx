@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Badge } from "@/components/ui/badge";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
@@ -5,6 +6,10 @@ import { PublicFooter } from "@/components/public-footer";
 export default function Terms() {
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Terms of Service - PhotonicTag</title>
+        <meta name="description" content="PhotonicTag terms of service. Review the terms governing your use of our EU Digital Product Passport platform." />
+      </Helmet>
       <PublicNav />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -83,6 +84,12 @@ const identityPricing = [
 export default function Pricing() {
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Pricing - PhotonicTag | EU DPP Compliance Platform</title>
+        <meta name="description" content="Simple, transparent pricing for EU Digital Product Passport compliance. Platform plans from €99/month plus usage-based product identity pricing. Compare plans and get started." />
+        <meta property="og:title" content="PhotonicTag Pricing - EU DPP Compliance Platform" />
+        <meta property="og:description" content="Affordable EU DPP compliance. Platform plans from €99/month. Avoid €100K+ penalties." />
+      </Helmet>
       <PublicNav />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

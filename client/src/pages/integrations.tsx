@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,12 @@ const erpIntegrations = [
 export default function Integrations() {
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Integrations - PhotonicTag | SAP, ERP & Identity Technologies</title>
+        <meta name="description" content="Connect PhotonicTag with SAP S/4HANA, ERP systems, QR codes, NFC tags, and RFID. Bidirectional sync, real-time product data flow. Enterprise-ready integrations." />
+        <meta property="og:title" content="PhotonicTag Integrations - SAP & ERP Connectivity" />
+        <meta property="og:description" content="Enterprise integrations for EU DPP. SAP S/4HANA sync. QR, NFC, RFID support." />
+      </Helmet>
       <PublicNav />
 
       <main className="mt-16">

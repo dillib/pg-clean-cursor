@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,13 @@ import { Link } from "wouter";
 export default function LandingValidation() {
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>PhotonicTag - EU Digital Product Passport Compliance | DPP Platform</title>
+        <meta name="description" content="Get EU Digital Product Passport compliant before 2027. PhotonicTag provides tamper-proof product identity, QR-based traceability, and SAP integration. Avoid €100K+ penalties." />
+        <meta property="og:title" content="PhotonicTag - EU DPP Compliance Made Simple" />
+        <meta property="og:description" content="Digital Product Passports for EU compliance. Avoid €100K+ penalties. SAP integration. Go live in weeks." />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <div className="fixed top-0 left-0 right-0 z-50">
         <PublicNav />
       </div>

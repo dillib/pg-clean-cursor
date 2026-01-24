@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -80,6 +81,12 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Contact Sales - PhotonicTag | EU DPP Compliance</title>
+        <meta name="description" content="Get in touch with PhotonicTag. Book a demo, request a consultation, or discuss your EU Digital Product Passport compliance needs. Response within 24 hours." />
+        <meta property="og:title" content="Contact PhotonicTag - EU DPP Compliance Experts" />
+        <meta property="og:description" content="Talk to our team about EU DPP compliance. Book a demo or request a consultation." />
+      </Helmet>
       <PublicNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
