@@ -12,7 +12,7 @@ const platformTiers = [
     price: 0,
     description: "Get started with DPP compliance before EU deadlines",
     features: [
-      "Up to 100 product identities",
+      "Up to 100 product identities*",
       "Basic admin dashboard",
       "QR code generation",
       "Public scan pages",
@@ -26,7 +26,7 @@ const platformTiers = [
     price: 99,
     description: "For small brands scaling their digital product passports",
     features: [
-      "Up to 1,000 product identities",
+      "Up to 1,000 product identities*",
       "Full admin dashboard",
       "API access",
       "Basic analytics",
@@ -40,7 +40,7 @@ const platformTiers = [
     price: 499,
     description: "For growing businesses with advanced traceability needs",
     features: [
-      "Up to 25,000 product identities",
+      "Up to 25,000 product identities*",
       "Advanced analytics",
       "Full API access",
       "3 team members",
@@ -54,7 +54,7 @@ const platformTiers = [
     price: 2000,
     description: "For large organizations with SAP and ERP integration needs",
     features: [
-      "Unlimited product identities",
+      "Unlimited product identities*",
       "SAP S/4HANA integration",
       "ERP bidirectional sync",
       "Dedicated account manager",
@@ -173,6 +173,12 @@ export default function Pricing() {
             <h2 className="text-2xl font-bold mb-2">Platform Plans</h2>
             <p className="text-muted-foreground">Choose your base tier</p>
             <Badge variant="secondary" className="mt-2">Save 20% with annual billing</Badge>
+            <div className="mt-4 p-3 bg-primary/5 rounded-lg inline-block">
+              <p className="text-sm font-medium">
+                <span className="text-primary">*</span> Product Identity = each unique Digital Product Passport + QR code you create
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">Priced per individual product, not per category or SKU</p>
+            </div>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {platformTiers.map((plan) => (
