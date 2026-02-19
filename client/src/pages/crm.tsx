@@ -3,16 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { 
   Users, TrendingUp, Target, Calendar, Mail, Building, 
   ChevronRight, Search, Filter, ArrowUpRight, ArrowDownRight,
-  CheckCircle, Clock, XCircle, Phone
+  CheckCircle, Clock, XCircle, Phone, UserPlus, Handshake,
+  Wand2, Loader2, Trash2, Eye, EyeOff, Copy, ExternalLink
 } from "lucide-react";
 import { useState } from "react";
-import type { Lead, LeadStatus, TierInterest } from "@shared/schema";
+import type { Lead, LeadStatus, TierInterest, Partner, DemoConfig } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -94,13 +97,31 @@ export default function CRM() {
     <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold" data-testid="text-crm-title">Lead Management</h1>
-          <p className="text-muted-foreground">Track and manage your sales pipeline</p>
+          <h1 className="text-3xl font-bold" data-testid="text-crm-title">CRM & Partner Management</h1>
+          <p className="text-muted-foreground">Leads, partners, and demo management</p>
         </div>
         <Badge variant="outline" className="text-sm">
           VC Metrics Dashboard
         </Badge>
       </div>
+
+      <Tabs defaultValue="leads" className="space-y-6">
+        <TabsList data-testid="tabs-crm">
+          <TabsTrigger value="leads" data-testid="tab-leads" className="gap-1">
+            <Users className="w-4 h-4" />
+            Leads
+          </TabsTrigger>
+          <TabsTrigger value="partners" data-testid="tab-partners" className="gap-1">
+            <Handshake className="w-4 h-4" />
+            Partners
+          </TabsTrigger>
+          <TabsTrigger value="demos" data-testid="tab-demos" className="gap-1">
+            <Wand2 className="w-4 h-4" />
+            Demo Generator
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="leads" className="space-y-6">
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card data-testid="card-metric-total">
@@ -416,6 +437,541 @@ export default function CRM() {
                   </Dialog>
                 );
               })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+        </TabsContent>
+
+        <TabsContent value="partners">
+          <PartnersTab />
+        </TabsContent>
+
+        <TabsContent value="demos">
+          <DemoGeneratorTab />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+const SAMPLE_PROMPTS = [
+  { label: "Battery Manufacturer", industry: "Batteries", prompt: "Generate 3 industrial battery products for a European battery manufacturer (LFP and NMC chemistry). Include detailed material composition, carbon footprint data, and recycling information for EU Battery Regulation compliance." },
+  { label: "Fashion Brand", industry: "Apparel", prompt: "Generate 3 sustainable fashion products for a mid-size European fashion brand. Include organic/recycled materials, water usage data, and supply chain origin information for EU DPP textile compliance." },
+  { label: "Electronics Company", industry: "Consumer Electronics", prompt: "Generate 3 consumer electronics products (smart devices, IoT sensors). Include repairability scores, spare parts availability, and e-waste recycling instructions for EU DPP electronics compliance." },
+  { label: "EV Components Supplier", industry: "EV Accessories", prompt: "Generate 3 electric vehicle accessory products (charging cables, battery modules, power converters). Include material composition, safety certifications, and end-of-life recycling data." },
+  { label: "Packaging Manufacturer", industry: "Industrial Packaging", prompt: "Generate 3 industrial packaging products (cardboard, biodegradable packaging, reusable containers). Include recycled content percentages, recyclability data, and material sourcing information." },
+  { label: "Furniture Maker", industry: "Furniture", prompt: "Generate 3 furniture products (office chairs, tables, shelving). Include wood sourcing certifications, VOC emissions data, repairability scores, and disassembly instructions." },
+];
+
+type SafePartner = Omit<Partner, "passwordHash">;
+
+function PartnersTab() {
+  const { toast } = useToast();
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [newPartner, setNewPartner] = useState({
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    company: "",
+    role: "demo_viewer" as string,
+  });
+  const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
+
+  const { data: partnersList = [], isLoading } = useQuery<SafePartner[]>({
+    queryKey: ["/api/partners"],
+  });
+
+  const createPartnerMutation = useMutation({
+    mutationFn: async (data: typeof newPartner) => {
+      const response = await apiRequest("POST", "/api/partners", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/partners"] });
+      setShowCreateDialog(false);
+      setNewPartner({ email: "", password: "", firstName: "", lastName: "", company: "", role: "demo_viewer" });
+      toast({ title: "Partner created", description: "Login credentials have been set up" });
+    },
+    onError: (error: any) => {
+      toast({ title: "Failed to create partner", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const updatePartnerMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Record<string, unknown> }) => {
+      const response = await apiRequest("PATCH", `/api/partners/${id}`, updates);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/partners"] });
+      toast({ title: "Partner updated" });
+    },
+  });
+
+  const deletePartnerMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/partners/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/partners"] });
+      toast({ title: "Partner removed" });
+    },
+  });
+
+  const copyLoginInfo = (email: string) => {
+    navigator.clipboard.writeText(email);
+    toast({ title: "Email copied to clipboard" });
+  };
+
+  const ROLE_LABELS: Record<string, string> = {
+    sales_partner: "Sales Partner",
+    reseller: "Reseller",
+    consultant: "Consultant",
+    demo_viewer: "Demo Viewer",
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="text-xl font-semibold">Partner Accounts</h2>
+          <p className="text-sm text-muted-foreground">Create and manage partner login credentials for demo access</p>
+        </div>
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogTrigger asChild>
+            <Button className="gap-2" data-testid="button-create-partner">
+              <UserPlus className="w-4 h-4" />
+              Add Partner
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Partner Account</DialogTitle>
+              <DialogDescription>Set up login credentials for a new partner</DialogDescription>
+            </DialogHeader>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                createPartnerMutation.mutate(newPartner);
+              }}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>First Name</Label>
+                  <Input
+                    value={newPartner.firstName}
+                    onChange={(e) => setNewPartner({ ...newPartner, firstName: e.target.value })}
+                    required
+                    data-testid="input-partner-first-name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Last Name</Label>
+                  <Input
+                    value={newPartner.lastName}
+                    onChange={(e) => setNewPartner({ ...newPartner, lastName: e.target.value })}
+                    required
+                    data-testid="input-partner-last-name"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={newPartner.email}
+                  onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })}
+                  required
+                  data-testid="input-partner-create-email"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Password (min 6 characters)</Label>
+                <Input
+                  type="text"
+                  value={newPartner.password}
+                  onChange={(e) => setNewPartner({ ...newPartner, password: e.target.value })}
+                  required
+                  minLength={6}
+                  data-testid="input-partner-create-password"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Company</Label>
+                <Input
+                  value={newPartner.company}
+                  onChange={(e) => setNewPartner({ ...newPartner, company: e.target.value })}
+                  data-testid="input-partner-company"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <Select value={newPartner.role} onValueChange={(v) => setNewPartner({ ...newPartner, role: v })}>
+                  <SelectTrigger data-testid="select-partner-role">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="demo_viewer">Demo Viewer</SelectItem>
+                    <SelectItem value="sales_partner">Sales Partner</SelectItem>
+                    <SelectItem value="reseller">Reseller</SelectItem>
+                    <SelectItem value="consultant">Consultant</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={createPartnerMutation.isPending}
+                data-testid="button-submit-partner"
+              >
+                {createPartnerMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : null}
+                Create Partner Account
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : partnersList.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Handshake className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-medium mb-2">No partners yet</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Create partner accounts to give demo access to potential sales partners and clients
+            </p>
+            <Button onClick={() => setShowCreateDialog(true)} className="gap-2" data-testid="button-add-first-partner">
+              <UserPlus className="w-4 h-4" />
+              Add First Partner
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {partnersList.map((partner) => (
+            <Card key={partner.id} data-testid={`card-partner-${partner.id}`}>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-4 flex-wrap">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-medium">
+                      {partner.firstName[0]}{partner.lastName[0]}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium">{partner.firstName} {partner.lastName}</span>
+                      <Badge variant="secondary">{ROLE_LABELS[partner.role] || partner.role}</Badge>
+                      <Badge variant={partner.status === "active" ? "default" : "secondary"}>
+                        {partner.status}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                      <span>{partner.email}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => copyLoginInfo(partner.email)}
+                        data-testid={`button-copy-email-${partner.id}`}
+                      >
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                      {partner.company && (
+                        <>
+                          <span className="text-muted-foreground/50">|</span>
+                          <span>{partner.company}</span>
+                        </>
+                      )}
+                    </div>
+                    {partner.lastLoginAt && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Last login: {format(new Date(partner.lastLoginAt), "MMM d, yyyy h:mm a")}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Select
+                      value={partner.status}
+                      onValueChange={(value) =>
+                        updatePartnerMutation.mutate({ id: partner.id, updates: { status: value } })
+                      }
+                    >
+                      <SelectTrigger className="w-28" data-testid={`select-partner-status-${partner.id}`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        if (confirm("Remove this partner account?")) {
+                          deletePartnerMutation.mutate(partner.id);
+                        }
+                      }}
+                      data-testid={`button-delete-partner-${partner.id}`}
+                    >
+                      <Trash2 className="w-4 h-4 text-muted-foreground" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <ExternalLink className="w-4 h-4" />
+            Partner Login URL
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2">
+            <Input
+              readOnly
+              value={`${window.location.origin}/partner/login`}
+              className="font-mono text-sm"
+              data-testid="input-partner-login-url"
+            />
+            <Button
+              variant="outline"
+              onClick={() => {
+                navigator.clipboard.writeText(`${window.location.origin}/partner/login`);
+                toast({ title: "Login URL copied" });
+              }}
+              data-testid="button-copy-login-url"
+            >
+              <Copy className="w-4 h-4" />
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Share this URL with partners so they can log in and explore the platform
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function DemoGeneratorTab() {
+  const { toast } = useToast();
+  const [selectedPrompt, setSelectedPrompt] = useState<typeof SAMPLE_PROMPTS[0] | null>(null);
+  const [customPrompt, setCustomPrompt] = useState("");
+  const [customIndustry, setCustomIndustry] = useState("");
+  const [customName, setCustomName] = useState("");
+
+  const { data: demoConfigs = [], isLoading } = useQuery<DemoConfig[]>({
+    queryKey: ["/api/demo-configs"],
+  });
+
+  const createDemoMutation = useMutation({
+    mutationFn: async (data: { name: string; industry: string; prompt: string }) => {
+      const response = await apiRequest("POST", "/api/demo-configs", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/demo-configs"] });
+      setSelectedPrompt(null);
+      setCustomPrompt("");
+      setCustomIndustry("");
+      setCustomName("");
+      toast({ title: "Demo generation started", description: "Products are being generated using AI. This may take a moment." });
+    },
+    onError: () => {
+      toast({ title: "Failed to create demo", variant: "destructive" });
+    },
+  });
+
+  const deleteDemoMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/demo-configs/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/demo-configs"] });
+      toast({ title: "Demo config removed" });
+    },
+  });
+
+  const handleGenerateFromPrompt = (prompt: typeof SAMPLE_PROMPTS[0]) => {
+    createDemoMutation.mutate({
+      name: `${prompt.label} Demo`,
+      industry: prompt.industry,
+      prompt: prompt.prompt,
+    });
+  };
+
+  const handleGenerateCustom = () => {
+    if (!customName || !customIndustry || !customPrompt) {
+      toast({ title: "Please fill all fields", variant: "destructive" });
+      return;
+    }
+    createDemoMutation.mutate({
+      name: customName,
+      industry: customIndustry,
+      prompt: customPrompt,
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold">Quick Demo Generator</h2>
+        <p className="text-sm text-muted-foreground">Generate tailored product demos for potential clients using AI</p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Industry Templates</CardTitle>
+          <CardDescription>Click a template to instantly generate a demo with realistic products</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {SAMPLE_PROMPTS.map((prompt) => (
+              <div
+                key={prompt.label}
+                className="p-3 rounded-md border text-left cursor-pointer hover-elevate active-elevate-2"
+                onClick={() => !createDemoMutation.isPending && handleGenerateFromPrompt(prompt)}
+                data-testid={`button-template-${prompt.industry.toLowerCase().replace(/\s/g, '-')}`}
+              >
+                <p className="font-medium text-sm">{prompt.label}</p>
+                <p className="text-xs text-muted-foreground">{prompt.industry}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Custom Demo</CardTitle>
+          <CardDescription>Write your own prompt to generate a specific industry demo</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Demo Name</Label>
+              <Input
+                placeholder="e.g., Acme Corp Battery Demo"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                data-testid="input-custom-demo-name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Industry</Label>
+              <Input
+                placeholder="e.g., Batteries, Textiles, Electronics"
+                value={customIndustry}
+                onChange={(e) => setCustomIndustry(e.target.value)}
+                data-testid="input-custom-demo-industry"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Prompt</Label>
+            <Textarea
+              placeholder="Describe the products you want to generate. Include details about materials, sustainability goals, and compliance needs..."
+              value={customPrompt}
+              onChange={(e) => setCustomPrompt(e.target.value)}
+              rows={4}
+              data-testid="input-custom-demo-prompt"
+            />
+          </div>
+          <Button
+            onClick={handleGenerateCustom}
+            disabled={createDemoMutation.isPending}
+            className="gap-2"
+            data-testid="button-generate-custom-demo"
+          >
+            {createDemoMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Wand2 className="w-4 h-4" />
+            )}
+            Generate Demo
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Generated Demos</CardTitle>
+          <CardDescription>Previously generated demo configurations</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : demoConfigs.length === 0 ? (
+            <div className="text-center py-8">
+              <Wand2 className="w-10 h-10 mx-auto text-muted-foreground/50 mb-3" />
+              <p className="text-sm text-muted-foreground">No demos generated yet. Use a template or create a custom demo above.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {demoConfigs.map((config) => (
+                <div
+                  key={config.id}
+                  className="flex items-center gap-4 p-4 rounded-lg border"
+                  data-testid={`card-demo-config-${config.id}`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium">{config.name}</span>
+                      <Badge variant="secondary">{config.industry}</Badge>
+                      <Badge
+                        variant={
+                          config.status === "ready"
+                            ? "default"
+                            : config.status === "generating"
+                            ? "secondary"
+                            : "destructive"
+                        }
+                      >
+                        {config.status === "generating" && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
+                        {config.status}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{config.prompt}</p>
+                    {config.generatedProducts && (config.generatedProducts as any[]).length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {(config.generatedProducts as any[]).length} products generated
+                      </p>
+                    )}
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {format(new Date(config.createdAt), "MMM d, yyyy")}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      if (confirm("Delete this demo configuration?")) {
+                        deleteDemoMutation.mutate(config.id);
+                      }
+                    }}
+                    data-testid={`button-delete-demo-${config.id}`}
+                  >
+                    <Trash2 className="w-4 h-4 text-muted-foreground" />
+                  </Button>
+                </div>
+              ))}
             </div>
           )}
         </CardContent>

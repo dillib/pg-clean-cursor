@@ -891,3 +891,62 @@ export const insertLeadActivitySchema = createInsertSchema(leadActivities).omit(
 
 export type InsertLeadActivity = z.infer<typeof insertLeadActivitySchema>;
 export type LeadActivity = typeof leadActivities.$inferSelect;
+
+// ============================================
+// PARTNERS (Sales Partners & Demo Access)
+// ============================================
+
+export type PartnerRole = "sales_partner" | "reseller" | "consultant" | "demo_viewer";
+export type PartnerStatus = "active" | "inactive" | "pending";
+
+export const partners = pgTable("partners", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  company: text("company"),
+  role: text("role").$type<PartnerRole>().default("demo_viewer").notNull(),
+  status: text("status").$type<PartnerStatus>().default("active").notNull(),
+  lastLoginAt: timestamp("last_login_at"),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertPartnerSchema = createInsertSchema(partners).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastLoginAt: true,
+  passwordHash: true,
+}).extend({
+  password: z.string().min(6),
+});
+
+export type InsertPartner = z.infer<typeof insertPartnerSchema>;
+export type Partner = typeof partners.$inferSelect;
+
+// ============================================
+// DEMO CONFIGURATIONS (Custom demos for clients)
+// ============================================
+
+export const demoConfigs = pgTable("demo_configs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  industry: text("industry").notNull(),
+  prompt: text("prompt").notNull(),
+  generatedProducts: jsonb("generated_products").$type<Record<string, unknown>[]>().default([]),
+  createdBy: varchar("created_by"),
+  status: text("status").$type<"generating" | "ready" | "failed">().default("generating").notNull(),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertDemoConfigSchema = createInsertSchema(demoConfigs).omit({
+  id: true,
+  createdAt: true,
+  generatedProducts: true,
+  status: true,
+});
+
+export type InsertDemoConfig = z.infer<typeof insertDemoConfigSchema>;
+export type DemoConfig = typeof demoConfigs.$inferSelect;

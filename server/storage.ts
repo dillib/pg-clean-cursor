@@ -37,6 +37,9 @@ import {
   type LeadActivity,
   type InsertLeadActivity,
   type LeadStatus,
+  type Partner,
+  type DemoConfig,
+  type InsertDemoConfig,
   users,
   products,
   roles,
@@ -53,6 +56,8 @@ import {
   integrationSyncLogs,
   leads,
   leadActivities,
+  partners,
+  demoConfigs,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -143,6 +148,21 @@ export interface IStorage {
   getSyncLogsByConnectorId(connectorId: string): Promise<IntegrationSyncLog[]>;
   createIntegrationSyncLog(log: InsertIntegrationSyncLog): Promise<IntegrationSyncLog>;
   updateIntegrationSyncLog(id: string, updates: Partial<IntegrationSyncLog>): Promise<IntegrationSyncLog | undefined>;
+
+  // Partners
+  getPartner(id: string): Promise<Partner | undefined>;
+  getPartnerByEmail(email: string): Promise<Partner | undefined>;
+  getAllPartners(): Promise<Partner[]>;
+  createPartner(partner: Omit<Partner, "id" | "createdAt" | "updatedAt" | "lastLoginAt">): Promise<Partner>;
+  updatePartner(id: string, updates: Partial<Partner>): Promise<Partner | undefined>;
+  deletePartner(id: string): Promise<boolean>;
+
+  // Demo Configs
+  getDemoConfig(id: string): Promise<DemoConfig | undefined>;
+  getAllDemoConfigs(): Promise<DemoConfig[]>;
+  createDemoConfig(config: InsertDemoConfig): Promise<DemoConfig>;
+  updateDemoConfig(id: string, updates: Partial<DemoConfig>): Promise<DemoConfig | undefined>;
+  deleteDemoConfig(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -630,6 +650,69 @@ export class DatabaseStorage implements IStorage {
       thisWeek,
       lastWeek,
     };
+  }
+
+  // Partners
+  async getPartner(id: string): Promise<Partner | undefined> {
+    const [partner] = await db.select().from(partners).where(eq(partners.id, id));
+    return partner;
+  }
+
+  async getPartnerByEmail(email: string): Promise<Partner | undefined> {
+    const [partner] = await db.select().from(partners).where(eq(partners.email, email));
+    return partner;
+  }
+
+  async getAllPartners(): Promise<Partner[]> {
+    return db.select().from(partners).orderBy(desc(partners.createdAt));
+  }
+
+  async createPartner(partner: Omit<Partner, "id" | "createdAt" | "updatedAt" | "lastLoginAt">): Promise<Partner> {
+    const [created] = await db.insert(partners).values(partner as typeof partners.$inferInsert).returning();
+    return created;
+  }
+
+  async updatePartner(id: string, updates: Partial<Partner>): Promise<Partner | undefined> {
+    const [updated] = await db
+      .update(partners)
+      .set({ ...updates, updatedAt: new Date() } as typeof partners.$inferInsert)
+      .where(eq(partners.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePartner(id: string): Promise<boolean> {
+    const result = await db.delete(partners).where(eq(partners.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Demo Configs
+  async getDemoConfig(id: string): Promise<DemoConfig | undefined> {
+    const [config] = await db.select().from(demoConfigs).where(eq(demoConfigs.id, id));
+    return config;
+  }
+
+  async getAllDemoConfigs(): Promise<DemoConfig[]> {
+    return db.select().from(demoConfigs).orderBy(desc(demoConfigs.createdAt));
+  }
+
+  async createDemoConfig(config: InsertDemoConfig): Promise<DemoConfig> {
+    const [created] = await db.insert(demoConfigs).values(config as typeof demoConfigs.$inferInsert).returning();
+    return created;
+  }
+
+  async updateDemoConfig(id: string, updates: Partial<DemoConfig>): Promise<DemoConfig | undefined> {
+    const [updated] = await db
+      .update(demoConfigs)
+      .set(updates as typeof demoConfigs.$inferInsert)
+      .where(eq(demoConfigs.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteDemoConfig(id: string): Promise<boolean> {
+    const result = await db.delete(demoConfigs).where(eq(demoConfigs.id, id)).returning();
+    return result.length > 0;
   }
 }
 

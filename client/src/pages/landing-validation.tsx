@@ -89,6 +89,112 @@ export default function LandingValidation() {
         <ModulesSection />
       </div>
 
+      <section className="py-16 px-4 sm:px-6 lg:px-8 border-y" data-testid="section-dpp-timeline">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <Badge variant="outline" className="mb-4 gap-1">
+              <Clock className="w-3 h-3" />
+              ESPR Regulation (EU) 2024/1781
+            </Badge>
+            <h2 className="text-3xl font-bold mb-4" data-testid="text-timeline-title">EU DPP Compliance Timeline</h2>
+            <p className="text-lg text-muted-foreground">
+              Digital Product Passports are rolling out in phases. Know your deadline.
+            </p>
+          </div>
+
+          <div className="relative">
+            <div className="absolute left-1/2 -translate-x-px top-0 bottom-0 w-0.5 bg-border hidden md:block" />
+
+            <div className="space-y-8 md:space-y-12">
+              <div className="relative flex flex-col md:flex-row md:items-center gap-4" data-testid="timeline-item-batteries">
+                <div className="md:w-1/2 md:text-right md:pr-8">
+                  <Badge variant="destructive" className="mb-2">Urgent</Badge>
+                  <h3 className="font-semibold text-lg">Batteries & EV Components</h3>
+                  <p className="text-sm text-muted-foreground">Industrial, EV, and portable batteries above 2kWh. Full lifecycle data, carbon footprint, and recycled content disclosure required.</p>
+                </div>
+                <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-destructive text-destructive-foreground items-center justify-center z-10">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div className="md:w-1/2 md:pl-8">
+                  <Card className="border-destructive/30 bg-destructive/5">
+                    <CardContent className="p-4">
+                      <p className="font-bold text-destructive text-lg">February 18, 2027</p>
+                      <p className="text-xs text-muted-foreground mt-1">EU Battery Regulation 2023/1542</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              <div className="relative flex flex-col md:flex-row md:items-center gap-4" data-testid="timeline-item-textiles">
+                <div className="md:w-1/2 md:text-right md:pr-8">
+                  <Badge variant="secondary" className="mb-2 bg-amber-500/10 text-amber-600 border-amber-200">Soon</Badge>
+                  <h3 className="font-semibold text-lg">Textiles & Electronics</h3>
+                  <p className="text-sm text-muted-foreground">Clothing, footwear, consumer electronics, and smart devices. Material composition, repairability scores, and sustainability data.</p>
+                </div>
+                <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-amber-500 text-white items-center justify-center z-10">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <div className="md:w-1/2 md:pl-8">
+                  <Card className="border-amber-500/30 bg-amber-500/5">
+                    <CardContent className="p-4">
+                      <p className="font-bold text-amber-600 text-lg">Late 2027</p>
+                      <p className="text-xs text-muted-foreground mt-1">ESPR delegated acts expected</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              <div className="relative flex flex-col md:flex-row md:items-center gap-4" data-testid="timeline-item-packaging">
+                <div className="md:w-1/2 md:text-right md:pr-8">
+                  <Badge variant="secondary" className="mb-2">Upcoming</Badge>
+                  <h3 className="font-semibold text-lg">Packaging & Furniture</h3>
+                  <p className="text-sm text-muted-foreground">Packaging materials, furniture, and home goods. Recycling instructions, material sourcing, and circularity data.</p>
+                </div>
+                <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-primary/80 text-primary-foreground items-center justify-center z-10">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                <div className="md:w-1/2 md:pl-8">
+                  <Card>
+                    <CardContent className="p-4">
+                      <p className="font-bold text-lg">2028 - 2029</p>
+                      <p className="text-xs text-muted-foreground mt-1">Phased rollout under ESPR</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              <div className="relative flex flex-col md:flex-row md:items-center gap-4" data-testid="timeline-item-universal">
+                <div className="md:w-1/2 md:text-right md:pr-8">
+                  <Badge variant="secondary" className="mb-2">All Industries</Badge>
+                  <h3 className="font-semibold text-lg">Universal DPP Mandate</h3>
+                  <p className="text-sm text-muted-foreground">All product categories including construction materials, automotive parts, and industrial equipment. Full EU market coverage.</p>
+                </div>
+                <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-muted text-muted-foreground items-center justify-center z-10">
+                  <Shield className="w-5 h-5" />
+                </div>
+                <div className="md:w-1/2 md:pl-8">
+                  <Card>
+                    <CardContent className="p-4">
+                      <p className="font-bold text-lg">By 2030</p>
+                      <p className="text-xs text-muted-foreground mt-1">Complete ESPR implementation</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-10">
+            <Button asChild data-testid="button-timeline-demo">
+              <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer" className="gap-2">
+                <Calendar className="w-4 h-4" />
+                Find Out Your Deadline
+              </a>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-destructive/5 border-y">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">

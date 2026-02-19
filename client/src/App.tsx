@@ -27,6 +27,8 @@ import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 import DemoGallery from "@/pages/demo-gallery";
 import CRM from "@/pages/crm";
+import PartnerLogin from "@/pages/partner-login";
+import PartnerDashboard from "@/pages/partner-dashboard";
 import NotFound from "@/pages/not-found";
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -130,6 +132,8 @@ function Router() {
       <Route path="/integrations" component={Integrations} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/contact" component={Contact} />
+      <Route path="/partner/login" component={PartnerLogin} />
+      <Route path="/partner/dashboard" component={PartnerDashboard} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route component={NotFound} />

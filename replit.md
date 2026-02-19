@@ -17,9 +17,21 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### January 2026
+- **Partner Portal & Demo System**: Partner management expansion:
+  - Partner authentication system separate from Replit Auth (email/password with bcrypt)
+  - Partner login page at /partner/login with dedicated auth flow
+  - Partner dashboard at /partner/dashboard for demo product browsing
+  - CRM expanded with 3 tabs: Leads, Partners, Demo Generator
+  - Partner management: create/edit/delete partner accounts with roles (sales_partner, reseller, consultant, demo_viewer)
+  - Quick Demo Generator with 6 industry templates (Battery, Fashion, Electronics, EV, Packaging, Furniture)
+  - Custom demo prompt support for AI-generated product data
+  - Partner Login button added to public navigation
+  - EU DPP Compliance Timeline section on landing page with 4-phase rollout visual (2027-2030)
+  - Database tables: partners, demo_configs
+  - API routes: /api/partners (CRUD), /api/partners/login, /api/demo-configs (CRUD)
 - **Validation Build Finalized**: Market validation launch ready with all public pages:
   - Public pages: Landing, Examples (/scan/demo), Integrations, Pricing, Contact, Privacy, Terms
-  - No login pages in navigation - validation build is public-only
+  - Partner Login button in public navigation for partner access
   - CRM dashboard remains protected behind auth for internal lead management
   - Custom PhotonicTag favicon/app icon generated
   - SEO complete with react-helmet-async: Page-specific titles, meta descriptions, OG tags

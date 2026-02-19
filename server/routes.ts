@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { type Server } from "http";
-import { insertProductSchema, insertIoTDeviceSchema, insertEnterpriseConnectorSchema, insertLeadSchema } from "@shared/schema";
+import { insertProductSchema, insertIoTDeviceSchema, insertEnterpriseConnectorSchema, insertLeadSchema, insertPartnerSchema, insertDemoConfigSchema } from "@shared/schema";
 import { productService } from "./services/product-service";
 import { qrService } from "./services/qr-service";
 import { identityService } from "./services/identity-service";
@@ -12,6 +12,7 @@ import { seedDemoData } from "./seed-demo-data";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { storage } from "./storage";
 import sapRoutes from "./routes/sap-routes";
+import bcrypt from "bcryptjs";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -869,9 +870,285 @@ export async function registerRoutes(
   });
 
   // ==========================================
+  // PARTNER AUTH ENDPOINTS
+  // ==========================================
+
+  app.post("/api/partner/login", async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body;
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password required" });
+      }
+
+      const partner = await storage.getPartnerByEmail(email);
+      if (!partner) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      if (partner.status !== "active") {
+        return res.status(403).json({ error: "Account is inactive" });
+      }
+
+      const valid = await bcrypt.compare(password, partner.passwordHash);
+      if (!valid) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      await storage.updatePartner(partner.id, { lastLoginAt: new Date() });
+
+      (req.session as any).partnerId = partner.id;
+      (req.session as any).partnerRole = partner.role;
+
+      const { passwordHash, ...safePartner } = partner;
+      res.json({ success: true, partner: safePartner });
+    } catch (error) {
+      console.error("Partner login error:", error);
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  app.get("/api/partner/me", async (req: Request, res: Response) => {
+    try {
+      const partnerId = (req.session as any)?.partnerId;
+      if (!partnerId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const partner = await storage.getPartner(partnerId);
+      if (!partner || partner.status !== "active") {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const { passwordHash, ...safePartner } = partner;
+      res.json(safePartner);
+    } catch (error) {
+      console.error("Partner auth check error:", error);
+      res.status(500).json({ error: "Auth check failed" });
+    }
+  });
+
+  app.post("/api/partner/logout", async (req: Request, res: Response) => {
+    (req.session as any).partnerId = undefined;
+    (req.session as any).partnerRole = undefined;
+    res.json({ success: true });
+  });
+
+  // ==========================================
+  // PARTNER MANAGEMENT ENDPOINTS (Protected - Admin Only)
+  // ==========================================
+
+  app.get("/api/partners", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const allPartners = await storage.getAllPartners();
+      const safePartners = allPartners.map(({ passwordHash, ...p }) => p);
+      res.json(safePartners);
+    } catch (error) {
+      console.error("Error fetching partners:", error);
+      res.status(500).json({ error: "Failed to fetch partners" });
+    }
+  });
+
+  app.post("/api/partners", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const parsed = insertPartnerSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid partner data", details: parsed.error.issues });
+      }
+
+      const existing = await storage.getPartnerByEmail(parsed.data.email);
+      if (existing) {
+        return res.status(409).json({ error: "Partner with this email already exists" });
+      }
+
+      const passwordHash = await bcrypt.hash(parsed.data.password, 10);
+      const { password, ...rest } = parsed.data;
+
+      const partner = await storage.createPartner({
+        ...rest,
+        passwordHash,
+      });
+
+      const { passwordHash: _, ...safePartner } = partner;
+      res.status(201).json(safePartner);
+    } catch (error) {
+      console.error("Error creating partner:", error);
+      res.status(500).json({ error: "Failed to create partner" });
+    }
+  });
+
+  app.patch("/api/partners/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const updates: any = { ...req.body };
+
+      if (updates.password) {
+        updates.passwordHash = await bcrypt.hash(updates.password, 10);
+        delete updates.password;
+      }
+
+      const partner = await storage.updatePartner(req.params.id, updates);
+      if (!partner) {
+        return res.status(404).json({ error: "Partner not found" });
+      }
+
+      const { passwordHash, ...safePartner } = partner;
+      res.json(safePartner);
+    } catch (error) {
+      console.error("Error updating partner:", error);
+      res.status(500).json({ error: "Failed to update partner" });
+    }
+  });
+
+  app.delete("/api/partners/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const success = await storage.deletePartner(req.params.id);
+      if (!success) {
+        return res.status(404).json({ error: "Partner not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting partner:", error);
+      res.status(500).json({ error: "Failed to delete partner" });
+    }
+  });
+
+  // ==========================================
+  // DEMO CONFIG ENDPOINTS (Protected - Admin Only)
+  // ==========================================
+
+  app.get("/api/demo-configs", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const configs = await storage.getAllDemoConfigs();
+      res.json(configs);
+    } catch (error) {
+      console.error("Error fetching demo configs:", error);
+      res.status(500).json({ error: "Failed to fetch demo configs" });
+    }
+  });
+
+  app.post("/api/demo-configs", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const parsed = insertDemoConfigSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid demo config", details: parsed.error.issues });
+      }
+
+      const config = await storage.createDemoConfig(parsed.data);
+
+      // Generate products using AI in the background
+      generateDemoProducts(config.id, parsed.data.prompt, parsed.data.industry).catch(err => {
+        console.error("Error generating demo products:", err);
+      });
+
+      res.status(201).json(config);
+    } catch (error) {
+      console.error("Error creating demo config:", error);
+      res.status(500).json({ error: "Failed to create demo config" });
+    }
+  });
+
+  app.delete("/api/demo-configs/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const success = await storage.deleteDemoConfig(req.params.id);
+      if (!success) {
+        return res.status(404).json({ error: "Demo config not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting demo config:", error);
+      res.status(500).json({ error: "Failed to delete demo config" });
+    }
+  });
+
+  app.get("/api/demo-configs/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const config = await storage.getDemoConfig(req.params.id);
+      if (!config) {
+        return res.status(404).json({ error: "Demo config not found" });
+      }
+      res.json(config);
+    } catch (error) {
+      console.error("Error fetching demo config:", error);
+      res.status(500).json({ error: "Failed to fetch demo config" });
+    }
+  });
+
+  // ==========================================
   // SAP INTEGRATION ENDPOINTS (Protected)
   // ==========================================
   app.use("/api/sap", isAuthenticated, sapRoutes);
 
   return httpServer;
+}
+
+async function generateDemoProducts(configId: string, prompt: string, industry: string) {
+  try {
+    const systemPrompt = `You are a product data generator for Digital Product Passports (DPP) under EU ESPR Regulation 2024/1781. Generate realistic product data for the ${industry} industry.
+
+Return a JSON array of 3 products. Each product must have:
+- productName: realistic product name
+- productCategory: "${industry}"
+- modelNumber: realistic model number
+- sku: realistic SKU
+- manufacturer: realistic manufacturer name
+- countryOfOrigin: realistic country
+- batchNumber: realistic batch number
+- materials: comma-separated list of materials
+- carbonFootprint: number (kg CO2e)
+- repairabilityScore: number 1-10
+- warrantyInfo: warranty text
+- recyclingInstructions: recycling guidance text
+- recycledContentPercent: number 0-100
+- recyclabilityPercent: number 0-100
+
+Respond ONLY with a valid JSON array, no markdown.`;
+
+    const response = await aiService.generateChatCompletion([
+      { role: "system", content: systemPrompt },
+      { role: "user", content: prompt },
+    ]);
+
+    let products: any[] = [];
+    try {
+      const content = response.content || response;
+      const text = typeof content === "string" ? content : JSON.stringify(content);
+      const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      products = JSON.parse(cleaned);
+    } catch (parseError) {
+      console.error("Failed to parse AI response:", parseError);
+      await storage.updateDemoConfig(configId, { status: "failed" });
+      return;
+    }
+
+    // Create actual products in the database
+    for (const p of products) {
+      try {
+        await productService.createProduct({
+          productName: p.productName || `${industry} Product`,
+          productCategory: p.productCategory || industry,
+          modelNumber: p.modelNumber || "",
+          sku: p.sku || "",
+          manufacturer: p.manufacturer || "Demo Manufacturer",
+          countryOfOrigin: p.countryOfOrigin || "Germany",
+          batchNumber: p.batchNumber || `DEMO-${Date.now()}`,
+          materials: p.materials || "Various materials",
+          carbonFootprint: p.carbonFootprint || 50,
+          repairabilityScore: p.repairabilityScore || 7,
+          warrantyInfo: p.warrantyInfo || "Standard warranty",
+          recyclingInstructions: p.recyclingInstructions || "Contact manufacturer for recycling",
+          recycledContentPercent: p.recycledContentPercent,
+          recyclabilityPercent: p.recyclabilityPercent,
+        });
+      } catch (err) {
+        console.error("Error creating demo product:", err);
+      }
+    }
+
+    await storage.updateDemoConfig(configId, {
+      status: "ready",
+      generatedProducts: products,
+    });
+  } catch (error) {
+    console.error("Error in generateDemoProducts:", error);
+    await storage.updateDemoConfig(configId, { status: "failed" });
+  }
 }
