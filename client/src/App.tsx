@@ -211,7 +211,13 @@ function InternalOpsProtected() {
   }
 
   if (!isAuthenticated) {
-    return <Redirect to="/" />;
+    window.location.href = "/api/login";
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <span className="ml-2 text-muted-foreground">Redirecting to login...</span>
+      </div>
+    );
   }
 
   return (
