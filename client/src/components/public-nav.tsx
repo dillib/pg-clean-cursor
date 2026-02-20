@@ -10,7 +10,7 @@ const navLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
-export function PublicNav() {
+export function PublicNav({ hideBookDemo = false }: { hideBookDemo?: boolean } = {}) {
   return (
     <nav className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -37,11 +37,13 @@ export function PublicNav() {
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Button asChild data-testid="button-book-demo">
-              <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer">
-                Book a Demo
-              </a>
-            </Button>
+            {!hideBookDemo && (
+              <Button asChild data-testid="button-book-demo">
+                <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer">
+                  Book a Demo
+                </a>
+              </Button>
+            )}
           </div>
         </div>
       </div>

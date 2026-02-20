@@ -83,7 +83,7 @@ export default function PartnerDashboard() {
         <title>Demo Dashboard | PhotonicTag</title>
       </Helmet>
       <div className="fixed top-0 left-0 right-0 z-50">
-        <PublicNav />
+        <PublicNav hideBookDemo />
       </div>
 
       <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
@@ -179,38 +179,96 @@ export default function PartnerDashboard() {
                         {category}
                         <Badge variant="secondary">{categoryProducts.length}</Badge>
                       </h3>
-                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="grid sm:grid-cols-2 gap-6">
                         {categoryProducts.map((product) => (
-                          <Card key={product.id} className="hover-elevate" data-testid={`card-product-${product.id}`}>
-                            {product.productImage && (
-                              <div className="aspect-video w-full overflow-hidden bg-muted">
-                                <img
-                                  src={product.productImage}
-                                  alt={product.productName || "Product"}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            )}
-                            <CardContent className="p-4">
-                              <h4 className="font-medium text-sm line-clamp-2 mb-1">{product.productName}</h4>
-                              <p className="text-xs text-muted-foreground mb-3">{product.manufacturer}</p>
-                              <div className="flex items-center gap-2 flex-wrap mb-3">
-                                {product.ceMarking && (
-                                  <Badge variant="outline" className="text-xs">CE</Badge>
+                          <Card key={product.id} className="hover-elevate overflow-hidden" data-testid={`card-product-${product.id}`}>
+                            <div className="flex flex-col md:flex-row">
+                              {product.productImage && (
+                                <div className="md:w-64 w-full h-48 md:h-auto overflow-hidden bg-muted flex-shrink-0">
+                                  <img
+                                    src={product.productImage}
+                                    alt={product.productName || "Product"}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )}
+                              <CardContent className="p-5 flex-1">
+                                <div className="flex items-start justify-between gap-2 mb-3">
+                                  <div>
+                                    <h4 className="font-semibold text-base mb-1">{product.productName}</h4>
+                                    <p className="text-sm text-muted-foreground">{product.manufacturer}</p>
+                                  </div>
+                                  {product.qrCodeData && (
+                                    <img src={product.qrCodeData} alt="QR" className="w-16 h-16 rounded border" />
+                                  )}
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm mb-3">
+                                  {product.modelNumber && (
+                                    <>
+                                      <span className="text-muted-foreground">Model</span>
+                                      <span className="font-medium">{product.modelNumber}</span>
+                                    </>
+                                  )}
+                                  {product.sku && (
+                                    <>
+                                      <span className="text-muted-foreground">SKU</span>
+                                      <span className="font-medium">{product.sku}</span>
+                                    </>
+                                  )}
+                                  {product.countryOfOrigin && (
+                                    <>
+                                      <span className="text-muted-foreground">Origin</span>
+                                      <span className="font-medium">{product.countryOfOrigin}</span>
+                                    </>
+                                  )}
+                                  {product.expectedLifespanYears && (
+                                    <>
+                                      <span className="text-muted-foreground">Lifespan</span>
+                                      <span className="font-medium">{product.expectedLifespanYears} years</span>
+                                    </>
+                                  )}
+                                </div>
+
+                                <div className="flex items-center gap-2 flex-wrap mb-3">
+                                  {product.ceMarking && (
+                                    <Badge variant="outline" className="text-xs">CE Marked</Badge>
+                                  )}
+                                  {product.repairabilityScore && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      Repairability: {product.repairabilityScore}/10
+                                    </Badge>
+                                  )}
+                                  {product.carbonFootprint && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {product.carbonFootprint} kg CO2
+                                    </Badge>
+                                  )}
+                                  {product.recycledContentPercent && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {product.recycledContentPercent}% Recycled
+                                    </Badge>
+                                  )}
+                                  {product.recyclabilityPercent && (
+                                    <Badge variant="outline" className="text-xs text-green-600 border-green-300">
+                                      {product.recyclabilityPercent}% Recyclable
+                                    </Badge>
+                                  )}
+                                </div>
+
+                                {product.materials && (
+                                  <p className="text-xs text-muted-foreground mb-3">
+                                    <span className="font-medium text-foreground">Materials:</span> {product.materials}
+                                  </p>
                                 )}
-                                <Badge variant="secondary" className="text-xs">
-                                  Score: {product.repairabilityScore}/10
-                                </Badge>
-                                <Badge variant="secondary" className="text-xs">
-                                  {product.carbonFootprint} kg CO2
-                                </Badge>
-                              </div>
-                              <Button variant="outline" size="sm" className="w-full gap-1" asChild>
-                                <Link href={`/product/${product.id}`}>
-                                  View DPP <ArrowRight className="h-3 w-3" />
-                                </Link>
-                              </Button>
-                            </CardContent>
+
+                                <Button variant="default" size="sm" className="w-full gap-1" asChild>
+                                  <Link href={`/product/${product.id}`}>
+                                    View Full Digital Product Passport <ArrowRight className="h-3 w-3" />
+                                  </Link>
+                                </Button>
+                              </CardContent>
+                            </div>
                           </Card>
                         ))}
                       </div>
