@@ -12,6 +12,7 @@ import { seedDemoData } from "./seed-demo-data";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { storage } from "./storage";
 import sapRoutes from "./routes/sap-routes";
+import internalRoutes from "./routes/internal-routes";
 import bcrypt from "bcryptjs";
 import type { RequestHandler } from "express";
 
@@ -1089,6 +1090,11 @@ export async function registerRoutes(
       res.status(500).json({ error: "Failed to fetch demo config" });
     }
   });
+
+  // ==========================================
+  // INTERNAL ADMIN ENDPOINTS (Protected - Admin Only)
+  // ==========================================
+  app.use("/api/internal", isAuthenticated, internalRoutes);
 
   // ==========================================
   // SAP INTEGRATION ENDPOINTS (Protected)

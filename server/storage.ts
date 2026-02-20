@@ -40,6 +40,21 @@ import {
   type Partner,
   type DemoConfig,
   type InsertDemoConfig,
+  type CustomerAccount,
+  type InsertCustomerAccount,
+  type AccountActivity,
+  type InsertAccountActivity,
+  type NextBestAction,
+  type InsertNextBestAction,
+  type ActionStatus,
+  type DemoInstance,
+  type InsertDemoInstance,
+  type DemoInstanceStatus,
+  type PersonaTemplate,
+  type InsertPersonaTemplate,
+  type SupportTicket,
+  type InsertSupportTicket,
+  type TicketStatus,
   users,
   products,
   roles,
@@ -58,6 +73,13 @@ import {
   leadActivities,
   partners,
   demoConfigs,
+  customerAccounts,
+  accountActivities,
+  nextBestActions,
+  demoInstances,
+  personaTemplates,
+  supportTickets,
+  platformMetrics,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -163,6 +185,45 @@ export interface IStorage {
   createDemoConfig(config: InsertDemoConfig): Promise<DemoConfig>;
   updateDemoConfig(id: string, updates: Partial<DemoConfig>): Promise<DemoConfig | undefined>;
   deleteDemoConfig(id: string): Promise<boolean>;
+
+  // Customer Accounts
+  getCustomerAccount(id: string): Promise<CustomerAccount | undefined>;
+  getAllCustomerAccounts(): Promise<CustomerAccount[]>;
+  createCustomerAccount(account: InsertCustomerAccount): Promise<CustomerAccount>;
+  updateCustomerAccount(id: string, updates: Partial<CustomerAccount>): Promise<CustomerAccount | undefined>;
+  deleteCustomerAccount(id: string): Promise<boolean>;
+
+  // Account Activities
+  getAccountActivities(accountId: string): Promise<AccountActivity[]>;
+  createAccountActivity(activity: InsertAccountActivity): Promise<AccountActivity>;
+
+  // Next Best Actions
+  getNextBestActions(accountId: string): Promise<NextBestAction[]>;
+  getAllPendingActions(): Promise<NextBestAction[]>;
+  createNextBestAction(action: InsertNextBestAction): Promise<NextBestAction>;
+  updateNextBestActionStatus(id: string, status: ActionStatus): Promise<NextBestAction | undefined>;
+
+  // Demo Instances
+  getDemoInstance(id: string): Promise<DemoInstance | undefined>;
+  getAllDemoInstances(): Promise<DemoInstance[]>;
+  createDemoInstance(instance: InsertDemoInstance): Promise<DemoInstance>;
+  updateDemoInstance(id: string, updates: Partial<DemoInstance>): Promise<DemoInstance | undefined>;
+  deleteDemoInstance(id: string): Promise<boolean>;
+
+  // Persona Templates
+  getPersonaTemplate(id: string): Promise<PersonaTemplate | undefined>;
+  getAllPersonaTemplates(): Promise<PersonaTemplate[]>;
+  createPersonaTemplate(template: InsertPersonaTemplate): Promise<PersonaTemplate>;
+
+  // Support Tickets
+  getSupportTicket(id: string): Promise<SupportTicket | undefined>;
+  getAllSupportTickets(): Promise<SupportTicket[]>;
+  createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
+  updateSupportTicket(id: string, updates: Partial<SupportTicket>): Promise<SupportTicket | undefined>;
+
+  // Platform Metrics
+  recordMetric(metricType: string, value: number, metadata?: Record<string, unknown>): Promise<void>;
+  getMetrics(metricType?: string, limit?: number): Promise<Array<{ metricType: string; value: number; metadata: Record<string, unknown> | null; recordedAt: Date }>>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -713,6 +774,159 @@ export class DatabaseStorage implements IStorage {
   async deleteDemoConfig(id: string): Promise<boolean> {
     const result = await db.delete(demoConfigs).where(eq(demoConfigs.id, id)).returning();
     return result.length > 0;
+  }
+
+  // Customer Accounts
+  async getCustomerAccount(id: string): Promise<CustomerAccount | undefined> {
+    const [account] = await db.select().from(customerAccounts).where(eq(customerAccounts.id, id));
+    return account;
+  }
+
+  async getAllCustomerAccounts(): Promise<CustomerAccount[]> {
+    return db.select().from(customerAccounts).orderBy(desc(customerAccounts.createdAt));
+  }
+
+  async createCustomerAccount(account: InsertCustomerAccount): Promise<CustomerAccount> {
+    const [created] = await db.insert(customerAccounts).values(account as typeof customerAccounts.$inferInsert).returning();
+    return created;
+  }
+
+  async updateCustomerAccount(id: string, updates: Partial<CustomerAccount>): Promise<CustomerAccount | undefined> {
+    const [updated] = await db
+      .update(customerAccounts)
+      .set({ ...updates, updatedAt: new Date() } as typeof customerAccounts.$inferInsert)
+      .where(eq(customerAccounts.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCustomerAccount(id: string): Promise<boolean> {
+    const result = await db.delete(customerAccounts).where(eq(customerAccounts.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Account Activities
+  async getAccountActivities(accountId: string): Promise<AccountActivity[]> {
+    return db.select().from(accountActivities).where(eq(accountActivities.accountId, accountId)).orderBy(desc(accountActivities.createdAt));
+  }
+
+  async createAccountActivity(activity: InsertAccountActivity): Promise<AccountActivity> {
+    const [created] = await db.insert(accountActivities).values(activity as typeof accountActivities.$inferInsert).returning();
+    return created;
+  }
+
+  // Next Best Actions
+  async getNextBestActions(accountId: string): Promise<NextBestAction[]> {
+    return db.select().from(nextBestActions).where(eq(nextBestActions.accountId, accountId)).orderBy(desc(nextBestActions.createdAt));
+  }
+
+  async getAllPendingActions(): Promise<NextBestAction[]> {
+    return db.select().from(nextBestActions).where(eq(nextBestActions.status, "pending")).orderBy(desc(nextBestActions.createdAt));
+  }
+
+  async createNextBestAction(action: InsertNextBestAction): Promise<NextBestAction> {
+    const [created] = await db.insert(nextBestActions).values(action as typeof nextBestActions.$inferInsert).returning();
+    return created;
+  }
+
+  async updateNextBestActionStatus(id: string, status: ActionStatus): Promise<NextBestAction | undefined> {
+    const updates: Record<string, unknown> = { status };
+    if (status === "completed") updates.completedAt = new Date();
+    const [updated] = await db
+      .update(nextBestActions)
+      .set(updates as typeof nextBestActions.$inferInsert)
+      .where(eq(nextBestActions.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Demo Instances
+  async getDemoInstance(id: string): Promise<DemoInstance | undefined> {
+    const [instance] = await db.select().from(demoInstances).where(eq(demoInstances.id, id));
+    return instance;
+  }
+
+  async getAllDemoInstances(): Promise<DemoInstance[]> {
+    return db.select().from(demoInstances).orderBy(desc(demoInstances.createdAt));
+  }
+
+  async createDemoInstance(instance: InsertDemoInstance): Promise<DemoInstance> {
+    const [created] = await db.insert(demoInstances).values(instance as typeof demoInstances.$inferInsert).returning();
+    return created;
+  }
+
+  async updateDemoInstance(id: string, updates: Partial<DemoInstance>): Promise<DemoInstance | undefined> {
+    const [updated] = await db
+      .update(demoInstances)
+      .set({ ...updates, updatedAt: new Date() } as typeof demoInstances.$inferInsert)
+      .where(eq(demoInstances.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteDemoInstance(id: string): Promise<boolean> {
+    const result = await db.delete(demoInstances).where(eq(demoInstances.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Persona Templates
+  async getPersonaTemplate(id: string): Promise<PersonaTemplate | undefined> {
+    const [template] = await db.select().from(personaTemplates).where(eq(personaTemplates.id, id));
+    return template;
+  }
+
+  async getAllPersonaTemplates(): Promise<PersonaTemplate[]> {
+    return db.select().from(personaTemplates).orderBy(desc(personaTemplates.createdAt));
+  }
+
+  async createPersonaTemplate(template: InsertPersonaTemplate): Promise<PersonaTemplate> {
+    const [created] = await db.insert(personaTemplates).values(template as typeof personaTemplates.$inferInsert).returning();
+    return created;
+  }
+
+  // Support Tickets
+  async getSupportTicket(id: string): Promise<SupportTicket | undefined> {
+    const [ticket] = await db.select().from(supportTickets).where(eq(supportTickets.id, id));
+    return ticket;
+  }
+
+  async getAllSupportTickets(): Promise<SupportTicket[]> {
+    return db.select().from(supportTickets).orderBy(desc(supportTickets.createdAt));
+  }
+
+  async createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket> {
+    const [created] = await db.insert(supportTickets).values(ticket as typeof supportTickets.$inferInsert).returning();
+    return created;
+  }
+
+  async updateSupportTicket(id: string, updates: Partial<SupportTicket>): Promise<SupportTicket | undefined> {
+    const [updated] = await db
+      .update(supportTickets)
+      .set({ ...updates, updatedAt: new Date() } as typeof supportTickets.$inferInsert)
+      .where(eq(supportTickets.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Platform Metrics
+  async recordMetric(metricType: string, value: number, metadata?: Record<string, unknown>): Promise<void> {
+    await db.insert(platformMetrics).values({
+      metricType,
+      value,
+      metadata: metadata || {},
+    } as typeof platformMetrics.$inferInsert);
+  }
+
+  async getMetrics(metricType?: string, limit: number = 100): Promise<Array<{ metricType: string; value: number; metadata: Record<string, unknown> | null; recordedAt: Date }>> {
+    if (metricType) {
+      return db.select().from(platformMetrics)
+        .where(eq(platformMetrics.metricType, metricType))
+        .orderBy(desc(platformMetrics.recordedAt))
+        .limit(limit);
+    }
+    return db.select().from(platformMetrics)
+      .orderBy(desc(platformMetrics.recordedAt))
+      .limit(limit);
   }
 }
 

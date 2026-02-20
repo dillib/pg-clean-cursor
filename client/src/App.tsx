@@ -33,6 +33,7 @@ import PartnerLogin from "@/pages/partner-login";
 import PartnerDashboard from "@/pages/partner-dashboard";
 import DemoLogin from "@/pages/demo-login";
 import AdminLogin from "@/pages/admin-login";
+import AdminInternal from "@/pages/admin-internal";
 import NotFound from "@/pages/not-found";
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -238,6 +239,11 @@ function Router() {
       <Route path="/integrations/sap-demo">
         <ProtectedRoute>
           <SAPDemo />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/internal">
+        <ProtectedRoute>
+          <AdminInternal />
         </ProtectedRoute>
       </Route>
       <Route path="/crm">

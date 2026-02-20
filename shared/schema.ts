@@ -950,3 +950,207 @@ export const insertDemoConfigSchema = createInsertSchema(demoConfigs).omit({
 
 export type InsertDemoConfig = z.infer<typeof insertDemoConfigSchema>;
 export type DemoConfig = typeof demoConfigs.$inferSelect;
+
+// ============================================
+// INTERNAL CRM - CUSTOMER ACCOUNTS
+// ============================================
+
+export type AccountStatus = "prospect" | "active" | "churning" | "churned" | "paused";
+export type AccountTier = "free" | "starter" | "growth" | "enterprise";
+
+export const customerAccounts = pgTable("customer_accounts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyName: text("company_name").notNull(),
+  contactName: text("contact_name").notNull(),
+  contactEmail: text("contact_email").notNull(),
+  contactPhone: text("contact_phone"),
+  industry: text("industry"),
+  tier: text("tier").$type<AccountTier>().default("free").notNull(),
+  status: text("status").$type<AccountStatus>().default("prospect").notNull(),
+  healthScore: integer("health_score").default(50),
+  productCount: integer("product_count").default(0),
+  lastActivityAt: timestamp("last_activity_at"),
+  contractStartDate: timestamp("contract_start_date"),
+  contractEndDate: timestamp("contract_end_date"),
+  mrr: integer("mrr").default(0),
+  notes: text("notes"),
+  leadId: varchar("lead_id"),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertCustomerAccountSchema = createInsertSchema(customerAccounts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertCustomerAccount = z.infer<typeof insertCustomerAccountSchema>;
+export type CustomerAccount = typeof customerAccounts.$inferSelect;
+
+// ============================================
+// ACCOUNT ACTIVITIES
+// ============================================
+
+export type AccountActivityType = "login" | "product_created" | "scan" | "api_call" | "support_ticket" | "demo_viewed" | "integration_sync" | "export" | "note_added";
+
+export const accountActivities = pgTable("account_activities", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  accountId: varchar("account_id").references(() => customerAccounts.id).notNull(),
+  activityType: text("activity_type").$type<AccountActivityType>().notNull(),
+  description: text("description"),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertAccountActivitySchema = createInsertSchema(accountActivities).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertAccountActivity = z.infer<typeof insertAccountActivitySchema>;
+export type AccountActivity = typeof accountActivities.$inferSelect;
+
+// ============================================
+// AI NEXT BEST ACTIONS
+// ============================================
+
+export type ActionPriority = "low" | "medium" | "high" | "critical";
+export type ActionStatus = "pending" | "completed" | "dismissed" | "snoozed";
+
+export const nextBestActions = pgTable("next_best_actions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  accountId: varchar("account_id").references(() => customerAccounts.id).notNull(),
+  action: text("action").notNull(),
+  reasoning: text("reasoning").notNull(),
+  priority: text("priority").$type<ActionPriority>().default("medium").notNull(),
+  status: text("status").$type<ActionStatus>().default("pending").notNull(),
+  category: text("category"),
+  dueDate: timestamp("due_date"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertNextBestActionSchema = createInsertSchema(nextBestActions).omit({
+  id: true,
+  createdAt: true,
+  completedAt: true,
+});
+
+export type InsertNextBestAction = z.infer<typeof insertNextBestActionSchema>;
+export type NextBestAction = typeof nextBestActions.$inferSelect;
+
+// ============================================
+// DEMO FACTORY - DEMO INSTANCES
+// ============================================
+
+export type DemoInstanceStatus = "provisioning" | "active" | "expired" | "deactivated";
+
+export const demoInstances = pgTable("demo_instances", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  prospectName: text("prospect_name").notNull(),
+  prospectEmail: text("prospect_email"),
+  prospectCompany: text("prospect_company"),
+  industry: text("industry").notNull(),
+  personaTemplate: text("persona_template"),
+  status: text("status").$type<DemoInstanceStatus>().default("provisioning").notNull(),
+  productIds: jsonb("product_ids").$type<string[]>().default([]),
+  iotDeviceIds: jsonb("iot_device_ids").$type<string[]>().default([]),
+  demoUrl: text("demo_url"),
+  expiresAt: timestamp("expires_at"),
+  provisionedBy: varchar("provisioned_by"),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertDemoInstanceSchema = createInsertSchema(demoInstances).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  productIds: true,
+  iotDeviceIds: true,
+  demoUrl: true,
+  status: true,
+});
+
+export type InsertDemoInstance = z.infer<typeof insertDemoInstanceSchema>;
+export type DemoInstance = typeof demoInstances.$inferSelect;
+
+// ============================================
+// DEMO FACTORY - PERSONA TEMPLATES
+// ============================================
+
+export const personaTemplates = pgTable("persona_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  industry: text("industry").notNull(),
+  description: text("description"),
+  sampleProducts: jsonb("sample_products").$type<Record<string, unknown>[]>().default([]),
+  iotConfig: jsonb("iot_config").$type<Record<string, unknown>>().default({}),
+  productCount: integer("product_count").default(3),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertPersonaTemplateSchema = createInsertSchema(personaTemplates).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertPersonaTemplate = z.infer<typeof insertPersonaTemplateSchema>;
+export type PersonaTemplate = typeof personaTemplates.$inferSelect;
+
+// ============================================
+// SUPPORT TICKETS
+// ============================================
+
+export type TicketPriority = "low" | "medium" | "high" | "urgent";
+export type TicketStatus = "open" | "in_progress" | "waiting_on_customer" | "resolved" | "closed";
+export type TicketCategory = "billing" | "technical" | "integration" | "compliance" | "feature_request" | "general";
+
+export const supportTickets = pgTable("support_tickets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  accountId: varchar("account_id"),
+  subject: text("subject").notNull(),
+  description: text("description").notNull(),
+  submitterEmail: text("submitter_email").notNull(),
+  submitterName: text("submitter_name"),
+  priority: text("priority").$type<TicketPriority>().default("medium").notNull(),
+  status: text("status").$type<TicketStatus>().default("open").notNull(),
+  category: text("category").$type<TicketCategory>().default("general").notNull(),
+  tags: jsonb("tags").$type<string[]>().default([]),
+  aiSummary: text("ai_summary"),
+  aiSuggestedPriority: text("ai_suggested_priority").$type<TicketPriority>(),
+  aiSuggestedCategory: text("ai_suggested_category").$type<TicketCategory>(),
+  aiSuggestedTags: jsonb("ai_suggested_tags").$type<string[]>().default([]),
+  assignedTo: varchar("assigned_to"),
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  resolvedAt: true,
+  aiSummary: true,
+  aiSuggestedPriority: true,
+  aiSuggestedCategory: true,
+  aiSuggestedTags: true,
+});
+
+export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
+export type SupportTicket = typeof supportTickets.$inferSelect;
+
+// ============================================
+// PLATFORM METRICS (Ops Monitoring)
+// ============================================
+
+export const platformMetrics = pgTable("platform_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  metricType: text("metric_type").notNull(),
+  value: integer("value").notNull(),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
+  recordedAt: timestamp("recorded_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
