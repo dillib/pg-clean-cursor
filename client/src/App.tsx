@@ -309,8 +309,19 @@ function InternalDashboardProtected() {
   );
 }
 
-function DemoDashboardProtected() {
-  const { isAuthenticated: isTeamAuth, isLoading: teamLoading } = useTeamAuth();
+function DemoProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { teamUser, isAuthenticated: isTeamAuth, isLoading: teamLoading } = useTeamAuth();
+  const [, setLocation] = useLocation();
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await fetch("/api/team/logout", { method: "POST", credentials: "include" });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/team/me"] });
+      setLocation("/demo/login");
+    },
+  });
 
   if (teamLoading) {
     return (
@@ -324,7 +335,27 @@ function DemoDashboardProtected() {
     return <Redirect to="/demo/login" />;
   }
 
-  return <PartnerDashboard />;
+  const style = {
+    "--sidebar-width": "16rem",
+    "--sidebar-width-icon": "3rem",
+  };
+
+  return (
+    <SidebarProvider style={style as React.CSSProperties}>
+      <div className="flex h-screen w-full">
+        <AppSidebar mode="demo" teamUser={teamUser} onLogout={() => logoutMutation.mutate()} />
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <header className="flex h-14 items-center justify-between gap-4 border-b px-4 shrink-0">
+            <SidebarTrigger data-testid="button-sidebar-toggle" />
+            <ThemeToggle />
+          </header>
+          <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
+            {children}
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
 }
 
 function Router() {
@@ -390,7 +421,44 @@ function Router() {
         <InternalDashboardProtected />
       </Route>
       <Route path="/demo/dashboard">
-        <DemoDashboardProtected />
+        <DemoProtectedRoute>
+          <Dashboard />
+        </DemoProtectedRoute>
+      </Route>
+      <Route path="/demo/products/new">
+        <DemoProtectedRoute>
+          <ProductForm />
+        </DemoProtectedRoute>
+      </Route>
+      <Route path="/demo/products/:id/edit">
+        <DemoProtectedRoute>
+          <ProductForm />
+        </DemoProtectedRoute>
+      </Route>
+      <Route path="/demo/products/:id">
+        <DemoProtectedRoute>
+          <ProductDetail />
+        </DemoProtectedRoute>
+      </Route>
+      <Route path="/demo/products">
+        <DemoProtectedRoute>
+          <Products />
+        </DemoProtectedRoute>
+      </Route>
+      <Route path="/demo/iot-devices">
+        <DemoProtectedRoute>
+          <IoTDevices />
+        </DemoProtectedRoute>
+      </Route>
+      <Route path="/demo/integrations/sap">
+        <DemoProtectedRoute>
+          <SAPConnector />
+        </DemoProtectedRoute>
+      </Route>
+      <Route path="/demo/integrations/sap-demo">
+        <DemoProtectedRoute>
+          <SAPDemo />
+        </DemoProtectedRoute>
       </Route>
       <Route path="/team/login">
         <Redirect to="/internal/login" />

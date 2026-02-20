@@ -21,70 +21,92 @@ const navigationItems = [
     title: "Dashboard",
     url: "/",
     icon: LayoutDashboard,
+    demoUrl: "/demo/dashboard",
   },
   {
     title: "Products",
     url: "/products",
     icon: Package,
+    demoUrl: "/demo/products",
   },
   {
     title: "IoT Devices",
     url: "/iot-devices",
     icon: Wifi,
+    demoUrl: "/demo/iot-devices",
   },
   {
     title: "SAP Connector",
     url: "/integrations/sap",
     icon: Plug,
+    demoUrl: "/demo/integrations/sap",
   },
   {
     title: "SAP Demo",
     url: "/integrations/sap-demo",
     icon: ArrowLeftRight,
+    demoUrl: "/demo/integrations/sap-demo",
   },
   {
     title: "Create Product",
     url: "/products/new",
     icon: Plus,
+    demoUrl: "/demo/products/new",
   },
   {
     title: "Internal Ops",
     url: "/admin/internal",
     icon: Settings2,
+    adminOnly: true,
   },
 ];
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  mode?: "admin" | "demo";
+  teamUser?: { firstName?: string; lastName?: string; email?: string } | null;
+  onLogout?: () => void;
+}
+
+export function AppSidebar({ mode = "admin", teamUser, onLogout }: AppSidebarProps) {
   const [location] = useLocation();
   const { user, logout, isLoggingOut } = useAuth();
 
+  const isDemo = mode === "demo";
+  const displayUser = isDemo ? teamUser : user;
+
   const getInitials = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+    if (displayUser?.firstName && displayUser?.lastName) {
+      return `${displayUser.firstName[0]}${displayUser.lastName[0]}`.toUpperCase();
     }
-    if (user?.email) {
-      return user.email[0].toUpperCase();
+    if (displayUser?.email) {
+      return displayUser.email[0].toUpperCase();
     }
     return "U";
   };
 
   const getDisplayName = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName} ${user.lastName}`;
+    if (displayUser?.firstName && displayUser?.lastName) {
+      return `${displayUser.firstName} ${displayUser.lastName}`;
     }
-    if (user?.firstName) {
-      return user.firstName;
+    if (displayUser?.firstName) {
+      return displayUser.firstName;
     }
-    if (user?.email) {
-      return user.email;
+    if (displayUser?.email) {
+      return displayUser.email;
     }
     return "User";
   };
 
+  const filteredItems = isDemo
+    ? navigationItems.filter((item) => !item.adminOnly)
+    : navigationItems;
+
+  const homeUrl = isDemo ? "/demo/dashboard" : "/";
+
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href={homeUrl} className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
             <QrCode className="h-5 w-5 text-primary-foreground" />
           </div>
@@ -101,13 +123,14 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map((item) => {
-                const isActive = location === item.url || 
-                  (item.url !== "/" && location.startsWith(item.url));
+              {filteredItems.map((item) => {
+                const itemUrl = isDemo && item.demoUrl ? item.demoUrl : item.url;
+                const isActive = location === itemUrl || 
+                  (itemUrl !== "/" && itemUrl !== "/demo/dashboard" && location.startsWith(itemUrl));
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild data-active={isActive}>
-                      <Link href={item.url} data-testid={`nav-${item.title.toLowerCase().replace(/\s/g, '-')}`}>
+                      <Link href={itemUrl} data-testid={`nav-${item.title.toLowerCase().replace(/\s/g, '-')}`}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
                       </Link>
@@ -120,17 +143,17 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border p-4">
-        {user && (
+        {displayUser && (
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user.profileImageUrl || undefined} alt={getDisplayName()} />
+                <AvatarImage src={(user as any)?.profileImageUrl || undefined} alt={getDisplayName()} />
                 <AvatarFallback className="text-xs">{getInitials()}</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{getDisplayName()}</p>
-                {user.email && (
-                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                {displayUser.email && (
+                  <p className="text-xs text-muted-foreground truncate">{displayUser.email}</p>
                 )}
               </div>
             </div>
@@ -138,12 +161,12 @@ export function AppSidebar() {
               variant="ghost" 
               size="sm" 
               className="w-full justify-start gap-2"
-              onClick={() => logout()}
-              disabled={isLoggingOut}
+              onClick={() => isDemo && onLogout ? onLogout() : logout()}
+              disabled={!isDemo && isLoggingOut}
               data-testid="button-logout"
             >
               <LogOut className="h-4 w-4" />
-              <span>{isLoggingOut ? "Logging out..." : "Log out"}</span>
+              <span>{!isDemo && isLoggingOut ? "Logging out..." : "Log out"}</span>
             </Button>
           </div>
         )}
