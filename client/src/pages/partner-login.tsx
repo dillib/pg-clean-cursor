@@ -24,12 +24,12 @@ export default function PartnerLogin() {
     setIsLoading(true);
 
     try {
-      const response = await apiRequest("POST", "/api/partner/login", { email, password });
+      const response = await apiRequest("POST", "/api/team/login", { email, password });
       const data = await response.json();
 
       if (data.success) {
         toast({ title: "Welcome back!", description: `Logged in as ${data.partner.firstName}` });
-        setLocation("/partner/dashboard");
+        setLocation("/team/dashboard");
       }
     } catch (error: any) {
       toast({
@@ -45,8 +45,8 @@ export default function PartnerLogin() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Partner Login | PhotonicTag</title>
-        <meta name="description" content="Partner portal login for PhotonicTag Digital Product Passport platform." />
+        <title>Team Login | PhotonicTag</title>
+        <meta name="description" content="Team portal login for PhotonicTag Digital Product Passport platform." />
       </Helmet>
       <div className="fixed top-0 left-0 right-0 z-50">
         <PublicNav />
@@ -55,7 +55,7 @@ export default function PartnerLogin() {
       <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl" data-testid="text-partner-login-title">Partner Portal</CardTitle>
+            <CardTitle className="text-2xl" data-testid="text-partner-login-title">Team Portal</CardTitle>
             <CardDescription>
               Sign in to explore the PhotonicTag platform and demo products
             </CardDescription>
@@ -67,7 +67,7 @@ export default function PartnerLogin() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="partner@company.com"
+                  placeholder="team@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -114,7 +114,7 @@ export default function PartnerLogin() {
             </form>
 
             <p className="text-xs text-muted-foreground text-center mt-6">
-              Partner accounts are created by PhotonicTag administrators. 
+              Team accounts are created by PhotonicTag administrators. 
               Contact us if you need access.
             </p>
           </CardContent>

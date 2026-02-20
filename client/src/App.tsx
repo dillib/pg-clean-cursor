@@ -134,8 +134,8 @@ function Router() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/contact" component={Contact} />
       <Route path="/admin/login" component={AdminLogin} />
-      <Route path="/partner/login" component={PartnerLogin} />
-      <Route path="/partner/dashboard" component={PartnerDashboard} />
+      <Route path="/team/login" component={PartnerLogin} />
+      <Route path="/team/dashboard" component={PartnerDashboard} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route component={NotFound} />

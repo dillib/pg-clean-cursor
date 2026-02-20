@@ -16,9 +16,9 @@ import { apiRequest } from "@/lib/queryClient";
 
 function usePartnerAuth() {
   const { data: partner, isLoading, error } = useQuery({
-    queryKey: ["/api/partner/me"],
+    queryKey: ["/api/team/me"],
     queryFn: async () => {
-      const res = await fetch("/api/partner/me", { credentials: "include" });
+      const res = await fetch("/api/team/me", { credentials: "include" });
       if (!res.ok) throw new Error("Not authenticated");
       return res.json();
     },
@@ -39,10 +39,10 @@ export default function PartnerDashboard() {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/partner/logout");
+      await apiRequest("POST", "/api/team/logout");
     },
     onSuccess: () => {
-      setLocation("/partner/login");
+      setLocation("/team/login");
     },
   });
 
@@ -55,7 +55,7 @@ export default function PartnerDashboard() {
   }
 
   if (!isAuthenticated) {
-    setLocation("/partner/login");
+    setLocation("/team/login");
     return null;
   }
 
@@ -69,7 +69,7 @@ export default function PartnerDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Partner Dashboard | PhotonicTag</title>
+        <title>Team Dashboard | PhotonicTag</title>
       </Helmet>
       <div className="fixed top-0 left-0 right-0 z-50">
         <PublicNav />

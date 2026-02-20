@@ -873,7 +873,7 @@ export async function registerRoutes(
   // PARTNER AUTH ENDPOINTS
   // ==========================================
 
-  app.post("/api/partner/login", async (req: Request, res: Response) => {
+  app.post("/api/team/login", async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
       if (!email || !password) {
@@ -907,7 +907,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/partner/me", async (req: Request, res: Response) => {
+  app.get("/api/team/me", async (req: Request, res: Response) => {
     try {
       const partnerId = (req.session as any)?.partnerId;
       if (!partnerId) {
@@ -927,7 +927,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/partner/logout", async (req: Request, res: Response) => {
+  app.post("/api/team/logout", async (req: Request, res: Response) => {
     (req.session as any).partnerId = undefined;
     (req.session as any).partnerRole = undefined;
     res.json({ success: true });

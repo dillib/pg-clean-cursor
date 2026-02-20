@@ -98,7 +98,7 @@ export default function CRM() {
       <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
         <div>
           <h1 className="text-3xl font-bold" data-testid="text-crm-title">CRM & Team Management</h1>
-          <p className="text-muted-foreground">Leads, partners, and demo management</p>
+          <p className="text-muted-foreground">Leads, team, and demo management</p>
         </div>
         <Badge variant="outline" className="text-sm">
           VC Metrics Dashboard
@@ -113,7 +113,7 @@ export default function CRM() {
           </TabsTrigger>
           <TabsTrigger value="partners" data-testid="tab-partners" className="gap-1">
             <Handshake className="w-4 h-4" />
-            Partners
+            Team
           </TabsTrigger>
           <TabsTrigger value="demos" data-testid="tab-demos" className="gap-1">
             <Wand2 className="w-4 h-4" />
@@ -737,21 +737,21 @@ function PartnersTab() {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <ExternalLink className="w-4 h-4" />
-            Partner Login URL
+            Team Login URL
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2">
             <Input
               readOnly
-              value={`${window.location.origin}/partner/login`}
+              value={`${window.location.origin}/team/login`}
               className="font-mono text-sm"
               data-testid="input-partner-login-url"
             />
             <Button
               variant="outline"
               onClick={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/partner/login`);
+                navigator.clipboard.writeText(`${window.location.origin}/team/login`);
                 toast({ title: "Login URL copied" });
               }}
               data-testid="button-copy-login-url"
@@ -760,7 +760,7 @@ function PartnersTab() {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            Share this URL with partners so they can log in and explore the platform
+            Share this URL with team members so they can log in and explore the platform
           </p>
         </CardContent>
       </Card>
