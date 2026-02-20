@@ -13,6 +13,24 @@ import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integra
 import { storage } from "./storage";
 import sapRoutes from "./routes/sap-routes";
 import bcrypt from "bcryptjs";
+import type { RequestHandler } from "express";
+
+const isAuthenticatedOrTeam: RequestHandler = async (req, res, next) => {
+  const user = req.user as any;
+  if (user && req.isAuthenticated?.() && user.expires_at) {
+    const now = Math.floor(Date.now() / 1000);
+    if (now <= user.expires_at) {
+      return next();
+    }
+  }
+
+  const partnerId = (req.session as any)?.partnerId;
+  if (partnerId) {
+    return next();
+  }
+
+  return res.status(401).json({ message: "Unauthorized" });
+};
 
 export async function registerRoutes(
   httpServer: Server,
@@ -768,8 +786,8 @@ export async function registerRoutes(
     }
   });
 
-  // Protected CRM endpoints
-  app.get("/api/leads", isAuthenticated, async (req: Request, res: Response) => {
+  // Protected CRM endpoints (accessible by admin OR team auth)
+  app.get("/api/leads", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const leads = await storage.getAllLeads();
       res.json(leads);
@@ -779,7 +797,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/leads/stats", isAuthenticated, async (req: Request, res: Response) => {
+  app.get("/api/leads/stats", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const stats = await storage.getLeadStats();
       res.json(stats);
@@ -789,7 +807,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/leads/:id", isAuthenticated, async (req: Request, res: Response) => {
+  app.get("/api/leads/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const lead = await storage.getLead(req.params.id);
       if (!lead) {
@@ -802,7 +820,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/leads/:id", isAuthenticated, async (req: Request, res: Response) => {
+  app.patch("/api/leads/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const lead = await storage.getLead(req.params.id);
       if (!lead) {
@@ -828,7 +846,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/leads/:id", isAuthenticated, async (req: Request, res: Response) => {
+  app.delete("/api/leads/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const success = await storage.deleteLead(req.params.id);
       if (!success) {
@@ -841,7 +859,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/leads/:id/activities", isAuthenticated, async (req: Request, res: Response) => {
+  app.get("/api/leads/:id/activities", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const activities = await storage.getLeadActivities(req.params.id);
       res.json(activities);
@@ -851,7 +869,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/leads/:id/activities", isAuthenticated, async (req: Request, res: Response) => {
+  app.post("/api/leads/:id/activities", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const lead = await storage.getLead(req.params.id);
       if (!lead) {

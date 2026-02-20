@@ -7,11 +7,11 @@ import { Label } from "@/components/ui/label";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LogIn, Eye, EyeOff } from "lucide-react";
+import { Loader2, LogIn, Eye, EyeOff, Package } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 
-export default function PartnerLogin() {
+export default function DemoLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -28,8 +28,8 @@ export default function PartnerLogin() {
       const data = await response.json();
 
       if (data.success) {
-        toast({ title: "Welcome back!", description: `Logged in as ${data.partner.firstName}` });
-        setLocation("/crm");
+        toast({ title: "Welcome!", description: "Explore our Digital Product Passport demos" });
+        setLocation("/team/dashboard");
       }
     } catch (error: any) {
       toast({
@@ -45,8 +45,9 @@ export default function PartnerLogin() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Team Login | PhotonicTag</title>
-        <meta name="description" content="Team portal login for PhotonicTag Digital Product Passport platform." />
+        <title>Demo Login | PhotonicTag</title>
+        <meta name="description" content="Sign in to explore PhotonicTag Digital Product Passport demos." />
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="fixed top-0 left-0 right-0 z-50">
         <PublicNav />
@@ -55,36 +56,39 @@ export default function PartnerLogin() {
       <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl" data-testid="text-partner-login-title">Team Portal</CardTitle>
+            <div className="mx-auto w-12 h-12 rounded-md bg-primary flex items-center justify-center mb-2">
+              <Package className="w-7 h-7 text-primary-foreground" />
+            </div>
+            <CardTitle className="text-2xl" data-testid="text-demo-login-title">Demo Access</CardTitle>
             <CardDescription>
-              Sign in to access CRM, lead management, and team tools
+              Sign in to explore Digital Product Passport demos across industries
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="demo-email">Email</Label>
                 <Input
-                  id="email"
+                  id="demo-email"
                   type="email"
-                  placeholder="team@company.com"
+                  placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  data-testid="input-partner-email"
+                  data-testid="input-demo-email"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="demo-password">Password</Label>
                 <div className="relative">
                   <Input
-                    id="password"
+                    id="demo-password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    data-testid="input-partner-password"
+                    data-testid="input-demo-password"
                   />
                   <Button
                     type="button"
@@ -92,7 +96,7 @@ export default function PartnerLogin() {
                     size="icon"
                     className="absolute right-0 top-0"
                     onClick={() => setShowPassword(!showPassword)}
-                    data-testid="button-toggle-password"
+                    data-testid="button-demo-toggle-password"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
@@ -102,19 +106,19 @@ export default function PartnerLogin() {
                 type="submit"
                 className="w-full gap-2"
                 disabled={isLoading}
-                data-testid="button-partner-submit"
+                data-testid="button-demo-submit"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <LogIn className="h-4 w-4" />
                 )}
-                Sign In
+                View Demos
               </Button>
             </form>
 
             <p className="text-xs text-muted-foreground text-center mt-6">
-              Team accounts are created by PhotonicTag administrators. 
+              Demo accounts are provided by PhotonicTag administrators.
               Contact us if you need access.
             </p>
           </CardContent>

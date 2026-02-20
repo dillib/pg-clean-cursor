@@ -45,7 +45,7 @@ interface LeadStats {
   lastWeek: number;
 }
 
-export default function CRM() {
+export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [tierFilter, setTierFilter] = useState<string>("all");
@@ -111,14 +111,18 @@ export default function CRM() {
             <Users className="w-4 h-4" />
             Leads
           </TabsTrigger>
-          <TabsTrigger value="partners" data-testid="tab-partners" className="gap-1">
-            <Handshake className="w-4 h-4" />
-            Team
-          </TabsTrigger>
-          <TabsTrigger value="demos" data-testid="tab-demos" className="gap-1">
-            <Wand2 className="w-4 h-4" />
-            Demo Generator
-          </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="partners" data-testid="tab-partners" className="gap-1">
+              <Handshake className="w-4 h-4" />
+              Team
+            </TabsTrigger>
+          )}
+          {isAdmin && (
+            <TabsTrigger value="demos" data-testid="tab-demos" className="gap-1">
+              <Wand2 className="w-4 h-4" />
+              Demo Generator
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="leads" className="space-y-6">

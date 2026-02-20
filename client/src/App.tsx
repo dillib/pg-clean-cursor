@@ -1,6 +1,6 @@
 import { Switch, Route, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, useQuery, useMutation } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -10,7 +10,8 @@ import { ScrollToTop } from "@/components/scroll-to-top";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
-import { Loader2 } from "lucide-react";
+import { Loader2, QrCode, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Landing from "@/pages/landing-validation";
 import Dashboard from "@/pages/dashboard";
 import Products from "@/pages/products";
@@ -29,6 +30,7 @@ import DemoGallery from "@/pages/demo-gallery";
 import CRM from "@/pages/crm";
 import PartnerLogin from "@/pages/partner-login";
 import PartnerDashboard from "@/pages/partner-dashboard";
+import DemoLogin from "@/pages/demo-login";
 import AdminLogin from "@/pages/admin-login";
 import NotFound from "@/pages/not-found";
 
@@ -78,6 +80,86 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <AdminLayout>{children}</AdminLayout>;
 }
 
+function useTeamAuth() {
+  const { data: teamUser, isLoading, error } = useQuery({
+    queryKey: ["/api/team/me"],
+    queryFn: async () => {
+      const res = await fetch("/api/team/me", { credentials: "include" });
+      if (!res.ok) throw new Error("Not authenticated");
+      return res.json();
+    },
+    retry: false,
+  });
+  return { teamUser, isLoading, isAuthenticated: !!teamUser && !error };
+}
+
+function TeamLayout({ children }: { children: React.ReactNode }) {
+  const { teamUser } = useTeamAuth();
+  const [, setLocation] = useLocation();
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await fetch("/api/team/logout", { method: "POST", credentials: "include" });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/team/me"] });
+      setLocation("/team/login");
+    },
+  });
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="flex h-14 items-center justify-between gap-4 border-b px-4 shrink-0">
+        <div className="flex items-center gap-2">
+          <QrCode className="h-5 w-5 text-primary" />
+          <span className="font-semibold">PhotonicTag CRM</span>
+        </div>
+        <div className="flex items-center gap-3">
+          {teamUser && (
+            <span className="text-sm text-muted-foreground" data-testid="text-team-user">
+              {teamUser.firstName} {teamUser.lastName}
+            </span>
+          )}
+          <ThemeToggle />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => logoutMutation.mutate()}
+            data-testid="button-team-logout"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
+      </header>
+      <main className="flex-1 overflow-auto">
+        {children}
+      </main>
+    </div>
+  );
+}
+
+function DualAuthCRM() {
+  const { isAuthenticated: isAdminAuth, isLoading: adminLoading } = useAuth();
+  const { isAuthenticated: isTeamAuth, isLoading: teamLoading } = useTeamAuth();
+
+  if (adminLoading || teamLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (isAdminAuth) {
+    return <AdminLayout><CRM isAdmin={true} /></AdminLayout>;
+  }
+
+  if (isTeamAuth) {
+    return <TeamLayout><CRM isAdmin={false} /></TeamLayout>;
+  }
+
+  return <Redirect to="/team/login" />;
+}
+
 function Router() {
   return (
     <Switch>
@@ -122,9 +204,7 @@ function Router() {
         </ProtectedRoute>
       </Route>
       <Route path="/crm">
-        <ProtectedRoute>
-          <CRM />
-        </ProtectedRoute>
+        <DualAuthCRM />
       </Route>
       <Route path="/product/:id">
         <PublicScan />
@@ -135,6 +215,7 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/team/login" component={PartnerLogin} />
+      <Route path="/demo/login" component={DemoLogin} />
       <Route path="/team/dashboard" component={PartnerDashboard} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
