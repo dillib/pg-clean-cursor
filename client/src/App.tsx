@@ -10,7 +10,8 @@ import { ScrollToTop } from "@/components/scroll-to-top";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
-import { Loader2, QrCode, LogOut } from "lucide-react";
+import { Loader2, QrCode, LogOut, ArrowLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Landing from "@/pages/landing-validation";
 import Dashboard from "@/pages/dashboard";
@@ -137,8 +138,44 @@ function TeamLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function CRMLayout({ children, userName, isAdmin }: { children: React.ReactNode; userName: string; isAdmin: boolean }) {
+  const [, setLocation] = useLocation();
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="flex h-14 items-center justify-between gap-4 border-b px-4 shrink-0">
+        <div className="flex items-center gap-2">
+          <QrCode className="h-5 w-5 text-primary" />
+          <span className="font-semibold">PhotonicTag CRM</span>
+          {isAdmin && (
+            <Badge variant="secondary" className="text-xs">Super Admin</Badge>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted-foreground" data-testid="text-crm-user">
+            {userName}
+          </span>
+          <ThemeToggle />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setLocation("/")}
+            data-testid="button-crm-back"
+            title="Back to Admin Dashboard"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </div>
+      </header>
+      <main className="flex-1 overflow-auto">
+        {children}
+      </main>
+    </div>
+  );
+}
+
 function DualAuthCRM() {
-  const { isAuthenticated: isAdminAuth, isLoading: adminLoading } = useAuth();
+  const { isAuthenticated: isAdminAuth, isLoading: adminLoading, user: adminUser } = useAuth();
   const { isAuthenticated: isTeamAuth, isLoading: teamLoading } = useTeamAuth();
 
   if (adminLoading || teamLoading) {
@@ -150,7 +187,7 @@ function DualAuthCRM() {
   }
 
   if (isAdminAuth) {
-    return <AdminLayout><CRM isAdmin={true} /></AdminLayout>;
+    return <CRMLayout userName={adminUser?.firstName || "Admin"} isAdmin={true}><CRM isAdmin={true} /></CRMLayout>;
   }
 
   if (isTeamAuth) {

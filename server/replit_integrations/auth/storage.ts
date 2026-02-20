@@ -16,9 +16,25 @@ class AuthStorage implements IAuthStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    // Automatically grant admin privileges to master admin emails
     const isAdmin = userData.email ? MASTER_ADMIN_EMAILS.includes(userData.email.toLowerCase()) : false;
     
+    const existingByEmail = userData.email
+      ? await db.select().from(users).where(eq(users.email, userData.email)).then(r => r[0])
+      : undefined;
+
+    if (existingByEmail) {
+      const [user] = await db
+        .update(users)
+        .set({
+          ...userData,
+          isAdmin,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.email, userData.email!))
+        .returning();
+      return user;
+    }
+
     const [user] = await db
       .insert(users)
       .values({ ...userData, isAdmin })
