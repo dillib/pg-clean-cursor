@@ -29,7 +29,7 @@ export default function PartnerLogin() {
 
       if (data.success) {
         toast({ title: "Welcome back!", description: `Logged in as ${data.partner.firstName}` });
-        setLocation("/crm");
+        setLocation("/internal/dashboard");
       }
     } catch (error: any) {
       toast({
@@ -45,8 +45,8 @@ export default function PartnerLogin() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Team Login | PhotonicTag</title>
-        <meta name="description" content="Team portal login for PhotonicTag Digital Product Passport platform." />
+        <title>Internal Login | PhotonicTag</title>
+        <meta name="description" content="Internal team login for PhotonicTag Digital Product Passport platform." />
       </Helmet>
       <div className="fixed top-0 left-0 right-0 z-50">
         <PublicNav />
@@ -55,9 +55,9 @@ export default function PartnerLogin() {
       <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl" data-testid="text-partner-login-title">Team Portal</CardTitle>
+            <CardTitle className="text-2xl" data-testid="text-partner-login-title">Internal Login</CardTitle>
             <CardDescription>
-              Sign in to access CRM, lead management, and team tools
+              Sign in to access CRM, lead management, and demo tools
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -114,7 +114,7 @@ export default function PartnerLogin() {
             </form>
 
             <p className="text-xs text-muted-foreground text-center mt-6">
-              Team accounts are created by PhotonicTag administrators. 
+              Internal accounts are created by PhotonicTag administrators. 
               Contact us if you need access.
             </p>
           </CardContent>

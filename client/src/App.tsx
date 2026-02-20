@@ -104,7 +104,7 @@ function TeamLayout({ children }: { children: React.ReactNode }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team/me"] });
-      setLocation("/team/login");
+      setLocation("/internal/login");
     },
   });
 
@@ -195,7 +195,7 @@ function DualAuthCRM() {
     return <TeamLayout><CRM isAdmin={false} /></TeamLayout>;
   }
 
-  return <Redirect to="/team/login" />;
+  return <Redirect to="/internal/login" />;
 }
 
 function InternalOpsProtected() {
@@ -223,7 +223,7 @@ function InternalOpsProtected() {
           </Button>
           <QrCode className="h-5 w-5 text-primary" />
           <span className="font-semibold">PhotonicTag</span>
-          <Badge variant="secondary" className="text-xs">Internal Ops</Badge>
+          <Badge variant="secondary" className="text-xs">Super Admin</Badge>
         </div>
         <div className="flex items-center gap-3">
           {user && (
@@ -235,10 +235,89 @@ function InternalOpsProtected() {
         </div>
       </header>
       <main className="flex-1 overflow-auto">
-        <AdminInternal />
+        <AdminInternal mode="full" />
       </main>
     </div>
   );
+}
+
+function InternalDashboardProtected() {
+  const { isAuthenticated: isTeamAuth, isLoading: teamLoading, teamUser } = useTeamAuth();
+  const [, setLocation] = useLocation();
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await fetch("/api/team/logout", { method: "POST", credentials: "include" });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/team/me"] });
+      setLocation("/internal/login");
+    },
+  });
+
+  if (teamLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!isTeamAuth) {
+    return <Redirect to="/internal/login" />;
+  }
+
+  if (teamUser?.role === "demo_viewer") {
+    return <Redirect to="/demo/dashboard" />;
+  }
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="flex h-14 items-center justify-between gap-4 border-b px-4 shrink-0">
+        <div className="flex items-center gap-2">
+          <QrCode className="h-5 w-5 text-primary" />
+          <span className="font-semibold">PhotonicTag</span>
+          <Badge variant="secondary" className="text-xs">Internal</Badge>
+        </div>
+        <div className="flex items-center gap-3">
+          {teamUser && (
+            <span className="text-sm text-muted-foreground" data-testid="text-internal-user">
+              {teamUser.firstName} {teamUser.lastName}
+            </span>
+          )}
+          <ThemeToggle />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => logoutMutation.mutate()}
+            data-testid="button-internal-logout"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
+      </header>
+      <main className="flex-1 overflow-auto">
+        <AdminInternal mode="internal" />
+      </main>
+    </div>
+  );
+}
+
+function DemoDashboardProtected() {
+  const { isAuthenticated: isTeamAuth, isLoading: teamLoading } = useTeamAuth();
+
+  if (teamLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!isTeamAuth) {
+    return <Redirect to="/demo/login" />;
+  }
+
+  return <PartnerDashboard />;
 }
 
 function Router() {
@@ -298,9 +377,20 @@ function Router() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/contact" component={Contact} />
       <Route path="/admin/login" component={AdminLogin} />
-      <Route path="/team/login" component={PartnerLogin} />
+      <Route path="/internal/login" component={PartnerLogin} />
       <Route path="/demo/login" component={DemoLogin} />
-      <Route path="/team/dashboard" component={PartnerDashboard} />
+      <Route path="/internal/dashboard">
+        <InternalDashboardProtected />
+      </Route>
+      <Route path="/demo/dashboard">
+        <DemoDashboardProtected />
+      </Route>
+      <Route path="/team/login">
+        <Redirect to="/internal/login" />
+      </Route>
+      <Route path="/team/dashboard">
+        <Redirect to="/demo/dashboard" />
+      </Route>
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route component={NotFound} />

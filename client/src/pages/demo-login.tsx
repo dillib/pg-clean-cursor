@@ -29,7 +29,7 @@ export default function DemoLogin() {
 
       if (data.success) {
         toast({ title: "Welcome!", description: "Explore our Digital Product Passport demos" });
-        setLocation("/team/dashboard");
+        setLocation("/demo/dashboard");
       }
     } catch (error: any) {
       toast({

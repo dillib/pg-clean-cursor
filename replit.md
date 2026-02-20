@@ -17,14 +17,19 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### February 2026
-- **Internal Admin Platform**: Comprehensive internal operations dashboard at /admin/internal with 4 tabs:
+- **Internal Admin Platform**: Comprehensive internal operations dashboard at /admin/internal with 5 tabs:
   - **AI-Driven CRM**: Customer account management with AI health scoring (0-100), AI next-best-action generation, activity tracking, MRR tracking, and at-risk account detection
-  - **Demo Factory**: One-click demo provisioning with AI-generated product data, 6 industry persona templates (Automotive, Textiles, Electronics, Batteries, Packaging, Furniture), 14-day expiration, prospect tracking
+  - **Demo Factory**: Uses existing /api/demo-configs API with 6 industry templates (Battery, Fashion, Electronics, EV, Packaging, Furniture) and custom prompt support
+  - **User Management**: Internal user CRUD (create/activate/deactivate/delete) for team members with role assignment (sales_partner, reseller, consultant, demo_viewer)
   - **AI Support Triage**: Intelligent ticketing with AI auto-categorization, priority suggestion, tag generation, and summary analysis using GPT-4o
   - **Platform Ops**: Real-time health monitoring with uptime, memory usage, entity counts, auto-refresh every 30 seconds
-  - Database tables: customer_accounts, account_activities, next_best_actions, demo_instances, persona_templates, support_tickets, platform_metrics
-  - API routes: /api/internal/* namespace with authenticated middleware
+  - Database tables: customer_accounts, account_activities, next_best_actions, support_tickets, platform_metrics
+  - API routes: /api/internal/* namespace with admin-only middleware
   - Sidebar navigation: "Internal Ops" added with Settings2 icon
+- **Role-Based Login System**: Three distinct login flows:
+  - Super Admin (dillib@gmail.com): Replit Auth → /admin/internal shows all 5 tabs (CRM, Demo Factory, Users, Support, Platform Ops)
+  - Internal Login (/internal/login): Team email/password → /internal/dashboard shows CRM + Demo Factory only
+  - Demo Login (/demo/login): Demo viewer email/password → /demo/dashboard shows actual products (partner dashboard)
 
 ### January 2026
 - **Partner Portal & Demo System**: Partner management expansion:

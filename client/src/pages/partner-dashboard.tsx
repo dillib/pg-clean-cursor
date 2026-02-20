@@ -55,7 +55,7 @@ export default function PartnerDashboard() {
       if (isAdminAuth) {
         setLocation("/");
       } else {
-        setLocation("/team/login");
+        setLocation("/demo/login");
       }
     },
   });
@@ -69,7 +69,7 @@ export default function PartnerDashboard() {
   }
 
   if (!isAuthenticated) {
-    setLocation("/team/login");
+    setLocation("/demo/login");
     return null;
   }
 
@@ -83,7 +83,7 @@ export default function PartnerDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Team Dashboard | PhotonicTag</title>
+        <title>Demo Dashboard | PhotonicTag</title>
       </Helmet>
       <div className="fixed top-0 left-0 right-0 z-50">
         <PublicNav />

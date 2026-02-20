@@ -12,7 +12,7 @@ import {
   Users, Zap, HeadphonesIcon, BarChart3,
   Building, Heart, Check, X, Clock, AlertTriangle,
   Plus, Loader2, Rocket, Tag, Shield, Cpu,
-  TrendingUp, ChevronRight, Search, Eye,
+  TrendingUp, ChevronRight, Search, Eye, UserPlus, Trash2, Edit,
 } from "lucide-react";
 import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -877,45 +877,281 @@ function PlatformOpsTab() {
 }
 
 // ==========================================
+// USER MANAGEMENT TAB (Super Admin only)
+// ==========================================
+
+type PartnerUser = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  company: string | null;
+  role: string;
+  status: string;
+  lastLoginAt: string | null;
+  createdAt: string;
+};
+
+function UserManagementTab() {
+  const { toast } = useToast();
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+
+  const { data: partners = [], isLoading } = useQuery<PartnerUser[]>({
+    queryKey: ["/api/partners"],
+  });
+
+  const createPartnerMutation = useMutation({
+    mutationFn: async (data: Record<string, unknown>) => {
+      const res = await apiRequest("POST", "/api/partners", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/partners"] });
+      setShowCreateDialog(false);
+      toast({ title: "User created successfully" });
+    },
+    onError: () => toast({ title: "Failed to create user", variant: "destructive" }),
+  });
+
+  const deletePartnerMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/partners/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/partners"] });
+      toast({ title: "User deleted" });
+    },
+  });
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const res = await apiRequest("PATCH", `/api/partners/${id}`, { status });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/partners"] });
+      toast({ title: "User updated" });
+    },
+  });
+
+  const activeUsers = partners.filter(p => p.status === "active");
+  const inactiveUsers = partners.filter(p => p.status !== "active");
+
+  const ROLE_LABELS: Record<string, string> = {
+    sales_partner: "Sales Partner",
+    reseller: "Reseller",
+    consultant: "Consultant",
+    demo_viewer: "Demo Viewer",
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card><CardContent className="p-5">
+          <div className="flex items-center justify-between">
+            <div><p className="text-sm text-muted-foreground">Total Users</p><p className="text-2xl font-bold">{partners.length}</p></div>
+            <Users className="w-8 h-8 text-blue-500/30" />
+          </div>
+        </CardContent></Card>
+        <Card><CardContent className="p-5">
+          <div className="flex items-center justify-between">
+            <div><p className="text-sm text-muted-foreground">Active</p><p className="text-2xl font-bold">{activeUsers.length}</p></div>
+            <Check className="w-8 h-8 text-green-500/30" />
+          </div>
+        </CardContent></Card>
+        <Card><CardContent className="p-5">
+          <div className="flex items-center justify-between">
+            <div><p className="text-sm text-muted-foreground">Inactive</p><p className="text-2xl font-bold">{inactiveUsers.length}</p></div>
+            <X className="w-8 h-8 text-red-500/30" />
+          </div>
+        </CardContent></Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="text-lg">Internal Users</CardTitle>
+              <CardDescription>Manage team members who can access CRM, Demo Factory, and product demos</CardDescription>
+            </div>
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+              <DialogTrigger asChild>
+                <Button data-testid="button-create-user"><UserPlus className="w-4 h-4 mr-1" /> Add User</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New User</DialogTitle>
+                  <DialogDescription>Add a new team member with access to internal tools</DialogDescription>
+                </DialogHeader>
+                <CreateUserForm onSubmit={(data) => createPartnerMutation.mutate(data)} isPending={createPartnerMutation.isPending} />
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
+          ) : partners.length === 0 ? (
+            <div className="text-center py-12">
+              <Users className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-medium mb-2">No users yet</h3>
+              <p className="text-muted-foreground text-sm">Create your first internal user to get started</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {partners.map(partner => (
+                <div key={partner.id} className="flex items-center gap-4 p-4 rounded-lg border" data-testid={`user-row-${partner.id}`}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium">{partner.firstName} {partner.lastName}</span>
+                      <Badge className={partner.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}>
+                        {partner.status}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">{ROLE_LABELS[partner.role] || partner.role}</Badge>
+                    </div>
+                    <div className="text-sm text-muted-foreground flex gap-2 flex-wrap">
+                      <span>{partner.email}</span>
+                      {partner.company && <><span>•</span><span>{partner.company}</span></>}
+                      {partner.lastLoginAt && <><span>•</span><span>Last login: {format(new Date(partner.lastLoginAt), "MMM d, yyyy")}</span></>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => toggleStatusMutation.mutate({ id: partner.id, status: partner.status === "active" ? "inactive" : "active" })}
+                      title={partner.status === "active" ? "Deactivate" : "Activate"}
+                      data-testid={`button-toggle-user-${partner.id}`}
+                    >
+                      {partner.status === "active" ? <X className="w-4 h-4 text-muted-foreground" /> : <Check className="w-4 h-4 text-green-600" />}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => { if (confirm("Delete this user? This cannot be undone.")) deletePartnerMutation.mutate(partner.id); }}
+                      data-testid={`button-delete-user-${partner.id}`}
+                    >
+                      <Trash2 className="w-4 h-4 text-muted-foreground" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function CreateUserForm({ onSubmit, isPending }: { onSubmit: (data: Record<string, unknown>) => void; isPending: boolean }) {
+  const [form, setForm] = useState({
+    email: "", password: "", firstName: "", lastName: "",
+    company: "", role: "demo_viewer",
+  });
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div><Label>First Name *</Label><Input value={form.firstName} onChange={e => setForm({ ...form, firstName: e.target.value })} data-testid="input-user-firstname" /></div>
+        <div><Label>Last Name *</Label><Input value={form.lastName} onChange={e => setForm({ ...form, lastName: e.target.value })} data-testid="input-user-lastname" /></div>
+      </div>
+      <div><Label>Email *</Label><Input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} data-testid="input-user-email" /></div>
+      <div><Label>Password *</Label><Input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} data-testid="input-user-password" placeholder="Min 6 characters" /></div>
+      <div><Label>Company</Label><Input value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} data-testid="input-user-company" /></div>
+      <div>
+        <Label>Role</Label>
+        <Select value={form.role} onValueChange={v => setForm({ ...form, role: v })}>
+          <SelectTrigger data-testid="select-user-role"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sales_partner">Sales Partner</SelectItem>
+            <SelectItem value="reseller">Reseller</SelectItem>
+            <SelectItem value="consultant">Consultant</SelectItem>
+            <SelectItem value="demo_viewer">Demo Viewer</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <Button onClick={() => onSubmit(form)} disabled={isPending || !form.email || !form.password || !form.firstName || !form.lastName} className="w-full" data-testid="button-submit-user">
+        {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UserPlus className="w-4 h-4 mr-2" />}
+        Create User
+      </Button>
+    </div>
+  );
+}
+
+// ==========================================
 // MAIN PAGE
 // ==========================================
 
-export default function AdminInternal() {
+export type AdminInternalMode = "full" | "internal";
+
+export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalMode }) {
+  const isFull = mode === "full";
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold" data-testid="text-internal-title">Internal Operations</h1>
-          <p className="text-muted-foreground">AI-driven CRM, demo factory, support triage, and platform monitoring</p>
+          <h1 className="text-3xl font-bold" data-testid="text-internal-title">
+            {isFull ? "Internal Operations" : "Team Dashboard"}
+          </h1>
+          <p className="text-muted-foreground">
+            {isFull
+              ? "AI-driven CRM, demo factory, support triage, user management, and platform monitoring"
+              : "CRM and demo management tools"}
+          </p>
         </div>
-        <Badge variant="outline" className="text-sm">Enterprise Admin</Badge>
+        {isFull && <Badge variant="outline" className="text-sm">Super Admin</Badge>}
       </div>
 
-      <Tabs defaultValue="crm" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4" data-testid="tabs-internal">
-          <TabsTrigger value="crm" data-testid="tab-crm" className="gap-1">
-            <Users className="w-4 h-4" />
-            <span className="hidden sm:inline">CRM</span>
-          </TabsTrigger>
-          <TabsTrigger value="demos" data-testid="tab-demos" className="gap-1">
-            <Rocket className="w-4 h-4" />
-            <span className="hidden sm:inline">Demo Factory</span>
-          </TabsTrigger>
-          <TabsTrigger value="support" data-testid="tab-support" className="gap-1">
-            <HeadphonesIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">Support</span>
-          </TabsTrigger>
-          <TabsTrigger value="ops" data-testid="tab-ops" className="gap-1">
-            <BarChart3 className="w-4 h-4" />
-            <span className="hidden sm:inline">Platform Ops</span>
-          </TabsTrigger>
-        </TabsList>
+      {isFull ? (
+        <Tabs defaultValue="crm" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5" data-testid="tabs-internal">
+            <TabsTrigger value="crm" data-testid="tab-crm" className="gap-1">
+              <Users className="w-4 h-4" />
+              <span className="hidden sm:inline">CRM</span>
+            </TabsTrigger>
+            <TabsTrigger value="demos" data-testid="tab-demos" className="gap-1">
+              <Rocket className="w-4 h-4" />
+              <span className="hidden sm:inline">Demo Factory</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" data-testid="tab-users" className="gap-1">
+              <UserPlus className="w-4 h-4" />
+              <span className="hidden sm:inline">Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="support" data-testid="tab-support" className="gap-1">
+              <HeadphonesIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">Support</span>
+            </TabsTrigger>
+            <TabsTrigger value="ops" data-testid="tab-ops" className="gap-1">
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden sm:inline">Platform Ops</span>
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="crm"><CRMTab /></TabsContent>
-        <TabsContent value="demos"><DemoFactoryTab /></TabsContent>
-        <TabsContent value="support"><SupportTriageTab /></TabsContent>
-        <TabsContent value="ops"><PlatformOpsTab /></TabsContent>
-      </Tabs>
+          <TabsContent value="crm"><CRMTab /></TabsContent>
+          <TabsContent value="demos"><DemoFactoryTab /></TabsContent>
+          <TabsContent value="users"><UserManagementTab /></TabsContent>
+          <TabsContent value="support"><SupportTriageTab /></TabsContent>
+          <TabsContent value="ops"><PlatformOpsTab /></TabsContent>
+        </Tabs>
+      ) : (
+        <Tabs defaultValue="crm" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2" data-testid="tabs-internal">
+            <TabsTrigger value="crm" data-testid="tab-crm" className="gap-1">
+              <Users className="w-4 h-4" />
+              <span>CRM</span>
+            </TabsTrigger>
+            <TabsTrigger value="demos" data-testid="tab-demos" className="gap-1">
+              <Rocket className="w-4 h-4" />
+              <span>Demo Factory</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="crm"><CRMTab /></TabsContent>
+          <TabsContent value="demos"><DemoFactoryTab /></TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 }
