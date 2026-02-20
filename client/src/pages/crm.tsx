@@ -97,7 +97,7 @@ export default function CRM() {
     <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold" data-testid="text-crm-title">CRM & Partner Management</h1>
+          <h1 className="text-3xl font-bold" data-testid="text-crm-title">CRM & Team Management</h1>
           <p className="text-muted-foreground">Leads, partners, and demo management</p>
         </div>
         <Badge variant="outline" className="text-sm">
@@ -536,20 +536,20 @@ function PartnersTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-xl font-semibold">Partner Accounts</h2>
-          <p className="text-sm text-muted-foreground">Create and manage partner login credentials for demo access</p>
+          <h2 className="text-xl font-semibold">Team Accounts</h2>
+          <p className="text-sm text-muted-foreground">Create and manage team login credentials for demo access</p>
         </div>
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogTrigger asChild>
             <Button className="gap-2" data-testid="button-create-partner">
               <UserPlus className="w-4 h-4" />
-              Add Partner
+              Add Team Member
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create Partner Account</DialogTitle>
-              <DialogDescription>Set up login credentials for a new partner</DialogDescription>
+              <DialogTitle>Add Team Member</DialogTitle>
+              <DialogDescription>Set up login credentials for a new team member</DialogDescription>
             </DialogHeader>
             <form
               onSubmit={(e) => {
@@ -645,13 +645,13 @@ function PartnersTab() {
         <Card>
           <CardContent className="py-12 text-center">
             <Handshake className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-medium mb-2">No partners yet</h3>
+            <h3 className="text-lg font-medium mb-2">No team members yet</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Create partner accounts to give demo access to potential sales partners and clients
+              Create team accounts to give demo access to sales partners and clients
             </p>
             <Button onClick={() => setShowCreateDialog(true)} className="gap-2" data-testid="button-add-first-partner">
               <UserPlus className="w-4 h-4" />
-              Add First Partner
+              Add First Team Member
             </Button>
           </CardContent>
         </Card>
