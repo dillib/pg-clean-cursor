@@ -13,6 +13,7 @@ import {
 import { Link, useLocation } from "wouter";
 import type { Product } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/use-auth";
 
 function usePartnerAuth() {
   const { data: partner, isLoading, error } = useQuery({
@@ -29,8 +30,15 @@ function usePartnerAuth() {
 }
 
 export default function PartnerDashboard() {
-  const { partner, isLoading: authLoading, isAuthenticated } = usePartnerAuth();
+  const { partner, isLoading: authLoading, isAuthenticated: isTeamAuth } = usePartnerAuth();
+  const { user: adminUser, isLoading: adminLoading, isAuthenticated: isAdminAuth } = useAuth();
   const [, setLocation] = useLocation();
+
+  const isAuthenticated = isTeamAuth || isAdminAuth;
+  const displayName = isAdminAuth ? (adminUser?.firstName || "Admin") : partner?.firstName;
+  const displayInfo = isAdminAuth
+    ? "Administrator"
+    : (partner?.company ? `${partner.company} - ` : "") + (partner?.role?.replace("_", " ") || "");
 
   const { data: products = [], isLoading: productsLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
@@ -39,14 +47,20 @@ export default function PartnerDashboard() {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/team/logout");
+      if (isTeamAuth) {
+        await apiRequest("POST", "/api/team/logout");
+      }
     },
     onSuccess: () => {
-      setLocation("/team/login");
+      if (isAdminAuth) {
+        setLocation("/");
+      } else {
+        setLocation("/team/login");
+      }
     },
   });
 
-  if (authLoading) {
+  if (authLoading || adminLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -80,10 +94,10 @@ export default function PartnerDashboard() {
           <div className="flex items-center justify-between gap-4 flex-wrap mb-8">
             <div>
               <h1 className="text-2xl font-bold" data-testid="text-partner-welcome">
-                Welcome, {partner?.firstName}
+                Welcome, {displayName}
               </h1>
               <p className="text-muted-foreground">
-                {partner?.company ? `${partner.company} - ` : ""}{partner?.role?.replace("_", " ")}
+                {displayInfo}
               </p>
             </div>
             <Button
