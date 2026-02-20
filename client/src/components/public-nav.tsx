@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { QrCode, LogIn } from "lucide-react";
+import { QrCode } from "lucide-react";
 
 const navLinks = [
   { href: "/scan/demo", label: "Examples" },
@@ -37,12 +37,6 @@ export function PublicNav() {
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Button variant="outline" asChild data-testid="button-partner-login">
-              <Link href="/partner/login" className="gap-2">
-                <LogIn className="w-4 h-4" />
-                Partner Login
-              </Link>
-            </Button>
             <Button asChild data-testid="button-book-demo">
               <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer">
                 Book a Demo
