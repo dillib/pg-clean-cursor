@@ -14,17 +14,27 @@ import {
   type TicketCategory,
   type ActionStatus,
 } from "@shared/schema";
+import { MASTER_ADMIN_EMAILS } from "@shared/models/auth";
+import { authStorage } from "../replit_integrations/auth/storage";
 import OpenAI from "openai";
 import type { RequestHandler } from "express";
 
 const router = Router();
 
-const isAdminUser: RequestHandler = (req, res, next) => {
-  const user = req.user as any;
-  if (!user || !user.isAdmin) {
+const isAdminUser: RequestHandler = async (req, res, next) => {
+  try {
+    const sessionUser = req.user as any;
+    if (!sessionUser?.claims?.sub) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    const dbUser = await authStorage.getUser(sessionUser.claims.sub);
+    if (!dbUser || !dbUser.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    next();
+  } catch (error) {
     return res.status(403).json({ error: "Admin access required" });
   }
-  next();
 };
 
 router.use(isAdminUser);

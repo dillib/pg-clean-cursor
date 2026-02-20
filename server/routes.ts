@@ -1,5 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { type Server } from "http";
+import OpenAI from "openai";
 import { insertProductSchema, insertIoTDeviceSchema, insertEnterpriseConnectorSchema, insertLeadSchema, insertPartnerSchema, insertDemoConfigSchema } from "@shared/schema";
 import { productService } from "./services/product-service";
 import { qrService } from "./services/qr-service";
@@ -1126,16 +1127,22 @@ Return a JSON array of 3 products. Each product must have:
 
 Respond ONLY with a valid JSON array, no markdown.`;
 
-    const response = await aiService.generateChatCompletion([
-      { role: "system", content: systemPrompt },
-      { role: "user", content: prompt },
-    ]);
+    const openai = new OpenAI({
+      apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+    });
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: prompt },
+      ],
+    });
 
     let products: any[] = [];
     try {
-      const content = response.content || response;
-      const text = typeof content === "string" ? content : JSON.stringify(content);
-      const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const content = response.choices[0]?.message?.content || "[]";
+      const cleaned = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       products = JSON.parse(cleaned);
     } catch (parseError) {
       console.error("Failed to parse AI response:", parseError);
