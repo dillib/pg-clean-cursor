@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation, useParams, Link } from "wouter";
+import { usePrefixedLink } from "@/hooks/use-route-prefix";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -43,6 +44,7 @@ const productFormSchema = z.object({
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
 export default function ProductForm() {
+  const link = usePrefixedLink();
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -97,7 +99,7 @@ export default function ProductForm() {
         title: "Product created",
         description: "Your Digital Product Passport has been created successfully.",
       });
-      setLocation(`/products/${data.id}`);
+      setLocation(link(`/products/${data.id}`));
     },
     onError: () => {
       toast({
@@ -120,7 +122,7 @@ export default function ProductForm() {
         title: "Product updated",
         description: "Your Digital Product Passport has been updated successfully.",
       });
-      setLocation(`/products/${params.id}`);
+      setLocation(link(`/products/${params.id}`));
     },
     onError: () => {
       toast({
@@ -152,7 +154,7 @@ export default function ProductForm() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link href={isEditing ? `/products/${params.id}` : "/products"}>
+        <Link href={link(isEditing ? `/products/${params.id}` : "/products")}>
           <Button variant="ghost" size="icon" data-testid="button-back">
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -400,7 +402,7 @@ export default function ProductForm() {
           </Card>
 
           <div className="flex justify-end gap-4">
-            <Link href={isEditing ? `/products/${params.id}` : "/products"}>
+            <Link href={link(isEditing ? `/products/${params.id}` : "/products")}>
               <Button type="button" variant="outline" data-testid="button-cancel">
                 Cancel
               </Button>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, Link, useLocation } from "wouter";
+import { usePrefixedLink } from "@/hooks/use-route-prefix";
 import {
   ArrowLeft,
   Edit,
@@ -88,6 +89,7 @@ const eventTypes = [
 ];
 
 export default function ProductDetail() {
+  const link = usePrefixedLink();
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -129,7 +131,7 @@ export default function ProductDetail() {
         title: "Product deleted",
         description: "The product has been permanently removed.",
       });
-      setLocation("/products");
+      setLocation(link("/products"));
     },
     onError: () => {
       toast({
@@ -258,7 +260,7 @@ export default function ProductDetail() {
         <p className="text-muted-foreground mb-6">
           The product you're looking for doesn't exist or has been removed.
         </p>
-        <Link href="/products">
+        <Link href={link("/products")}>
           <Button data-testid="button-back-to-products">Back to Products</Button>
         </Link>
       </div>
@@ -269,7 +271,7 @@ export default function ProductDetail() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/products">
+          <Link href={link("/products")}>
             <Button variant="ghost" size="icon" data-testid="button-back">
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -293,7 +295,7 @@ export default function ProductDetail() {
               Public View
             </Button>
           </Link>
-          <Link href={`/products/${params.id}/edit`}>
+          <Link href={link(`/products/${params.id}/edit`)}>
             <Button variant="outline" data-testid="button-edit">
               <Edit className="mr-2 h-4 w-4" />
               Edit

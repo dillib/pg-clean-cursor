@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Package, QrCode, Recycle, Sparkles, ArrowRight, Plus } from "lucide-react";
+import { usePrefixedLink } from "@/hooks/use-route-prefix";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Product } from "@shared/schema";
 
 export default function Dashboard() {
+  const link = usePrefixedLink();
   const { data: products, isLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
   });
@@ -28,7 +30,7 @@ export default function Dashboard() {
             Manage your Digital Product Passports and track sustainability.
           </p>
         </div>
-        <Link href="/products/new">
+        <Link href={link("/products/new")}>
           <Button data-testid="button-create-product-hero">
             <Plus className="mr-2 h-4 w-4" />
             Create Product
@@ -126,7 +128,7 @@ export default function Dashboard() {
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <Package className="h-12 w-12 text-muted-foreground mb-4" />
                 <p className="text-muted-foreground mb-4">No products yet</p>
-                <Link href="/products/new">
+                <Link href={link("/products/new")}>
                   <Button variant="outline" size="sm" data-testid="button-create-first-product">
                     Create your first product
                   </Button>
@@ -135,7 +137,7 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-3">
                 {products?.slice(0, 5).map((product) => (
-                  <Link key={product.id} href={`/products/${product.id}`}>
+                  <Link key={product.id} href={link(`/products/${product.id}`)}>
                     <div
                       className="flex items-center gap-4 p-2 rounded-md hover-elevate active-elevate-2"
                       data-testid={`card-product-${product.id}`}
@@ -172,13 +174,13 @@ export default function Dashboard() {
             <CardDescription>Common tasks and shortcuts</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <Link href="/products/new">
+            <Link href={link("/products/new")}>
               <Button variant="outline" className="w-full justify-start" data-testid="button-quick-create">
                 <Plus className="mr-2 h-4 w-4" />
                 Create New Product
               </Button>
             </Link>
-            <Link href="/products">
+            <Link href={link("/products")}>
               <Button variant="outline" className="w-full justify-start" data-testid="button-quick-view-all">
                 <Package className="mr-2 h-4 w-4" />
                 View All Products

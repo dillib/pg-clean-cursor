@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { usePrefixedLink } from "@/hooks/use-route-prefix";
 import { Wifi, Radio, Bluetooth, QrCode, Activity, Signal, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,7 @@ const statusColors: Record<string, "default" | "secondary" | "destructive" | "ou
 };
 
 export default function IoTDevices() {
+  const link = usePrefixedLink();
   const { data: devices, isLoading } = useQuery<IoTDevice[]>({
     queryKey: ["/api/iot/devices"],
   });
@@ -142,7 +144,7 @@ export default function IoTDevices() {
                         {metadata?.productName && (
                           <>
                             <span className="text-muted-foreground/50">|</span>
-                            <Link href={`/products/${device.productId}`} className="hover:underline" data-testid={`link-product-${device.productId}`}>
+                            <Link href={link(`/products/${device.productId}`)} className="hover:underline" data-testid={`link-product-${device.productId}`}>
                               {metadata.productName}
                             </Link>
                           </>

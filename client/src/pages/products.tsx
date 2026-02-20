@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { usePrefixedLink } from "@/hooks/use-route-prefix";
 import {
   Package,
   Plus,
@@ -28,6 +29,7 @@ import { Progress } from "@/components/ui/progress";
 import type { Product } from "@shared/schema";
 
 export default function Products() {
+  const link = usePrefixedLink();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
@@ -53,7 +55,7 @@ export default function Products() {
             Manage your Digital Product Passports
           </p>
         </div>
-        <Link href="/products/new">
+        <Link href={link("/products/new")}>
           <Button data-testid="button-create-product">
             <Plus className="mr-2 h-4 w-4" />
             Create Product
@@ -142,7 +144,7 @@ export default function Products() {
                 : "Get started by creating your first product"}
             </p>
             {!searchQuery && (
-              <Link href="/products/new">
+              <Link href={link("/products/new")}>
                 <Button data-testid="button-create-first">
                   <Plus className="mr-2 h-4 w-4" />
                   Create Product
@@ -154,7 +156,7 @@ export default function Products() {
       ) : viewMode === "grid" ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredProducts?.map((product) => (
-            <Link key={product.id} href={`/products/${product.id}`}>
+            <Link key={product.id} href={link(`/products/${product.id}`)}>
               <Card className="group overflow-visible hover-elevate active-elevate-2" data-testid={`card-product-grid-${product.id}`}>
                 <CardContent className="p-4">
                   <div className="aspect-square w-full rounded-md bg-muted mb-4 overflow-hidden flex items-center justify-center">
@@ -252,7 +254,7 @@ export default function Products() {
                     {product.carbonFootprint}kg
                   </TableCell>
                   <TableCell className="text-right">
-                    <Link href={`/products/${product.id}`}>
+                    <Link href={link(`/products/${product.id}`)}>
                       <Button variant="ghost" size="sm" data-testid={`button-view-${product.id}`}>
                         View
                       </Button>
