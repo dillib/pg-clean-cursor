@@ -36,9 +36,6 @@ export default function PartnerDashboard() {
 
   const isAuthenticated = isTeamAuth || isAdminAuth;
   const displayName = isAdminAuth ? (adminUser?.firstName || "Admin") : partner?.firstName;
-  const displayInfo = isAdminAuth
-    ? "Administrator"
-    : (partner?.company ? `${partner.company} - ` : "") + (partner?.role?.replace("_", " ") || "");
 
   const { data: products = [], isLoading: productsLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
@@ -96,9 +93,6 @@ export default function PartnerDashboard() {
               <h1 className="text-2xl font-bold" data-testid="text-partner-welcome">
                 Welcome, {displayName}
               </h1>
-              <p className="text-muted-foreground">
-                {displayInfo}
-              </p>
             </div>
             <Button
               variant="outline"
