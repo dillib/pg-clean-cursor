@@ -224,9 +224,6 @@ function InternalOpsProtected() {
     <div className="min-h-screen bg-background flex flex-col">
       <header className="flex h-14 items-center justify-between gap-4 border-b px-4 shrink-0">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => setLocation("/")} data-testid="button-back-dashboard">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
           <QrCode className="h-5 w-5 text-primary" />
           <span className="font-semibold">PhotonicTag</span>
           <Badge variant="secondary" className="text-xs">Super Admin</Badge>
