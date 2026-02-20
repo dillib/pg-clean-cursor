@@ -382,53 +382,53 @@ export default function SAPDemoPage() {
         </Badge>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Layers className="h-4 w-4 text-blue-500" />
-              SAP Materials
+              <Layers className="h-4 w-4 text-blue-500 shrink-0" />
+              <span className="truncate">SAP Materials</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.sap.totalMaterials || 100}</div>
-            <p className="text-xs text-muted-foreground">Total in mock SAP</p>
+            <p className="text-xs text-muted-foreground truncate">Total in mock SAP</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Package className="h-4 w-4 text-primary" />
-              PhotonicTag Products
+              <Package className="h-4 w-4 text-primary shrink-0" />
+              <span className="truncate">Products</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.photonicTag.totalProducts || products.length}</div>
-            <p className="text-xs text-muted-foreground">In PhotonicTag DPP</p>
+            <p className="text-xs text-muted-foreground truncate">In PhotonicTag DPP</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              Synced
+              <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+              <span className="truncate">Synced</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.sap.synced || syncedMaterials.length}</div>
-            <p className="text-xs text-muted-foreground">Linked & synchronized</p>
+            <p className="text-xs text-muted-foreground truncate">Linked & synchronized</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-              Conflicts
+              <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+              <span className="truncate">Conflicts</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{conflicts.length}</div>
-            <p className="text-xs text-muted-foreground">Need resolution</p>
+            <p className="text-xs text-muted-foreground truncate">Need resolution</p>
           </CardContent>
         </Card>
       </div>
@@ -554,26 +554,26 @@ export default function SAPDemoPage() {
             <CardTitle className="text-lg">Sync Controls</CardTitle>
             <CardDescription>Transfer data between systems</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-4 items-center flex-1 justify-center">
+          <CardContent className="flex flex-col gap-4 items-center flex-1 justify-center p-4">
             <Button
               onClick={handleSyncFromSAP}
               disabled={isSyncing || pendingMaterials.length === 0}
-              className="w-full gap-2"
+              className="w-full gap-2 px-2"
               size="lg"
               data-testid="button-sync-from-sap"
             >
               {syncFromSAP.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin shrink-0" />
               ) : (
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 shrink-0" />
               )}
-              Sync from SAP
-              <Badge variant="secondary" className="ml-auto">{Math.min(20, pendingMaterials.length)}</Badge>
+              <span className="truncate">Sync from SAP</span>
+              <Badge variant="secondary" className="ml-auto shrink-0">{Math.min(20, pendingMaterials.length)}</Badge>
             </Button>
 
             <div className="flex items-center gap-2 w-full">
               <Separator className="flex-1" />
-              <span className="text-xs text-muted-foreground">OR</span>
+              <span className="text-[10px] text-muted-foreground font-medium shrink-0">OR</span>
               <Separator className="flex-1" />
             </div>
 
@@ -581,22 +581,22 @@ export default function SAPDemoPage() {
               onClick={handleSyncToSAP}
               disabled={isSyncing || syncedMaterials.length === 0}
               variant="outline"
-              className="w-full gap-2"
+              className="w-full gap-2 px-2"
               size="lg"
               data-testid="button-sync-to-sap"
             >
               {syncToSAP.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin shrink-0" />
               ) : (
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 shrink-0" />
               )}
-              Sync to SAP
-              <Badge variant="secondary" className="ml-auto">{syncedMaterials.length}</Badge>
+              <span className="truncate">Sync to SAP</span>
+              <Badge variant="secondary" className="ml-auto shrink-0">{syncedMaterials.length}</Badge>
             </Button>
 
             <div className="flex items-center gap-2 w-full">
               <Separator className="flex-1" />
-              <span className="text-xs text-muted-foreground">OR</span>
+              <span className="text-[10px] text-muted-foreground font-medium shrink-0">OR</span>
               <Separator className="flex-1" />
             </div>
 
@@ -604,16 +604,16 @@ export default function SAPDemoPage() {
               onClick={handleBidirectionalSync}
               disabled={isSyncing}
               variant="secondary"
-              className="w-full gap-2"
+              className="w-full gap-2 px-2"
               size="lg"
               data-testid="button-bidirectional-sync"
             >
               {bidirectionalSync.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin shrink-0" />
               ) : (
-                <ArrowLeftRight className="h-4 w-4" />
+                <ArrowLeftRight className="h-4 w-4 shrink-0" />
               )}
-              Full Bidirectional Sync
+              <span className="truncate">Full Sync</span>
             </Button>
 
             {conflicts.length > 0 && (

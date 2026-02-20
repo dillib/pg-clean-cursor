@@ -36,69 +36,69 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium truncate">Total Products</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground shrink-0" />
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <Skeleton className="h-8 w-16" />
             ) : (
-              <div className="text-3xl font-bold" data-testid="text-total-products">
+              <div className="text-2xl sm:text-3xl font-bold" data-testid="text-total-products">
                 {totalProducts}
               </div>
             )}
-            <p className="text-xs text-muted-foreground mt-1">Digital Product Passports</p>
+            <p className="text-xs text-muted-foreground mt-1 truncate">Digital Passports</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">QR Codes Active</CardTitle>
-            <QrCode className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium truncate">QR Active</CardTitle>
+            <QrCode className="h-4 w-4 text-muted-foreground shrink-0" />
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <Skeleton className="h-8 w-16" />
             ) : (
-              <div className="text-3xl font-bold" data-testid="text-qr-codes">
+              <div className="text-2xl sm:text-3xl font-bold" data-testid="text-qr-codes">
                 {totalProducts}
               </div>
             )}
-            <p className="text-xs text-muted-foreground mt-1">Scannable identities</p>
+            <p className="text-xs text-muted-foreground mt-1 truncate">Scannable identities</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Repairability</CardTitle>
-            <Sparkles className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium truncate">Avg Repair</CardTitle>
+            <Sparkles className="h-4 w-4 text-muted-foreground shrink-0" />
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <Skeleton className="h-8 w-16" />
             ) : (
-              <div className="text-3xl font-bold" data-testid="text-avg-repairability">
+              <div className="text-2xl sm:text-3xl font-bold" data-testid="text-avg-repairability">
                 {avgRepairability}<span className="text-lg text-muted-foreground">/10</span>
               </div>
             )}
-            <p className="text-xs text-muted-foreground mt-1">Across all products</p>
+            <p className="text-xs text-muted-foreground mt-1 truncate">Product average</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Carbon Footprint</CardTitle>
-            <Recycle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium truncate">Carbon</CardTitle>
+            <Recycle className="h-4 w-4 text-muted-foreground shrink-0" />
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <Skeleton className="h-8 w-16" />
             ) : (
-              <div className="text-3xl font-bold" data-testid="text-carbon-footprint">
+              <div className="text-2xl sm:text-3xl font-bold" data-testid="text-carbon-footprint">
                 {totalCarbonFootprint}<span className="text-lg text-muted-foreground">kg</span>
               </div>
             )}
-            <p className="text-xs text-muted-foreground mt-1">Total CO2 equivalent</p>
+            <p className="text-xs text-muted-foreground mt-1 truncate">Total CO2 eq.</p>
           </CardContent>
         </Card>
       </div>
