@@ -235,6 +235,10 @@ function InternalOpsProtected() {
             </span>
           )}
           <ThemeToggle />
+          <Button variant="outline" size="sm" onClick={() => { window.location.href = "/api/logout"; }} data-testid="button-admin-signout">
+            <LogOut className="h-4 w-4 mr-1" />
+            Sign Out
+          </Button>
         </div>
       </header>
       <main className="flex-1 overflow-auto">
