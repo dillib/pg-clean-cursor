@@ -8,20 +8,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import {
-  Users, Activity, Zap, HeadphonesIcon, BarChart3,
-  Building, Heart, ArrowRight, Check, X, Clock, AlertTriangle,
-  Plus, Loader2, RefreshCw, Rocket, Tag, Shield, Cpu,
-  TrendingUp, ChevronRight, Search, Mail, Phone, Eye,
+  Users, Zap, HeadphonesIcon, BarChart3,
+  Building, Heart, Check, X, Clock, AlertTriangle,
+  Plus, Loader2, Rocket, Tag, Shield, Cpu,
+  TrendingUp, ChevronRight, Search, Eye,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type {
   CustomerAccount, AccountActivity, NextBestAction,
-  DemoInstance, PersonaTemplate, SupportTicket,
+  SupportTicket, DemoConfig,
   AccountStatus, AccountTier, TicketPriority, TicketStatus,
 } from "@shared/schema";
 
@@ -354,61 +353,74 @@ function CreateAccountForm({ onSubmit, isPending }: { onSubmit: (data: Record<st
 // DEMO FACTORY TAB
 // ==========================================
 
+const INDUSTRY_TEMPLATES = [
+  { label: "Battery Manufacturer", industry: "Batteries", prompt: "Generate 3 industrial battery products for a European battery manufacturer (LFP and NMC chemistry). Include detailed material composition, carbon footprint data, and recycling information for EU Battery Regulation compliance." },
+  { label: "Fashion Brand", industry: "Apparel", prompt: "Generate 3 sustainable fashion products for a mid-size European fashion brand. Include organic/recycled materials, water usage data, and supply chain origin information for EU DPP textile compliance." },
+  { label: "Electronics Company", industry: "Consumer Electronics", prompt: "Generate 3 consumer electronics products (smart devices, IoT sensors). Include repairability scores, spare parts availability, and e-waste recycling instructions for EU DPP electronics compliance." },
+  { label: "EV Components Supplier", industry: "EV Accessories", prompt: "Generate 3 electric vehicle accessory products (charging cables, battery modules, power converters). Include material composition, safety certifications, and end-of-life recycling data." },
+  { label: "Packaging Manufacturer", industry: "Industrial Packaging", prompt: "Generate 3 industrial packaging products (cardboard, biodegradable packaging, reusable containers). Include recycled content percentages, recyclability data, and material sourcing information." },
+  { label: "Furniture Maker", industry: "Furniture", prompt: "Generate 3 furniture products (office chairs, tables, shelving). Include wood sourcing certifications, VOC emissions data, repairability scores, and disassembly instructions." },
+];
+
 function DemoFactoryTab() {
   const { toast } = useToast();
-  const [showProvisionDialog, setShowProvisionDialog] = useState(false);
+  const [customName, setCustomName] = useState("");
+  const [customIndustry, setCustomIndustry] = useState("");
+  const [customPrompt, setCustomPrompt] = useState("");
 
-  const { data: demos = [], isLoading } = useQuery<DemoInstance[]>({
-    queryKey: ["/api/internal/demos"],
+  const { data: demoConfigs = [], isLoading } = useQuery<DemoConfig[]>({
+    queryKey: ["/api/demo-configs"],
   });
 
-  const { data: personas = [] } = useQuery<PersonaTemplate[]>({
-    queryKey: ["/api/internal/personas"],
-  });
-
-  const seedPersonasMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/internal/personas/seed-defaults");
+  const createDemoMutation = useMutation({
+    mutationFn: async (data: { name: string; industry: string; prompt: string }) => {
+      const res = await apiRequest("POST", "/api/demo-configs", data);
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/internal/personas"] });
-      toast({ title: "Persona templates seeded" });
+      queryClient.invalidateQueries({ queryKey: ["/api/demo-configs"] });
+      setCustomName("");
+      setCustomIndustry("");
+      setCustomPrompt("");
+      toast({ title: "Demo generation started", description: "AI is generating products. This may take a moment." });
     },
+    onError: () => toast({ title: "Failed to generate demo", variant: "destructive" }),
   });
 
-  const provisionMutation = useMutation({
-    mutationFn: async (data: Record<string, unknown>) => {
-      const res = await apiRequest("POST", "/api/internal/demos/provision", data);
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/internal/demos"] });
-      setShowProvisionDialog(false);
-      toast({ title: "Demo provisioning started", description: "Products are being generated with AI..." });
-    },
-    onError: () => toast({ title: "Failed to provision demo", variant: "destructive" }),
-  });
-
-  const deactivateMutation = useMutation({
+  const deleteDemoMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await apiRequest("PATCH", `/api/internal/demos/${id}`, { status: "deactivated" });
-      return res.json();
+      await apiRequest("DELETE", `/api/demo-configs/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/internal/demos"] });
-      toast({ title: "Demo deactivated" });
+      queryClient.invalidateQueries({ queryKey: ["/api/demo-configs"] });
+      toast({ title: "Demo deleted" });
     },
   });
 
-  const activeDemos = demos.filter(d => d.status === "active");
-  const provisioningDemos = demos.filter(d => d.status === "provisioning");
+  const handleTemplateClick = (template: typeof INDUSTRY_TEMPLATES[0]) => {
+    if (createDemoMutation.isPending) return;
+    createDemoMutation.mutate({
+      name: `${template.label} Demo`,
+      industry: template.industry,
+      prompt: template.prompt,
+    });
+  };
+
+  const handleCustomGenerate = () => {
+    if (!customName || !customIndustry || !customPrompt) {
+      toast({ title: "Please fill all fields", variant: "destructive" });
+      return;
+    }
+    createDemoMutation.mutate({ name: customName, industry: customIndustry, prompt: customPrompt });
+  };
+
+  const readyDemos = demoConfigs.filter(d => d.status === "ready");
+  const generatingDemos = demoConfigs.filter(d => d.status === "generating");
 
   const DEMO_STATUS_COLORS: Record<string, string> = {
-    provisioning: "bg-blue-100 text-blue-700",
-    active: "bg-green-100 text-green-700",
-    expired: "bg-orange-100 text-orange-700",
-    deactivated: "bg-gray-100 text-gray-600",
+    generating: "bg-blue-100 text-blue-700",
+    ready: "bg-green-100 text-green-700",
+    failed: "bg-red-100 text-red-700",
   };
 
   return (
@@ -416,19 +428,19 @@ function DemoFactoryTab() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card><CardContent className="p-5">
           <div className="flex items-center justify-between">
-            <div><p className="text-sm text-muted-foreground">Active Demos</p><p className="text-2xl font-bold">{activeDemos.length}</p></div>
+            <div><p className="text-sm text-muted-foreground">Ready Demos</p><p className="text-2xl font-bold">{readyDemos.length}</p></div>
             <Rocket className="w-8 h-8 text-green-500/30" />
           </div>
         </CardContent></Card>
         <Card><CardContent className="p-5">
           <div className="flex items-center justify-between">
-            <div><p className="text-sm text-muted-foreground">Provisioning</p><p className="text-2xl font-bold">{provisioningDemos.length}</p></div>
+            <div><p className="text-sm text-muted-foreground">Generating</p><p className="text-2xl font-bold">{generatingDemos.length}</p></div>
             <Loader2 className="w-8 h-8 text-blue-500/30" />
           </div>
         </CardContent></Card>
         <Card><CardContent className="p-5">
           <div className="flex items-center justify-between">
-            <div><p className="text-sm text-muted-foreground">Persona Templates</p><p className="text-2xl font-bold">{personas.length}</p></div>
+            <div><p className="text-sm text-muted-foreground">Total Created</p><p className="text-2xl font-bold">{demoConfigs.length}</p></div>
             <Tag className="w-8 h-8 text-purple-500/30" />
           </div>
         </CardContent></Card>
@@ -436,134 +448,95 @@ function DemoFactoryTab() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Industry Persona Templates</CardTitle>
-          <CardDescription>Pre-defined templates with sample products and IoT configurations</CardDescription>
+          <CardTitle className="text-lg">Industry Templates</CardTitle>
+          <CardDescription>Click a template to instantly generate a demo with AI-created products</CardDescription>
         </CardHeader>
         <CardContent>
-          {personas.length === 0 ? (
-            <div className="text-center py-8">
-              <Tag className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground mb-4">No persona templates yet</p>
-              <Button onClick={() => seedPersonasMutation.mutate()} disabled={seedPersonasMutation.isPending} data-testid="button-seed-personas">
-                {seedPersonasMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
-                Load Default Templates
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {personas.map(p => (
-                <div key={p.id} className="p-4 rounded-lg border hover:bg-muted/50 transition-colors" data-testid={`persona-${p.id}`}>
-                  <div className="font-medium mb-1">{p.name}</div>
-                  <div className="text-xs text-muted-foreground mb-2">{p.description}</div>
-                  <Badge variant="outline" className="text-xs">{p.productCount} products</Badge>
-                </div>
-              ))}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {INDUSTRY_TEMPLATES.map(template => (
+              <div
+                key={template.label}
+                className="p-4 rounded-lg border cursor-pointer hover:bg-muted/50 hover:border-primary/30 transition-all"
+                onClick={() => handleTemplateClick(template)}
+                data-testid={`button-template-${template.industry.toLowerCase().replace(/\s/g, '-')}`}
+              >
+                <div className="font-medium text-sm mb-1">{template.label}</div>
+                <div className="text-xs text-muted-foreground">{template.industry}</div>
+              </div>
+            ))}
+          </div>
+          {createDemoMutation.isPending && (
+            <div className="flex items-center gap-2 mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+              <span className="text-sm text-blue-700 dark:text-blue-300">Generating demo products with AI...</span>
             </div>
           )}
         </CardContent>
       </Card>
 
-      <Card data-testid="card-demo-instances">
+      <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Demo Instances</CardTitle>
-              <CardDescription>One-click provisioned demo environments for prospects</CardDescription>
-            </div>
-            <Dialog open={showProvisionDialog} onOpenChange={setShowProvisionDialog}>
-              <DialogTrigger asChild>
-                <Button data-testid="button-provision-demo"><Rocket className="w-4 h-4 mr-1" /> Provision Demo</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Provision New Demo</DialogTitle>
-                  <DialogDescription>Enter prospect details to spawn a fully seeded demo environment</DialogDescription>
-                </DialogHeader>
-                <ProvisionDemoForm personas={personas} onSubmit={(data) => provisionMutation.mutate(data)} isPending={provisionMutation.isPending} />
-              </DialogContent>
-            </Dialog>
+          <CardTitle className="text-lg">Custom Demo</CardTitle>
+          <CardDescription>Write your own prompt to generate a demo tailored to a specific prospect</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div><Label>Demo Name</Label><Input placeholder="e.g., Acme Corp Battery Demo" value={customName} onChange={e => setCustomName(e.target.value)} data-testid="input-custom-demo-name" /></div>
+            <div><Label>Industry</Label><Input placeholder="e.g., Batteries, Textiles" value={customIndustry} onChange={e => setCustomIndustry(e.target.value)} data-testid="input-custom-demo-industry" /></div>
           </div>
+          <div>
+            <Label>Prompt</Label>
+            <Textarea placeholder="Describe the products you want to generate. Include details about materials, sustainability goals, and compliance needs..." value={customPrompt} onChange={e => setCustomPrompt(e.target.value)} rows={4} data-testid="input-custom-demo-prompt" />
+          </div>
+          <Button onClick={handleCustomGenerate} disabled={createDemoMutation.isPending} className="gap-2" data-testid="button-generate-custom-demo">
+            {createDemoMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
+            Generate Demo
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card data-testid="card-generated-demos">
+        <CardHeader>
+          <CardTitle className="text-lg">Generated Demos</CardTitle>
+          <CardDescription>Previously created demo configurations with AI-generated products</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
-          ) : demos.length === 0 ? (
+          ) : demoConfigs.length === 0 ? (
             <div className="text-center py-12">
               <Rocket className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-medium mb-2">No demo instances</h3>
-              <p className="text-muted-foreground text-sm">Provision your first demo to get started</p>
+              <h3 className="text-lg font-medium mb-2">No demos yet</h3>
+              <p className="text-muted-foreground text-sm">Use a template above or create a custom demo to get started</p>
             </div>
           ) : (
             <div className="space-y-2">
-              {demos.map(demo => (
-                <div key={demo.id} className="flex items-center gap-4 p-4 rounded-lg border" data-testid={`demo-row-${demo.id}`}>
+              {demoConfigs.map(config => (
+                <div key={config.id} className="flex items-center gap-4 p-4 rounded-lg border" data-testid={`demo-config-${config.id}`}>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium">{demo.prospectName}</span>
-                      <Badge className={DEMO_STATUS_COLORS[demo.status]}>{demo.status}</Badge>
-                      <Badge variant="outline" className="text-xs">{demo.industry}</Badge>
+                      <span className="font-medium">{config.name}</span>
+                      <Badge className={DEMO_STATUS_COLORS[config.status]}>
+                        {config.status === "generating" && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
+                        {config.status}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">{config.industry}</Badge>
                     </div>
-                    <div className="text-sm text-muted-foreground flex gap-2 flex-wrap">
-                      {demo.prospectCompany && <span>{demo.prospectCompany}</span>}
-                      {demo.prospectEmail && <><span>•</span><span>{demo.prospectEmail}</span></>}
-                      <span>•</span>
-                      <span>{(demo.productIds as string[])?.length || 0} products</span>
-                      {demo.expiresAt && <><span>•</span><span>Expires {format(new Date(demo.expiresAt), "MMM d, yyyy")}</span></>}
-                    </div>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{config.prompt}</p>
+                    {config.generatedProducts && (config.generatedProducts as unknown[]).length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">{(config.generatedProducts as unknown[]).length} products generated</p>
+                    )}
                   </div>
-                  {demo.status === "active" && (
-                    <Button size="sm" variant="outline" onClick={() => deactivateMutation.mutate(demo.id)} data-testid={`button-deactivate-${demo.id}`}>
-                      <X className="w-3 h-3 mr-1" /> Deactivate
-                    </Button>
-                  )}
-                  {demo.status === "provisioning" && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+                  <span className="text-xs text-muted-foreground hidden sm:block">{format(new Date(config.createdAt), "MMM d, yyyy")}</span>
+                  <Button variant="ghost" size="icon" onClick={() => { if (confirm("Delete this demo?")) deleteDemoMutation.mutate(config.id); }} data-testid={`button-delete-demo-${config.id}`}>
+                    <X className="w-4 h-4 text-muted-foreground" />
+                  </Button>
                 </div>
               ))}
             </div>
           )}
         </CardContent>
       </Card>
-    </div>
-  );
-}
-
-function ProvisionDemoForm({ personas, onSubmit, isPending }: { personas: PersonaTemplate[]; onSubmit: (data: Record<string, unknown>) => void; isPending: boolean }) {
-  const [form, setForm] = useState({
-    prospectName: "", prospectEmail: "", prospectCompany: "",
-    industry: personas[0]?.industry || "Automotive", personaTemplate: "",
-  });
-
-  return (
-    <div className="space-y-4">
-      <div><Label>Prospect Name *</Label><Input value={form.prospectName} onChange={e => setForm({ ...form, prospectName: e.target.value })} data-testid="input-prospect-name" /></div>
-      <div className="grid grid-cols-2 gap-4">
-        <div><Label>Email</Label><Input type="email" value={form.prospectEmail} onChange={e => setForm({ ...form, prospectEmail: e.target.value })} data-testid="input-prospect-email" /></div>
-        <div><Label>Company</Label><Input value={form.prospectCompany} onChange={e => setForm({ ...form, prospectCompany: e.target.value })} data-testid="input-prospect-company" /></div>
-      </div>
-      <div>
-        <Label>Industry *</Label>
-        <Select value={form.industry} onValueChange={v => setForm({ ...form, industry: v })}>
-          <SelectTrigger data-testid="select-industry"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {personas.length > 0 ? personas.map(p => (
-              <SelectItem key={p.id} value={p.industry}>{p.name} - {p.industry}</SelectItem>
-            )) : (
-              <>
-                <SelectItem value="Automotive">Automotive</SelectItem>
-                <SelectItem value="Textiles">Textiles</SelectItem>
-                <SelectItem value="Electronics">Electronics</SelectItem>
-                <SelectItem value="Batteries">Batteries</SelectItem>
-                <SelectItem value="Packaging">Packaging</SelectItem>
-                <SelectItem value="Furniture">Furniture</SelectItem>
-              </>
-            )}
-          </SelectContent>
-        </Select>
-      </div>
-      <Button onClick={() => onSubmit(form)} disabled={isPending || !form.prospectName || !form.industry} className="w-full" data-testid="button-submit-provision">
-        {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Rocket className="w-4 h-4 mr-2" />}
-        Provision Demo Environment
-      </Button>
     </div>
   );
 }

@@ -198,6 +198,49 @@ function DualAuthCRM() {
   return <Redirect to="/team/login" />;
 }
 
+function InternalOpsProtected() {
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const [, setLocation] = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Redirect to="/" />;
+  }
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="flex h-14 items-center justify-between gap-4 border-b px-4 shrink-0">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => setLocation("/")} data-testid="button-back-dashboard">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <QrCode className="h-5 w-5 text-primary" />
+          <span className="font-semibold">PhotonicTag</span>
+          <Badge variant="secondary" className="text-xs">Internal Ops</Badge>
+        </div>
+        <div className="flex items-center gap-3">
+          {user && (
+            <span className="text-sm text-muted-foreground" data-testid="text-ops-user">
+              {user.firstName || user.email}
+            </span>
+          )}
+          <ThemeToggle />
+        </div>
+      </header>
+      <main className="flex-1 overflow-auto">
+        <AdminInternal />
+      </main>
+    </div>
+  );
+}
+
 function Router() {
   return (
     <Switch>
@@ -242,9 +285,7 @@ function Router() {
         </ProtectedRoute>
       </Route>
       <Route path="/admin/internal">
-        <ProtectedRoute>
-          <AdminInternal />
-        </ProtectedRoute>
+        <InternalOpsProtected />
       </Route>
       <Route path="/crm">
         <DualAuthCRM />
