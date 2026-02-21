@@ -413,42 +413,7 @@ function Router() {
       <Route path="/demo/login" component={DemoLogin} />
       <Route path="/internal/dashboard">
         <InternalProtectedRoute>
-          <Dashboard />
-        </InternalProtectedRoute>
-      </Route>
-      <Route path="/internal/products/new">
-        <InternalProtectedRoute>
-          <ProductForm />
-        </InternalProtectedRoute>
-      </Route>
-      <Route path="/internal/products/:id/edit">
-        <InternalProtectedRoute>
-          <ProductForm />
-        </InternalProtectedRoute>
-      </Route>
-      <Route path="/internal/products/:id">
-        <InternalProtectedRoute>
-          <ProductDetail />
-        </InternalProtectedRoute>
-      </Route>
-      <Route path="/internal/products">
-        <InternalProtectedRoute>
-          <Products />
-        </InternalProtectedRoute>
-      </Route>
-      <Route path="/internal/iot-devices">
-        <InternalProtectedRoute>
-          <IoTDevices />
-        </InternalProtectedRoute>
-      </Route>
-      <Route path="/internal/integrations/sap">
-        <InternalProtectedRoute>
-          <SAPConnector />
-        </InternalProtectedRoute>
-      </Route>
-      <Route path="/internal/integrations/sap-demo">
-        <InternalProtectedRoute>
-          <SAPDemo />
+          <AdminInternal mode="internal" />
         </InternalProtectedRoute>
       </Route>
       <Route path="/internal/admin">

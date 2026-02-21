@@ -20,8 +20,7 @@ interface NavItem {
   title: string;
   url: string;
   icon: typeof LayoutDashboard;
-  adminOnly?: boolean;
-  internalOnly?: boolean;
+  showIn: ("admin" | "demo" | "internal")[];
 }
 
 const navigationItems: NavItem[] = [
@@ -29,43 +28,49 @@ const navigationItems: NavItem[] = [
     title: "Dashboard",
     url: "/",
     icon: LayoutDashboard,
+    showIn: ["admin", "demo"],
   },
   {
     title: "Products",
     url: "/products",
     icon: Package,
+    showIn: ["admin", "demo"],
   },
   {
     title: "IoT Devices",
     url: "/iot-devices",
     icon: Wifi,
+    showIn: ["admin", "demo"],
   },
   {
     title: "SAP Connector",
     url: "/integrations/sap",
     icon: Plug,
+    showIn: ["admin", "demo"],
   },
   {
     title: "SAP Demo",
     url: "/integrations/sap-demo",
     icon: ArrowLeftRight,
+    showIn: ["admin", "demo"],
   },
   {
     title: "Create Product",
     url: "/products/new",
     icon: Plus,
+    showIn: ["admin", "demo"],
   },
   {
     title: "CRM & Tools",
     url: "/admin",
     icon: Settings2,
-    internalOnly: true,
+    showIn: ["internal"],
   },
   {
     title: "Internal Ops",
     url: "/admin/internal",
     icon: Settings2,
-    adminOnly: true,
+    showIn: ["admin"],
   },
 ];
 
@@ -107,11 +112,7 @@ export function AppSidebar({ mode = "admin", teamUser, onLogout }: AppSidebarPro
     return "User";
   };
 
-  const filteredItems = navigationItems.filter((item) => {
-    if (isDemo) return !item.adminOnly && !item.internalOnly;
-    if (isInternal) return !item.adminOnly;
-    return !item.internalOnly;
-  });
+  const filteredItems = navigationItems.filter((item) => item.showIn.includes(mode));
 
   const getPrefix = () => {
     if (isDemo) return "/demo";
@@ -120,7 +121,7 @@ export function AppSidebar({ mode = "admin", teamUser, onLogout }: AppSidebarPro
   };
   const prefix = getPrefix();
 
-  const homeUrl = isDemo ? "/demo/dashboard" : isInternal ? "/internal/dashboard" : "/";
+  const homeUrl = isDemo ? "/demo/dashboard" : isInternal ? "/internal/admin" : "/";
 
   return (
     <Sidebar>

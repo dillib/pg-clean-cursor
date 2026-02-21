@@ -32,7 +32,7 @@ export default function PartnerLogin() {
         if (data.partner.role === "demo_viewer") {
           setLocation("/demo/dashboard");
         } else {
-          setLocation("/internal/dashboard");
+          setLocation("/internal/admin");
         }
       }
     } catch (error: any) {

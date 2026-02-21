@@ -12,7 +12,7 @@ import {
   Users, Zap, HeadphonesIcon, BarChart3,
   Building, Heart, Check, X, Clock, AlertTriangle,
   Plus, Loader2, Rocket, Tag, Shield, Cpu,
-  TrendingUp, ChevronRight, Search, Eye, UserPlus, Trash2, Edit,
+  TrendingUp, ChevronRight, Search, Eye, UserPlus, Trash2, Edit, KeyRound,
 } from "lucide-react";
 import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -895,6 +895,8 @@ type PartnerUser = {
 function UserManagementTab() {
   const { toast } = useToast();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [passwordChangeUser, setPasswordChangeUser] = useState<PartnerUser | null>(null);
+  const [newPassword, setNewPassword] = useState("");
 
   const { data: partners = [], isLoading } = useQuery<PartnerUser[]>({
     queryKey: ["/api/partners"],
@@ -932,6 +934,19 @@ function UserManagementTab() {
       queryClient.invalidateQueries({ queryKey: ["/api/partners"] });
       toast({ title: "User updated" });
     },
+  });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async ({ id, password }: { id: string; password: string }) => {
+      const res = await apiRequest("PATCH", `/api/partners/${id}`, { password });
+      return res.json();
+    },
+    onSuccess: () => {
+      setPasswordChangeUser(null);
+      setNewPassword("");
+      toast({ title: "Password updated successfully" });
+    },
+    onError: () => toast({ title: "Failed to update password", variant: "destructive" }),
   });
 
   const activeUsers = partners.filter(p => p.status === "active");
@@ -1019,6 +1034,15 @@ function UserManagementTab() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      onClick={() => { setPasswordChangeUser(partner); setNewPassword(""); }}
+                      title="Change Password"
+                      data-testid={`button-password-user-${partner.id}`}
+                    >
+                      <KeyRound className="w-4 h-4 text-muted-foreground" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => toggleStatusMutation.mutate({ id: partner.id, status: partner.status === "active" ? "inactive" : "active" })}
                       title={partner.status === "active" ? "Deactivate" : "Activate"}
                       data-testid={`button-toggle-user-${partner.id}`}
@@ -1040,6 +1064,38 @@ function UserManagementTab() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!passwordChangeUser} onOpenChange={(open) => { if (!open) { setPasswordChangeUser(null); setNewPassword(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+            <DialogDescription>
+              Set a new password for {passwordChangeUser?.firstName} {passwordChangeUser?.lastName} ({passwordChangeUser?.email})
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>New Password</Label>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                placeholder="Min 6 characters"
+                data-testid="input-new-password"
+              />
+            </div>
+            <Button
+              onClick={() => passwordChangeUser && changePasswordMutation.mutate({ id: passwordChangeUser.id, password: newPassword })}
+              disabled={changePasswordMutation.isPending || newPassword.length < 6}
+              className="w-full"
+              data-testid="button-submit-password"
+            >
+              {changePasswordMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <KeyRound className="w-4 h-4 mr-2" />}
+              Update Password
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
