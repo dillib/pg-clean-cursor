@@ -29,7 +29,11 @@ export default function PartnerLogin() {
 
       if (data.success) {
         toast({ title: "Welcome back!", description: `Logged in as ${data.partner.firstName}` });
-        setLocation("/internal/dashboard");
+        if (data.partner.role === "demo_viewer") {
+          setLocation("/demo/dashboard");
+        } else {
+          setLocation("/internal/dashboard");
+        }
       }
     } catch (error: any) {
       toast({

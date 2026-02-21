@@ -251,7 +251,7 @@ function InternalOpsProtected() {
   );
 }
 
-function InternalDashboardProtected() {
+function InternalProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated: isTeamAuth, isLoading: teamLoading, teamUser } = useTeamAuth();
   const [, setLocation] = useLocation();
   const logoutMutation = useMutation({
@@ -276,39 +276,28 @@ function InternalDashboardProtected() {
     return <Redirect to="/internal/login" />;
   }
 
-  if (teamUser?.role === "demo_viewer") {
-    return <Redirect to="/demo/dashboard" />;
-  }
+  const style = {
+    "--sidebar-width": "16rem",
+    "--sidebar-width-icon": "3rem",
+  };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <header className="flex h-14 items-center justify-between gap-4 border-b px-4 shrink-0">
-        <div className="flex items-center gap-2">
-          <QrCode className="h-5 w-5 text-primary" />
-          <span className="font-semibold">PhotonicTag</span>
-          <Badge variant="secondary" className="text-xs">Internal</Badge>
+    <RoutePrefixProvider prefix="/internal">
+      <SidebarProvider style={style as React.CSSProperties}>
+        <div className="flex h-screen w-full">
+          <AppSidebar mode="internal" teamUser={teamUser} onLogout={() => logoutMutation.mutate()} />
+          <div className="flex flex-col flex-1 overflow-hidden">
+            <header className="flex h-14 items-center justify-between gap-4 border-b px-4 shrink-0">
+              <SidebarTrigger data-testid="button-sidebar-toggle" />
+              <ThemeToggle />
+            </header>
+            <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
+              {children}
+            </main>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          {teamUser && (
-            <span className="text-sm text-muted-foreground" data-testid="text-internal-user">
-              {teamUser.firstName} {teamUser.lastName}
-            </span>
-          )}
-          <ThemeToggle />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => logoutMutation.mutate()}
-            data-testid="button-internal-logout"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
-        </div>
-      </header>
-      <main className="flex-1 overflow-auto">
-        <AdminInternal mode="internal" />
-      </main>
-    </div>
+      </SidebarProvider>
+    </RoutePrefixProvider>
   );
 }
 
@@ -423,7 +412,49 @@ function Router() {
       <Route path="/internal/login" component={PartnerLogin} />
       <Route path="/demo/login" component={DemoLogin} />
       <Route path="/internal/dashboard">
-        <InternalDashboardProtected />
+        <InternalProtectedRoute>
+          <Dashboard />
+        </InternalProtectedRoute>
+      </Route>
+      <Route path="/internal/products/new">
+        <InternalProtectedRoute>
+          <ProductForm />
+        </InternalProtectedRoute>
+      </Route>
+      <Route path="/internal/products/:id/edit">
+        <InternalProtectedRoute>
+          <ProductForm />
+        </InternalProtectedRoute>
+      </Route>
+      <Route path="/internal/products/:id">
+        <InternalProtectedRoute>
+          <ProductDetail />
+        </InternalProtectedRoute>
+      </Route>
+      <Route path="/internal/products">
+        <InternalProtectedRoute>
+          <Products />
+        </InternalProtectedRoute>
+      </Route>
+      <Route path="/internal/iot-devices">
+        <InternalProtectedRoute>
+          <IoTDevices />
+        </InternalProtectedRoute>
+      </Route>
+      <Route path="/internal/integrations/sap">
+        <InternalProtectedRoute>
+          <SAPConnector />
+        </InternalProtectedRoute>
+      </Route>
+      <Route path="/internal/integrations/sap-demo">
+        <InternalProtectedRoute>
+          <SAPDemo />
+        </InternalProtectedRoute>
+      </Route>
+      <Route path="/internal/admin">
+        <InternalProtectedRoute>
+          <AdminInternal mode="internal" />
+        </InternalProtectedRoute>
       </Route>
       <Route path="/demo/dashboard">
         <DemoProtectedRoute>

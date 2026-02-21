@@ -16,42 +16,50 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 
-const navigationItems = [
+interface NavItem {
+  title: string;
+  url: string;
+  icon: typeof LayoutDashboard;
+  adminOnly?: boolean;
+  internalOnly?: boolean;
+}
+
+const navigationItems: NavItem[] = [
   {
     title: "Dashboard",
     url: "/",
     icon: LayoutDashboard,
-    demoUrl: "/demo/dashboard",
   },
   {
     title: "Products",
     url: "/products",
     icon: Package,
-    demoUrl: "/demo/products",
   },
   {
     title: "IoT Devices",
     url: "/iot-devices",
     icon: Wifi,
-    demoUrl: "/demo/iot-devices",
   },
   {
     title: "SAP Connector",
     url: "/integrations/sap",
     icon: Plug,
-    demoUrl: "/demo/integrations/sap",
   },
   {
     title: "SAP Demo",
     url: "/integrations/sap-demo",
     icon: ArrowLeftRight,
-    demoUrl: "/demo/integrations/sap-demo",
   },
   {
     title: "Create Product",
     url: "/products/new",
     icon: Plus,
-    demoUrl: "/demo/products/new",
+  },
+  {
+    title: "CRM & Tools",
+    url: "/admin",
+    icon: Settings2,
+    internalOnly: true,
   },
   {
     title: "Internal Ops",
@@ -62,7 +70,7 @@ const navigationItems = [
 ];
 
 interface AppSidebarProps {
-  mode?: "admin" | "demo";
+  mode?: "admin" | "demo" | "internal";
   teamUser?: { firstName?: string; lastName?: string; email?: string } | null;
   onLogout?: () => void;
 }
@@ -72,7 +80,9 @@ export function AppSidebar({ mode = "admin", teamUser, onLogout }: AppSidebarPro
   const { user, logout, isLoggingOut } = useAuth();
 
   const isDemo = mode === "demo";
-  const displayUser = isDemo ? teamUser : user;
+  const isInternal = mode === "internal";
+  const isTeamMode = isDemo || isInternal;
+  const displayUser = isTeamMode ? teamUser : user;
 
   const getInitials = () => {
     if (displayUser?.firstName && displayUser?.lastName) {
@@ -97,11 +107,20 @@ export function AppSidebar({ mode = "admin", teamUser, onLogout }: AppSidebarPro
     return "User";
   };
 
-  const filteredItems = isDemo
-    ? navigationItems.filter((item) => !item.adminOnly)
-    : navigationItems;
+  const filteredItems = navigationItems.filter((item) => {
+    if (isDemo) return !item.adminOnly && !item.internalOnly;
+    if (isInternal) return !item.adminOnly;
+    return !item.internalOnly;
+  });
 
-  const homeUrl = isDemo ? "/demo/dashboard" : "/";
+  const getPrefix = () => {
+    if (isDemo) return "/demo";
+    if (isInternal) return "/internal";
+    return "";
+  };
+  const prefix = getPrefix();
+
+  const homeUrl = isDemo ? "/demo/dashboard" : isInternal ? "/internal/dashboard" : "/";
 
   return (
     <Sidebar>
@@ -124,9 +143,11 @@ export function AppSidebar({ mode = "admin", teamUser, onLogout }: AppSidebarPro
           <SidebarGroupContent>
             <SidebarMenu>
               {filteredItems.map((item) => {
-                const itemUrl = isDemo && item.demoUrl ? item.demoUrl : item.url;
+                const itemUrl = isTeamMode
+                  ? (item.url === "/" ? `${prefix}/dashboard` : `${prefix}${item.url}`)
+                  : item.url;
                 const isActive = location === itemUrl || 
-                  (itemUrl !== "/" && itemUrl !== "/demo/dashboard" && location.startsWith(itemUrl));
+                  (itemUrl !== "/" && itemUrl !== `${prefix}/dashboard` && location.startsWith(itemUrl));
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild data-active={isActive}>
@@ -161,8 +182,8 @@ export function AppSidebar({ mode = "admin", teamUser, onLogout }: AppSidebarPro
               variant="ghost" 
               size="sm" 
               className="w-full justify-start gap-2"
-              onClick={() => isDemo && onLogout ? onLogout() : logout()}
-              disabled={!isDemo && isLoggingOut}
+              onClick={() => isTeamMode && onLogout ? onLogout() : logout()}
+              disabled={!isTeamMode && isLoggingOut}
               data-testid="button-logout"
             >
               <LogOut className="h-4 w-4" />
