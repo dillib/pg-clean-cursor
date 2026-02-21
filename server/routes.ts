@@ -920,7 +920,13 @@ export async function registerRoutes(
       (req.session as any).partnerRole = partner.role;
 
       const { passwordHash, ...safePartner } = partner;
-      res.json({ success: true, partner: safePartner });
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ error: "Login failed" });
+        }
+        res.json({ success: true, partner: safePartner });
+      });
     } catch (error) {
       console.error("Partner login error:", error);
       res.status(500).json({ error: "Login failed" });
@@ -1035,7 +1041,7 @@ export async function registerRoutes(
   // DEMO CONFIG ENDPOINTS (Protected - Admin Only)
   // ==========================================
 
-  app.get("/api/demo-configs", isAuthenticated, async (req: Request, res: Response) => {
+  app.get("/api/demo-configs", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const configs = await storage.getAllDemoConfigs();
       res.json(configs);
@@ -1045,7 +1051,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/demo-configs", isAuthenticated, async (req: Request, res: Response) => {
+  app.post("/api/demo-configs", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const parsed = insertDemoConfigSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -1066,7 +1072,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/demo-configs/:id", isAuthenticated, async (req: Request, res: Response) => {
+  app.delete("/api/demo-configs/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const success = await storage.deleteDemoConfig(req.params.id);
       if (!success) {
@@ -1079,7 +1085,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/demo-configs/:id", isAuthenticated, async (req: Request, res: Response) => {
+  app.get("/api/demo-configs/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const config = await storage.getDemoConfig(req.params.id);
       if (!config) {
@@ -1095,7 +1101,7 @@ export async function registerRoutes(
   // ==========================================
   // INTERNAL ADMIN ENDPOINTS (Protected - Admin Only)
   // ==========================================
-  app.use("/api/internal", isAuthenticated, internalRoutes);
+  app.use("/api/internal", isAuthenticatedOrTeam, internalRoutes);
 
   // ==========================================
   // SAP INTEGRATION ENDPOINTS (Protected)

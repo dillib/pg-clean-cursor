@@ -21,8 +21,13 @@ import type { RequestHandler } from "express";
 
 const router = Router();
 
-const isAdminUser: RequestHandler = async (req, res, next) => {
+const isAdminOrTeamUser: RequestHandler = async (req, res, next) => {
   try {
+    const partnerId = (req.session as any)?.partnerId;
+    if (partnerId) {
+      return next();
+    }
+
     const sessionUser = req.user as any;
     if (!sessionUser?.claims?.sub) {
       return res.status(403).json({ error: "Admin access required" });
@@ -37,7 +42,7 @@ const isAdminUser: RequestHandler = async (req, res, next) => {
   }
 };
 
-router.use(isAdminUser);
+router.use(isAdminOrTeamUser);
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
