@@ -13,8 +13,9 @@ import {
   Building, Heart, Check, X, Clock, AlertTriangle,
   Plus, Loader2, Rocket, Tag, Shield, Cpu,
   TrendingUp, ChevronRight, Search, Eye, UserPlus, Trash2, Edit, KeyRound,
+  Upload, FileSpreadsheet, CheckCircle2, AlertCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -64,11 +65,26 @@ function HealthScoreBar({ score }: { score: number }) {
 // CRM TAB
 // ==========================================
 
+type ImportResult = {
+  success: boolean;
+  totalRows: number;
+  created: number;
+  updated: number;
+  skipped: number;
+  errors: string[];
+  mappedColumns: { from: string; to: string }[];
+};
+
 function CRMTab() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importType, setImportType] = useState<"accounts" | "leads">("leads");
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: accounts = [], isLoading } = useQuery<CustomerAccount[]>({
     queryKey: ["/api/internal/accounts"],
@@ -124,6 +140,33 @@ function CRMTab() {
       toast({ title: "Action updated" });
     },
   });
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsImporting(true);
+    setImportResult(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("importType", importType);
+      const res = await fetch("/api/internal/accounts/bulk-import", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Import failed");
+      setImportResult(data);
+      queryClient.invalidateQueries({ queryKey: ["/api/internal/accounts"] });
+      toast({ title: `Import complete: ${data.created} created, ${data.updated} updated` });
+    } catch (err: any) {
+      toast({ title: "Import failed", description: err.message, variant: "destructive" });
+    } finally {
+      setIsImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const filteredAccounts = accounts.filter(a =>
     a.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -232,6 +275,9 @@ function CRMTab() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input placeholder="Search accounts..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9 w-48" data-testid="input-search-accounts" />
               </div>
+              <Button variant="outline" onClick={() => { setShowImportDialog(true); setImportResult(null); }} data-testid="button-import-excel">
+                <Upload className="w-4 h-4 mr-1" /> Import Excel
+              </Button>
               <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                 <DialogTrigger asChild>
                   <Button data-testid="button-create-account"><Plus className="w-4 h-4 mr-1" /> Add Account</Button>
@@ -297,6 +343,104 @@ function CRMTab() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileSpreadsheet className="w-5 h-5" />
+              Import from Excel
+            </DialogTitle>
+            <DialogDescription>
+              Upload an Excel (.xlsx, .xls) or CSV file to bulk import records. Column headers are automatically matched.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Import As</Label>
+              <Select value={importType} onValueChange={v => setImportType(v as any)}>
+                <SelectTrigger data-testid="select-import-type"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="leads">Leads (Sales Pipeline)</SelectItem>
+                  <SelectItem value="accounts">Customer Accounts (CRM)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="border-2 border-dashed rounded-lg p-6 text-center">
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept=".xlsx,.xls,.csv"
+                onChange={handleFileUpload}
+                className="hidden"
+                data-testid="input-file-upload"
+              />
+              {isImporting ? (
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">Processing file...</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                  <Upload className="w-8 h-8 text-muted-foreground" />
+                  <p className="text-sm font-medium">Click to select file</p>
+                  <p className="text-xs text-muted-foreground">Supports .xlsx, .xls, and .csv files (max 10MB)</p>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-muted/50 rounded-lg p-3">
+              <p className="text-xs font-medium mb-2">Supported column headers:</p>
+              <div className="flex flex-wrap gap-1">
+                {(importType === "leads"
+                  ? ["First Name", "Last Name", "Email", "Phone", "Company", "Job Title", "Source", "Notes", "Status"]
+                  : ["Company Name", "Contact Name", "Email", "Phone", "Industry", "Tier", "Status", "MRR"]
+                ).map(h => (
+                  <Badge key={h} variant="secondary" className="text-xs">{h}</Badge>
+                ))}
+              </div>
+            </div>
+
+            {importResult && (
+              <div className="rounded-lg border p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  {importResult.errors.length === 0 ? (
+                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                  ) : (
+                    <AlertCircle className="w-5 h-5 text-orange-500" />
+                  )}
+                  <span className="font-medium">Import Results</span>
+                </div>
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  <div><p className="text-lg font-bold">{importResult.totalRows}</p><p className="text-xs text-muted-foreground">Total Rows</p></div>
+                  <div><p className="text-lg font-bold text-green-600">{importResult.created}</p><p className="text-xs text-muted-foreground">Created</p></div>
+                  <div><p className="text-lg font-bold text-blue-600">{importResult.updated}</p><p className="text-xs text-muted-foreground">Updated</p></div>
+                  <div><p className="text-lg font-bold text-muted-foreground">{importResult.skipped}</p><p className="text-xs text-muted-foreground">Skipped</p></div>
+                </div>
+                {importResult.mappedColumns.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium mb-1">Mapped columns:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {importResult.mappedColumns.map(m => (
+                        <Badge key={m.from} variant="outline" className="text-xs">{m.from} → {m.to}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {importResult.errors.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-red-600 mb-1">Errors ({importResult.errors.length}):</p>
+                    <div className="max-h-24 overflow-y-auto text-xs text-red-600 space-y-1">
+                      {importResult.errors.map((err, i) => <p key={i}>{err}</p>)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

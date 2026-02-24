@@ -18,6 +18,8 @@ import { MASTER_ADMIN_EMAILS } from "@shared/models/auth";
 import { authStorage } from "../replit_integrations/auth/storage";
 import OpenAI from "openai";
 import type { RequestHandler } from "express";
+import multer from "multer";
+import * as XLSX from "xlsx";
 
 const router = Router();
 
@@ -93,6 +95,131 @@ router.post("/accounts", async (req: Request, res: Response) => {
     res.status(201).json(account);
   } catch (error) {
     res.status(500).json({ error: "Failed to create account" });
+  }
+});
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+
+const COLUMN_MAP: Record<string, string> = {
+  "company": "companyName", "company name": "companyName", "companyname": "companyName", "organization": "companyName", "org": "companyName", "firma": "companyName",
+  "contact": "contactName", "contact name": "contactName", "contactname": "contactName", "name": "contactName", "full name": "contactName", "fullname": "contactName",
+  "email": "contactEmail", "contact email": "contactEmail", "e-mail": "contactEmail", "mail": "contactEmail",
+  "phone": "contactPhone", "contact phone": "contactPhone", "telephone": "contactPhone", "tel": "contactPhone", "mobile": "contactPhone",
+  "industry": "industry", "sector": "industry", "branche": "industry",
+  "tier": "tier", "plan": "tier", "package": "tier",
+  "status": "status",
+  "mrr": "mrr", "revenue": "mrr", "monthly revenue": "mrr",
+  "first name": "firstName", "firstname": "firstName", "vorname": "firstName",
+  "last name": "lastName", "lastname": "lastName", "nachname": "lastName",
+  "job title": "jobTitle", "jobtitle": "jobTitle", "title": "jobTitle", "position": "jobTitle", "rolle": "jobTitle",
+  "notes": "notes", "comment": "notes", "comments": "notes",
+  "source": "source", "lead source": "source", "quelle": "source",
+  "message": "message",
+  "volume": "estimatedVolume", "estimated volume": "estimatedVolume",
+  "tier interest": "tierInterest", "tierinterest": "tierInterest",
+};
+
+function normalizeHeader(h: string): string {
+  return h.trim().toLowerCase().replace(/[_\-]/g, " ").replace(/\s+/g, " ");
+}
+
+router.post("/accounts/bulk-import", upload.single("file"), async (req: Request, res: Response) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rawRows: Record<string, any>[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+    if (rawRows.length === 0) return res.status(400).json({ error: "File is empty or has no data rows" });
+
+    const importType = (req.body?.importType as string) || "accounts";
+    const headers = Object.keys(rawRows[0]);
+    const mapping: Record<string, string> = {};
+    for (const h of headers) {
+      const norm = normalizeHeader(h);
+      if (COLUMN_MAP[norm]) mapping[h] = COLUMN_MAP[norm];
+    }
+
+    const results = { created: 0, updated: 0, skipped: 0, errors: [] as string[] };
+
+    for (let i = 0; i < rawRows.length; i++) {
+      const row = rawRows[i];
+      const mapped: Record<string, any> = {};
+      for (const [origCol, targetField] of Object.entries(mapping)) {
+        const val = row[origCol];
+        if (val !== undefined && val !== null && val !== "") {
+          mapped[targetField] = String(val).trim();
+        }
+      }
+
+      if (mapped.firstName && mapped.lastName && !mapped.contactName) {
+        mapped.contactName = `${mapped.firstName} ${mapped.lastName}`;
+      }
+
+      try {
+        if (importType === "leads") {
+          if (!mapped.contactEmail && !mapped.companyName) {
+            results.skipped++;
+            continue;
+          }
+          const leadData: Record<string, any> = {
+            firstName: mapped.firstName || mapped.contactName?.split(" ")[0] || "",
+            lastName: mapped.lastName || mapped.contactName?.split(" ").slice(1).join(" ") || "",
+            email: mapped.contactEmail || "",
+            phone: mapped.contactPhone || "",
+            company: mapped.companyName || "",
+            jobTitle: mapped.jobTitle || "",
+            tierInterest: mapped.tierInterest || "starter",
+            estimatedVolume: mapped.estimatedVolume || "",
+            message: mapped.message || mapped.notes || "",
+            source: mapped.source || "excel_import",
+            status: mapped.status || "new",
+          };
+
+          if (leadData.email) {
+            const existing = await storage.getLeadByEmail(leadData.email);
+            if (existing) {
+              await storage.updateLead(existing.id, leadData);
+              results.updated++;
+              continue;
+            }
+          }
+          await storage.createLead(leadData as any);
+          results.created++;
+        } else {
+          if (!mapped.companyName && !mapped.contactName) {
+            results.skipped++;
+            continue;
+          }
+          const accountData = {
+            companyName: mapped.companyName || mapped.contactName || "Unknown",
+            contactName: mapped.contactName || "",
+            contactEmail: mapped.contactEmail || "",
+            contactPhone: mapped.contactPhone || "",
+            industry: mapped.industry || "",
+            tier: (mapped.tier || "free") as any,
+            status: (mapped.status || "prospect") as any,
+            mrr: mapped.mrr ? parseInt(mapped.mrr) || 0 : 0,
+          };
+          await storage.createCustomerAccount(accountData);
+          results.created++;
+        }
+      } catch (err: any) {
+        results.errors.push(`Row ${i + 2}: ${err.message || "Unknown error"}`);
+      }
+    }
+
+    res.json({
+      success: true,
+      totalRows: rawRows.length,
+      mappedColumns: Object.entries(mapping).map(([from, to]) => ({ from, to })),
+      ...results,
+    });
+  } catch (error: any) {
+    console.error("Error importing file:", error);
+    res.status(500).json({ error: "Failed to import file: " + (error.message || "Unknown error") });
   }
 });
 
