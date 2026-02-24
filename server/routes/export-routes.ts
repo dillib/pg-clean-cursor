@@ -1,6 +1,4 @@
 import { Router, Request, Response } from "express";
-import path from "path";
-import fs from "fs";
 import pptxgen from "pptxgenjs";
 const PptxGenJS = (pptxgen as any).default || pptxgen;
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle, PageBreak, ShadingType, TabStopType, TabStopPosition } from "docx";
@@ -29,7 +27,6 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     const BRAND_CYAN = "2563EB";
     const BRAND_TEAL = "3B82F6";
     const BRAND_BLUE = "2563EB";
-    const BRAND_LIGHT_BLUE = "DBEAFE";
     const CARD_DARK = "1E293B";
     const CARD_BORDER = "334155";
     const SUBTLE_TEXT = "94A3B8";
@@ -39,14 +36,8 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     const DANGER_RED = "EF4444";
     const SUCCESS_GREEN = "10B981";
 
-    const logoPath = path.resolve(process.cwd(), "server/assets/logo.png");
-    const logoExists = fs.existsSync(logoPath);
-
     const addFooter = (s: any, dark = true) => {
-      if (logoExists) {
-        s.addImage({ path: logoPath, x: 0.3, y: 6.78, w: 0.35, h: 0.35 });
-      }
-      s.addText("PhotonicTag  •  Identity, at the speed of light.", { x: 0.75, y: 6.85, w: 8, h: 0.3, fontSize: 8, color: dark ? "4A5568" : "9CA3AF", fontFace: "Calibri" });
+      s.addText("PhotonicTag  •  Identity, at the speed of light.", { x: 0.5, y: 6.85, w: 8, h: 0.3, fontSize: 8, color: dark ? "4A5568" : "9CA3AF", fontFace: "Calibri" });
       s.addText("CONFIDENTIAL", { x: 10, y: 6.85, w: 2.5, h: 0.3, fontSize: 8, color: dark ? "4A5568" : "9CA3AF", fontFace: "Calibri", align: "right" });
     };
 
@@ -57,9 +48,6 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     slide.background = { color: BRAND_DARK };
     slide.addShape(pptx.ShapeType.ellipse, { x: 8.5, y: -2.5, w: 9, h: 9, fill: { color: BRAND_NAVY } });
     slide.addShape(pptx.ShapeType.ellipse, { x: 10, y: 3, w: 5, h: 5, fill: { color: "162044" } });
-    if (logoExists) {
-      slide.addImage({ path: logoPath, x: 1.0, y: 0.6, w: 0.55, h: 0.55 });
-    }
     slide.addText([
       { text: "Photonic", options: { color: WHITE, bold: true, fontSize: 54, fontFace: "Calibri" } },
       { text: "Tag", options: { color: BRAND_CYAN, bold: true, fontSize: 54, fontFace: "Calibri" } },
@@ -402,10 +390,7 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     slide.addText("Schedule Your Personalized Demo", { x: 3.5, y: 3.9, w: 6, h: 0.9, fontSize: 18, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
     slide.addShape(pptx.ShapeType.roundRect, { x: 4.2, y: 5.1, w: 4.9, h: 0.6, fill: { color: "transparent" }, line: { color: CARD_BORDER, width: 1 }, rectRadius: 0.1 });
     slide.addText("Or start with a POC — €499/month", { x: 4.2, y: 5.1, w: 4.9, h: 0.6, fontSize: 13, color: SUBTLE_TEXT, align: "center", valign: "middle", fontFace: "Calibri" });
-    if (logoExists) {
-      slide.addImage({ path: logoPath, x: 5.65, y: 6.0, w: 0.4, h: 0.4 });
-    }
-    slide.addText("PhotonicTag", { x: 6.1, y: 6.05, w: 3, h: 0.35, fontSize: 13, bold: true, color: BRAND_CYAN, fontFace: "Calibri" });
+    slide.addText("PhotonicTag", { x: 1, y: 6.05, w: 11, h: 0.35, fontSize: 14, bold: true, color: BRAND_CYAN, align: "center", fontFace: "Calibri" });
     slide.addText("enterprise@photonictag.com  •  www.photonictag.com", { x: 1, y: 6.45, w: 11, h: 0.3, fontSize: 10, color: SUBTLE_TEXT, align: "center", fontFace: "Calibri" });
 
     const data = await pptx.write({ outputType: "nodebuffer" }) as Buffer;
