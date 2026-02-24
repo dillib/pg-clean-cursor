@@ -449,7 +449,7 @@ function CRMTab() {
 function CreateAccountForm({ onSubmit, isPending }: { onSubmit: (data: Record<string, unknown>) => void; isPending: boolean }) {
   const [form, setForm] = useState({
     companyName: "", contactName: "", contactEmail: "", contactPhone: "",
-    industry: "", tier: "free", status: "prospect", mrr: 0,
+    industry: "", tier: "poc", status: "prospect", mrr: 0,
   });
 
   return (
@@ -465,7 +465,7 @@ function CreateAccountForm({ onSubmit, isPending }: { onSubmit: (data: Record<st
           <Select value={form.tier} onValueChange={v => setForm({ ...form, tier: v })}>
             <SelectTrigger data-testid="select-tier"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="free">Free</SelectItem>
+              <SelectItem value="poc">POC</SelectItem>
               <SelectItem value="starter">Starter</SelectItem>
               <SelectItem value="growth">Growth</SelectItem>
               <SelectItem value="enterprise">Enterprise</SelectItem>
@@ -1429,7 +1429,7 @@ function ProposalGeneratorTab() {
     estimatedProducts: "",
     sapSystem: "none",
     timeline: "",
-    tier: "enterprise",
+    tier: "poc",
     customNotes: "",
   });
 
@@ -1504,7 +1504,7 @@ function ProposalGeneratorTab() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="free">Free</SelectItem>
+                      <SelectItem value="poc">POC</SelectItem>
                       <SelectItem value="starter">Starter</SelectItem>
                       <SelectItem value="growth">Growth</SelectItem>
                       <SelectItem value="enterprise">Enterprise</SelectItem>

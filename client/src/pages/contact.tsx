@@ -24,7 +24,7 @@ const contactFormSchema = z.object({
   phone: z.string().optional(),
   company: z.string().optional(),
   jobTitle: z.string().optional(),
-  tierInterest: z.enum(["free", "starter", "growth", "enterprise"]).default("enterprise"),
+  tierInterest: z.enum(["poc", "starter", "growth", "enterprise"]).default("enterprise"),
   estimatedVolume: z.string().optional(),
   message: z.string().min(10, "Please provide some details about your needs"),
   source: z.enum(["pricing_page", "contact_form", "demo_request", "waitlist", "referral", "other"]).default("contact_form"),
@@ -196,9 +196,9 @@ export default function Contact() {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="free">Free (100 products)</SelectItem>
-                                <SelectItem value="starter">Starter ($99/mo)</SelectItem>
-                                <SelectItem value="growth">Growth ($499/mo)</SelectItem>
+                                <SelectItem value="poc">POC (50 products)</SelectItem>
+                                <SelectItem value="starter">Starter (€1,499/mo)</SelectItem>
+                                <SelectItem value="growth">Growth (€2,999/mo)</SelectItem>
                                 <SelectItem value="enterprise">Enterprise (Custom)</SelectItem>
                               </SelectContent>
                             </Select>

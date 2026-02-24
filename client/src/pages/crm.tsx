@@ -30,7 +30,7 @@ const STATUS_CONFIG: Record<LeadStatus, { label: string; color: string; icon: an
 };
 
 const TIER_COLORS: Record<TierInterest, string> = {
-  free: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+  poc: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
   starter: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
   growth: "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
   enterprise: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
@@ -209,7 +209,7 @@ export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {["enterprise", "growth", "starter", "free"].map((tier) => {
+              {["enterprise", "growth", "starter", "poc"].map((tier) => {
                 const count = stats?.byTier?.[tier] || 0;
                 const percentage = stats?.total ? (count / stats.total * 100).toFixed(0) : 0;
                 return (
@@ -294,7 +294,7 @@ export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Tiers</SelectItem>
-                  <SelectItem value="free">Free</SelectItem>
+                  <SelectItem value="poc">POC</SelectItem>
                   <SelectItem value="starter">Starter</SelectItem>
                   <SelectItem value="growth">Growth</SelectItem>
                   <SelectItem value="enterprise">Enterprise</SelectItem>

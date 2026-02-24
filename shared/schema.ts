@@ -828,7 +828,7 @@ export interface RiskAssessment {
 
 export type LeadStatus = "new" | "contacted" | "demo_scheduled" | "qualified" | "won" | "lost";
 export type LeadSource = "pricing_page" | "contact_form" | "demo_request" | "waitlist" | "referral" | "other";
-export type TierInterest = "free" | "starter" | "growth" | "enterprise";
+export type TierInterest = "poc" | "starter" | "growth" | "enterprise";
 
 export const leads = pgTable("leads", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -842,7 +842,7 @@ export const leads = pgTable("leads", {
   jobTitle: text("job_title"),
   
   // Lead Qualification
-  tierInterest: text("tier_interest").$type<TierInterest>().default("free").notNull(),
+  tierInterest: text("tier_interest").$type<TierInterest>().default("poc").notNull(),
   estimatedVolume: text("estimated_volume"),
   message: text("message"),
   
@@ -958,7 +958,7 @@ export type DemoConfig = typeof demoConfigs.$inferSelect;
 // ============================================
 
 export type AccountStatus = "prospect" | "active" | "churning" | "churned" | "paused";
-export type AccountTier = "free" | "starter" | "growth" | "enterprise";
+export type AccountTier = "poc" | "starter" | "growth" | "enterprise";
 
 export const customerAccounts = pgTable("customer_accounts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -967,7 +967,7 @@ export const customerAccounts = pgTable("customer_accounts", {
   contactEmail: text("contact_email").notNull(),
   contactPhone: text("contact_phone"),
   industry: text("industry"),
-  tier: text("tier").$type<AccountTier>().default("free").notNull(),
+  tier: text("tier").$type<AccountTier>().default("poc").notNull(),
   status: text("status").$type<AccountStatus>().default("prospect").notNull(),
   healthScore: integer("health_score").default(50),
   productCount: integer("product_count").default(0),

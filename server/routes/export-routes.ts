@@ -198,9 +198,9 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     slide.addText("Pricing Overview", { x: 0.8, y: 0.4, w: 11, h: 0.7, fontSize: 32, bold: true, color: TEXT_DARK, fontFace: "Arial" });
 
     const tiers = [
-      { name: "Free", products: "Up to 100", price: "€0/mo", features: "Basic DPP, QR codes, public scan pages" },
-      { name: "Starter", products: "Up to 1,000", price: "Contact us", features: "DPP + analytics, enhanced QR, priority support" },
-      { name: "Growth", products: "Up to 10,000", price: "Contact us", features: "AI insights, IoT integration, team management" },
+      { name: "POC", products: "Up to 50", price: "€499/mo", features: "Basic DPP, QR codes, public scan pages, limited support" },
+      { name: "Starter", products: "Up to 1,000", price: "€1,499/mo", features: "DPP + analytics, enhanced QR, priority support" },
+      { name: "Growth", products: "Up to 10,000", price: "€2,999/mo", features: "AI insights, IoT integration, team management" },
       { name: "Enterprise", products: "Unlimited", price: "Custom", features: "SAP integration, SSO, dedicated support, SLAs" },
     ];
     tiers.forEach((t, i) => {
@@ -676,9 +676,9 @@ function buildProposalDoc(body: ProposalRequest): Buffer | Promise<Buffer> {
   const refNum = `PT-POC-${Date.now().toString(36).toUpperCase()}`;
 
   const tierPricing: Record<string, string> = {
-    free: "€0 (Free Tier)",
-    starter: "€2,500 - €5,000",
-    growth: "€7,500 - €15,000",
+    poc: "€499/month (POC Tier)",
+    starter: "€1,499/month",
+    growth: "€2,999/month",
     enterprise: "€20,000 - €50,000 (Custom)",
   };
 
