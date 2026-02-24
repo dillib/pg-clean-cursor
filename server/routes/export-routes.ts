@@ -55,28 +55,30 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     // ====================================
     let slide = pptx.addSlide();
     slide.background = { color: BRAND_DARK };
-    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 7.5, fill: { color: BRAND_DARK } });
-    slide.addShape(pptx.ShapeType.ellipse, { x: 8, y: -2, w: 8, h: 8, fill: { color: BRAND_NAVY } });
-    slide.addShape(pptx.ShapeType.ellipse, { x: 9.5, y: 3, w: 5, h: 5, fill: { color: "162044" } });
+    slide.addShape(pptx.ShapeType.ellipse, { x: 8.5, y: -2.5, w: 9, h: 9, fill: { color: BRAND_NAVY } });
+    slide.addShape(pptx.ShapeType.ellipse, { x: 10, y: 3, w: 5, h: 5, fill: { color: "162044" } });
     if (logoExists) {
-      slide.addImage({ path: logoPath, x: 1.1, y: 1.0, w: 0.8, h: 0.8 });
+      slide.addImage({ path: logoPath, x: 1.0, y: 0.6, w: 0.55, h: 0.55 });
     }
-    slide.addShape(pptx.ShapeType.rect, { x: 1.1, y: 1.9, w: 0.08, h: 1.5, fill: { color: BRAND_CYAN } });
-    slide.addText("Photonic", { x: 1.4, y: 1.5, w: 8, h: 0.9, fontSize: 52, bold: true, color: WHITE, fontFace: "Calibri" });
-    slide.addText("Tag", { x: 1.4, y: 2.3, w: 8, h: 0.9, fontSize: 52, bold: true, color: BRAND_CYAN, fontFace: "Calibri" });
-    slide.addText("Identity, at the speed of light.", { x: 1.1, y: 3.1, w: 8, h: 0.6, fontSize: 22, color: SUBTLE_TEXT, italic: true, fontFace: "Calibri" });
-    slide.addText("AI-Powered Digital Product Passport Platform", { x: 1.1, y: 4.0, w: 7, h: 0.5, fontSize: 15, color: BODY_TEXT, fontFace: "Calibri" });
-    slide.addText("EU ESPR Regulation (EU) 2024/1781 Compliance", { x: 1.1, y: 4.5, w: 7, h: 0.4, fontSize: 13, color: SUBTLE_TEXT, fontFace: "Calibri" });
+    slide.addText([
+      { text: "Photonic", options: { color: WHITE, bold: true, fontSize: 54, fontFace: "Calibri" } },
+      { text: "Tag", options: { color: BRAND_CYAN, bold: true, fontSize: 54, fontFace: "Calibri" } },
+    ], { x: 1.0, y: 1.6, w: 9, h: 1.0 });
+    slide.addText("Identity, at the speed of light.", { x: 1.0, y: 2.8, w: 8, h: 0.6, fontSize: 20, color: SUBTLE_TEXT, italic: true, fontFace: "Calibri" });
+    slide.addShape(pptx.ShapeType.rect, { x: 1.0, y: 3.7, w: 5, h: 0.015, fill: { color: CARD_BORDER } });
+    slide.addText("AI-Powered Digital Product Passport Platform", { x: 1.0, y: 4.0, w: 8, h: 0.5, fontSize: 16, color: BODY_TEXT, fontFace: "Calibri" });
+    slide.addText("EU ESPR Regulation (EU) 2024/1781 Compliance", { x: 1.0, y: 4.5, w: 8, h: 0.4, fontSize: 12, color: SUBTLE_TEXT, fontFace: "Calibri" });
     const statsBar = [
       { num: "100K+", label: "Products Tracked" },
-      { num: "6", label: "AI Modules" },
+      { num: "5", label: "AI Modules" },
       { num: "3", label: "SAP Connectors" },
       { num: "99.9%", label: "Uptime SLA" },
     ];
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 5.5, w: 13.34, h: 0.015, fill: { color: CARD_BORDER } });
     statsBar.forEach((s, i) => {
-      const x = 1.1 + i * 2.5;
-      slide.addText(s.num, { x, y: 5.5, w: 2, h: 0.5, fontSize: 22, bold: true, color: BRAND_CYAN, fontFace: "Calibri" });
-      slide.addText(s.label, { x, y: 5.95, w: 2, h: 0.3, fontSize: 10, color: SUBTLE_TEXT, fontFace: "Calibri" });
+      const x = 1.0 + i * 2.8;
+      slide.addText(s.num, { x, y: 5.7, w: 2.4, h: 0.5, fontSize: 24, bold: true, color: BRAND_CYAN, fontFace: "Calibri" });
+      slide.addText(s.label, { x, y: 6.15, w: 2.4, h: 0.3, fontSize: 10, color: SUBTLE_TEXT, fontFace: "Calibri" });
     });
     addFooter(slide);
 
@@ -394,17 +396,17 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     slide.background = { color: BRAND_DARK };
     slide.addShape(pptx.ShapeType.ellipse, { x: -3, y: -3, w: 10, h: 10, fill: { color: BRAND_NAVY } });
     slide.addShape(pptx.ShapeType.ellipse, { x: 7, y: 2, w: 8, h: 8, fill: { color: "162044" } });
+    slide.addText("Ready to future-proof\nyour products?", { x: 1, y: 1.2, w: 11, h: 1.4, fontSize: 40, bold: true, color: WHITE, align: "center", fontFace: "Calibri" });
+    slide.addText("The EU DPP mandate is coming. Early adopters gain competitive advantage,\nconsumer trust, and regulatory peace of mind.", { x: 1.5, y: 2.8, w: 10, h: 0.8, fontSize: 15, color: SUBTLE_TEXT, align: "center", fontFace: "Calibri" });
+    slide.addShape(pptx.ShapeType.roundRect, { x: 3.5, y: 3.9, w: 6, h: 0.9, fill: { color: BRAND_CYAN }, rectRadius: 0.15 });
+    slide.addText("Schedule Your Personalized Demo", { x: 3.5, y: 3.9, w: 6, h: 0.9, fontSize: 18, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
+    slide.addShape(pptx.ShapeType.roundRect, { x: 4.2, y: 5.1, w: 4.9, h: 0.6, fill: { color: "transparent" }, line: { color: CARD_BORDER, width: 1 }, rectRadius: 0.1 });
+    slide.addText("Or start with a POC — €499/month", { x: 4.2, y: 5.1, w: 4.9, h: 0.6, fontSize: 13, color: SUBTLE_TEXT, align: "center", valign: "middle", fontFace: "Calibri" });
     if (logoExists) {
-      slide.addImage({ path: logoPath, x: 6.17, y: 0.3, w: 1.0, h: 1.0 });
+      slide.addImage({ path: logoPath, x: 5.65, y: 6.0, w: 0.4, h: 0.4 });
     }
-    slide.addText("Ready to future-proof\nyour products?", { x: 1, y: 1.3, w: 11, h: 1.4, fontSize: 40, bold: true, color: WHITE, align: "center", fontFace: "Calibri" });
-    slide.addText("The EU DPP mandate is coming. Early adopters gain competitive advantage,\nconsumer trust, and regulatory peace of mind.", { x: 1.5, y: 2.6, w: 10, h: 0.8, fontSize: 15, color: SUBTLE_TEXT, align: "center", fontFace: "Calibri" });
-    slide.addShape(pptx.ShapeType.roundRect, { x: 3.5, y: 3.8, w: 6, h: 0.9, fill: { color: BRAND_CYAN }, rectRadius: 0.15 });
-    slide.addText("Schedule Your Personalized Demo →", { x: 3.5, y: 3.8, w: 6, h: 0.9, fontSize: 18, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
-    slide.addShape(pptx.ShapeType.roundRect, { x: 4, y: 5.0, w: 5, h: 0.7, fill: { color: "transparent" }, line: { color: SUBTLE_TEXT, width: 1 }, rectRadius: 0.12 });
-    slide.addText("Or start with a POC — €499/month", { x: 4, y: 5.0, w: 5, h: 0.7, fontSize: 14, color: SUBTLE_TEXT, align: "center", valign: "middle", fontFace: "Calibri" });
-    slide.addText("PhotonicTag", { x: 1, y: 6.0, w: 11, h: 0.4, fontSize: 14, bold: true, color: BRAND_CYAN, align: "center", fontFace: "Calibri" });
-    slide.addText("enterprise@photonictag.com  •  www.photonictag.com  •  +49 (0) 800 PHOTONIC", { x: 1, y: 6.35, w: 11, h: 0.35, fontSize: 11, color: SUBTLE_TEXT, align: "center", fontFace: "Calibri" });
+    slide.addText("PhotonicTag", { x: 6.1, y: 6.05, w: 3, h: 0.35, fontSize: 13, bold: true, color: BRAND_CYAN, fontFace: "Calibri" });
+    slide.addText("enterprise@photonictag.com  •  www.photonictag.com", { x: 1, y: 6.45, w: 11, h: 0.3, fontSize: 10, color: SUBTLE_TEXT, align: "center", fontFace: "Calibri" });
 
     const data = await pptx.write({ outputType: "nodebuffer" }) as Buffer;
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.presentationml.presentation");
