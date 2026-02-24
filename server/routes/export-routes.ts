@@ -389,7 +389,7 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     slide.addShape(pptx.ShapeType.roundRect, { x: 4, y: 5.0, w: 5, h: 0.7, fill: { color: "transparent" }, line: { color: SUBTLE_TEXT, width: 1 }, rectRadius: 0.12 });
     slide.addText("Or start with a POC — €499/month", { x: 4, y: 5.0, w: 5, h: 0.7, fontSize: 14, color: SUBTLE_TEXT, align: "center", valign: "middle", fontFace: "Calibri" });
     slide.addText("PhotonicTag", { x: 1, y: 6.0, w: 11, h: 0.4, fontSize: 14, bold: true, color: BRAND_CYAN, align: "center", fontFace: "Calibri" });
-    slide.addText("contact@photonictag.com  •  www.photonictag.com  •  +49 (0) 800 PHOTONIC", { x: 1, y: 6.35, w: 11, h: 0.35, fontSize: 11, color: SUBTLE_TEXT, align: "center", fontFace: "Calibri" });
+    slide.addText("enterprise@photonictag.com  •  www.photonictag.com  •  +49 (0) 800 PHOTONIC", { x: 1, y: 6.35, w: 11, h: 0.35, fontSize: 11, color: SUBTLE_TEXT, align: "center", fontFace: "Calibri" });
 
     const data = await pptx.write({ outputType: "nodebuffer" }) as Buffer;
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.presentationml.presentation");

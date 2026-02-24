@@ -51,10 +51,9 @@ export default function LandingValidation() {
           </Badge>
           
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-6" data-testid="text-hero-title">
-            Your Products Need a{" "}
-            <span className="text-primary">Digital Identity.</span>
-            <br className="hidden sm:block" />
-            <span className="text-primary">We Make It Happen.</span>
+            Digital Product Passports.
+            <br />
+            <span className="text-primary">Made Simple.</span>
           </h1>
           
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed" data-testid="text-hero-subtitle">
