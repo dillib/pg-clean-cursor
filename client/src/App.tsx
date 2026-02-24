@@ -35,6 +35,9 @@ import PartnerDashboard from "@/pages/partner-dashboard";
 import DemoLogin from "@/pages/demo-login";
 import AdminLogin from "@/pages/admin-login";
 import AdminInternal from "@/pages/admin-internal";
+import Docs from "@/pages/docs";
+import Presentation from "@/pages/presentation";
+import FAQs from "@/pages/faqs";
 import NotFound from "@/pages/not-found";
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -467,6 +470,9 @@ function Router() {
       <Route path="/team/dashboard">
         <Redirect to="/demo/dashboard" />
       </Route>
+      <Route path="/presentation" component={Presentation} />
+      <Route path="/docs" component={Docs} />
+      <Route path="/faqs" component={FAQs} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route component={NotFound} />
