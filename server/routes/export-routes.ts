@@ -18,214 +18,462 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     const pptx = new PptxGenJS();
     pptx.author = "PhotonicTag";
     pptx.company = "PhotonicTag GmbH";
-    pptx.title = "PhotonicTag - AI-Powered Digital Product Passport Platform";
-    pptx.subject = "EU ESPR Compliance Solution";
+    pptx.title = "PhotonicTag — AI-Powered Digital Product Passport Platform";
+    pptx.subject = "Enterprise Marketing Presentation";
     pptx.layout = "LAYOUT_WIDE";
 
-    // Slide 1: Title
+    const BRAND_DARK = "0D1117";
+    const BRAND_NAVY = "161B33";
+    const BRAND_CYAN = "00C2D1";
+    const BRAND_TEAL = "0891B2";
+    const BRAND_BLUE = "2563EB";
+    const CARD_DARK = "1C2333";
+    const CARD_BORDER = "2D3748";
+    const SUBTLE_TEXT = "94A3B8";
+    const BODY_TEXT = "CBD5E1";
+    const WHITE = "FFFFFF";
+    const WARM_AMBER = "F59E0B";
+    const DANGER_RED = "EF4444";
+    const SUCCESS_GREEN = "10B981";
+
+    const addFooter = (s: any, dark = true) => {
+      s.addText("PhotonicTag GmbH  •  Identity, at the speed of light.", { x: 0.5, y: 6.85, w: 8, h: 0.3, fontSize: 8, color: dark ? "4A5568" : "9CA3AF", fontFace: "Calibri" });
+      s.addText("CONFIDENTIAL", { x: 10, y: 6.85, w: 2.5, h: 0.3, fontSize: 8, color: dark ? "4A5568" : "9CA3AF", fontFace: "Calibri", align: "right" });
+    };
+
+    // ====================================
+    // SLIDE 1: TITLE — Premium dark opener
+    // ====================================
     let slide = pptx.addSlide();
-    slide.background = { color: DARK_BG };
-    slide.addText("PhotonicTag", { x: 0.8, y: 1.2, w: 11, h: 1.2, fontSize: 48, bold: true, color: TEXT_LIGHT, fontFace: "Arial" });
-    slide.addText("Identity, at the speed of light.", { x: 0.8, y: 2.5, w: 11, h: 0.8, fontSize: 28, color: PRIMARY_COLOR, fontFace: "Arial", italic: true });
-    slide.addText("AI-Powered Digital Product Passport Platform\nEU ESPR Regulation (EU) 2024/1781 Compliance", { x: 0.8, y: 3.6, w: 9, h: 1.0, fontSize: 16, color: "AAAAAA", fontFace: "Arial" });
-    slide.addText("CONFIDENTIAL — For authorized recipients only", { x: 0.8, y: 6.5, w: 11, h: 0.4, fontSize: 10, color: "666666", fontFace: "Arial" });
-
-    // Slide 2: The Problem
-    slide = pptx.addSlide();
-    slide.background = { color: TEXT_LIGHT };
-    slide.addText("The Regulatory Challenge", { x: 0.8, y: 0.4, w: 11, h: 0.8, fontSize: 32, bold: true, color: TEXT_DARK, fontFace: "Arial" });
-    slide.addText("The EU Ecodesign for Sustainable Products Regulation (ESPR) mandates Digital Product Passports across all product categories by 2030. Non-compliance penalties reach €100,000+ per violation with EU market access restrictions.", { x: 0.8, y: 1.3, w: 11, h: 0.8, fontSize: 14, color: "555555", fontFace: "Arial" });
-
-    const timeline = [
-      { date: "Feb 2027", category: "Batteries", desc: "Industrial and EV batteries require Digital Product Passports under EU Battery Regulation", color: ACCENT_RED },
-      { date: "2028", category: "Textiles & Electronics", desc: "Textiles, electronics, and ICT products must carry DPPs with material composition and repairability data", color: "F59E0B" },
-      { date: "2029", category: "Furniture & Construction", desc: "Furniture, construction materials, and chemicals require full lifecycle documentation", color: PRIMARY_COLOR },
-      { date: "2030", category: "All Categories", desc: "Universal DPP mandate across all product categories under ESPR (EU) 2024/1781", color: PRIMARY_COLOR },
+    slide.background = { color: BRAND_DARK };
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 7.5, fill: { color: BRAND_DARK } });
+    slide.addShape(pptx.ShapeType.ellipse, { x: 8, y: -2, w: 8, h: 8, fill: { color: BRAND_NAVY } });
+    slide.addShape(pptx.ShapeType.ellipse, { x: 9.5, y: 3, w: 5, h: 5, fill: { color: "1A2744" } });
+    slide.addShape(pptx.ShapeType.rect, { x: 0.8, y: 1.6, w: 0.08, h: 1.8, fill: { color: BRAND_CYAN } });
+    slide.addText("Photonic", { x: 1.1, y: 1.2, w: 8, h: 0.9, fontSize: 52, bold: true, color: WHITE, fontFace: "Calibri" });
+    slide.addText("Tag", { x: 1.1, y: 2.0, w: 8, h: 0.9, fontSize: 52, bold: true, color: BRAND_CYAN, fontFace: "Calibri" });
+    slide.addText("Identity, at the speed of light.", { x: 1.1, y: 3.1, w: 8, h: 0.6, fontSize: 22, color: SUBTLE_TEXT, italic: true, fontFace: "Calibri" });
+    slide.addText("AI-Powered Digital Product Passport Platform", { x: 1.1, y: 4.0, w: 7, h: 0.5, fontSize: 15, color: BODY_TEXT, fontFace: "Calibri" });
+    slide.addText("EU ESPR Regulation (EU) 2024/1781 Compliance", { x: 1.1, y: 4.5, w: 7, h: 0.4, fontSize: 13, color: SUBTLE_TEXT, fontFace: "Calibri" });
+    const statsBar = [
+      { num: "100K+", label: "Products Tracked" },
+      { num: "6", label: "AI Modules" },
+      { num: "3", label: "SAP Connectors" },
+      { num: "99.9%", label: "Uptime SLA" },
     ];
-    timeline.forEach((t, i) => {
-      const y = 2.4 + i * 1.0;
-      slide.addShape(pptx.ShapeType.roundRect, { x: 0.8, y, w: 1.4, h: 0.7, fill: { color: t.color }, rectRadius: 0.1 });
-      slide.addText(t.date, { x: 0.8, y, w: 1.4, h: 0.7, fontSize: 12, bold: true, color: TEXT_LIGHT, align: "center", valign: "middle", fontFace: "Arial" });
-      slide.addText(t.category, { x: 2.4, y, w: 3, h: 0.35, fontSize: 13, bold: true, color: TEXT_DARK, fontFace: "Arial" });
-      slide.addText(t.desc, { x: 2.4, y: y + 0.3, w: 9.5, h: 0.4, fontSize: 11, color: "666666", fontFace: "Arial" });
+    statsBar.forEach((s, i) => {
+      const x = 1.1 + i * 2.5;
+      slide.addText(s.num, { x, y: 5.5, w: 2, h: 0.5, fontSize: 22, bold: true, color: BRAND_CYAN, fontFace: "Calibri" });
+      slide.addText(s.label, { x, y: 5.95, w: 2, h: 0.3, fontSize: 10, color: SUBTLE_TEXT, fontFace: "Calibri" });
     });
+    addFooter(slide);
 
-    // Slide 3: Platform Capabilities
+    // ====================================
+    // SLIDE 2: THE PROBLEM — Urgency slide
+    // ====================================
     slide = pptx.addSlide();
-    slide.background = { color: TEXT_LIGHT };
-    slide.addText("Platform Capabilities", { x: 0.8, y: 0.4, w: 11, h: 0.7, fontSize: 32, bold: true, color: TEXT_DARK, fontFace: "Arial" });
-    slide.addText("Six integrated modules covering the full Digital Product Passport lifecycle", { x: 0.8, y: 1.1, w: 11, h: 0.5, fontSize: 14, color: "555555", fontFace: "Arial" });
-
-    const caps = [
-      { title: "Digital Product Passports", desc: "EU ESPR-compliant product identity with tamper-proof QR codes linking physical products to their complete digital profile." },
-      { title: "Anti-Counterfeiting", desc: "Physics-rooted identity signatures that cannot be forged, cloned, or reproduced. Verifiable via any smartphone." },
-      { title: "IoT & Smart Tagging", desc: "NFC, RFID, and BLE device management for real-time product tracking and sensor data throughout the supply chain." },
-      { title: "AI Sustainability Intelligence", desc: "Automated carbon footprint scoring, circularity assessment (A+ to F), repair guides, and risk analysis." },
-      { title: "SAP & ERP Integration", desc: "Bidirectional sync with SAP S/4HANA, ECC, and Business One. Automated field mapping and conflict resolution." },
-      { title: "Supply Chain Traceability", desc: "End-to-end visibility from raw material sourcing to end-of-life recycling with CloudEvents audit trail." },
+    slide.background = { color: BRAND_DARK };
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 1.2, fill: { color: BRAND_NAVY } });
+    slide.addText("THE REGULATORY CHALLENGE", { x: 0.8, y: 0.15, w: 10, h: 0.4, fontSize: 11, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 3 });
+    slide.addText("EU Digital Product Passport Mandate", { x: 0.8, y: 0.5, w: 10, h: 0.6, fontSize: 28, bold: true, color: WHITE, fontFace: "Calibri" });
+    slide.addShape(pptx.ShapeType.roundRect, { x: 0.8, y: 1.5, w: 5.5, h: 2.0, fill: { color: CARD_DARK }, line: { color: DANGER_RED, width: 1.5 }, rectRadius: 0.12 });
+    slide.addText("⚠  NON-COMPLIANCE RISK", { x: 1.1, y: 1.65, w: 5, h: 0.4, fontSize: 12, bold: true, color: DANGER_RED, fontFace: "Calibri" });
+    slide.addText("€100,000+ per violation\nEU market access restrictions\nProduct recalls & reputational damage\nSupply chain disruption", { x: 1.1, y: 2.1, w: 5, h: 1.2, fontSize: 12, color: BODY_TEXT, fontFace: "Calibri", lineSpacingMultiple: 1.4 });
+    slide.addShape(pptx.ShapeType.roundRect, { x: 6.8, y: 1.5, w: 5.5, h: 2.0, fill: { color: CARD_DARK }, line: { color: SUCCESS_GREEN, width: 1.5 }, rectRadius: 0.12 });
+    slide.addText("✓  THE OPPORTUNITY", { x: 7.1, y: 1.65, w: 5, h: 0.4, fontSize: 12, bold: true, color: SUCCESS_GREEN, fontFace: "Calibri" });
+    slide.addText("First-mover competitive advantage\nConsumer trust & brand premium\nSupply chain transparency leadership\nSustainability scoring automation", { x: 7.1, y: 2.1, w: 5, h: 1.2, fontSize: 12, color: BODY_TEXT, fontFace: "Calibri", lineSpacingMultiple: 1.4 });
+    slide.addText("ESPR COMPLIANCE TIMELINE", { x: 0.8, y: 3.8, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 2 });
+    slide.addShape(pptx.ShapeType.rect, { x: 0.8, y: 4.3, w: 11.5, h: 0.04, fill: { color: CARD_BORDER } });
+    const tl = [
+      { date: "FEB 2027", cat: "Batteries & EV", desc: "Industrial and EV batteries under EU Battery Regulation", color: DANGER_RED, urgency: "URGENT" },
+      { date: "2028", cat: "Textiles & Electronics", desc: "Material composition & repairability data required", color: WARM_AMBER, urgency: "UPCOMING" },
+      { date: "2029", cat: "Furniture & Construction", desc: "Full lifecycle documentation mandatory", color: BRAND_BLUE, urgency: "PLANNED" },
+      { date: "2030", cat: "All Product Categories", desc: "Universal DPP mandate (EU) 2024/1781", color: BRAND_TEAL, urgency: "UNIVERSAL" },
     ];
-    caps.forEach((c, i) => {
+    tl.forEach((t, i) => {
+      const y = 4.5 + i * 0.58;
+      slide.addShape(pptx.ShapeType.ellipse, { x: 0.9, y: y + 0.05, w: 0.2, h: 0.2, fill: { color: t.color } });
+      slide.addShape(pptx.ShapeType.roundRect, { x: 1.3, y, w: 1.6, h: 0.35, fill: { color: t.color }, rectRadius: 0.05 });
+      slide.addText(t.date, { x: 1.3, y, w: 1.6, h: 0.35, fontSize: 9, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
+      slide.addText(t.cat, { x: 3.1, y, w: 3.5, h: 0.35, fontSize: 11, bold: true, color: WHITE, fontFace: "Calibri", valign: "middle" });
+      slide.addText(t.desc, { x: 6.6, y, w: 4.5, h: 0.35, fontSize: 10, color: SUBTLE_TEXT, fontFace: "Calibri", valign: "middle" });
+      slide.addText(t.urgency, { x: 11.2, y, w: 1.1, h: 0.35, fontSize: 8, bold: true, color: t.color, fontFace: "Calibri", align: "right", valign: "middle" });
+    });
+    addFooter(slide);
+
+    // ====================================
+    // SLIDE 3: SOLUTION OVERVIEW — What is PhotonicTag
+    // ====================================
+    slide = pptx.addSlide();
+    slide.background = { color: WHITE };
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 0.08, fill: { color: BRAND_CYAN } });
+    slide.addText("SOLUTION OVERVIEW", { x: 0.8, y: 0.3, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_TEAL, fontFace: "Calibri", letterSpacing: 3 });
+    slide.addText("One Platform. Complete DPP Lifecycle.", { x: 0.8, y: 0.65, w: 10, h: 0.7, fontSize: 28, bold: true, color: BRAND_DARK, fontFace: "Calibri" });
+    slide.addText("PhotonicTag transforms product identity into a physics-rooted, tamper-proof signature — bridging physical and digital worlds for trust, traceability, and transparency.", { x: 0.8, y: 1.35, w: 10, h: 0.6, fontSize: 13, color: "64748B", fontFace: "Calibri" });
+    const modules = [
+      { title: "Digital Product\nPassports", desc: "EU ESPR-compliant identity with tamper-proof QR codes linking to complete digital profiles.", num: "01", color: BRAND_BLUE },
+      { title: "Anti-\nCounterfeiting", desc: "Physics-rooted signatures that cannot be forged, cloned, or reproduced.", num: "02", color: BRAND_TEAL },
+      { title: "IoT & Smart\nTagging", desc: "NFC, RFID, BLE device management for real-time supply chain tracking.", num: "03", color: SUCCESS_GREEN },
+      { title: "AI Sustainability\nIntelligence", desc: "Automated carbon scoring, circularity assessment (A+ to F), repair guides.", num: "04", color: "8B5CF6" },
+      { title: "SAP & ERP\nIntegration", desc: "Bidirectional sync with S/4HANA, ECC, Business One. Zero rip-and-replace.", num: "05", color: WARM_AMBER },
+      { title: "Supply Chain\nTraceability", desc: "End-to-end visibility from sourcing to end-of-life with audit trail.", num: "06", color: DANGER_RED },
+    ];
+    modules.forEach((m, i) => {
       const col = i % 3;
       const row = Math.floor(i / 3);
-      const x = 0.8 + col * 3.8;
-      const y = 1.9 + row * 2.2;
-      slide.addShape(pptx.ShapeType.roundRect, { x, y, w: 3.5, h: 1.9, fill: { color: "FFFFFF" }, line: { color: "DDDDDD", width: 1 }, rectRadius: 0.1, shadow: { type: "outer", blur: 4, offset: 2, color: "00000020" } });
-      slide.addText(c.title, { x: x + 0.2, y: y + 0.15, w: 3.1, h: 0.45, fontSize: 13, bold: true, color: PRIMARY_COLOR, fontFace: "Arial" });
-      slide.addText(c.desc, { x: x + 0.2, y: y + 0.6, w: 3.1, h: 1.1, fontSize: 10, color: "555555", fontFace: "Arial" });
+      const x = 0.8 + col * 3.9;
+      const y = 2.2 + row * 2.3;
+      slide.addShape(pptx.ShapeType.roundRect, { x, y, w: 3.6, h: 2.05, fill: { color: "F8FAFC" }, line: { color: "E2E8F0", width: 1 }, rectRadius: 0.1 });
+      slide.addShape(pptx.ShapeType.roundRect, { x: x + 0.15, y: y + 0.15, w: 0.55, h: 0.35, fill: { color: m.color }, rectRadius: 0.06 });
+      slide.addText(m.num, { x: x + 0.15, y: y + 0.15, w: 0.55, h: 0.35, fontSize: 10, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
+      slide.addText(m.title, { x: x + 0.15, y: y + 0.6, w: 3.3, h: 0.55, fontSize: 12, bold: true, color: BRAND_DARK, fontFace: "Calibri" });
+      slide.addText(m.desc, { x: x + 0.15, y: y + 1.2, w: 3.3, h: 0.7, fontSize: 10, color: "64748B", fontFace: "Calibri" });
     });
+    addFooter(slide, false);
 
-    // Slide 4: Why PhotonicTag
+    // ====================================
+    // SLIDE 4: HOW IT WORKS — Process flow
+    // ====================================
     slide = pptx.addSlide();
-    slide.background = { color: DARK_BG };
-    slide.addText("Why PhotonicTag", { x: 0.8, y: 0.4, w: 11, h: 0.7, fontSize: 32, bold: true, color: TEXT_LIGHT, fontFace: "Arial" });
-
-    const diffs = [
-      { title: "Go live in weeks, not months", desc: "Pre-built templates, automated data mapping, and guided onboarding." },
-      { title: "Physics-rooted identity", desc: "Beyond simple QR codes — tamper-proof signatures grounded in physical properties." },
-      { title: "SAP-native integration", desc: "Bidirectional sync with existing SAP material master data. No rip-and-replace." },
-      { title: "AI-powered automation", desc: "Sustainability scoring, repair guides, risk assessment generated automatically." },
-      { title: "Consumer-facing transparency", desc: "Public-facing scan page with DPP data, accessible via QR code on any mobile device." },
-      { title: "Enterprise-grade security", desc: "RBAC, encrypted sessions, audit logging, and GDPR-compliant data handling." },
+    slide.background = { color: BRAND_DARK };
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 1.2, fill: { color: BRAND_NAVY } });
+    slide.addText("HOW IT WORKS", { x: 0.8, y: 0.15, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 3 });
+    slide.addText("From Product Data to Verified Identity", { x: 0.8, y: 0.5, w: 10, h: 0.6, fontSize: 28, bold: true, color: WHITE, fontFace: "Calibri" });
+    const steps = [
+      { num: "1", title: "Connect", desc: "Import product data from SAP, Excel, or API. PhotonicTag maps your existing fields to DPP categories automatically.", icon: "🔗" },
+      { num: "2", title: "Enrich", desc: "AI generates sustainability scores, repair guides, circularity grades, and risk assessments from your product data.", icon: "🧠" },
+      { num: "3", title: "Verify", desc: "Create tamper-proof digital identities with physics-rooted signatures. Generate unique QR codes for every product.", icon: "🔒" },
+      { num: "4", title: "Deploy", desc: "Publish public scan pages for consumers. Sync data back to SAP. Enable IoT tracking for real-time monitoring.", icon: "🚀" },
     ];
-    diffs.forEach((d, i) => {
+    steps.forEach((s, i) => {
+      const x = 0.5 + i * 3.1;
+      slide.addShape(pptx.ShapeType.roundRect, { x, y: 1.6, w: 2.9, h: 3.2, fill: { color: CARD_DARK }, line: { color: CARD_BORDER, width: 1 }, rectRadius: 0.12 });
+      slide.addShape(pptx.ShapeType.ellipse, { x: x + 0.95, y: 1.85, w: 0.9, h: 0.9, fill: { color: BRAND_NAVY }, line: { color: BRAND_CYAN, width: 1.5 } });
+      slide.addText(s.num, { x: x + 0.95, y: 1.85, w: 0.9, h: 0.9, fontSize: 22, bold: true, color: BRAND_CYAN, align: "center", valign: "middle", fontFace: "Calibri" });
+      slide.addText(s.title, { x: x + 0.2, y: 2.95, w: 2.5, h: 0.45, fontSize: 16, bold: true, color: WHITE, align: "center", fontFace: "Calibri" });
+      slide.addText(s.desc, { x: x + 0.2, y: 3.45, w: 2.5, h: 1.15, fontSize: 10, color: BODY_TEXT, align: "center", fontFace: "Calibri" });
+      if (i < 3) {
+        slide.addText("→", { x: x + 2.9, y: 2.7, w: 0.3, h: 0.5, fontSize: 20, color: BRAND_CYAN, fontFace: "Calibri", valign: "middle" });
+      }
+    });
+    slide.addShape(pptx.ShapeType.roundRect, { x: 0.5, y: 5.2, w: 12.0, h: 1.3, fill: { color: BRAND_NAVY }, line: { color: CARD_BORDER, width: 1 }, rectRadius: 0.12 });
+    slide.addText("RESULT", { x: 0.8, y: 5.3, w: 2, h: 0.3, fontSize: 10, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 2 });
+    const results = [
+      "EU ESPR-compliant Digital Product Passports",
+      "Consumer-scannable QR codes on every product",
+      "AI-powered sustainability insights",
+      "Real-time supply chain visibility",
+    ];
+    results.forEach((r, i) => {
+      slide.addText(`✓  ${r}`, { x: 0.8 + (i % 2) * 5.8, y: 5.65 + Math.floor(i / 2) * 0.35, w: 5.5, h: 0.3, fontSize: 11, color: BODY_TEXT, fontFace: "Calibri" });
+    });
+    addFooter(slide);
+
+    // ====================================
+    // SLIDE 5: SAP INTEGRATION DEEP-DIVE
+    // ====================================
+    slide = pptx.addSlide();
+    slide.background = { color: WHITE };
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 0.08, fill: { color: BRAND_CYAN } });
+    slide.addText("SAP INTEGRATION", { x: 0.8, y: 0.3, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_TEAL, fontFace: "Calibri", letterSpacing: 3 });
+    slide.addText("Enterprise ERP Connectivity", { x: 0.8, y: 0.65, w: 10, h: 0.7, fontSize: 28, bold: true, color: BRAND_DARK, fontFace: "Calibri" });
+    const sapSystems = [
+      { name: "SAP S/4HANA", method: "OData V4 API", features: "Real-time sync, material master, BOM, classification", badge: "RECOMMENDED" },
+      { name: "SAP ECC", method: "RFC / IDoc", features: "Batch sync, MARA/MAKT/MARC tables, change pointers", badge: "SUPPORTED" },
+      { name: "SAP Business One", method: "Service Layer API", features: "Items, BOM, business partners, inventory data", badge: "SUPPORTED" },
+    ];
+    sapSystems.forEach((s, i) => {
+      const y = 1.6 + i * 1.4;
+      slide.addShape(pptx.ShapeType.roundRect, { x: 0.8, y, w: 7, h: 1.15, fill: { color: "F8FAFC" }, line: { color: "E2E8F0", width: 1 }, rectRadius: 0.1 });
+      slide.addText(s.name, { x: 1.1, y: y + 0.1, w: 3, h: 0.35, fontSize: 14, bold: true, color: BRAND_DARK, fontFace: "Calibri" });
+      slide.addText(s.method, { x: 4.2, y: y + 0.1, w: 2, h: 0.35, fontSize: 10, color: BRAND_TEAL, bold: true, fontFace: "Calibri" });
+      slide.addShape(pptx.ShapeType.roundRect, { x: 6.3, y: y + 0.12, w: 1.3, h: 0.3, fill: { color: i === 0 ? BRAND_CYAN : "E2E8F0" }, rectRadius: 0.05 });
+      slide.addText(s.badge, { x: 6.3, y: y + 0.12, w: 1.3, h: 0.3, fontSize: 7, bold: true, color: i === 0 ? WHITE : "64748B", align: "center", valign: "middle", fontFace: "Calibri" });
+      slide.addText(s.features, { x: 1.1, y: y + 0.55, w: 6.5, h: 0.4, fontSize: 10, color: "64748B", fontFace: "Calibri" });
+    });
+    slide.addShape(pptx.ShapeType.roundRect, { x: 8.3, y: 1.6, w: 4.2, h: 3.6, fill: { color: BRAND_DARK }, rectRadius: 0.12 });
+    slide.addText("DATA FLOW", { x: 8.6, y: 1.75, w: 3.6, h: 0.3, fontSize: 10, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 2 });
+    const flowItems = [
+      { label: "SAP → PhotonicTag", items: "Material master, descriptions,\nplant data, classification,\nbatch & BOM data" },
+      { label: "PhotonicTag → SAP", items: "Sustainability scores,\ncircularity grades, QR URLs,\ncompliance status flags" },
+    ];
+    flowItems.forEach((f, i) => {
+      const y = 2.2 + i * 1.5;
+      slide.addText(i === 0 ? "▼ INBOUND" : "▲ OUTBOUND", { x: 8.6, y, w: 3.6, h: 0.3, fontSize: 9, bold: true, color: i === 0 ? SUCCESS_GREEN : BRAND_BLUE, fontFace: "Calibri" });
+      slide.addText(f.items, { x: 8.6, y: y + 0.3, w: 3.6, h: 0.9, fontSize: 10, color: BODY_TEXT, fontFace: "Calibri" });
+    });
+    slide.addShape(pptx.ShapeType.roundRect, { x: 0.8, y: 5.6, w: 11.7, h: 0.9, fill: { color: "EFF6FF" }, line: { color: "BFDBFE", width: 1 }, rectRadius: 0.1 });
+    slide.addText("💡", { x: 1.0, y: 5.7, w: 0.5, h: 0.5, fontSize: 18, fontFace: "Calibri" });
+    slide.addText("Typical implementation: 2-4 weeks  •  100-10,000 materials per sync batch  •  30-50 mapped fields per record  •  Delta detection for incremental updates", { x: 1.5, y: 5.7, w: 10.5, h: 0.7, fontSize: 10, color: "1E40AF", fontFace: "Calibri" });
+    addFooter(slide, false);
+
+    // ====================================
+    // SLIDE 6: AI INTELLIGENCE
+    // ====================================
+    slide = pptx.addSlide();
+    slide.background = { color: BRAND_DARK };
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 1.2, fill: { color: BRAND_NAVY } });
+    slide.addText("AI INTELLIGENCE SUITE", { x: 0.8, y: 0.15, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 3 });
+    slide.addText("Automated Insights from Product Data", { x: 0.8, y: 0.5, w: 10, h: 0.6, fontSize: 28, bold: true, color: WHITE, fontFace: "Calibri" });
+    const aiModules = [
+      { title: "AI Summary", desc: "Instant executive summary of any product's DPP — materials, origin, certifications, and key attributes in plain language.", grade: "GPT-4o", color: BRAND_BLUE },
+      { title: "Sustainability Analysis", desc: "Carbon footprint estimation, environmental impact scoring, and actionable recommendations for improvement.", grade: "ESG Score", color: SUCCESS_GREEN },
+      { title: "Circularity Score", desc: "A+ to F grade assessing recyclability, material reuse potential, and end-of-life processing readiness.", grade: "A+ → F", color: BRAND_TEAL },
+      { title: "Repair Guide", desc: "Auto-generated step-by-step repair instructions based on product materials, components, and construction.", grade: "Auto-Gen", color: WARM_AMBER },
+      { title: "Risk Assessment", desc: "Supply chain risk scoring across regulatory, environmental, ethical sourcing, and geopolitical factors.", grade: "Risk Score", color: DANGER_RED },
+    ];
+    aiModules.forEach((m, i) => {
+      const isWide = i < 3;
+      const col = isWide ? i : i - 3;
+      const x = isWide ? 0.5 + col * 4.1 : 1.5 + col * 5.0;
+      const y = isWide ? 1.5 : 4.0;
+      const w = isWide ? 3.8 : 4.7;
+      slide.addShape(pptx.ShapeType.roundRect, { x, y, w, h: 2.2, fill: { color: CARD_DARK }, line: { color: m.color, width: 1.5 }, rectRadius: 0.12 });
+      slide.addShape(pptx.ShapeType.roundRect, { x: x + 0.2, y: y + 0.2, w: 1.2, h: 0.3, fill: { color: m.color }, rectRadius: 0.05 });
+      slide.addText(m.grade, { x: x + 0.2, y: y + 0.2, w: 1.2, h: 0.3, fontSize: 8, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
+      slide.addText(m.title, { x: x + 0.2, y: y + 0.65, w: w - 0.4, h: 0.4, fontSize: 14, bold: true, color: WHITE, fontFace: "Calibri" });
+      slide.addText(m.desc, { x: x + 0.2, y: y + 1.1, w: w - 0.4, h: 0.9, fontSize: 10, color: BODY_TEXT, fontFace: "Calibri" });
+    });
+    addFooter(slide);
+
+    // ====================================
+    // SLIDE 7: COMPETITIVE DIFFERENTIATORS
+    // ====================================
+    slide = pptx.addSlide();
+    slide.background = { color: WHITE };
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 0.08, fill: { color: BRAND_CYAN } });
+    slide.addText("WHY PHOTONICTAG", { x: 0.8, y: 0.3, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_TEAL, fontFace: "Calibri", letterSpacing: 3 });
+    slide.addText("Competitive Advantage", { x: 0.8, y: 0.65, w: 10, h: 0.7, fontSize: 28, bold: true, color: BRAND_DARK, fontFace: "Calibri" });
+    const advantages = [
+      { title: "Go Live in Weeks", desc: "Pre-built templates, automated data mapping, and guided onboarding. Not months — weeks.", metric: "4-6 weeks" },
+      { title: "Physics-Rooted Identity", desc: "Beyond simple QR codes — tamper-proof signatures grounded in physical properties that cannot be replicated.", metric: "Unforgeable" },
+      { title: "SAP-Native Integration", desc: "Bidirectional sync with existing SAP material master data. Works alongside your current ERP. No rip-and-replace.", metric: "3 connectors" },
+      { title: "AI-Powered Automation", desc: "Sustainability scoring, repair guides, risk assessment, and compliance checks — generated automatically from your product data.", metric: "5 AI modules" },
+      { title: "Consumer Transparency", desc: "Every product gets a mobile-optimized scan page with full DPP data — accessible via QR code anywhere in the world.", metric: "Global reach" },
+      { title: "Enterprise Security", desc: "Role-based access, encrypted sessions, CloudEvents audit trail, and GDPR-compliant processing. SOC 2 ready.", metric: "99.9% SLA" },
+    ];
+    advantages.forEach((a, i) => {
       const col = i % 2;
       const row = Math.floor(i / 2);
-      const x = 0.8 + col * 5.8;
-      const y = 1.5 + row * 1.5;
-      slide.addText("✓", { x, y, w: 0.4, h: 0.4, fontSize: 18, bold: true, color: ACCENT_GREEN, fontFace: "Arial" });
-      slide.addText(d.title, { x: x + 0.4, y, w: 5, h: 0.35, fontSize: 14, bold: true, color: TEXT_LIGHT, fontFace: "Arial" });
-      slide.addText(d.desc, { x: x + 0.4, y: y + 0.35, w: 5, h: 0.5, fontSize: 11, color: "AAAAAA", fontFace: "Arial" });
+      const x = 0.8 + col * 6.0;
+      const y = 1.5 + row * 1.7;
+      slide.addShape(pptx.ShapeType.roundRect, { x, y, w: 5.7, h: 1.45, fill: { color: "F8FAFC" }, line: { color: "E2E8F0", width: 1 }, rectRadius: 0.1 });
+      slide.addShape(pptx.ShapeType.rect, { x, y, w: 0.08, h: 1.45, fill: { color: BRAND_CYAN } });
+      slide.addText(a.title, { x: x + 0.3, y: y + 0.1, w: 3.8, h: 0.35, fontSize: 13, bold: true, color: BRAND_DARK, fontFace: "Calibri" });
+      slide.addShape(pptx.ShapeType.roundRect, { x: x + 4.2, y: y + 0.12, w: 1.2, h: 0.3, fill: { color: BRAND_CYAN }, rectRadius: 0.05 });
+      slide.addText(a.metric, { x: x + 4.2, y: y + 0.12, w: 1.2, h: 0.3, fontSize: 8, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
+      slide.addText(a.desc, { x: x + 0.3, y: y + 0.5, w: 5.1, h: 0.8, fontSize: 10, color: "64748B", fontFace: "Calibri" });
     });
+    addFooter(slide, false);
 
-    // Slide 5: Target Industries
+    // ====================================
+    // SLIDE 8: TARGET INDUSTRIES
+    // ====================================
     slide = pptx.addSlide();
-    slide.background = { color: TEXT_LIGHT };
-    slide.addText("Target Industries & Deadlines", { x: 0.8, y: 0.4, w: 11, h: 0.7, fontSize: 32, bold: true, color: TEXT_DARK, fontFace: "Arial" });
-
-    const industries = [
-      { name: "Batteries & Energy Storage", examples: "Industrial batteries, EV batteries, portable power", deadline: "Feb 2027" },
-      { name: "Textiles & Fashion", examples: "Apparel, technical textiles, footwear, accessories", deadline: "2028" },
-      { name: "Consumer Electronics", examples: "Smartphones, laptops, IoT devices, wearables", deadline: "2028" },
-      { name: "Automotive & EV", examples: "EV components, parts, accessories", deadline: "2028" },
-      { name: "Furniture & Home", examples: "Office furniture, home furnishings, mattresses", deadline: "2029" },
-      { name: "Industrial Packaging", examples: "Cardboard, biodegradable packaging, reusable containers", deadline: "2029" },
-    ];
-    const tableRows: any[][] = [
+    slide.background = { color: BRAND_DARK };
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 1.2, fill: { color: BRAND_NAVY } });
+    slide.addText("TARGET INDUSTRIES", { x: 0.8, y: 0.15, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 3 });
+    slide.addText("Industries & Compliance Deadlines", { x: 0.8, y: 0.5, w: 10, h: 0.6, fontSize: 28, bold: true, color: WHITE, fontFace: "Calibri" });
+    const indRows: any[][] = [
       [
-        { text: "Industry", options: { bold: true, fontSize: 12, color: TEXT_LIGHT, fill: { color: PRIMARY_COLOR }, fontFace: "Arial" } },
-        { text: "Product Examples", options: { bold: true, fontSize: 12, color: TEXT_LIGHT, fill: { color: PRIMARY_COLOR }, fontFace: "Arial" } },
-        { text: "Deadline", options: { bold: true, fontSize: 12, color: TEXT_LIGHT, fill: { color: PRIMARY_COLOR }, fontFace: "Arial", align: "center" } },
+        { text: "Industry Sector", options: { bold: true, fontSize: 11, color: WHITE, fill: { color: BRAND_TEAL }, fontFace: "Calibri" } },
+        { text: "Product Examples", options: { bold: true, fontSize: 11, color: WHITE, fill: { color: BRAND_TEAL }, fontFace: "Calibri" } },
+        { text: "Deadline", options: { bold: true, fontSize: 11, color: WHITE, fill: { color: BRAND_TEAL }, fontFace: "Calibri", align: "center" } },
+        { text: "Status", options: { bold: true, fontSize: 11, color: WHITE, fill: { color: BRAND_TEAL }, fontFace: "Calibri", align: "center" } },
       ],
     ];
-    industries.forEach((ind, i) => {
-      const bg = i % 2 === 0 ? "F8FAFC" : "FFFFFF";
-      tableRows.push([
-        { text: ind.name, options: { fontSize: 11, color: TEXT_DARK, fill: { color: bg }, fontFace: "Arial", bold: true } },
-        { text: ind.examples, options: { fontSize: 10, color: "555555", fill: { color: bg }, fontFace: "Arial" } },
-        { text: ind.deadline, options: { fontSize: 11, color: ind.deadline.includes("2027") ? ACCENT_RED : PRIMARY_COLOR, fill: { color: bg }, fontFace: "Arial", bold: true, align: "center" } },
+    const indData = [
+      { name: "Batteries & Energy Storage", ex: "Industrial batteries, EV batteries, portable power", dl: "Feb 2027", status: "URGENT", sColor: DANGER_RED },
+      { name: "Textiles & Fashion", ex: "Apparel, technical textiles, footwear, accessories", dl: "2028", status: "UPCOMING", sColor: WARM_AMBER },
+      { name: "Consumer Electronics", ex: "Smartphones, laptops, IoT devices, wearables", dl: "2028", status: "UPCOMING", sColor: WARM_AMBER },
+      { name: "Automotive & EV", ex: "EV components, parts, accessories", dl: "2028", status: "UPCOMING", sColor: WARM_AMBER },
+      { name: "Furniture & Home", ex: "Office furniture, home furnishings, mattresses", dl: "2029", status: "PLANNED", sColor: BRAND_BLUE },
+      { name: "Industrial Packaging", ex: "Cardboard, biodegradable packaging, reusable containers", dl: "2029", status: "PLANNED", sColor: BRAND_BLUE },
+    ];
+    indData.forEach((ind, i) => {
+      const bg = i % 2 === 0 ? CARD_DARK : BRAND_NAVY;
+      indRows.push([
+        { text: ind.name, options: { fontSize: 10, color: WHITE, fill: { color: bg }, fontFace: "Calibri", bold: true } },
+        { text: ind.ex, options: { fontSize: 9, color: BODY_TEXT, fill: { color: bg }, fontFace: "Calibri" } },
+        { text: ind.dl, options: { fontSize: 10, color: ind.dl.includes("2027") ? DANGER_RED : BRAND_CYAN, fill: { color: bg }, fontFace: "Calibri", bold: true, align: "center" } },
+        { text: ind.status, options: { fontSize: 8, color: ind.sColor, fill: { color: bg }, fontFace: "Calibri", bold: true, align: "center" } },
       ]);
     });
-    slide.addTable(tableRows, { x: 0.8, y: 1.3, w: 11.4, colW: [3.5, 5.5, 2.4], border: { type: "solid", pt: 0.5, color: "DDDDDD" } });
+    slide.addTable(indRows, { x: 0.8, y: 1.5, w: 11.5, colW: [3.2, 4.5, 1.5, 1.5], border: { type: "solid", pt: 0.5, color: CARD_BORDER }, rowH: [0.45, 0.45, 0.45, 0.45, 0.45, 0.45, 0.45] });
+    addFooter(slide);
 
-    // Slide 6: Technical Architecture
+    // ====================================
+    // SLIDE 9: TECHNICAL ARCHITECTURE
+    // ====================================
     slide = pptx.addSlide();
-    slide.background = { color: TEXT_LIGHT };
-    slide.addText("Technical Architecture", { x: 0.8, y: 0.4, w: 11, h: 0.7, fontSize: 32, bold: true, color: TEXT_DARK, fontFace: "Arial" });
-
-    const stackItems = [
-      ["Frontend", "React + TypeScript + Vite"],
-      ["Backend", "Node.js + Express"],
-      ["Database", "PostgreSQL + Drizzle ORM"],
-      ["AI Engine", "OpenAI GPT-4o"],
-      ["Authentication", "OAuth 2.0 / OIDC + RBAC"],
-      ["Events", "CloudEvents Bus"],
-      ["IoT Support", "NFC / RFID / BLE"],
-      ["Integration", "SAP S/4HANA, ECC, Business One"],
-    ];
-    const stackRows: any[][] = [
+    slide.background = { color: WHITE };
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 0.08, fill: { color: BRAND_CYAN } });
+    slide.addText("TECHNICAL ARCHITECTURE", { x: 0.8, y: 0.3, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_TEAL, fontFace: "Calibri", letterSpacing: 3 });
+    slide.addText("Enterprise-Grade Technology Stack", { x: 0.8, y: 0.65, w: 10, h: 0.7, fontSize: 28, bold: true, color: BRAND_DARK, fontFace: "Calibri" });
+    const techStack: any[][] = [
       [
-        { text: "Component", options: { bold: true, fontSize: 12, color: TEXT_LIGHT, fill: { color: DARK_BG }, fontFace: "Arial" } },
-        { text: "Technology", options: { bold: true, fontSize: 12, color: TEXT_LIGHT, fill: { color: DARK_BG }, fontFace: "Arial" } },
+        { text: "Layer", options: { bold: true, fontSize: 11, color: WHITE, fill: { color: BRAND_DARK }, fontFace: "Calibri" } },
+        { text: "Technology", options: { bold: true, fontSize: 11, color: WHITE, fill: { color: BRAND_DARK }, fontFace: "Calibri" } },
+        { text: "Purpose", options: { bold: true, fontSize: 11, color: WHITE, fill: { color: BRAND_DARK }, fontFace: "Calibri" } },
       ],
     ];
-    stackItems.forEach(([comp, tech], i) => {
-      const bg = i % 2 === 0 ? "F8FAFC" : "FFFFFF";
-      stackRows.push([
-        { text: comp, options: { fontSize: 11, color: "555555", fill: { color: bg }, fontFace: "Arial" } },
-        { text: tech, options: { fontSize: 11, color: TEXT_DARK, fill: { color: bg }, fontFace: "Arial", bold: true } },
+    const techData = [
+      ["Frontend", "React 18 + TypeScript + Vite", "Type-safe, high-performance UI"],
+      ["UI Framework", "Shadcn/ui + Radix Primitives", "Accessible, customizable components"],
+      ["Backend", "Node.js 20 LTS + Express", "High-throughput HTTP handling"],
+      ["Database", "PostgreSQL + Drizzle ORM", "Type-safe data persistence"],
+      ["AI Engine", "OpenAI GPT-4o", "Sustainability & compliance intelligence"],
+      ["Authentication", "OAuth 2.0 / OIDC + RBAC", "Three-tier access control"],
+      ["Event System", "CloudEvents Bus", "Audit trail & decoupled processing"],
+      ["IoT Layer", "NFC / RFID / BLE", "Smart tag management & tracking"],
+      ["Integration", "SAP S/4HANA, ECC, B1", "Bidirectional ERP synchronization"],
+    ];
+    techData.forEach(([layer, tech, purpose], i) => {
+      const bg = i % 2 === 0 ? "F8FAFC" : WHITE;
+      techStack.push([
+        { text: layer, options: { fontSize: 10, color: BRAND_TEAL, fill: { color: bg }, fontFace: "Calibri", bold: true } },
+        { text: tech, options: { fontSize: 10, color: BRAND_DARK, fill: { color: bg }, fontFace: "Calibri" } },
+        { text: purpose, options: { fontSize: 10, color: "64748B", fill: { color: bg }, fontFace: "Calibri" } },
       ]);
     });
-    slide.addTable(stackRows, { x: 0.8, y: 1.3, w: 5.2, colW: [2, 3.2], border: { type: "solid", pt: 0.5, color: "DDDDDD" } });
-
-    const security = [
+    slide.addTable(techStack, { x: 0.8, y: 1.5, w: 6.5, colW: [1.5, 2.8, 2.2], border: { type: "solid", pt: 0.5, color: "E2E8F0" } });
+    slide.addShape(pptx.ShapeType.roundRect, { x: 7.8, y: 1.5, w: 4.7, h: 5.0, fill: { color: BRAND_DARK }, rectRadius: 0.12 });
+    slide.addText("SECURITY & COMPLIANCE", { x: 8.1, y: 1.7, w: 4.1, h: 0.3, fontSize: 10, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 2 });
+    const secItems = [
       "GDPR-compliant data processing",
       "Role-based access control (3 tiers)",
       "Encrypted session management",
       "CloudEvents audit trail",
       "Tamper-proof product identity",
       "SOC 2 Type II ready architecture",
+      "bcrypt password hashing (cost 10)",
+      "OAuth 2.0 / OpenID Connect",
     ];
-    slide.addText("Security & Compliance", { x: 7, y: 1.3, w: 5.5, h: 0.5, fontSize: 16, bold: true, color: TEXT_DARK, fontFace: "Arial" });
-    security.forEach((s, i) => {
-      slide.addText(`✓  ${s}`, { x: 7, y: 2.0 + i * 0.55, w: 5.5, h: 0.4, fontSize: 12, color: "333333", fontFace: "Arial" });
+    secItems.forEach((s, i) => {
+      slide.addText(`✓  ${s}`, { x: 8.1, y: 2.15 + i * 0.45, w: 4.1, h: 0.35, fontSize: 10, color: BODY_TEXT, fontFace: "Calibri" });
     });
+    addFooter(slide, false);
 
-    // Slide 7: Internal Operations
+    // ====================================
+    // SLIDE 10: INTERNAL OPS PLATFORM
+    // ====================================
     slide = pptx.addSlide();
-    slide.background = { color: DARK_BG };
-    slide.addText("Internal Operations Platform", { x: 0.8, y: 0.4, w: 11, h: 0.7, fontSize: 32, bold: true, color: TEXT_LIGHT, fontFace: "Arial" });
-    slide.addText("Comprehensive back-office system for managing the entire product identity lifecycle", { x: 0.8, y: 1.1, w: 11, h: 0.5, fontSize: 14, color: "AAAAAA", fontFace: "Arial" });
-
-    const ops = [
-      { title: "AI-Driven CRM", desc: "Customer account management with AI health scoring (0-100), next-best-action generation, MRR tracking, at-risk detection, and Excel bulk import." },
-      { title: "Demo Factory", desc: "One-click demo generation from 6 industry templates or custom AI prompts. Per-demo credentials, shareable URLs." },
-      { title: "Support Triage", desc: "AI-powered ticket categorization with automatic priority suggestion, tag generation, and summary analysis." },
-      { title: "Platform Ops", desc: "Real-time health monitoring with uptime tracking, memory usage, entity counts, and auto-refresh." },
+    slide.background = { color: BRAND_DARK };
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 1.2, fill: { color: BRAND_NAVY } });
+    slide.addText("INTERNAL OPERATIONS", { x: 0.8, y: 0.15, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 3 });
+    slide.addText("Back-Office Command Center", { x: 0.8, y: 0.5, w: 10, h: 0.6, fontSize: 28, bold: true, color: WHITE, fontFace: "Calibri" });
+    const opsCards = [
+      { title: "AI-Driven CRM", desc: "Customer health scoring (0-100), next-best-action AI, MRR tracking, at-risk detection, Excel bulk import, and activity timeline.", color: BRAND_BLUE },
+      { title: "POC Proposal Generator", desc: "Multi-language proposals (EN/DE/FR/ES) with legal terms, SAP scope, commercial terms, and signature pages. Exports to editable Word.", color: SUCCESS_GREEN },
+      { title: "Demo Factory", desc: "One-click demo generation from 6 industry templates or custom AI prompts. Per-demo credentials, shareable URLs, and auto-expiry.", color: BRAND_TEAL },
+      { title: "Support Triage", desc: "AI-powered ticket categorization with automatic priority suggestion, tag generation, and summary analysis for faster resolution.", color: WARM_AMBER },
+      { title: "User Management", desc: "CRUD operations for internal team members with role assignment (super admin, internal team, demo viewer) and secure password management.", color: "8B5CF6" },
+      { title: "Platform Ops", desc: "Real-time health monitoring with uptime tracking, memory usage, entity counts, auto-refresh every 30 seconds, and system diagnostics.", color: DANGER_RED },
     ];
-    ops.forEach((o, i) => {
-      const col = i % 2;
-      const row = Math.floor(i / 2);
-      const x = 0.8 + col * 5.8;
-      const y = 2.0 + row * 2.2;
-      slide.addShape(pptx.ShapeType.roundRect, { x, y, w: 5.4, h: 1.8, fill: { color: "252545" }, line: { color: "333366", width: 1 }, rectRadius: 0.1 });
-      slide.addText(o.title, { x: x + 0.3, y: y + 0.15, w: 4.8, h: 0.45, fontSize: 14, bold: true, color: PRIMARY_COLOR, fontFace: "Arial" });
-      slide.addText(o.desc, { x: x + 0.3, y: y + 0.6, w: 4.8, h: 1.0, fontSize: 10, color: "BBBBBB", fontFace: "Arial" });
+    opsCards.forEach((o, i) => {
+      const col = i % 3;
+      const row = Math.floor(i / 3);
+      const x = 0.5 + col * 4.1;
+      const y = 1.5 + row * 2.5;
+      slide.addShape(pptx.ShapeType.roundRect, { x, y, w: 3.8, h: 2.2, fill: { color: CARD_DARK }, line: { color: CARD_BORDER, width: 1 }, rectRadius: 0.12 });
+      slide.addShape(pptx.ShapeType.rect, { x, y, w: 3.8, h: 0.06, fill: { color: o.color } });
+      slide.addText(o.title, { x: x + 0.2, y: y + 0.2, w: 3.4, h: 0.4, fontSize: 13, bold: true, color: WHITE, fontFace: "Calibri" });
+      slide.addText(o.desc, { x: x + 0.2, y: y + 0.7, w: 3.4, h: 1.3, fontSize: 9.5, color: BODY_TEXT, fontFace: "Calibri" });
     });
+    addFooter(slide);
 
-    // Slide 8: Pricing Overview
+    // ====================================
+    // SLIDE 11: PRICING
+    // ====================================
     slide = pptx.addSlide();
-    slide.background = { color: TEXT_LIGHT };
-    slide.addText("Pricing Overview", { x: 0.8, y: 0.4, w: 11, h: 0.7, fontSize: 32, bold: true, color: TEXT_DARK, fontFace: "Arial" });
-
-    const tiers = [
-      { name: "POC", products: "Up to 50", price: "€499/mo", features: "Basic DPP, QR codes, public scan pages, limited support" },
-      { name: "Starter", products: "Up to 1,000", price: "€1,499/mo", features: "DPP + analytics, enhanced QR, priority support" },
-      { name: "Growth", products: "Up to 10,000", price: "€2,999/mo", features: "AI insights, IoT integration, team management" },
-      { name: "Enterprise", products: "Unlimited", price: "Custom", features: "SAP integration, SSO, dedicated support, SLAs" },
+    slide.background = { color: WHITE };
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 0.08, fill: { color: BRAND_CYAN } });
+    slide.addText("PRICING", { x: 0.8, y: 0.3, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_TEAL, fontFace: "Calibri", letterSpacing: 3 });
+    slide.addText("Transparent, Scalable Plans", { x: 0.8, y: 0.65, w: 10, h: 0.7, fontSize: 28, bold: true, color: BRAND_DARK, fontFace: "Calibri" });
+    const pricingTiers = [
+      { name: "POC", price: "€499", period: "/month", products: "Up to 50 products", features: ["Full DPP creation", "QR code generation", "Public scan pages", "Basic dashboard", "Email onboarding support"], highlight: false },
+      { name: "Starter", price: "€1,499", period: "/month", products: "Up to 1,000 products", features: ["Everything in POC", "Excel bulk import", "Enhanced analytics", "Team collaboration (5)", "48h email support SLA"], highlight: false },
+      { name: "Growth", price: "€2,999", period: "/month", products: "Up to 10,000 products", features: ["Everything in Starter", "AI insights suite", "IoT integration", "Team mgmt (20 users)", "24h priority support"], highlight: true },
+      { name: "Enterprise", price: "Custom", period: "", products: "Unlimited products", features: ["Everything in Growth", "SAP integration suite", "SSO/SAML auth", "Dedicated account mgr", "4h phone support SLA"], highlight: false },
     ];
-    tiers.forEach((t, i) => {
+    pricingTiers.forEach((t, i) => {
       const x = 0.5 + i * 3.1;
-      const isEnterprise = t.name === "Enterprise";
-      slide.addShape(pptx.ShapeType.roundRect, { x, y: 1.5, w: 2.8, h: 4.5, fill: { color: isEnterprise ? DARK_BG : "FFFFFF" }, line: { color: isEnterprise ? PRIMARY_COLOR : "DDDDDD", width: isEnterprise ? 2 : 1 }, rectRadius: 0.1 });
-      slide.addText(t.name, { x, y: 1.7, w: 2.8, h: 0.5, fontSize: 18, bold: true, color: isEnterprise ? TEXT_LIGHT : TEXT_DARK, align: "center", fontFace: "Arial" });
-      slide.addText(t.price, { x, y: 2.3, w: 2.8, h: 0.5, fontSize: 16, bold: true, color: PRIMARY_COLOR, align: "center", fontFace: "Arial" });
-      slide.addText(t.products + " products", { x, y: 2.9, w: 2.8, h: 0.4, fontSize: 11, color: isEnterprise ? "AAAAAA" : "666666", align: "center", fontFace: "Arial" });
-      slide.addText(t.features, { x: x + 0.2, y: 3.5, w: 2.4, h: 2.0, fontSize: 10, color: isEnterprise ? "BBBBBB" : "555555", fontFace: "Arial" });
+      const bg = t.highlight ? BRAND_DARK : "F8FAFC";
+      const borderColor = t.highlight ? BRAND_CYAN : "E2E8F0";
+      slide.addShape(pptx.ShapeType.roundRect, { x, y: 1.4, w: 2.9, h: 5.0, fill: { color: bg }, line: { color: borderColor, width: t.highlight ? 2 : 1 }, rectRadius: 0.12 });
+      if (t.highlight) {
+        slide.addShape(pptx.ShapeType.roundRect, { x: x + 0.6, y: 1.2, w: 1.7, h: 0.35, fill: { color: BRAND_CYAN }, rectRadius: 0.06 });
+        slide.addText("MOST POPULAR", { x: x + 0.6, y: 1.2, w: 1.7, h: 0.35, fontSize: 8, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
+      }
+      const textColor = t.highlight ? WHITE : BRAND_DARK;
+      const subColor = t.highlight ? BODY_TEXT : "64748B";
+      slide.addText(t.name, { x, y: 1.6, w: 2.9, h: 0.45, fontSize: 16, bold: true, color: textColor, align: "center", fontFace: "Calibri" });
+      slide.addText(t.price, { x, y: 2.05, w: 2.9, h: 0.55, fontSize: 24, bold: true, color: BRAND_CYAN, align: "center", fontFace: "Calibri" });
+      slide.addText(t.period, { x: x + 1.8, y: 2.25, w: 1, h: 0.3, fontSize: 10, color: subColor, fontFace: "Calibri" });
+      slide.addText(t.products, { x, y: 2.65, w: 2.9, h: 0.35, fontSize: 10, color: subColor, align: "center", fontFace: "Calibri" });
+      slide.addShape(pptx.ShapeType.rect, { x: x + 0.3, y: 3.1, w: 2.3, h: 0.02, fill: { color: t.highlight ? CARD_BORDER : "E2E8F0" } });
+      t.features.forEach((f, fi) => {
+        slide.addText(`✓  ${f}`, { x: x + 0.2, y: 3.3 + fi * 0.45, w: 2.5, h: 0.35, fontSize: 9.5, color: subColor, fontFace: "Calibri" });
+      });
     });
-    slide.addText("Annual billing: 20% discount  •  All prices exclude VAT", { x: 0.8, y: 6.3, w: 11, h: 0.3, fontSize: 10, color: "888888", fontFace: "Arial", align: "center" });
+    slide.addText("Annual billing: 20% discount  •  All prices exclude VAT  •  POC credits apply to upgrade", { x: 0.8, y: 6.55, w: 11, h: 0.3, fontSize: 9, color: "94A3B8", fontFace: "Calibri", align: "center" });
+    addFooter(slide, false);
 
-    // Slide 9: CTA
+    // ====================================
+    // SLIDE 12: CUSTOMER SUCCESS / CASE STUDY
+    // ====================================
     slide = pptx.addSlide();
-    slide.background = { color: DARK_BG };
-    slide.addText("Ready to get compliant?", { x: 0.8, y: 1.5, w: 11, h: 1.0, fontSize: 40, bold: true, color: TEXT_LIGHT, align: "center", fontFace: "Arial" });
-    slide.addText("Schedule a personalized demo to see how PhotonicTag can help your\norganization meet EU DPP requirements ahead of the deadline.", { x: 1.5, y: 2.8, w: 10, h: 1.0, fontSize: 16, color: "AAAAAA", align: "center", fontFace: "Arial" });
-    slide.addShape(pptx.ShapeType.roundRect, { x: 4.2, y: 4.2, w: 4.6, h: 0.8, fill: { color: PRIMARY_COLOR }, rectRadius: 0.15 });
-    slide.addText("Schedule a Demo →", { x: 4.2, y: 4.2, w: 4.6, h: 0.8, fontSize: 18, bold: true, color: TEXT_LIGHT, align: "center", valign: "middle", fontFace: "Arial" });
-    slide.addText("PhotonicTag GmbH  •  contact@photonictag.com  •  www.photonictag.com", { x: 0.8, y: 6.3, w: 11, h: 0.4, fontSize: 10, color: "666666", fontFace: "Arial", align: "center" });
+    slide.background = { color: BRAND_DARK };
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 1.2, fill: { color: BRAND_NAVY } });
+    slide.addText("IMPLEMENTATION APPROACH", { x: 0.8, y: 0.15, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 3 });
+    slide.addText("Proven 6-Week POC Methodology", { x: 0.8, y: 0.5, w: 10, h: 0.6, fontSize: 28, bold: true, color: WHITE, fontFace: "Calibri" });
+    const phases = [
+      { week: "Week 1-2", title: "Discovery & Setup", items: "Requirements gathering\nSAP connector configuration\nData mapping definition\nEnvironment provisioning" },
+      { week: "Week 3-4", title: "Integration & Enrichment", items: "Data migration execution\nAI insights activation\nQR code generation\nDPP template creation" },
+      { week: "Week 5-6", title: "Validation & Handoff", items: "End-to-end testing\nUser acceptance testing\nTraining & documentation\nGo/No-Go decision" },
+    ];
+    phases.forEach((p, i) => {
+      const x = 0.5 + i * 4.1;
+      slide.addShape(pptx.ShapeType.roundRect, { x, y: 1.5, w: 3.9, h: 3.5, fill: { color: CARD_DARK }, line: { color: CARD_BORDER, width: 1 }, rectRadius: 0.12 });
+      slide.addShape(pptx.ShapeType.roundRect, { x: x + 0.2, y: 1.7, w: 1.6, h: 0.35, fill: { color: BRAND_CYAN }, rectRadius: 0.06 });
+      slide.addText(p.week, { x: x + 0.2, y: 1.7, w: 1.6, h: 0.35, fontSize: 10, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
+      slide.addText(p.title, { x: x + 0.2, y: 2.2, w: 3.5, h: 0.4, fontSize: 15, bold: true, color: WHITE, fontFace: "Calibri" });
+      slide.addText(p.items, { x: x + 0.2, y: 2.8, w: 3.5, h: 1.8, fontSize: 11, color: BODY_TEXT, fontFace: "Calibri", lineSpacingMultiple: 1.5 });
+    });
+    slide.addShape(pptx.ShapeType.roundRect, { x: 0.5, y: 5.3, w: 12.0, h: 1.2, fill: { color: BRAND_NAVY }, line: { color: CARD_BORDER, width: 1 }, rectRadius: 0.12 });
+    slide.addText("DELIVERABLES", { x: 0.8, y: 5.4, w: 3, h: 0.3, fontSize: 10, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 2 });
+    const deliverables = [
+      "Fully configured DPP platform",
+      "SAP integration (if applicable)",
+      "AI insights for all products",
+      "QR codes & public scan pages",
+      "User training & documentation",
+      "Validation report with recommendation",
+    ];
+    deliverables.forEach((d, i) => {
+      slide.addText(`✓  ${d}`, { x: 0.8 + (i % 3) * 3.9, y: 5.75 + Math.floor(i / 3) * 0.35, w: 3.7, h: 0.3, fontSize: 10, color: BODY_TEXT, fontFace: "Calibri" });
+    });
+    addFooter(slide);
+
+    // ====================================
+    // SLIDE 13: CTA — Final slide
+    // ====================================
+    slide = pptx.addSlide();
+    slide.background = { color: BRAND_DARK };
+    slide.addShape(pptx.ShapeType.ellipse, { x: -3, y: -3, w: 10, h: 10, fill: { color: BRAND_NAVY } });
+    slide.addShape(pptx.ShapeType.ellipse, { x: 7, y: 2, w: 8, h: 8, fill: { color: "141B2D" } });
+    slide.addText("Ready to future-proof\nyour products?", { x: 1, y: 1.0, w: 11, h: 1.4, fontSize: 40, bold: true, color: WHITE, align: "center", fontFace: "Calibri" });
+    slide.addText("The EU DPP mandate is coming. Early adopters gain competitive advantage,\nconsumer trust, and regulatory peace of mind.", { x: 1.5, y: 2.6, w: 10, h: 0.8, fontSize: 15, color: SUBTLE_TEXT, align: "center", fontFace: "Calibri" });
+    slide.addShape(pptx.ShapeType.roundRect, { x: 3.5, y: 3.8, w: 6, h: 0.9, fill: { color: BRAND_CYAN }, rectRadius: 0.15 });
+    slide.addText("Schedule Your Personalized Demo →", { x: 3.5, y: 3.8, w: 6, h: 0.9, fontSize: 18, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
+    slide.addShape(pptx.ShapeType.roundRect, { x: 4, y: 5.0, w: 5, h: 0.7, fill: { color: "transparent" }, line: { color: SUBTLE_TEXT, width: 1 }, rectRadius: 0.12 });
+    slide.addText("Or start with a POC — €499/month", { x: 4, y: 5.0, w: 5, h: 0.7, fontSize: 14, color: SUBTLE_TEXT, align: "center", valign: "middle", fontFace: "Calibri" });
+    slide.addText("PhotonicTag GmbH", { x: 1, y: 6.0, w: 11, h: 0.4, fontSize: 14, bold: true, color: BRAND_CYAN, align: "center", fontFace: "Calibri" });
+    slide.addText("contact@photonictag.com  •  www.photonictag.com  •  +49 (0) 800 PHOTONIC", { x: 1, y: 6.35, w: 11, h: 0.35, fontSize: 11, color: SUBTLE_TEXT, align: "center", fontFace: "Calibri" });
 
     const data = await pptx.write({ outputType: "nodebuffer" }) as Buffer;
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.presentationml.presentation");
-    res.setHeader("Content-Disposition", "attachment; filename=PhotonicTag_Presentation.pptx");
+    res.setHeader("Content-Disposition", "attachment; filename=PhotonicTag_Marketing_Presentation.pptx");
     res.send(data);
   } catch (err: any) {
     console.error("PPT generation error:", err);

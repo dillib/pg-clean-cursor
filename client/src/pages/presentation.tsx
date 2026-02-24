@@ -82,7 +82,7 @@ export default function Presentation() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "PhotonicTag_Presentation.pptx";
+      a.download = "PhotonicTag_Marketing_Presentation.pptx";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
