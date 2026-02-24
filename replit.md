@@ -2,120 +2,15 @@
 
 ## Overview
 
-PhotonicTag is an AI-powered product identity platform for Digital Product Passports (DPP). Inspired by the precision of photonics — the science of light — PhotonicTag transforms identity from a printed label into a physics-rooted, tamper-proof signature.
+PhotonicTag is an AI-powered product identity platform that provides Digital Product Passports (DPP). It transforms product identity into a physics-rooted, tamper-proof signature, bridging physical and digital worlds for enhanced trust, traceability, and transparency. The platform includes an admin dashboard for product management and public scan pages for consumers to view DPPs via QR codes. Its core mission is to ensure secure, intelligent, and verifiable identities for every product, enabling brands, regulators, and consumers to trust product information, trace origins, and understand product lifecycles.
 
 **Brand Philosophy:** Every product deserves a secure, intelligent, and verifiable identity — one that cannot be forged, erased, or lost. PhotonicTag bridges the physical and digital worlds, enabling brands, regulators, and consumers to trust what they see, trace what they buy, and understand the full story behind every product.
 
 **Tagline:** "Identity, at the speed of light."
 
-The platform provides an admin dashboard for product management and public scan pages where consumers can view Digital Product Passports by scanning QR codes.
-
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
-
-## Recent Changes
-
-### February 2026
-- **Internal Admin Platform**: Comprehensive internal operations dashboard at /admin/internal with 5 tabs:
-  - **AI-Driven CRM**: Customer account management with AI health scoring (0-100), AI next-best-action generation, activity tracking, MRR tracking, and at-risk account detection
-  - **Demo Factory**: Uses existing /api/demo-configs API with 6 industry templates (Battery, Fashion, Electronics, EV, Packaging, Furniture) and custom prompt support
-  - **User Management**: Internal user CRUD (create/activate/deactivate/delete) for team members with role assignment (sales_partner, reseller, consultant, demo_viewer)
-  - **AI Support Triage**: Intelligent ticketing with AI auto-categorization, priority suggestion, tag generation, and summary analysis using GPT-4o
-  - **Platform Ops**: Real-time health monitoring with uptime, memory usage, entity counts, auto-refresh every 30 seconds
-  - Database tables: customer_accounts, account_activities, next_best_actions, support_tickets, platform_metrics
-  - API routes: /api/internal/* namespace with admin-only middleware
-  - Sidebar navigation: "Internal Ops" added with Settings2 icon
-- **Role-Based Login System**: Three distinct login flows:
-  - Super Admin (dillib@gmail.com): Replit Auth → /admin/internal shows all 5 tabs (CRM, Demo Factory, Users, Support, Platform Ops)
-  - Internal Login (/internal/login): Team email/password → /internal/dashboard shows CRM + Demo Factory only
-  - Demo Login (/demo/login): Demo viewer email/password → /demo/dashboard shows actual products (partner dashboard)
-
-### January 2026
-- **Partner Portal & Demo System**: Partner management expansion:
-  - Partner authentication system separate from Replit Auth (email/password with bcrypt)
-  - Partner login page at /partner/login with dedicated auth flow
-  - Partner dashboard at /partner/dashboard for demo product browsing
-  - CRM expanded with 3 tabs: Leads, Partners, Demo Generator
-  - Partner management: create/edit/delete partner accounts with roles (sales_partner, reseller, consultant, demo_viewer)
-  - Quick Demo Generator with 6 industry templates (Battery, Fashion, Electronics, EV, Packaging, Furniture)
-  - Custom demo prompt support for AI-generated product data
-  - Partner Login button added to public navigation
-  - EU DPP Compliance Timeline section on landing page with 4-phase rollout visual (2027-2030)
-  - Database tables: partners, demo_configs
-  - API routes: /api/partners (CRUD), /api/partners/login, /api/demo-configs (CRUD)
-- **Validation Build Finalized**: Market validation launch ready with all public pages:
-  - Public pages: Landing, Examples (/scan/demo), Integrations, Pricing, Contact, Privacy, Terms
-  - Partner Login button in public navigation for partner access
-  - CRM dashboard remains protected behind auth for internal lead management
-  - Custom PhotonicTag favicon/app icon generated
-  - SEO complete with react-helmet-async: Page-specific titles, meta descriptions, OG tags
-  - Six Integrated Modules section on landing and pricing pages
-  - Book a Demo button links to Google Calendar booking
-  - Demo booking link: https://calendar.app.google/Aa9nfUnJiZvcjXi28
-- **Lead Capture & CRM System**: Complete lead management for market validation launch:
-  - Leads database table with status pipeline (new → contacted → demo_scheduled → qualified → won/lost)
-  - Lead activities table for tracking interactions and notes
-  - Public contact form at /contact with qualification fields (tier interest, volume, company)
-  - Protected CRM dashboard at /crm for lead management
-  - VC validation metrics: lead volume, lead velocity (week-over-week growth %), conversion rate, enterprise interest count
-  - Tier interest breakdown chart (Enterprise, Growth, Starter, Free)
-  - Pipeline status distribution visualization
-  - Search and filtering for lead list
-  - Status update workflow with activity logging
-  - Book a Demo integration with Google Calendar booking link
-  - API endpoints: POST /api/leads (public), GET/PATCH /api/leads (protected), GET /api/leads/stats
-- **Enhanced Pricing Page**: Comprehensive pricing improvements for enterprise buyers:
-  - Added Free tier (100 products, no credit card required)
-  - Value anchoring with EU DPP compliance penalties (€10K-100K+ per violation)
-  - ROI visibility section showing compliance savings, time efficiency, SAP integration value
-  - SAP integration highlighted as Enterprise tier differentiator
-  - Annual discount increased from 10% to 20% (industry standard)
-  - Competitive comparison table vs DIY, Legacy PLM, Generic QR solutions
-  - EU DPP compliance deadline reminders (2027 batteries, 2030 all products)
-- **SAP Integration Demo Dashboard**: Visual demo showing bidirectional sync with mock SAP system:
-  - Mock SAP OData service with 100 realistic material master records (MARA/MARC structures)
-  - Split-screen dashboard showing SAP materials vs PhotonicTag products
-  - "Sync from SAP" button imports materials as DPP products
-  - "Sync to SAP" button exports product changes back to SAP
-  - "Full Bidirectional Sync" for complete two-way synchronization
-  - Conflict detection when data differs in both systems
-  - Conflict resolution UI with side-by-side value comparison
-  - Sync audit trail logging all sync events with timestamps
-  - Progress animations during sync operations
-  - Routes: /integrations/sap-demo (protected), API: /api/sap/* endpoints
-- **Enterprise SAP Integration**: Complete SAP connector configuration for enterprise ERP integration:
-  - SAP Connector admin page with connection configuration (S/4HANA, ECC, Business One)
-  - Field mapping between SAP material master fields and DPP fields
-  - Sync status monitoring with products synced count and last sync time
-  - Support for OData, RFC, and IDoc API types
-  - Bidirectional sync options (inbound, outbound, bidirectional)
-  - Sync frequency options (real-time, hourly, daily, manual)
-  - Added enterpriseConnectors and integrationSyncLogs tables to schema
-  - API endpoints: /api/integrations/connectors (CRUD), /test, /sync, /logs
-- **AI-Generated Insights**: Complete 5-type AI insights system with fetch-or-generate pattern:
-  - AI Summary: Product highlights and key features
-  - AI Sustainability Analysis: Carbon footprint scoring and circularity recommendations
-  - AI Repair Guide: Repairability rating, instructions, and parts availability
-  - AI Circularity Score: Recyclability grade (A+ to F), material efficiency, end-of-life options
-  - AI Risk Assessment: Overall risk level, data completeness %, counterfeit risk, compliance issues
-- Pre-generated AI insights for all 8 demo products for immediate demo visibility
-- Added CircularityScore and RiskAssessment TypeScript interfaces to schema
-- Added API endpoints: /api/ai/circularity, /api/ai/risk-assessment
-- **IoT Tagging System**: Complete NFC/RFID/BLE device management with 9 API endpoints, device registration, sensor readings, and scan tracking
-- Added IoT Devices admin page with device type breakdown and status tracking in sidebar navigation
-- Added IoT Devices tab to product detail view showing linked devices with proper filtering
-- Seeded 8 realistic demo products across industries (Batteries, Textiles, IoT Devices, Packaging, EV Accessories, Consumer Electronics, Fashion Accessories, Smart Home) with linked IoT devices and stock images
-- Secured all IoT write endpoints with isAuthenticated middleware
-- **GTM Complete**: All 6 core categories fully implemented (DPP, QR Identity, Supply Chain Traceability, Authentication, IoT Tagging, AI Intelligence)
-- Integrated brand story: "Physics-rooted identity" and "Illumination" theme throughout landing page
-- Updated hero section with core messaging: "Every Product Deserves a Secure Identity"
-- Added "This is not just tagging. This is illumination." CTA section
-- Implemented Replit Auth integration for OAuth-based authentication (Google, GitHub, X, Apple, email)
-- Created premium landing page with hero section, feature showcase, sustainability metrics, and branding
-- Added protected routes showing landing page for logged-out users
-- Updated sidebar with user profile display (avatar, name, email) and logout functionality
-- Removed legacy username/password authentication in favor of OAuth
 
 ## System Architecture
 
@@ -139,58 +34,37 @@ Preferred communication style: Simple, everyday language.
 - **Provider**: Replit Auth (OAuth via OpenID Connect)
 - **Session Storage**: PostgreSQL via connect-pg-simple
 - **User Model**: OAuth-based with email, firstName, lastName, profileImageUrl
-- **Auth Routes**: `/api/login`, `/api/logout`, `/api/auth/user`
-- **Integration Files**: `server/replit_integrations/auth/`
 
 ### Data Layer
 - **ORM**: Drizzle ORM with PostgreSQL dialect
 - **Schema Location**: `shared/schema.ts` - shared between client and server
 - **Validation**: Zod schemas generated from Drizzle schemas using drizzle-zod
-- **Storage Abstraction**: Interface-based storage pattern (`IStorage`) currently using in-memory implementation, designed for easy database migration
+- **Storage Abstraction**: Interface-based storage pattern (`IStorage`) designed for easy database migration
 
-### Key Data Models
-- **Products**: Comprehensive EU DPP-compliant schema with 7 categories:
-  - Product Identification: name, category, modelNumber, SKU, manufacturer, address, countryOfOrigin, batch/lot numbers
-  - Materials & Composition: materials list, materialBreakdown (JSONB), recycledContentPercent, recyclabilityPercent, hazardousMaterials
-  - Environmental Impact: carbonFootprint, waterUsage, energyConsumption, environmentalCertifications
-  - Durability & Repairability: repairabilityScore, expectedLifespanYears, sparePartsAvailable, repairInstructions, serviceCenters
-  - Ownership & Lifecycle: dateOfManufacture, dateOfFirstSale, ownershipHistory
-  - Compliance & Certifications: ceMarking, safetyCertifications
-  - End-of-Life & Recycling: recyclingInstructions, disassemblyInstructions, hazardWarnings, takeBackPrograms
-- **Users**: OAuth-based user model with Replit Auth fields (email, firstName, lastName, profileImageUrl)
-- **IoT Devices**: NFC/RFID/BLE device registry with device ID, type, status, manufacturer, model, firmware version, linked product ID, and last seen timestamp
-- **Enterprise Connectors**: SAP and other ERP system integrations with connector type, status, config, field mappings, and sync history
-- **Integration Sync Logs**: Sync operation history with records processed/created/updated/failed counts
-- **Conversations/Messages**: Chat functionality schema for AI interactions
-- **Audit Logs**: Event tracking for compliance and traceability
-
-### AI Integration Pattern
-- OpenAI-compatible API integration via environment variables (`AI_INTEGRATIONS_OPENAI_API_KEY`, `AI_INTEGRATIONS_OPENAI_BASE_URL`)
-- Modular integration structure under `server/replit_integrations/` for:
-  - Chat completions with conversation persistence
-  - Image generation using gpt-image-1 model
-  - Batch processing with rate limiting and retries
-- AI endpoints for product summarization, sustainability scoring, and repair instruction generation
-
-### Event-Driven Architecture
-- In-process CloudEvents bus for decoupled event handling
-- Event types: product.created, product.updated, qr.generated, identity.assigned, trace.recorded, ai.insights_generated
-- Audit logging for all events
-
-### QR Code System
-- Server-side QR code generation using `qrcode` library
-- QR codes stored as data URLs in the product record
-- Public scan pages accessible at `/product/:id`
+### Key Features and Models
+- **Products**: Comprehensive EU DPP-compliant schema including identification, materials, environmental impact, durability, ownership, compliance, and end-of-life information.
+- **Internal Admin Platform**: An internal operations dashboard at `/admin/internal` providing:
+    - **AI-Driven CRM**: Customer account management with AI health scoring, next-best-action generation, activity tracking, MRR tracking, and at-risk account detection.
+    - **Demo Factory**: Generates demos using industry templates and custom prompts, with per-demo credentials and shareable URLs.
+    - **User Management**: CRUD for internal team members with role assignment and password management.
+    - **AI Support Triage**: Intelligent ticketing with AI auto-categorization, priority suggestion, tag generation, and summary analysis.
+    - **Platform Ops**: Real-time health monitoring including uptime, memory usage, and entity counts.
+- **Role-Based Access**: Distinct login flows and access levels for Super Admin, Internal Team, and Demo Viewers, controlling dashboard and navigation visibility.
+- **Partner Portal & Demo System**: Partner authentication, dashboard for demo product browsing, and a quick demo generator.
+- **Lead Capture & CRM**: Lead management system with a public contact form, protected CRM dashboard, and metrics for lead volume, velocity, and conversion.
+- **SAP Integration**: Demonstrates bidirectional synchronization with a mock SAP system, including conflict detection and resolution. Full enterprise connector for S/4HANA, ECC, Business One with field mapping and sync monitoring.
+- **AI-Generated Insights**: System providing AI Summary, Sustainability Analysis, Repair Guide, Circularity Score, and Risk Assessment for products.
+- **IoT Tagging System**: Management of NFC/RFID/BLE devices, including registration, sensor readings, and scan tracking.
+- **QR Code System**: Server-side generation of QR codes stored as data URLs, linking to public product scan pages.
+- **Event-Driven Architecture**: In-process CloudEvents bus for decoupled event handling and audit logging.
 
 ## External Dependencies
 
 ### Database
-- PostgreSQL (configured via `DATABASE_URL` environment variable)
-- Drizzle Kit for migrations (`npm run db:push`)
+- PostgreSQL
 
 ### AI Services
 - OpenAI-compatible API (Replit AI Integrations)
-- Environment variables: `AI_INTEGRATIONS_OPENAI_API_KEY`, `AI_INTEGRATIONS_OPENAI_BASE_URL`
 
 ### Key NPM Packages
 - `drizzle-orm` / `drizzle-zod`: Database ORM and schema validation
@@ -201,3 +75,4 @@ Preferred communication style: Simple, everyday language.
 - `connect-pg-simple`: PostgreSQL session store
 - `openid-client`: OpenID Connect client for Replit Auth
 - Radix UI primitives: Accessible component foundations
+- `xlsx`, `multer`: For Excel bulk import functionality
