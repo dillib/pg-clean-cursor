@@ -938,6 +938,8 @@ export const demoConfigs = pgTable("demo_configs", {
   generatedProducts: jsonb("generated_products").$type<Record<string, unknown>[]>().default([]),
   createdBy: varchar("created_by"),
   status: text("status").$type<"generating" | "ready" | "failed">().default("generating").notNull(),
+  demoEmail: text("demo_email"),
+  demoPassword: text("demo_password"),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 

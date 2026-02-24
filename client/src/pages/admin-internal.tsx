@@ -14,6 +14,7 @@ import {
   Plus, Loader2, Rocket, Tag, Shield, Cpu,
   TrendingUp, ChevronRight, Search, Eye, UserPlus, Trash2, Edit, KeyRound,
   Upload, FileSpreadsheet, CheckCircle2, AlertCircle,
+  Link2, Copy, ExternalLink, Settings,
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -511,6 +512,9 @@ function DemoFactoryTab() {
   const [customName, setCustomName] = useState("");
   const [customIndustry, setCustomIndustry] = useState("");
   const [customPrompt, setCustomPrompt] = useState("");
+  const [credentialsConfig, setCredentialsConfig] = useState<DemoConfig | null>(null);
+  const [credEmail, setCredEmail] = useState("");
+  const [credPassword, setCredPassword] = useState("");
 
   const { data: demoConfigs = [], isLoading } = useQuery<DemoConfig[]>({
     queryKey: ["/api/demo-configs"],
@@ -540,6 +544,28 @@ function DemoFactoryTab() {
       toast({ title: "Demo deleted" });
     },
   });
+
+  const updateCredentialsMutation = useMutation({
+    mutationFn: async ({ id, demoEmail, demoPassword }: { id: string; demoEmail: string; demoPassword: string }) => {
+      const res = await apiRequest("PATCH", `/api/demo-configs/${id}`, { demoEmail, demoPassword });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/demo-configs"] });
+      setCredentialsConfig(null);
+      toast({ title: "Demo credentials saved" });
+    },
+    onError: () => toast({ title: "Failed to save credentials", variant: "destructive" }),
+  });
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: `${label} copied to clipboard` });
+  };
+
+  const getDemoUrl = () => {
+    return `${window.location.origin}/demo/login`;
+  };
 
   const handleTemplateClick = (template: typeof INDUSTRY_TEMPLATES[0]) => {
     if (createDemoMutation.isPending) return;
@@ -656,31 +682,123 @@ function DemoFactoryTab() {
           ) : (
             <div className="space-y-2">
               {demoConfigs.map(config => (
-                <div key={config.id} className="flex items-center gap-4 p-4 rounded-lg border" data-testid={`demo-config-${config.id}`}>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium">{config.name}</span>
-                      <Badge className={DEMO_STATUS_COLORS[config.status]}>
-                        {config.status === "generating" && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
-                        {config.status}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">{config.industry}</Badge>
+                <div key={config.id} className="p-4 rounded-lg border space-y-3" data-testid={`demo-config-${config.id}`}>
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium">{config.name}</span>
+                        <Badge className={DEMO_STATUS_COLORS[config.status]}>
+                          {config.status === "generating" && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
+                          {config.status}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">{config.industry}</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{config.prompt}</p>
+                      {config.generatedProducts && (config.generatedProducts as unknown[]).length > 0 && (
+                        <p className="text-xs text-muted-foreground mt-1">{(config.generatedProducts as unknown[]).length} products generated</p>
+                      )}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{config.prompt}</p>
-                    {config.generatedProducts && (config.generatedProducts as unknown[]).length > 0 && (
-                      <p className="text-xs text-muted-foreground mt-1">{(config.generatedProducts as unknown[]).length} products generated</p>
-                    )}
+                    <span className="text-xs text-muted-foreground hidden sm:block">{format(new Date(config.createdAt), "MMM d, yyyy")}</span>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => { setCredentialsConfig(config); setCredEmail((config as any).demoEmail || ""); setCredPassword((config as any).demoPassword || ""); }} title="Set Credentials" data-testid={`button-credentials-demo-${config.id}`}>
+                        <Settings className="w-4 h-4 text-muted-foreground" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => { if (confirm("Delete this demo?")) deleteDemoMutation.mutate(config.id); }} data-testid={`button-delete-demo-${config.id}`}>
+                        <X className="w-4 h-4 text-muted-foreground" />
+                      </Button>
+                    </div>
                   </div>
-                  <span className="text-xs text-muted-foreground hidden sm:block">{format(new Date(config.createdAt), "MMM d, yyyy")}</span>
-                  <Button variant="ghost" size="icon" onClick={() => { if (confirm("Delete this demo?")) deleteDemoMutation.mutate(config.id); }} data-testid={`button-delete-demo-${config.id}`}>
-                    <X className="w-4 h-4 text-muted-foreground" />
-                  </Button>
+                  {((config as any).demoEmail || config.status === "ready") && (
+                    <div className="flex items-center gap-3 p-3 rounded-md bg-muted/50 text-sm flex-wrap">
+                      {(config as any).demoEmail ? (
+                        <>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-muted-foreground">Login:</span>
+                            <code className="text-xs bg-background px-1.5 py-0.5 rounded border">{(config as any).demoEmail}</code>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard((config as any).demoEmail, "Email")} data-testid={`button-copy-email-${config.id}`}>
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-muted-foreground">Password:</span>
+                            <code className="text-xs bg-background px-1.5 py-0.5 rounded border">{(config as any).demoPassword}</code>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard((config as any).demoPassword, "Password")} data-testid={`button-copy-password-${config.id}`}>
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-1.5 ml-auto">
+                            <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => copyToClipboard(getDemoUrl(), "Demo URL")} data-testid={`button-copy-url-${config.id}`}>
+                              <Link2 className="w-3 h-3" /> Copy URL
+                            </Button>
+                            <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => window.open(getDemoUrl(), "_blank")} data-testid={`button-open-demo-${config.id}`}>
+                              <ExternalLink className="w-3 h-3" /> Open Demo
+                            </Button>
+                          </div>
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">No demo credentials set — click the gear icon to configure access</span>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!credentialsConfig} onOpenChange={(open) => { if (!open) setCredentialsConfig(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Demo Credentials
+            </DialogTitle>
+            <DialogDescription>
+              Set login credentials for "{credentialsConfig?.name}". These will be shown alongside the demo URL for easy sharing.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Demo Email</Label>
+              <Input
+                type="email"
+                value={credEmail}
+                onChange={e => setCredEmail(e.target.value)}
+                placeholder="demo@client-company.com"
+                data-testid="input-demo-cred-email"
+              />
+            </div>
+            <div>
+              <Label>Demo Password</Label>
+              <Input
+                value={credPassword}
+                onChange={e => setCredPassword(e.target.value)}
+                placeholder="Enter demo password"
+                data-testid="input-demo-cred-password"
+              />
+            </div>
+            <div className="bg-muted/50 rounded-lg p-3">
+              <Label className="text-xs text-muted-foreground">Demo Login URL</Label>
+              <div className="flex items-center gap-2 mt-1">
+                <code className="text-xs bg-background px-2 py-1 rounded border flex-1 truncate">{getDemoUrl()}</code>
+                <Button variant="outline" size="sm" className="shrink-0" onClick={() => copyToClipboard(getDemoUrl(), "URL")} data-testid="button-copy-demo-url">
+                  <Copy className="w-3 h-3 mr-1" /> Copy
+                </Button>
+              </div>
+            </div>
+            <Button
+              onClick={() => credentialsConfig && updateCredentialsMutation.mutate({ id: credentialsConfig.id, demoEmail: credEmail, demoPassword: credPassword })}
+              disabled={updateCredentialsMutation.isPending || !credEmail}
+              className="w-full"
+              data-testid="button-save-demo-credentials"
+            >
+              {updateCredentialsMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
+              Save Credentials
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

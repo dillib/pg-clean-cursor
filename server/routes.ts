@@ -1085,6 +1085,21 @@ export async function registerRoutes(
     }
   });
 
+  app.patch("/api/demo-configs/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+    try {
+      const { demoEmail, demoPassword } = req.body;
+      const updates: Record<string, any> = {};
+      if (demoEmail !== undefined) updates.demoEmail = demoEmail;
+      if (demoPassword !== undefined) updates.demoPassword = demoPassword;
+      const config = await storage.updateDemoConfig(req.params.id, updates);
+      if (!config) return res.status(404).json({ error: "Demo config not found" });
+      res.json(config);
+    } catch (error) {
+      console.error("Error updating demo config:", error);
+      res.status(500).json({ error: "Failed to update demo config" });
+    }
+  });
+
   app.get("/api/demo-configs/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const config = await storage.getDemoConfig(req.params.id);
