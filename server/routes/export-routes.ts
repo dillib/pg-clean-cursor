@@ -17,7 +17,7 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
   try {
     const pptx = new PptxGenJS();
     pptx.author = "PhotonicTag";
-    pptx.company = "PhotonicTag GmbH";
+    pptx.company = "PhotonicTag";
     pptx.title = "PhotonicTag — AI-Powered Digital Product Passport Platform";
     pptx.subject = "Enterprise Marketing Presentation";
     pptx.layout = "LAYOUT_WIDE";
@@ -37,7 +37,7 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     const SUCCESS_GREEN = "10B981";
 
     const addFooter = (s: any, dark = true) => {
-      s.addText("PhotonicTag GmbH  •  Identity, at the speed of light.", { x: 0.5, y: 6.85, w: 8, h: 0.3, fontSize: 8, color: dark ? "4A5568" : "9CA3AF", fontFace: "Calibri" });
+      s.addText("PhotonicTag  •  Identity, at the speed of light.", { x: 0.5, y: 6.85, w: 8, h: 0.3, fontSize: 8, color: dark ? "4A5568" : "9CA3AF", fontFace: "Calibri" });
       s.addText("CONFIDENTIAL", { x: 10, y: 6.85, w: 2.5, h: 0.3, fontSize: 8, color: dark ? "4A5568" : "9CA3AF", fontFace: "Calibri", align: "right" });
     };
 
@@ -303,87 +303,7 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     addFooter(slide);
 
     // ====================================
-    // SLIDE 9: TECHNICAL ARCHITECTURE
-    // ====================================
-    slide = pptx.addSlide();
-    slide.background = { color: WHITE };
-    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 0.08, fill: { color: BRAND_CYAN } });
-    slide.addText("TECHNICAL ARCHITECTURE", { x: 0.8, y: 0.3, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_TEAL, fontFace: "Calibri", letterSpacing: 3 });
-    slide.addText("Enterprise-Grade Technology Stack", { x: 0.8, y: 0.65, w: 10, h: 0.7, fontSize: 28, bold: true, color: BRAND_DARK, fontFace: "Calibri" });
-    const techStack: any[][] = [
-      [
-        { text: "Layer", options: { bold: true, fontSize: 11, color: WHITE, fill: { color: BRAND_DARK }, fontFace: "Calibri" } },
-        { text: "Technology", options: { bold: true, fontSize: 11, color: WHITE, fill: { color: BRAND_DARK }, fontFace: "Calibri" } },
-        { text: "Purpose", options: { bold: true, fontSize: 11, color: WHITE, fill: { color: BRAND_DARK }, fontFace: "Calibri" } },
-      ],
-    ];
-    const techData = [
-      ["Frontend", "React 18 + TypeScript + Vite", "Type-safe, high-performance UI"],
-      ["UI Framework", "Shadcn/ui + Radix Primitives", "Accessible, customizable components"],
-      ["Backend", "Node.js 20 LTS + Express", "High-throughput HTTP handling"],
-      ["Database", "PostgreSQL + Drizzle ORM", "Type-safe data persistence"],
-      ["AI Engine", "OpenAI GPT-4o", "Sustainability & compliance intelligence"],
-      ["Authentication", "OAuth 2.0 / OIDC + RBAC", "Three-tier access control"],
-      ["Event System", "CloudEvents Bus", "Audit trail & decoupled processing"],
-      ["IoT Layer", "NFC / RFID / BLE", "Smart tag management & tracking"],
-      ["Integration", "SAP S/4HANA, ECC, B1", "Bidirectional ERP synchronization"],
-    ];
-    techData.forEach(([layer, tech, purpose], i) => {
-      const bg = i % 2 === 0 ? "F8FAFC" : WHITE;
-      techStack.push([
-        { text: layer, options: { fontSize: 10, color: BRAND_TEAL, fill: { color: bg }, fontFace: "Calibri", bold: true } },
-        { text: tech, options: { fontSize: 10, color: BRAND_DARK, fill: { color: bg }, fontFace: "Calibri" } },
-        { text: purpose, options: { fontSize: 10, color: "64748B", fill: { color: bg }, fontFace: "Calibri" } },
-      ]);
-    });
-    slide.addTable(techStack, { x: 0.8, y: 1.5, w: 6.5, colW: [1.5, 2.8, 2.2], border: { type: "solid", pt: 0.5, color: "E2E8F0" } });
-    slide.addShape(pptx.ShapeType.roundRect, { x: 7.8, y: 1.5, w: 4.7, h: 5.0, fill: { color: BRAND_DARK }, rectRadius: 0.12 });
-    slide.addText("SECURITY & COMPLIANCE", { x: 8.1, y: 1.7, w: 4.1, h: 0.3, fontSize: 10, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 2 });
-    const secItems = [
-      "GDPR-compliant data processing",
-      "Role-based access control (3 tiers)",
-      "Encrypted session management",
-      "CloudEvents audit trail",
-      "Tamper-proof product identity",
-      "SOC 2 Type II ready architecture",
-      "bcrypt password hashing (cost 10)",
-      "OAuth 2.0 / OpenID Connect",
-    ];
-    secItems.forEach((s, i) => {
-      slide.addText(`✓  ${s}`, { x: 8.1, y: 2.15 + i * 0.45, w: 4.1, h: 0.35, fontSize: 10, color: BODY_TEXT, fontFace: "Calibri" });
-    });
-    addFooter(slide, false);
-
-    // ====================================
-    // SLIDE 10: INTERNAL OPS PLATFORM
-    // ====================================
-    slide = pptx.addSlide();
-    slide.background = { color: BRAND_DARK };
-    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 1.2, fill: { color: BRAND_NAVY } });
-    slide.addText("INTERNAL OPERATIONS", { x: 0.8, y: 0.15, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 3 });
-    slide.addText("Back-Office Command Center", { x: 0.8, y: 0.5, w: 10, h: 0.6, fontSize: 28, bold: true, color: WHITE, fontFace: "Calibri" });
-    const opsCards = [
-      { title: "AI-Driven CRM", desc: "Customer health scoring (0-100), next-best-action AI, MRR tracking, at-risk detection, Excel bulk import, and activity timeline.", color: BRAND_BLUE },
-      { title: "POC Proposal Generator", desc: "Multi-language proposals (EN/DE/FR/ES) with legal terms, SAP scope, commercial terms, and signature pages. Exports to editable Word.", color: SUCCESS_GREEN },
-      { title: "Demo Factory", desc: "One-click demo generation from 6 industry templates or custom AI prompts. Per-demo credentials, shareable URLs, and auto-expiry.", color: BRAND_TEAL },
-      { title: "Support Triage", desc: "AI-powered ticket categorization with automatic priority suggestion, tag generation, and summary analysis for faster resolution.", color: WARM_AMBER },
-      { title: "User Management", desc: "CRUD operations for internal team members with role assignment (super admin, internal team, demo viewer) and secure password management.", color: "8B5CF6" },
-      { title: "Platform Ops", desc: "Real-time health monitoring with uptime tracking, memory usage, entity counts, auto-refresh every 30 seconds, and system diagnostics.", color: DANGER_RED },
-    ];
-    opsCards.forEach((o, i) => {
-      const col = i % 3;
-      const row = Math.floor(i / 3);
-      const x = 0.5 + col * 4.1;
-      const y = 1.5 + row * 2.5;
-      slide.addShape(pptx.ShapeType.roundRect, { x, y, w: 3.8, h: 2.2, fill: { color: CARD_DARK }, line: { color: CARD_BORDER, width: 1 }, rectRadius: 0.12 });
-      slide.addShape(pptx.ShapeType.rect, { x, y, w: 3.8, h: 0.06, fill: { color: o.color } });
-      slide.addText(o.title, { x: x + 0.2, y: y + 0.2, w: 3.4, h: 0.4, fontSize: 13, bold: true, color: WHITE, fontFace: "Calibri" });
-      slide.addText(o.desc, { x: x + 0.2, y: y + 0.7, w: 3.4, h: 1.3, fontSize: 9.5, color: BODY_TEXT, fontFace: "Calibri" });
-    });
-    addFooter(slide);
-
-    // ====================================
-    // SLIDE 11: PRICING
+    // SLIDE 9: PRICING
     // ====================================
     slide = pptx.addSlide();
     slide.background = { color: WHITE };
@@ -420,7 +340,7 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     addFooter(slide, false);
 
     // ====================================
-    // SLIDE 12: CUSTOMER SUCCESS / CASE STUDY
+    // SLIDE 10: IMPLEMENTATION APPROACH
     // ====================================
     slide = pptx.addSlide();
     slide.background = { color: BRAND_DARK };
@@ -456,7 +376,7 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     addFooter(slide);
 
     // ====================================
-    // SLIDE 13: CTA — Final slide
+    // SLIDE 11: CTA — Final slide
     // ====================================
     slide = pptx.addSlide();
     slide.background = { color: BRAND_DARK };
@@ -468,7 +388,7 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     slide.addText("Schedule Your Personalized Demo →", { x: 3.5, y: 3.8, w: 6, h: 0.9, fontSize: 18, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
     slide.addShape(pptx.ShapeType.roundRect, { x: 4, y: 5.0, w: 5, h: 0.7, fill: { color: "transparent" }, line: { color: SUBTLE_TEXT, width: 1 }, rectRadius: 0.12 });
     slide.addText("Or start with a POC — €499/month", { x: 4, y: 5.0, w: 5, h: 0.7, fontSize: 14, color: SUBTLE_TEXT, align: "center", valign: "middle", fontFace: "Calibri" });
-    slide.addText("PhotonicTag GmbH", { x: 1, y: 6.0, w: 11, h: 0.4, fontSize: 14, bold: true, color: BRAND_CYAN, align: "center", fontFace: "Calibri" });
+    slide.addText("PhotonicTag", { x: 1, y: 6.0, w: 11, h: 0.4, fontSize: 14, bold: true, color: BRAND_CYAN, align: "center", fontFace: "Calibri" });
     slide.addText("contact@photonictag.com  •  www.photonictag.com  •  +49 (0) 800 PHOTONIC", { x: 1, y: 6.35, w: 11, h: 0.35, fontSize: 11, color: SUBTLE_TEXT, align: "center", fontFace: "Calibri" });
 
     const data = await pptx.write({ outputType: "nodebuffer" }) as Buffer;
