@@ -1,4 +1,6 @@
 import { Router, Request, Response } from "express";
+import path from "path";
+import fs from "fs";
 import pptxgen from "pptxgenjs";
 const PptxGenJS = (pptxgen as any).default || pptxgen;
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle, PageBreak, ShadingType, TabStopType, TabStopPosition } from "docx";
@@ -22,13 +24,14 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     pptx.subject = "Enterprise Marketing Presentation";
     pptx.layout = "LAYOUT_WIDE";
 
-    const BRAND_DARK = "0D1117";
-    const BRAND_NAVY = "161B33";
-    const BRAND_CYAN = "00C2D1";
-    const BRAND_TEAL = "0891B2";
+    const BRAND_DARK = "0F172A";
+    const BRAND_NAVY = "1E293B";
+    const BRAND_CYAN = "2563EB";
+    const BRAND_TEAL = "3B82F6";
     const BRAND_BLUE = "2563EB";
-    const CARD_DARK = "1C2333";
-    const CARD_BORDER = "2D3748";
+    const BRAND_LIGHT_BLUE = "DBEAFE";
+    const CARD_DARK = "1E293B";
+    const CARD_BORDER = "334155";
     const SUBTLE_TEXT = "94A3B8";
     const BODY_TEXT = "CBD5E1";
     const WHITE = "FFFFFF";
@@ -36,8 +39,14 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     const DANGER_RED = "EF4444";
     const SUCCESS_GREEN = "10B981";
 
+    const logoPath = path.resolve(process.cwd(), "server/assets/logo.png");
+    const logoExists = fs.existsSync(logoPath);
+
     const addFooter = (s: any, dark = true) => {
-      s.addText("PhotonicTag  •  Identity, at the speed of light.", { x: 0.5, y: 6.85, w: 8, h: 0.3, fontSize: 8, color: dark ? "4A5568" : "9CA3AF", fontFace: "Calibri" });
+      if (logoExists) {
+        s.addImage({ path: logoPath, x: 0.3, y: 6.78, w: 0.35, h: 0.35 });
+      }
+      s.addText("PhotonicTag  •  Identity, at the speed of light.", { x: 0.75, y: 6.85, w: 8, h: 0.3, fontSize: 8, color: dark ? "4A5568" : "9CA3AF", fontFace: "Calibri" });
       s.addText("CONFIDENTIAL", { x: 10, y: 6.85, w: 2.5, h: 0.3, fontSize: 8, color: dark ? "4A5568" : "9CA3AF", fontFace: "Calibri", align: "right" });
     };
 
@@ -48,10 +57,13 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     slide.background = { color: BRAND_DARK };
     slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 7.5, fill: { color: BRAND_DARK } });
     slide.addShape(pptx.ShapeType.ellipse, { x: 8, y: -2, w: 8, h: 8, fill: { color: BRAND_NAVY } });
-    slide.addShape(pptx.ShapeType.ellipse, { x: 9.5, y: 3, w: 5, h: 5, fill: { color: "1A2744" } });
-    slide.addShape(pptx.ShapeType.rect, { x: 0.8, y: 1.6, w: 0.08, h: 1.8, fill: { color: BRAND_CYAN } });
-    slide.addText("Photonic", { x: 1.1, y: 1.2, w: 8, h: 0.9, fontSize: 52, bold: true, color: WHITE, fontFace: "Calibri" });
-    slide.addText("Tag", { x: 1.1, y: 2.0, w: 8, h: 0.9, fontSize: 52, bold: true, color: BRAND_CYAN, fontFace: "Calibri" });
+    slide.addShape(pptx.ShapeType.ellipse, { x: 9.5, y: 3, w: 5, h: 5, fill: { color: "162044" } });
+    if (logoExists) {
+      slide.addImage({ path: logoPath, x: 1.1, y: 1.0, w: 0.8, h: 0.8 });
+    }
+    slide.addShape(pptx.ShapeType.rect, { x: 1.1, y: 1.9, w: 0.08, h: 1.5, fill: { color: BRAND_CYAN } });
+    slide.addText("Photonic", { x: 1.4, y: 1.5, w: 8, h: 0.9, fontSize: 52, bold: true, color: WHITE, fontFace: "Calibri" });
+    slide.addText("Tag", { x: 1.4, y: 2.3, w: 8, h: 0.9, fontSize: 52, bold: true, color: BRAND_CYAN, fontFace: "Calibri" });
     slide.addText("Identity, at the speed of light.", { x: 1.1, y: 3.1, w: 8, h: 0.6, fontSize: 22, color: SUBTLE_TEXT, italic: true, fontFace: "Calibri" });
     slide.addText("AI-Powered Digital Product Passport Platform", { x: 1.1, y: 4.0, w: 7, h: 0.5, fontSize: 15, color: BODY_TEXT, fontFace: "Calibri" });
     slide.addText("EU ESPR Regulation (EU) 2024/1781 Compliance", { x: 1.1, y: 4.5, w: 7, h: 0.4, fontSize: 13, color: SUBTLE_TEXT, fontFace: "Calibri" });
@@ -381,8 +393,11 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     slide = pptx.addSlide();
     slide.background = { color: BRAND_DARK };
     slide.addShape(pptx.ShapeType.ellipse, { x: -3, y: -3, w: 10, h: 10, fill: { color: BRAND_NAVY } });
-    slide.addShape(pptx.ShapeType.ellipse, { x: 7, y: 2, w: 8, h: 8, fill: { color: "141B2D" } });
-    slide.addText("Ready to future-proof\nyour products?", { x: 1, y: 1.0, w: 11, h: 1.4, fontSize: 40, bold: true, color: WHITE, align: "center", fontFace: "Calibri" });
+    slide.addShape(pptx.ShapeType.ellipse, { x: 7, y: 2, w: 8, h: 8, fill: { color: "162044" } });
+    if (logoExists) {
+      slide.addImage({ path: logoPath, x: 6.17, y: 0.3, w: 1.0, h: 1.0 });
+    }
+    slide.addText("Ready to future-proof\nyour products?", { x: 1, y: 1.3, w: 11, h: 1.4, fontSize: 40, bold: true, color: WHITE, align: "center", fontFace: "Calibri" });
     slide.addText("The EU DPP mandate is coming. Early adopters gain competitive advantage,\nconsumer trust, and regulatory peace of mind.", { x: 1.5, y: 2.6, w: 10, h: 0.8, fontSize: 15, color: SUBTLE_TEXT, align: "center", fontFace: "Calibri" });
     slide.addShape(pptx.ShapeType.roundRect, { x: 3.5, y: 3.8, w: 6, h: 0.9, fill: { color: BRAND_CYAN }, rectRadius: 0.15 });
     slide.addText("Schedule Your Personalized Demo →", { x: 3.5, y: 3.8, w: 6, h: 0.9, fontSize: 18, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
