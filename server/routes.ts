@@ -14,6 +14,7 @@ import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integra
 import { storage } from "./storage";
 import sapRoutes from "./routes/sap-routes";
 import internalRoutes from "./routes/internal-routes";
+import exportRoutes from "./routes/export-routes";
 import bcrypt from "bcryptjs";
 import type { RequestHandler } from "express";
 
@@ -1122,6 +1123,7 @@ export async function registerRoutes(
   // SAP INTEGRATION ENDPOINTS (Protected)
   // ==========================================
   app.use("/api/sap", isAuthenticated, sapRoutes);
+  app.use(exportRoutes);
 
   return httpServer;
 }

@@ -14,7 +14,7 @@ import {
   Plus, Loader2, Rocket, Tag, Shield, Cpu,
   TrendingUp, ChevronRight, Search, Eye, UserPlus, Trash2, Edit, KeyRound,
   Upload, FileSpreadsheet, CheckCircle2, AlertCircle,
-  Link2, Copy, ExternalLink, Settings,
+  Link2, Copy, ExternalLink, Settings, FileText, Download, Globe,
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -1398,6 +1398,254 @@ function CreateUserForm({ onSubmit, isPending }: { onSubmit: (data: Record<strin
 }
 
 // ==========================================
+// PROPOSALS TAB
+// ==========================================
+
+const LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "de", label: "Deutsch" },
+  { code: "fr", label: "Français" },
+  { code: "es", label: "Español" },
+];
+
+const SAP_SYSTEMS = [
+  { value: "none", label: "No SAP System" },
+  { value: "S/4HANA", label: "SAP S/4HANA" },
+  { value: "ECC", label: "SAP ECC" },
+  { value: "Business One", label: "SAP Business One" },
+  { value: "Other ERP", label: "Other ERP System" },
+];
+
+function ProposalGeneratorTab() {
+  const { toast } = useToast();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [form, setForm] = useState({
+    language: "en",
+    customerName: "",
+    customerIndustry: "",
+    contactPerson: "",
+    contactEmail: "",
+    productsScope: "",
+    estimatedProducts: "",
+    sapSystem: "none",
+    timeline: "",
+    tier: "enterprise",
+    customNotes: "",
+  });
+
+  const handleGenerate = async () => {
+    if (!form.customerName) {
+      toast({ title: "Customer name is required", variant: "destructive" });
+      return;
+    }
+    setIsGenerating(true);
+    try {
+      const res = await fetch("/api/export/proposal.docx", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Generation failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const safeName = form.customerName.replace(/[^a-zA-Z0-9]/g, "_");
+      a.download = `PhotonicTag_POC_Proposal_${safeName}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({ title: "Proposal generated and downloaded" });
+    } catch (err: any) {
+      toast({ title: "Failed to generate proposal", description: err.message, variant: "destructive" });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" />
+                POC Proposal Generator
+              </CardTitle>
+              <CardDescription>
+                Create professional Proof of Concept proposals with legal terms in multiple languages. Export as editable Word document.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label>Language *</Label>
+                  <Select value={form.language} onValueChange={v => setForm({ ...form, language: v })}>
+                    <SelectTrigger data-testid="select-proposal-language">
+                      <div className="flex items-center gap-2">
+                        <Globe className="w-4 h-4" />
+                        <SelectValue />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LANGUAGES.map(l => (
+                        <SelectItem key={l.code} value={l.code}>{l.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Pricing Tier</Label>
+                  <Select value={form.tier} onValueChange={v => setForm({ ...form, tier: v })}>
+                    <SelectTrigger data-testid="select-proposal-tier">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="free">Free</SelectItem>
+                      <SelectItem value="starter">Starter</SelectItem>
+                      <SelectItem value="growth">Growth</SelectItem>
+                      <SelectItem value="enterprise">Enterprise</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3">CUSTOMER INFORMATION</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Customer / Company Name *</Label>
+                    <Input value={form.customerName} onChange={e => setForm({ ...form, customerName: e.target.value })} placeholder="e.g., Acme GmbH" data-testid="input-proposal-customer" />
+                  </div>
+                  <div>
+                    <Label>Industry</Label>
+                    <Input value={form.customerIndustry} onChange={e => setForm({ ...form, customerIndustry: e.target.value })} placeholder="e.g., Batteries, Textiles" data-testid="input-proposal-industry" />
+                  </div>
+                  <div>
+                    <Label>Contact Person</Label>
+                    <Input value={form.contactPerson} onChange={e => setForm({ ...form, contactPerson: e.target.value })} placeholder="e.g., Dr. Maria Schmidt" data-testid="input-proposal-contact" />
+                  </div>
+                  <div>
+                    <Label>Contact Email</Label>
+                    <Input type="email" value={form.contactEmail} onChange={e => setForm({ ...form, contactEmail: e.target.value })} placeholder="e.g., m.schmidt@acme.de" data-testid="input-proposal-email" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3">PROJECT SCOPE</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Product Scope</Label>
+                    <Input value={form.productsScope} onChange={e => setForm({ ...form, productsScope: e.target.value })} placeholder="e.g., EV batteries, industrial cells" data-testid="input-proposal-scope" />
+                  </div>
+                  <div>
+                    <Label>Estimated Products</Label>
+                    <Input value={form.estimatedProducts} onChange={e => setForm({ ...form, estimatedProducts: e.target.value })} placeholder="e.g., 500-1000 SKUs" data-testid="input-proposal-products" />
+                  </div>
+                  <div>
+                    <Label>SAP System</Label>
+                    <Select value={form.sapSystem} onValueChange={v => setForm({ ...form, sapSystem: v })}>
+                      <SelectTrigger data-testid="select-proposal-sap">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SAP_SYSTEMS.map(s => (
+                          <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Desired Timeline</Label>
+                    <Input value={form.timeline} onChange={e => setForm({ ...form, timeline: e.target.value })} placeholder="e.g., Q1 2027 go-live" data-testid="input-proposal-timeline" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <Label>Additional Notes</Label>
+                <Textarea value={form.customNotes} onChange={e => setForm({ ...form, customNotes: e.target.value })} placeholder="Any special requirements, constraints, or context for this proposal..." rows={3} data-testid="input-proposal-notes" />
+              </div>
+
+              <Button onClick={handleGenerate} disabled={isGenerating || !form.customerName} className="w-full" size="lg" data-testid="button-generate-proposal">
+                {isGenerating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                Generate & Download Proposal (.docx)
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Proposal Contents</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm space-y-2">
+              {[
+                "1. Executive Summary",
+                "2. Scope of Work",
+                "3. Technical Architecture",
+                "4. SAP Integration",
+                "5. Timeline & Milestones",
+                "6. Deliverables",
+                "7. Commercial Terms",
+                "8. Legal Terms & Conditions",
+                "9. Next Steps",
+                "Signature Pages",
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2 py-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-green-600 shrink-0" />
+                  <span className="text-muted-foreground">{item}</span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Legal Coverage</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm space-y-2">
+              {[
+                "Confidentiality clause",
+                "GDPR / Data protection (DPA)",
+                "Intellectual property rights",
+                "Liability limitations",
+                "Termination & pro-rating",
+                "Governing law (German)",
+                "Force majeure",
+                "Warranty terms",
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2 py-1">
+                  <Shield className="w-3.5 h-3.5 text-primary shrink-0" />
+                  <span className="text-muted-foreground">{item}</span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-primary/5 border-primary/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Globe className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold">4 Languages</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                English, German, French, and Spanish. All legal terms, scope, and deliverables are fully translated.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
 // MAIN PAGE
 // ==========================================
 
@@ -1415,8 +1663,8 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
           </h1>
           <p className="text-muted-foreground">
             {isFull
-              ? "AI-driven CRM, demo factory, support triage, user management, and platform monitoring"
-              : "CRM and demo management tools"}
+              ? "AI-driven CRM, proposal generator, demo factory, support triage, user management, and platform monitoring"
+              : "CRM, proposals, and demo management tools"}
           </p>
         </div>
         {isFull && <Badge variant="outline" className="text-sm">Super Admin</Badge>}
@@ -1424,10 +1672,14 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
 
       {isFull ? (
         <Tabs defaultValue="crm" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5" data-testid="tabs-internal">
+          <TabsList className="grid w-full grid-cols-6" data-testid="tabs-internal">
             <TabsTrigger value="crm" data-testid="tab-crm" className="gap-1">
               <Users className="w-4 h-4" />
               <span className="hidden sm:inline">CRM</span>
+            </TabsTrigger>
+            <TabsTrigger value="proposals" data-testid="tab-proposals" className="gap-1">
+              <FileText className="w-4 h-4" />
+              <span className="hidden sm:inline">Proposals</span>
             </TabsTrigger>
             <TabsTrigger value="demos" data-testid="tab-demos" className="gap-1">
               <Rocket className="w-4 h-4" />
@@ -1448,6 +1700,7 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
           </TabsList>
 
           <TabsContent value="crm"><CRMTab /></TabsContent>
+          <TabsContent value="proposals"><ProposalGeneratorTab /></TabsContent>
           <TabsContent value="demos"><DemoFactoryTab /></TabsContent>
           <TabsContent value="users"><UserManagementTab /></TabsContent>
           <TabsContent value="support"><SupportTriageTab /></TabsContent>
@@ -1455,10 +1708,14 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
         </Tabs>
       ) : (
         <Tabs defaultValue="crm" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2" data-testid="tabs-internal">
+          <TabsList className="grid w-full grid-cols-3" data-testid="tabs-internal">
             <TabsTrigger value="crm" data-testid="tab-crm" className="gap-1">
               <Users className="w-4 h-4" />
               <span>CRM</span>
+            </TabsTrigger>
+            <TabsTrigger value="proposals" data-testid="tab-proposals" className="gap-1">
+              <FileText className="w-4 h-4" />
+              <span>Proposals</span>
             </TabsTrigger>
             <TabsTrigger value="demos" data-testid="tab-demos" className="gap-1">
               <Rocket className="w-4 h-4" />
@@ -1467,6 +1724,7 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
           </TabsList>
 
           <TabsContent value="crm"><CRMTab /></TabsContent>
+          <TabsContent value="proposals"><ProposalGeneratorTab /></TabsContent>
           <TabsContent value="demos"><DemoFactoryTab /></TabsContent>
         </Tabs>
       )}

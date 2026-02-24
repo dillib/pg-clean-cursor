@@ -45,6 +45,7 @@ Preferred communication style: Simple, everyday language.
 - **Products**: Comprehensive EU DPP-compliant schema including identification, materials, environmental impact, durability, ownership, compliance, and end-of-life information.
 - **Internal Admin Platform**: An internal operations dashboard at `/admin/internal` providing:
     - **AI-Driven CRM**: Customer account management with AI health scoring, next-best-action generation, activity tracking, MRR tracking, and at-risk account detection.
+    - **POC Proposal Generator**: Multi-language (EN/DE/FR/ES) proposal creation with legal terms, SAP integration scope, commercial terms, and signature pages. Exports to editable Word (.docx).
     - **Demo Factory**: Generates demos using industry templates and custom prompts, with per-demo credentials and shareable URLs.
     - **User Management**: CRUD for internal team members with role assignment and password management.
     - **AI Support Triage**: Intelligent ticketing with AI auto-categorization, priority suggestion, tag generation, and summary analysis.
@@ -76,3 +77,6 @@ Preferred communication style: Simple, everyday language.
 - `openid-client`: OpenID Connect client for Replit Auth
 - Radix UI primitives: Accessible component foundations
 - `xlsx`, `multer`: For Excel bulk import functionality
+- `pptxgenjs`: PowerPoint (.pptx) presentation generation
+- `docx`: Word (.docx) document generation for POC proposals
+- **Public Pages**: Presentation (/presentation) with PPT download, Product Documentation (/docs) with sidebar nav, FAQs (/faqs) with 6 categories and 45+ detailed Q&As

@@ -7,9 +7,10 @@ import { PublicFooter } from "@/components/public-footer";
 import {
   QrCode, Shield, Cpu, Leaf, ArrowRight, CheckCircle, Globe,
   Layers, BarChart3, Lock, Zap, Building2, Clock, AlertTriangle,
-  FileText, RefreshCw, Smartphone, Database, Eye, Calendar
+  FileText, RefreshCw, Smartphone, Database, Eye, Calendar, Download, Loader2
 } from "lucide-react";
 import { Link } from "wouter";
+import { useState } from "react";
 
 const platformCapabilities = [
   {
@@ -70,6 +71,29 @@ const targetIndustries = [
 ];
 
 export default function Presentation() {
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadPPT = async () => {
+    setDownloading(true);
+    try {
+      const res = await fetch("/api/export/presentation.pptx");
+      if (!res.ok) throw new Error("Download failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "PhotonicTag_Presentation.pptx";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("PPT download error:", err);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
@@ -109,6 +133,10 @@ export default function Presentation() {
                 <FileText className="w-4 h-4" />
                 Product Documentation
               </Link>
+            </Button>
+            <Button size="lg" variant="outline" onClick={handleDownloadPPT} disabled={downloading} data-testid="button-download-ppt" className="gap-2">
+              {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              Download PPT
             </Button>
           </div>
         </div>
