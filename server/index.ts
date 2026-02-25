@@ -6,6 +6,7 @@ import { createServer } from "http";
 import { setupEventHandlers } from "./events/handlers";
 import { storage } from "./storage";
 import { seedDemoData } from "./seed-demo-data";
+import bcrypt from "bcryptjs";
 
 const app = express();
 const httpServer = createServer(app);
@@ -83,6 +84,37 @@ app.use((req, res, next) => {
     }
   } catch (error) {
     log(`Error checking/seeding demo data: ${error}`);
+  }
+
+  try {
+    const defaultAccounts = [
+      { email: "demo@photonictag.com", firstName: "Demo", lastName: "User", company: "PhotonicTag Demo", role: "demo_viewer" as const, status: "active" as const, password: "demo2024" },
+      { email: "team@photonictag.com", firstName: "Team", lastName: "Member", company: "PhotonicTag", role: "sales_partner" as const, status: "active" as const, password: "team2024" },
+      { email: "admin@photonictag.com", firstName: "Admin", lastName: "User", company: "PhotonicTag", role: "consultant" as const, status: "active" as const, password: "admin2024" },
+    ];
+    for (const account of defaultAccounts) {
+      const existing = await storage.getPartnerByEmail(account.email);
+      const passwordHash = await bcrypt.hash(account.password, 10);
+      if (!existing) {
+        await storage.createPartner({
+          email: account.email,
+          firstName: account.firstName,
+          lastName: account.lastName,
+          company: account.company,
+          role: account.role,
+          status: account.status,
+          passwordHash,
+        });
+        log(`  Created partner: ${account.email} (${account.role})`);
+      } else {
+        await storage.updatePartner(existing.id, { passwordHash });
+        log(`  Reset password for: ${account.email}`);
+      }
+    }
+    const allPartners = await storage.getAllPartners();
+    log(`Partner accounts ready (${allPartners.length} total)`);
+  } catch (error) {
+    log(`Error seeding partner accounts: ${error}`);
   }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
