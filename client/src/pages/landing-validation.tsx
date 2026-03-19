@@ -59,9 +59,9 @@ export default function LandingValidation() {
             className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-6"
             data-testid="text-hero-title"
           >
-            Turn EU Compliance Into
+            Every Product Deserves
             <br />
-            <span className="text-primary">a Competitive Edge.</span>
+            <span className="text-primary">a Verified Identity.</span>
           </h1>
 
           <p
