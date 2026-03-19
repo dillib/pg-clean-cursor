@@ -1666,7 +1666,7 @@ const QUICK_PROMPTS = [
 function TeamAssistantTab() {
   const { toast } = useToast();
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "assistant", content: "Hi! I'm Aria, your PhotonicTag product and sales assistant. I can help you prepare for meetings, craft pitches for specific companies, explain our value proposition, handle objections, and answer any product or compliance questions. What can I help you with today?" }
+    { role: "assistant", content: "Hi! I'm Aria, your PhotonicTag sales and product assistant.\n\nBefore I give you a tailored answer, I'll ask a few quick questions to make sure my help is actually useful — not generic. The more context I have about the prospect, meeting stage, or situation, the better I can prepare you.\n\nThat said, if you have a simple factual question (pricing, compliance deadlines, feature details), just ask and I'll answer directly.\n\nWhat's on your mind?" }
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
