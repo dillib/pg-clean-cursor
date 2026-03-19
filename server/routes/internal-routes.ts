@@ -805,13 +805,17 @@ router.post("/assistant/transcribe", upload.single("audio"), async (req: Request
     if (!req.file) {
       return res.status(400).json({ error: "No audio file provided" });
     }
-    const audioFile = await toFile(req.file.buffer, `recording.${req.file.mimetype.split("/")[1] || "webm"}`, {
-      type: req.file.mimetype,
-    });
+    const mimeType = req.file.mimetype || "audio/webm";
+    const subtype = mimeType.split("/")[1] || "webm";
+    const ext = subtype.split(";")[0].trim();
+    const safeExt = ["webm", "mp4", "ogg", "wav", "mp3", "m4a", "mpeg"].includes(ext) ? ext : "webm";
+    console.log(`[Whisper] Transcribing audio: ${mimeType} → file: recording.${safeExt}, size: ${req.file.buffer.length} bytes`);
+    const audioFile = await toFile(req.file.buffer, `recording.${safeExt}`, { type: mimeType });
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
       model: "whisper-1",
     });
+    console.log(`[Whisper] Transcript: "${transcription.text}"`);
     res.json({ transcript: transcription.text });
   } catch (error) {
     console.error("Whisper transcription error:", error);

@@ -1675,10 +1675,15 @@ function TeamAssistantTab() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [hasMicSupport, setHasMicSupport] = useState(false);
+  const [volumeBars, setVolumeBars] = useState<number[]>(Array(28).fill(4));
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animFrameRef = useRef<number | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     setHasMicSupport(!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
@@ -1757,30 +1762,74 @@ function TeamAssistantTab() {
     }
   }, [toast]);
 
+  const stopVisualization = useCallback(() => {
+    if (animFrameRef.current) { cancelAnimationFrame(animFrameRef.current); animFrameRef.current = null; }
+    if (audioContextRef.current) { audioContextRef.current.close().catch(() => {}); audioContextRef.current = null; }
+    analyserRef.current = null;
+    setVolumeBars(Array(28).fill(4));
+  }, []);
+
+  const startVisualization = useCallback((stream: MediaStream) => {
+    try {
+      const ctx = new AudioContext();
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 128;
+      analyser.smoothingTimeConstant = 0.8;
+      const source = ctx.createMediaStreamSource(stream);
+      source.connect(analyser);
+      audioContextRef.current = ctx;
+      analyserRef.current = analyser;
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const BAR_COUNT = 28;
+      const draw = () => {
+        animFrameRef.current = requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(dataArray);
+        const bars: number[] = [];
+        for (let i = 0; i < BAR_COUNT; i++) {
+          const idx = Math.floor((i / BAR_COUNT) * dataArray.length * 0.6);
+          const raw = dataArray[idx] / 255;
+          const height = Math.max(3, Math.round(raw * 48));
+          bars.push(height);
+        }
+        setVolumeBars(bars);
+      };
+      draw();
+    } catch { /* ignore */ }
+  }, []);
+
   const startRecording = useCallback(async () => {
     try {
       stopSpeaking();
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      streamRef.current = stream;
       audioChunksRef.current = [];
       const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
         : MediaRecorder.isTypeSupported("audio/webm")
         ? "audio/webm"
-        : "audio/ogg";
+        : MediaRecorder.isTypeSupported("audio/ogg")
+        ? "audio/ogg"
+        : "audio/mp4";
       const recorder = new MediaRecorder(stream, { mimeType });
       recorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
       recorder.onstop = () => {
         stream.getTracks().forEach(t => t.stop());
+        stopVisualization();
         const blob = new Blob(audioChunksRef.current, { type: mimeType });
-        transcribeAudio(blob);
+        if (blob.size > 1000) {
+          transcribeAudio(blob);
+        } else {
+          toast({ title: "No audio captured", description: "Please speak clearly and try again.", variant: "destructive" });
+        }
       };
       mediaRecorderRef.current = recorder;
-      recorder.start(250);
+      recorder.start(100);
+      startVisualization(stream);
       setIsRecording(true);
     } catch {
-      toast({ title: "Microphone access denied", description: "Please allow microphone access to use voice input.", variant: "destructive" });
+      toast({ title: "Microphone access denied", description: "Please allow microphone access in your browser settings to use voice input.", variant: "destructive" });
     }
-  }, [stopSpeaking, transcribeAudio, toast]);
+  }, [stopSpeaking, transcribeAudio, stopVisualization, startVisualization, toast]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
@@ -1884,17 +1933,39 @@ function TeamAssistantTab() {
               </div>
             )}
             {isRecording && (
-              <div className="flex justify-center">
-                <div className="text-xs text-red-500 flex items-center gap-2 bg-red-50 dark:bg-red-950 px-3 py-1.5 rounded-full">
-                  <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                  Recording… tap mic to stop
+              <div className="flex flex-col items-center gap-2 py-3">
+                <div className="flex items-end gap-[3px] h-14" aria-label="Voice recording in progress">
+                  {volumeBars.map((h, i) => (
+                    <div
+                      key={i}
+                      className="rounded-full transition-all duration-75"
+                      style={{
+                        width: "4px",
+                        height: `${h}px`,
+                        background: h > 24
+                          ? "#ef4444"
+                          : h > 12
+                          ? "#3b82f6"
+                          : "#93c5fd",
+                        opacity: 0.85 + (i % 3) * 0.05,
+                      }}
+                    />
+                  ))}
                 </div>
+                <button
+                  onClick={stopRecording}
+                  className="text-xs text-red-500 font-medium flex items-center gap-1.5 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 px-4 py-1.5 rounded-full hover:bg-red-100 transition-colors"
+                >
+                  <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  Listening… tap to stop &amp; send
+                </button>
               </div>
             )}
             {isTranscribing && (
-              <div className="flex justify-center">
-                <div className="text-xs text-blue-600 flex items-center gap-2 bg-blue-50 dark:bg-blue-950 px-3 py-1.5 rounded-full">
-                  <Loader2 className="w-3 h-3 animate-spin" /> Transcribing your voice…
+              <div className="flex justify-center py-2">
+                <div className="text-xs text-blue-600 flex items-center gap-2 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 px-4 py-2 rounded-full">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Transcribing your voice…
                 </div>
               </div>
             )}
