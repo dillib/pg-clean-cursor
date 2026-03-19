@@ -1671,14 +1671,14 @@ function TeamAssistantTab() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
-  const [hasMicSupport, setHasMicSupport] = useState(false);
+  const [interimText, setInterimText] = useState("");
+  const [voiceLang, setVoiceLang] = useState("en-US");
+  const [hasSpeechSupport, setHasSpeechSupport] = useState(false);
   const [volumeBars, setVolumeBars] = useState<number[]>(Array(28).fill(4));
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -1686,7 +1686,8 @@ function TeamAssistantTab() {
   const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
-    setHasMicSupport(!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
+    const hasSpeech = !!(window as any).SpeechRecognition || !!(window as any).webkitSpeechRecognition;
+    setHasSpeechSupport(hasSpeech);
     if ("speechSynthesis" in window) synthRef.current = window.speechSynthesis;
   }, []);
 
@@ -1739,44 +1740,23 @@ function TeamAssistantTab() {
     }
   }, [messages, isLoading, voiceEnabled, speak, toast]);
 
-  const transcribeAudio = useCallback(async (audioBlob: Blob) => {
-    setIsTranscribing(true);
-    try {
-      const formData = new FormData();
-      const ext = audioBlob.type.includes("ogg") ? "ogg" : audioBlob.type.includes("mp4") ? "mp4" : "webm";
-      formData.append("audio", audioBlob, `recording.${ext}`);
-      const res = await fetch("/api/internal/assistant/transcribe", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Transcription failed");
-      const data = await res.json();
-      if (data.transcript?.trim()) {
-        setInput(prev => prev ? `${prev} ${data.transcript.trim()}` : data.transcript.trim());
-      }
-    } catch {
-      toast({ title: "Transcription failed", description: "Could not process the audio. Please try again.", variant: "destructive" });
-    } finally {
-      setIsTranscribing(false);
-    }
-  }, [toast]);
-
   const stopVisualization = useCallback(() => {
     if (animFrameRef.current) { cancelAnimationFrame(animFrameRef.current); animFrameRef.current = null; }
     if (audioContextRef.current) { audioContextRef.current.close().catch(() => {}); audioContextRef.current = null; }
+    if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
     analyserRef.current = null;
     setVolumeBars(Array(28).fill(4));
   }, []);
 
-  const startVisualization = useCallback((stream: MediaStream) => {
+  const startVisualization = useCallback(async () => {
     try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      streamRef.current = stream;
       const ctx = new AudioContext();
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 128;
       analyser.smoothingTimeConstant = 0.8;
-      const source = ctx.createMediaStreamSource(stream);
-      source.connect(analyser);
+      ctx.createMediaStreamSource(stream).connect(analyser);
       audioContextRef.current = ctx;
       analyserRef.current = analyser;
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -1787,56 +1767,63 @@ function TeamAssistantTab() {
         const bars: number[] = [];
         for (let i = 0; i < BAR_COUNT; i++) {
           const idx = Math.floor((i / BAR_COUNT) * dataArray.length * 0.6);
-          const raw = dataArray[idx] / 255;
-          const height = Math.max(3, Math.round(raw * 48));
-          bars.push(height);
+          bars.push(Math.max(3, Math.round((dataArray[idx] / 255) * 48)));
         }
         setVolumeBars(bars);
       };
       draw();
-    } catch { /* ignore */ }
+    } catch { /* no mic permission or not available */ }
   }, []);
 
-  const startRecording = useCallback(async () => {
-    try {
-      stopSpeaking();
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      streamRef.current = stream;
-      audioChunksRef.current = [];
-      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-        ? "audio/webm;codecs=opus"
-        : MediaRecorder.isTypeSupported("audio/webm")
-        ? "audio/webm"
-        : MediaRecorder.isTypeSupported("audio/ogg")
-        ? "audio/ogg"
-        : "audio/mp4";
-      const recorder = new MediaRecorder(stream, { mimeType });
-      recorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
-      recorder.onstop = () => {
-        stream.getTracks().forEach(t => t.stop());
-        stopVisualization();
-        const blob = new Blob(audioChunksRef.current, { type: mimeType });
-        if (blob.size > 1000) {
-          transcribeAudio(blob);
-        } else {
-          toast({ title: "No audio captured", description: "Please speak clearly and try again.", variant: "destructive" });
-        }
-      };
-      mediaRecorderRef.current = recorder;
-      recorder.start(100);
-      startVisualization(stream);
-      setIsRecording(true);
-    } catch {
-      toast({ title: "Microphone access denied", description: "Please allow microphone access in your browser settings to use voice input.", variant: "destructive" });
+  const startRecording = useCallback(() => {
+    const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognitionAPI) {
+      toast({ title: "Voice not supported", description: "Please use Chrome or Edge for voice input.", variant: "destructive" });
+      return;
     }
-  }, [stopSpeaking, transcribeAudio, stopVisualization, startVisualization, toast]);
+    stopSpeaking();
+    setInterimText("");
+    const recognition = new SpeechRecognitionAPI();
+    recognition.lang = voiceLang;
+    recognition.interimResults = true;
+    recognition.continuous = true;
+    recognition.maxAlternatives = 1;
+    recognitionRef.current = recognition;
+
+    recognition.onstart = () => setIsRecording(true);
+    recognition.onerror = (e: any) => {
+      if (e.error !== "aborted") toast({ title: "Voice error", description: `Microphone issue: ${e.error}`, variant: "destructive" });
+      setIsRecording(false);
+      setInterimText("");
+      stopVisualization();
+    };
+    recognition.onend = () => {
+      setIsRecording(false);
+      setInterimText("");
+      stopVisualization();
+    };
+    recognition.onresult = (e: any) => {
+      let interim = "";
+      let final = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) final += t + " ";
+        else interim += t;
+      }
+      if (final) setInput(prev => (prev ? prev.trim() + " " : "") + final.trim());
+      setInterimText(interim);
+    };
+
+    recognition.start();
+    startVisualization();
+  }, [voiceLang, stopSpeaking, stopVisualization, startVisualization, toast]);
 
   const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-      mediaRecorderRef.current.stop();
-    }
+    recognitionRef.current?.stop();
     setIsRecording(false);
-  }, []);
+    setInterimText("");
+    stopVisualization();
+  }, [stopVisualization]);
 
   const resetConversation = () => {
     stopSpeaking();

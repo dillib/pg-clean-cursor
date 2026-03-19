@@ -342,38 +342,45 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
     addFooter(slide, false);
 
     // ====================================
-    // SLIDE 10: IMPLEMENTATION APPROACH
+    // SLIDE 10: CUSTOMER ONBOARDING & SUCCESS
     // ====================================
     slide = pptx.addSlide();
     slide.background = { color: BRAND_DARK };
     slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.34, h: 1.2, fill: { color: BRAND_NAVY } });
-    slide.addText("IMPLEMENTATION APPROACH", { x: 0.8, y: 0.15, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 3 });
-    slide.addText("Proven 6-Week POC Methodology", { x: 0.8, y: 0.5, w: 10, h: 0.6, fontSize: 28, bold: true, color: WHITE, fontFace: "Calibri" });
-    const phases = [
-      { week: "Week 1-2", title: "Discovery & Setup", items: "Requirements gathering\nSAP connector configuration\nData mapping definition\nEnvironment provisioning" },
-      { week: "Week 3-4", title: "Integration & Enrichment", items: "Data migration execution\nAI insights activation\nQR code generation\nDPP template creation" },
-      { week: "Week 5-6", title: "Validation & Handoff", items: "End-to-end testing\nUser acceptance testing\nTraining & documentation\nGo/No-Go decision" },
+    slide.addText("ONBOARDING & CUSTOMER SUCCESS", { x: 0.8, y: 0.15, w: 10, h: 0.35, fontSize: 11, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 3 });
+    slide.addText("Live in 6 Weeks. Supported Every Step.", { x: 0.8, y: 0.5, w: 10, h: 0.6, fontSize: 28, bold: true, color: WHITE, fontFace: "Calibri" });
+
+    // 3-phase journey cards
+    const jourPhases = [
+      { week: "Weeks 1–2", title: "Discovery & Connect", items: ["Dedicated onboarding lead assigned", "SAP/ERP connector configured", "Product data mapped to DPP fields", "Your team trained on the dashboard"] },
+      { week: "Weeks 3–4", title: "Enrich & Publish", items: ["AI insights activated for all products", "QR codes generated & tested", "Consumer scan pages deployed", "Compliance gaps identified & closed"] },
+      { week: "Weeks 5–6", title: "Validate & Scale", items: ["End-to-end compliance testing", "User acceptance sign-off", "Handover documentation delivered", "Upgrade path & scaling roadmap"] },
     ];
-    phases.forEach((p, i) => {
+    jourPhases.forEach((p, i) => {
       const x = 0.5 + i * 4.1;
-      slide.addShape(pptx.ShapeType.roundRect, { x, y: 1.5, w: 3.9, h: 3.5, fill: { color: CARD_DARK }, line: { color: CARD_BORDER, width: 1 }, rectRadius: 0.12 });
-      slide.addShape(pptx.ShapeType.roundRect, { x: x + 0.2, y: 1.7, w: 1.6, h: 0.35, fill: { color: BRAND_CYAN }, rectRadius: 0.06 });
-      slide.addText(p.week, { x: x + 0.2, y: 1.7, w: 1.6, h: 0.35, fontSize: 10, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
-      slide.addText(p.title, { x: x + 0.2, y: 2.2, w: 3.5, h: 0.4, fontSize: 15, bold: true, color: WHITE, fontFace: "Calibri" });
-      slide.addText(p.items, { x: x + 0.2, y: 2.8, w: 3.5, h: 1.8, fontSize: 11, color: BODY_TEXT, fontFace: "Calibri", lineSpacingMultiple: 1.5 });
+      slide.addShape(pptx.ShapeType.roundRect, { x, y: 1.5, w: 3.85, h: 3.0, fill: { color: CARD_DARK }, line: { color: i === 2 ? SUCCESS_GREEN : CARD_BORDER, width: i === 2 ? 1.5 : 1 }, rectRadius: 0.12 });
+      slide.addShape(pptx.ShapeType.roundRect, { x: x + 0.2, y: 1.68, w: 1.7, h: 0.32, fill: { color: i === 2 ? SUCCESS_GREEN : BRAND_CYAN }, rectRadius: 0.06 });
+      slide.addText(p.week, { x: x + 0.2, y: 1.68, w: 1.7, h: 0.32, fontSize: 9, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
+      slide.addText(p.title, { x: x + 0.2, y: 2.12, w: 3.45, h: 0.38, fontSize: 14, bold: true, color: WHITE, fontFace: "Calibri" });
+      p.items.forEach((item, ii) => {
+        slide.addText(`✓  ${item}`, { x: x + 0.2, y: 2.62 + ii * 0.44, w: 3.45, h: 0.36, fontSize: 10, color: BODY_TEXT, fontFace: "Calibri" });
+      });
     });
-    slide.addShape(pptx.ShapeType.roundRect, { x: 0.5, y: 5.3, w: 12.0, h: 1.2, fill: { color: BRAND_NAVY }, line: { color: CARD_BORDER, width: 1 }, rectRadius: 0.12 });
-    slide.addText("DELIVERABLES", { x: 0.8, y: 5.4, w: 3, h: 0.3, fontSize: 10, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 2 });
-    const deliverables = [
-      "Fully configured DPP platform",
-      "SAP integration (if applicable)",
-      "AI insights for all products",
-      "QR codes & public scan pages",
-      "User training & documentation",
-      "Validation report with recommendation",
+
+    // Support tiers strip
+    slide.addShape(pptx.ShapeType.roundRect, { x: 0.5, y: 4.7, w: 12.0, h: 1.9, fill: { color: BRAND_NAVY }, line: { color: CARD_BORDER, width: 1 }, rectRadius: 0.12 });
+    slide.addText("SUPPORT TIERS — WHAT YOU GET", { x: 0.8, y: 4.8, w: 5, h: 0.28, fontSize: 9, bold: true, color: BRAND_CYAN, fontFace: "Calibri", letterSpacing: 2 });
+    const supportTiers = [
+      { tier: "POC", color: BRAND_TEAL, support: "Email support\nDedicated onboarding\nKnowledge base access" },
+      { tier: "Starter", color: BRAND_BLUE, support: "48h email SLA\nTeam training sessions\nMonthly check-ins" },
+      { tier: "Growth", color: WARM_AMBER, support: "24h priority support\nQuarterly business review\nProduct roadmap input" },
+      { tier: "Enterprise", color: SUCCESS_GREEN, support: "4h phone SLA\nDedicated account manager\nCustom SLA & escalation path" },
     ];
-    deliverables.forEach((d, i) => {
-      slide.addText(`✓  ${d}`, { x: 0.8 + (i % 3) * 3.9, y: 5.75 + Math.floor(i / 3) * 0.35, w: 3.7, h: 0.3, fontSize: 10, color: BODY_TEXT, fontFace: "Calibri" });
+    supportTiers.forEach((t, i) => {
+      const x = 0.8 + i * 3.0;
+      slide.addShape(pptx.ShapeType.roundRect, { x: x, y: 5.1, w: 0.85, h: 0.28, fill: { color: t.color }, rectRadius: 0.05 });
+      slide.addText(t.tier, { x: x, y: 5.1, w: 0.85, h: 0.28, fontSize: 8, bold: true, color: WHITE, align: "center", valign: "middle", fontFace: "Calibri" });
+      slide.addText(t.support, { x: x, y: 5.45, w: 2.7, h: 0.9, fontSize: 9, color: BODY_TEXT, fontFace: "Calibri", lineSpacingMultiple: 1.35 });
     });
     addFooter(slide);
 
