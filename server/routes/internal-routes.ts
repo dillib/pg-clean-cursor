@@ -16,7 +16,7 @@ import {
 } from "@shared/schema";
 import { MASTER_ADMIN_EMAILS } from "@shared/models/auth";
 import { authStorage } from "../replit_integrations/auth/storage";
-import OpenAI from "openai";
+import OpenAI, { toFile } from "openai";
 import type { RequestHandler } from "express";
 import multer from "multer";
 import * as XLSX from "xlsx";
@@ -799,6 +799,25 @@ Ask: "What exactly did they say — can you give me the exact words they used? A
 - Format with clear headers and bullets
 - Be decisive — tell them exactly what to say, who to target, and what to lead with
 - Keep a confident, professional tone — you represent PhotonicTag internally`;
+
+router.post("/assistant/transcribe", upload.single("audio"), async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No audio file provided" });
+    }
+    const audioFile = await toFile(req.file.buffer, `recording.${req.file.mimetype.split("/")[1] || "webm"}`, {
+      type: req.file.mimetype,
+    });
+    const transcription = await openai.audio.transcriptions.create({
+      file: audioFile,
+      model: "whisper-1",
+    });
+    res.json({ transcript: transcription.text });
+  } catch (error) {
+    console.error("Whisper transcription error:", error);
+    res.status(500).json({ error: "Transcription failed" });
+  }
+});
 
 router.post("/assistant/chat", async (req: Request, res: Response) => {
   try {
