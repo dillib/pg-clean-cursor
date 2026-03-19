@@ -15,8 +15,9 @@ import {
   TrendingUp, ChevronRight, Search, Eye, UserPlus, Trash2, Edit, KeyRound,
   Upload, FileSpreadsheet, CheckCircle2, AlertCircle,
   Link2, Copy, ExternalLink, Settings, FileText, Download, Globe,
+  MessageCircle, Mic, MicOff, Volume2, VolumeX, Bot, Send, RotateCcw, Sparkles,
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -1646,6 +1647,256 @@ function ProposalGeneratorTab() {
 }
 
 // ==========================================
+// TEAM AI ASSISTANT
+// ==========================================
+
+type ChatMessage = { role: "user" | "assistant"; content: string };
+
+const QUICK_PROMPTS = [
+  { label: "Meeting with ITC", prompt: "I have a meeting tomorrow with ITC, a major Indian conglomerate with FMCG and packaging divisions. How should I pitch PhotonicTag to them, who should I target, and what value should I lead with?" },
+  { label: "Mercedes-Benz pitch", prompt: "I'm meeting with someone from Mercedes-Benz next week. What's the strongest value proposition for an automotive OEM and who's the right person to engage?" },
+  { label: "Pricing overview", prompt: "Give me a clean summary of our pricing tiers that I can use in a conversation with a prospect." },
+  { label: "EU DPP urgency", prompt: "How do I explain the urgency of EU DPP compliance and why companies need to act now?" },
+  { label: "SAP integration story", prompt: "How should I explain our SAP integration to a prospect whose IT team is nervous about connecting a new system?" },
+  { label: "vs competitors", prompt: "How do we differentiate from competitors in the DPP space? What's our strongest competitive angle?" },
+  { label: "Objection: too expensive", prompt: "A prospect says we're too expensive compared to building something in-house. How do I handle this objection?" },
+  { label: "POC proposal", prompt: "What should a typical POC scope look like for a mid-size manufacturer trying PhotonicTag for the first time?" },
+];
+
+function TeamAssistantTab() {
+  const { toast } = useToast();
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { role: "assistant", content: "Hi! I'm Aria, your PhotonicTag product and sales assistant. I can help you prepare for meetings, craft pitches for specific companies, explain our value proposition, handle objections, and answer any product or compliance questions. What can I help you with today?" }
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [hasVoiceSupport, setHasVoiceSupport] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
+  const synthRef = useRef<SpeechSynthesis | null>(null);
+
+  useEffect(() => {
+    const hasSpeech = "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
+    const hasSynth = "speechSynthesis" in window;
+    setHasVoiceSupport(hasSpeech && hasSynth);
+    if (hasSynth) synthRef.current = window.speechSynthesis;
+  }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const speak = useCallback((text: string) => {
+    if (!synthRef.current || !voiceEnabled) return;
+    synthRef.current.cancel();
+    const plain = text.replace(/[#*`_~]/g, "").replace(/\n+/g, " ").trim();
+    const utter = new SpeechSynthesisUtterance(plain);
+    utter.rate = 0.95;
+    utter.pitch = 1.05;
+    const voices = synthRef.current.getVoices();
+    const preferred = voices.find(v => v.lang === "en-GB" && v.name.toLowerCase().includes("female"))
+      || voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female"))
+      || voices.find(v => v.lang.startsWith("en"));
+    if (preferred) utter.voice = preferred;
+    utter.onstart = () => setIsSpeaking(true);
+    utter.onend = () => setIsSpeaking(false);
+    utter.onerror = () => setIsSpeaking(false);
+    synthRef.current.speak(utter);
+  }, [voiceEnabled]);
+
+  const stopSpeaking = useCallback(() => {
+    synthRef.current?.cancel();
+    setIsSpeaking(false);
+  }, []);
+
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim() || isLoading) return;
+    const userMsg: ChatMessage = { role: "user", content: text.trim() };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    setInput("");
+    setIsLoading(true);
+    try {
+      const res = await apiRequest("POST", "/api/internal/assistant/chat", {
+        messages: newMessages,
+      });
+      const data = await res.json();
+      const assistantMsg: ChatMessage = { role: "assistant", content: data.reply };
+      setMessages(prev => [...prev, assistantMsg]);
+      if (voiceEnabled) speak(data.reply);
+    } catch {
+      toast({ title: "Error", description: "Aria is unavailable. Please try again.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [messages, isLoading, voiceEnabled, speak, toast]);
+
+  const startListening = useCallback(() => {
+    const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognitionAPI) return;
+    stopSpeaking();
+    const recognition = new SpeechRecognitionAPI();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognitionRef.current = recognition;
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      sendMessage(transcript);
+    };
+    recognition.start();
+  }, [stopSpeaking, sendMessage]);
+
+  const stopListening = useCallback(() => {
+    recognitionRef.current?.stop();
+    setIsListening(false);
+  }, []);
+
+  const resetConversation = () => {
+    stopSpeaking();
+    setMessages([
+      { role: "assistant", content: "Hi! I'm Aria, your PhotonicTag product and sales assistant. I can help you prepare for meetings, craft pitches for specific companies, explain our value proposition, handle objections, and answer any product or compliance questions. What can I help you with today?" }
+    ]);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+            <Bot className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold">Aria — Team Assistant</h2>
+            <p className="text-sm text-muted-foreground">Product knowledge, sales prep & meeting coaching</p>
+          </div>
+          <Badge variant="outline" className="text-xs gap-1 text-blue-600 border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+            <Sparkles className="w-3 h-3" /> AI Powered
+          </Badge>
+        </div>
+        <div className="flex items-center gap-2">
+          {hasVoiceSupport && (
+            <Button
+              variant={voiceEnabled ? "default" : "outline"}
+              size="sm"
+              onClick={() => { setVoiceEnabled(v => !v); if (isSpeaking) stopSpeaking(); }}
+              data-testid="button-toggle-voice"
+              className="gap-2"
+            >
+              {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              <span className="hidden sm:inline">{voiceEnabled ? "Voice On" : "Voice Off"}</span>
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={resetConversation} data-testid="button-reset-chat" className="gap-2">
+            <RotateCcw className="w-4 h-4" />
+            <span className="hidden sm:inline">Reset</span>
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {QUICK_PROMPTS.map((q) => (
+          <button
+            key={q.label}
+            onClick={() => sendMessage(q.prompt)}
+            disabled={isLoading}
+            data-testid={`button-quick-${q.label.toLowerCase().replace(/\s+/g, "-")}`}
+            className="text-xs px-3 py-1.5 rounded-full border border-border bg-muted hover:bg-accent hover:border-blue-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {q.label}
+          </button>
+        ))}
+      </div>
+
+      <Card className="flex flex-col" style={{ height: "480px" }}>
+        <CardContent className="flex flex-col h-full p-0">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.map((msg, i) => (
+              <div key={i} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
+                <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold ${msg.role === "assistant" ? "bg-blue-600 text-white" : "bg-muted text-muted-foreground"}`}>
+                  {msg.role === "assistant" ? <Bot className="w-4 h-4" /> : "You"}
+                </div>
+                <div className={`max-w-[78%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${msg.role === "assistant" ? "bg-muted text-foreground rounded-tl-sm" : "bg-blue-600 text-white rounded-tr-sm"}`}
+                  data-testid={`message-${msg.role}-${i}`}>
+                  {msg.content}
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex gap-3">
+                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+                  <Bot className="w-4 h-4 text-white" />
+                </div>
+                <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                  <span className="text-xs text-muted-foreground">Aria is thinking...</span>
+                </div>
+              </div>
+            )}
+            {isSpeaking && (
+              <div className="flex justify-center">
+                <button onClick={stopSpeaking} className="text-xs text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors">
+                  <Volume2 className="w-3 h-3 animate-pulse text-blue-500" /> Speaking — tap to stop
+                </button>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="border-t p-3 flex gap-2 items-end bg-background rounded-b-lg">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
+              placeholder="Ask about a prospect, pricing, objections, or any product question..."
+              className="flex-1 min-h-[40px] max-h-[120px] resize-none text-sm"
+              data-testid="input-assistant-message"
+              rows={1}
+            />
+            {hasVoiceSupport && (
+              <Button
+                variant={isListening ? "destructive" : "outline"}
+                size="icon"
+                onClick={isListening ? stopListening : startListening}
+                disabled={isLoading}
+                data-testid="button-voice-input"
+                title={isListening ? "Stop listening" : "Speak your question"}
+                className="flex-shrink-0"
+              >
+                {isListening ? <MicOff className="w-4 h-4 animate-pulse" /> : <Mic className="w-4 h-4" />}
+              </Button>
+            )}
+            <Button
+              onClick={() => sendMessage(input)}
+              disabled={!input.trim() || isLoading}
+              size="icon"
+              data-testid="button-send-message"
+              className="flex-shrink-0 bg-blue-600 hover:bg-blue-700"
+            >
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <p className="text-xs text-muted-foreground text-center">
+        Aria has knowledge of PhotonicTag products, pricing, and sales strategy. For confidential customer data, always refer to the CRM tab.
+      </p>
+    </div>
+  );
+}
+
+// ==========================================
 // MAIN PAGE
 // ==========================================
 
@@ -1671,8 +1922,12 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
       </div>
 
       {isFull ? (
-        <Tabs defaultValue="crm" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6" data-testid="tabs-internal">
+        <Tabs defaultValue="assistant" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-7" data-testid="tabs-internal">
+            <TabsTrigger value="assistant" data-testid="tab-assistant" className="gap-1">
+              <Bot className="w-4 h-4" />
+              <span className="hidden sm:inline">Aria AI</span>
+            </TabsTrigger>
             <TabsTrigger value="crm" data-testid="tab-crm" className="gap-1">
               <Users className="w-4 h-4" />
               <span className="hidden sm:inline">CRM</span>
@@ -1699,6 +1954,7 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="assistant"><TeamAssistantTab /></TabsContent>
           <TabsContent value="crm"><CRMTab /></TabsContent>
           <TabsContent value="proposals"><ProposalGeneratorTab /></TabsContent>
           <TabsContent value="demos"><DemoFactoryTab /></TabsContent>
@@ -1707,8 +1963,12 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
           <TabsContent value="ops"><PlatformOpsTab /></TabsContent>
         </Tabs>
       ) : (
-        <Tabs defaultValue="crm" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3" data-testid="tabs-internal">
+        <Tabs defaultValue="assistant" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4" data-testid="tabs-internal">
+            <TabsTrigger value="assistant" data-testid="tab-assistant" className="gap-1">
+              <Bot className="w-4 h-4" />
+              <span>Aria AI</span>
+            </TabsTrigger>
             <TabsTrigger value="crm" data-testid="tab-crm" className="gap-1">
               <Users className="w-4 h-4" />
               <span>CRM</span>
@@ -1723,6 +1983,7 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="assistant"><TeamAssistantTab /></TabsContent>
           <TabsContent value="crm"><CRMTab /></TabsContent>
           <TabsContent value="proposals"><ProposalGeneratorTab /></TabsContent>
           <TabsContent value="demos"><DemoFactoryTab /></TabsContent>
