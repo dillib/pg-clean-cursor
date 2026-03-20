@@ -1940,44 +1940,36 @@ function TeamAssistantTab() {
                 </button>
               </div>
             )}
-            {isTranscribing && (
-              <div className="flex justify-center py-2">
-                <div className="text-xs text-blue-600 flex items-center gap-2 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 px-4 py-2 rounded-full">
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  Transcribing your voice…
-                </div>
-              </div>
-            )}
             <div ref={messagesEndRef} />
           </div>
 
           <div className="border-t p-3 flex gap-2 items-end bg-background rounded-b-lg">
             <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
+              value={isRecording && interimText ? interimText : input}
+              onChange={(e) => { if (!isRecording) setInput(e.target.value); }}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
-              placeholder={isTranscribing ? "Transcribing your voice…" : isRecording ? "Listening… speak now, then tap mic to stop" : "Ask about a prospect, pricing, objections, or speak using the mic…"}
-              className="flex-1 min-h-[40px] max-h-[120px] resize-none text-sm"
+              placeholder={isRecording ? "Listening… speak now, then tap mic to stop" : "Ask about a prospect, pricing, objections, or speak using the mic…"}
+              className={`flex-1 min-h-[40px] max-h-[120px] resize-none text-sm ${isRecording && interimText ? "text-muted-foreground italic" : ""}`}
               data-testid="input-assistant-message"
               rows={1}
-              disabled={isTranscribing}
+              readOnly={isRecording}
             />
-            {hasMicSupport && (
+            {hasSpeechSupport && (
               <Button
                 variant={isRecording ? "destructive" : "outline"}
                 size="icon"
                 onClick={isRecording ? stopRecording : startRecording}
-                disabled={isLoading || isTranscribing}
+                disabled={isLoading}
                 data-testid="button-voice-input"
-                title={isRecording ? "Stop recording" : "Speak in any language — auto-detected"}
+                title={isRecording ? "Stop recording" : "Voice input — Chrome/Edge"}
                 className={`flex-shrink-0 ${isRecording ? "ring-2 ring-red-400 ring-offset-1" : ""}`}
               >
-                {isRecording ? <MicOff className="w-4 h-4" /> : isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
+                {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
               </Button>
             )}
             <Button
               onClick={() => sendMessage(input)}
-              disabled={!input.trim() || isLoading || isTranscribing}
+              disabled={!input.trim() || isLoading}
               size="icon"
               data-testid="button-send-message"
               className="flex-shrink-0 bg-blue-600 hover:bg-blue-700"
