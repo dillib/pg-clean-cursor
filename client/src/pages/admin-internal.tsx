@@ -1680,10 +1680,8 @@ function TeamAssistantTab() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
   const animFrameRef = useRef<number | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const animStartRef = useRef<number>(0);
 
   useEffect(() => {
     const hasSpeech = !!(window as any).SpeechRecognition || !!(window as any).webkitSpeechRecognition;
@@ -1742,37 +1740,31 @@ function TeamAssistantTab() {
 
   const stopVisualization = useCallback(() => {
     if (animFrameRef.current) { cancelAnimationFrame(animFrameRef.current); animFrameRef.current = null; }
-    if (audioContextRef.current) { audioContextRef.current.close().catch(() => {}); audioContextRef.current = null; }
-    if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
-    analyserRef.current = null;
     setVolumeBars(Array(28).fill(4));
   }, []);
 
-  const startVisualization = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      streamRef.current = stream;
-      const ctx = new AudioContext();
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 128;
-      analyser.smoothingTimeConstant = 0.8;
-      ctx.createMediaStreamSource(stream).connect(analyser);
-      audioContextRef.current = ctx;
-      analyserRef.current = analyser;
-      const dataArray = new Uint8Array(analyser.frequencyBinCount);
-      const BAR_COUNT = 28;
-      const draw = () => {
-        animFrameRef.current = requestAnimationFrame(draw);
-        analyser.getByteFrequencyData(dataArray);
-        const bars: number[] = [];
-        for (let i = 0; i < BAR_COUNT; i++) {
-          const idx = Math.floor((i / BAR_COUNT) * dataArray.length * 0.6);
-          bars.push(Math.max(3, Math.round((dataArray[idx] / 255) * 48)));
-        }
-        setVolumeBars(bars);
-      };
-      draw();
-    } catch { /* no mic permission or not available */ }
+  const startVisualization = useCallback(() => {
+    const BAR_COUNT = 28;
+    animStartRef.current = performance.now();
+    const draw = (now: number) => {
+      animFrameRef.current = requestAnimationFrame(draw);
+      const t = (now - animStartRef.current) / 1000;
+      const bars: number[] = [];
+      for (let i = 0; i < BAR_COUNT; i++) {
+        const pos = i / BAR_COUNT;
+        // Layered sine waves to simulate speech rhythm
+        const wave1 = Math.sin(t * 3.1 + pos * 6.2) * 0.35;
+        const wave2 = Math.sin(t * 5.7 + pos * 3.8) * 0.25;
+        const wave3 = Math.sin(t * 8.3 - pos * 5.1) * 0.15;
+        // Bell curve so middle bars are tallest (natural speech shape)
+        const bell = Math.exp(-Math.pow((pos - 0.5) * 3.2, 2));
+        // Combine and scale to pixel height
+        const raw = Math.max(0, (wave1 + wave2 + wave3 + 0.6) * bell);
+        bars.push(Math.max(3, Math.round(raw * 44)));
+      }
+      setVolumeBars(bars);
+    };
+    animFrameRef.current = requestAnimationFrame(draw);
   }, []);
 
   const startRecording = useCallback(() => {
