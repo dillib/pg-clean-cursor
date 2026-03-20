@@ -15,7 +15,7 @@ import {
   TrendingUp, ChevronRight, Search, Eye, UserPlus, Trash2, Edit, KeyRound,
   Upload, FileSpreadsheet, CheckCircle2, AlertCircle,
   Link2, Copy, ExternalLink, Settings, FileText, Download, Globe,
-  MessageCircle, Volume2, VolumeX, Bot, Send, RotateCcw, Sparkles,
+  MessageCircle, Bot, Send, RotateCcw, Sparkles,
 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -1670,41 +1670,11 @@ function TeamAssistantTab() {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [voiceEnabled, setVoiceEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const synthRef = useRef<SpeechSynthesis | null>(null);
-
-  useEffect(() => {
-    if ("speechSynthesis" in window) synthRef.current = window.speechSynthesis;
-  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  const speak = useCallback((text: string) => {
-    if (!synthRef.current || !voiceEnabled) return;
-    synthRef.current.cancel();
-    const plain = text.replace(/[#*`_~]/g, "").replace(/\n+/g, " ").trim();
-    const utter = new SpeechSynthesisUtterance(plain);
-    utter.rate = 0.95;
-    utter.pitch = 1.05;
-    const voices = synthRef.current.getVoices();
-    const preferred = voices.find(v => v.lang === "en-GB" && v.name.toLowerCase().includes("female"))
-      || voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female"))
-      || voices.find(v => v.lang.startsWith("en"));
-    if (preferred) utter.voice = preferred;
-    utter.onstart = () => setIsSpeaking(true);
-    utter.onend = () => setIsSpeaking(false);
-    utter.onerror = () => setIsSpeaking(false);
-    synthRef.current.speak(utter);
-  }, [voiceEnabled]);
-
-  const stopSpeaking = useCallback(() => {
-    synthRef.current?.cancel();
-    setIsSpeaking(false);
-  }, []);
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -1720,17 +1690,14 @@ function TeamAssistantTab() {
       const data = await res.json();
       const assistantMsg: ChatMessage = { role: "assistant", content: data.reply };
       setMessages(prev => [...prev, assistantMsg]);
-      if (voiceEnabled) speak(data.reply);
     } catch {
       toast({ title: "Error", description: "Aria is unavailable. Please try again.", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, voiceEnabled, speak, toast]);
-
+  }, [messages, isLoading, toast]);
 
   const resetConversation = () => {
-    stopSpeaking();
     setMessages([
       { role: "assistant", content: "Hi! I'm Aria, your PhotonicTag sales and product assistant.\n\nBefore I give you a tailored answer, I'll ask a few quick questions to make sure my help is actually useful — not generic. The more context I have about the prospect, meeting stage, or situation, the better I can prepare you.\n\nThat said, if you have a simple factual question (pricing, compliance deadlines, feature details), just ask and I'll answer directly.\n\nWhat's on your mind?" }
     ]);
@@ -1753,18 +1720,6 @@ function TeamAssistantTab() {
           </Badge>
         </div>
         <div className="flex items-center gap-2">
-          {"speechSynthesis" in window && (
-            <Button
-              variant={voiceEnabled ? "default" : "outline"}
-              size="sm"
-              onClick={() => { setVoiceEnabled(v => !v); if (isSpeaking) stopSpeaking(); }}
-              data-testid="button-toggle-voice"
-              className="gap-2"
-            >
-              {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-              <span className="hidden sm:inline">{voiceEnabled ? "Voice On" : "Voice Off"}</span>
-            </Button>
-          )}
           <Button variant="ghost" size="sm" onClick={resetConversation} data-testid="button-reset-chat" className="gap-2">
             <RotateCcw className="w-4 h-4" />
             <span className="hidden sm:inline">Reset</span>
@@ -1813,13 +1768,6 @@ function TeamAssistantTab() {
                   </div>
                   <span className="text-xs text-muted-foreground">Aria is thinking...</span>
                 </div>
-              </div>
-            )}
-            {isSpeaking && (
-              <div className="flex justify-center">
-                <button onClick={stopSpeaking} className="text-xs text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors">
-                  <Volume2 className="w-3 h-3 animate-pulse text-blue-500" /> Speaking — tap to stop
-                </button>
               </div>
             )}
             <div ref={messagesEndRef} />
