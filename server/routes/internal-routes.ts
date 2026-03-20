@@ -808,18 +808,34 @@ router.post("/assistant/transcribe", upload.single("audio"), async (req: Request
     const mimeType = req.file.mimetype || "audio/webm";
     const subtype = mimeType.split("/")[1] || "webm";
     const ext = subtype.split(";")[0].trim();
-    const safeExt = ["webm", "mp4", "ogg", "wav", "mp3", "m4a", "mpeg"].includes(ext) ? ext : "webm";
-    console.log(`[Whisper] Transcribing audio: ${mimeType} → file: recording.${safeExt}, size: ${req.file.buffer.length} bytes`);
-    const audioFile = await toFile(req.file.buffer, `recording.${safeExt}`, { type: mimeType });
-    const transcription = await openai.audio.transcriptions.create({
-      file: audioFile,
-      model: "whisper-1",
+    const safeExt = (["webm", "mp4", "ogg", "wav", "mp3", "m4a"].includes(ext) ? ext : "webm") as "webm" | "mp4" | "ogg" | "wav" | "mp3" | "m4a";
+    const base64Audio = req.file.buffer.toString("base64");
+    console.log(`[Transcribe] audio: ${mimeType} → ${safeExt}, size: ${req.file.buffer.length} bytes`);
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_audio" as any,
+              input_audio: { data: base64Audio, format: safeExt },
+            },
+            {
+              type: "text",
+              text: "Transcribe this audio exactly as spoken. Output only the transcription — no punctuation corrections, no added text, no explanations.",
+            },
+          ],
+        },
+      ],
+      max_tokens: 512,
     });
-    console.log(`[Whisper] Transcript: "${transcription.text}"`);
-    res.json({ transcript: transcription.text });
-  } catch (error) {
-    console.error("Whisper transcription error:", error);
-    res.status(500).json({ error: "Transcription failed" });
+    const transcript = response.choices[0]?.message?.content?.trim() || "";
+    console.log(`[Transcribe] result: "${transcript}"`);
+    res.json({ transcript });
+  } catch (error: any) {
+    console.error("Transcription error:", error?.message || error);
+    res.status(500).json({ error: "Transcription failed", detail: error?.message });
   }
 });
 

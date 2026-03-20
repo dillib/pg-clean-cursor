@@ -1671,21 +1671,20 @@ function TeamAssistantTab() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
-  const [interimText, setInterimText] = useState("");
-  const [voiceLang, setVoiceLang] = useState("en-US");
-  const [hasSpeechSupport, setHasSpeechSupport] = useState(false);
+  const [hasMicSupport, setHasMicSupport] = useState(false);
   const [volumeBars, setVolumeBars] = useState<number[]>(Array(28).fill(4));
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const animStartRef = useRef<number>(0);
 
   useEffect(() => {
-    const hasSpeech = !!(window as any).SpeechRecognition || !!(window as any).webkitSpeechRecognition;
-    setHasSpeechSupport(hasSpeech);
+    setHasMicSupport(!!(navigator.mediaDevices?.getUserMedia));
     if ("speechSynthesis" in window) synthRef.current = window.speechSynthesis;
   }, []);
 
@@ -1752,13 +1751,10 @@ function TeamAssistantTab() {
       const bars: number[] = [];
       for (let i = 0; i < BAR_COUNT; i++) {
         const pos = i / BAR_COUNT;
-        // Layered sine waves to simulate speech rhythm
         const wave1 = Math.sin(t * 3.1 + pos * 6.2) * 0.35;
         const wave2 = Math.sin(t * 5.7 + pos * 3.8) * 0.25;
         const wave3 = Math.sin(t * 8.3 - pos * 5.1) * 0.15;
-        // Bell curve so middle bars are tallest (natural speech shape)
         const bell = Math.exp(-Math.pow((pos - 0.5) * 3.2, 2));
-        // Combine and scale to pixel height
         const raw = Math.max(0, (wave1 + wave2 + wave3 + 0.6) * bell);
         bars.push(Math.max(3, Math.round(raw * 44)));
       }
@@ -1767,55 +1763,60 @@ function TeamAssistantTab() {
     animFrameRef.current = requestAnimationFrame(draw);
   }, []);
 
-  const startRecording = useCallback(() => {
-    const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognitionAPI) {
-      toast({ title: "Voice not supported", description: "Please use Chrome or Edge for voice input.", variant: "destructive" });
-      return;
-    }
-    stopSpeaking();
-    setInterimText("");
-    const recognition = new SpeechRecognitionAPI();
-    recognition.lang = voiceLang;
-    recognition.interimResults = true;
-    recognition.continuous = true;
-    recognition.maxAlternatives = 1;
-    recognitionRef.current = recognition;
-
-    recognition.onstart = () => setIsRecording(true);
-    recognition.onerror = (e: any) => {
-      if (e.error !== "aborted") toast({ title: "Voice error", description: `Microphone issue: ${e.error}`, variant: "destructive" });
-      setIsRecording(false);
-      setInterimText("");
-      stopVisualization();
-    };
-    recognition.onend = () => {
-      setIsRecording(false);
-      setInterimText("");
-      stopVisualization();
-    };
-    recognition.onresult = (e: any) => {
-      let interim = "";
-      let final = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) final += t + " ";
-        else interim += t;
+  const transcribeAudio = useCallback(async (blob: Blob, mimeType: string) => {
+    setIsTranscribing(true);
+    try {
+      const formData = new FormData();
+      const ext = mimeType.includes("ogg") ? "ogg" : mimeType.includes("mp4") ? "mp4" : mimeType.includes("wav") ? "wav" : "webm";
+      formData.append("audio", blob, `recording.${ext}`);
+      const res = await fetch("/api/internal/assistant/transcribe", {
+        method: "POST", body: formData, credentials: "include",
+      });
+      if (!res.ok) throw new Error("Server error");
+      const data = await res.json();
+      if (data.transcript?.trim()) {
+        setInput(prev => prev ? `${prev.trim()} ${data.transcript.trim()}` : data.transcript.trim());
+      } else {
+        toast({ title: "No speech detected", description: "Nothing was transcribed. Please try again.", variant: "destructive" });
       }
-      if (final) setInput(prev => (prev ? prev.trim() + " " : "") + final.trim());
-      setInterimText(interim);
-    };
+    } catch {
+      toast({ title: "Transcription failed", description: "Could not process audio. Please try again.", variant: "destructive" });
+    } finally {
+      setIsTranscribing(false);
+    }
+  }, [toast]);
 
-    recognition.start();
-    startVisualization();
-  }, [voiceLang, stopSpeaking, stopVisualization, startVisualization, toast]);
+  const startRecording = useCallback(async () => {
+    try {
+      stopSpeaking();
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      audioChunksRef.current = [];
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm"
+        : MediaRecorder.isTypeSupported("audio/ogg") ? "audio/ogg"
+        : "audio/mp4";
+      const recorder = new MediaRecorder(stream, { mimeType });
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+      recorder.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        stopVisualization();
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        if (blob.size > 500) transcribeAudio(blob, mimeType);
+        else toast({ title: "No audio captured", description: "Please speak clearly and try again.", variant: "destructive" });
+      };
+      mediaRecorderRef.current = recorder;
+      recorder.start(100);
+      startVisualization();
+      setIsRecording(true);
+    } catch {
+      toast({ title: "Microphone access denied", description: "Please allow microphone access to use voice input.", variant: "destructive" });
+    }
+  }, [stopSpeaking, transcribeAudio, stopVisualization, startVisualization, toast]);
 
   const stopRecording = useCallback(() => {
-    recognitionRef.current?.stop();
+    if (mediaRecorderRef.current?.state !== "inactive") mediaRecorderRef.current?.stop();
     setIsRecording(false);
-    setInterimText("");
-    stopVisualization();
-  }, [stopVisualization]);
+  }, []);
 
   const resetConversation = () => {
     stopSpeaking();
@@ -1945,31 +1946,31 @@ function TeamAssistantTab() {
 
           <div className="border-t p-3 flex gap-2 items-end bg-background rounded-b-lg">
             <Textarea
-              value={isRecording && interimText ? interimText : input}
-              onChange={(e) => { if (!isRecording) setInput(e.target.value); }}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
-              placeholder={isRecording ? "Listening… speak now, then tap mic to stop" : "Ask about a prospect, pricing, objections, or speak using the mic…"}
-              className={`flex-1 min-h-[40px] max-h-[120px] resize-none text-sm ${isRecording && interimText ? "text-muted-foreground italic" : ""}`}
+              placeholder={isRecording ? "Recording… tap mic to stop & transcribe" : isTranscribing ? "Transcribing your voice…" : "Ask about a prospect, pricing, objections, or speak using the mic…"}
+              className="flex-1 min-h-[40px] max-h-[120px] resize-none text-sm"
               data-testid="input-assistant-message"
               rows={1}
-              readOnly={isRecording}
+              disabled={isTranscribing}
             />
-            {hasSpeechSupport && (
+            {hasMicSupport && (
               <Button
                 variant={isRecording ? "destructive" : "outline"}
                 size="icon"
                 onClick={isRecording ? stopRecording : startRecording}
-                disabled={isLoading}
+                disabled={isLoading || isTranscribing}
                 data-testid="button-voice-input"
-                title={isRecording ? "Stop recording" : "Voice input — Chrome/Edge"}
+                title={isRecording ? "Stop & transcribe" : "Start voice input"}
                 className={`flex-shrink-0 ${isRecording ? "ring-2 ring-red-400 ring-offset-1" : ""}`}
               >
-                {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                {isRecording ? <MicOff className="w-4 h-4" /> : isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
               </Button>
             )}
             <Button
               onClick={() => sendMessage(input)}
-              disabled={!input.trim() || isLoading}
+              disabled={!input.trim() || isLoading || isTranscribing}
               size="icon"
               data-testid="button-send-message"
               className="flex-shrink-0 bg-blue-600 hover:bg-blue-700"
