@@ -15,7 +15,7 @@ import {
   TrendingUp, ChevronRight, Search, Eye, UserPlus, Trash2, Edit, KeyRound,
   Upload, FileSpreadsheet, CheckCircle2, AlertCircle,
   Link2, Copy, ExternalLink, Settings, FileText, Download, Globe,
-  MessageCircle, Mic, MicOff, Volume2, VolumeX, Bot, Send, RotateCcw, Sparkles,
+  MessageCircle, Volume2, VolumeX, Bot, Send, RotateCcw, Sparkles,
 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -1670,21 +1670,12 @@ function TeamAssistantTab() {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
-  const [hasMicSupport, setHasMicSupport] = useState(false);
-  const [volumeBars, setVolumeBars] = useState<number[]>(Array(28).fill(4));
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
   const synthRef = useRef<SpeechSynthesis | null>(null);
-  const animFrameRef = useRef<number | null>(null);
-  const animStartRef = useRef<number>(0);
 
   useEffect(() => {
-    setHasMicSupport(!!(navigator.mediaDevices?.getUserMedia));
     if ("speechSynthesis" in window) synthRef.current = window.speechSynthesis;
   }, []);
 
@@ -1737,90 +1728,9 @@ function TeamAssistantTab() {
     }
   }, [messages, isLoading, voiceEnabled, speak, toast]);
 
-  const stopVisualization = useCallback(() => {
-    if (animFrameRef.current) { cancelAnimationFrame(animFrameRef.current); animFrameRef.current = null; }
-    setVolumeBars(Array(28).fill(4));
-  }, []);
-
-  const startVisualization = useCallback(() => {
-    const BAR_COUNT = 28;
-    animStartRef.current = performance.now();
-    const draw = (now: number) => {
-      animFrameRef.current = requestAnimationFrame(draw);
-      const t = (now - animStartRef.current) / 1000;
-      const bars: number[] = [];
-      for (let i = 0; i < BAR_COUNT; i++) {
-        const pos = i / BAR_COUNT;
-        const wave1 = Math.sin(t * 3.1 + pos * 6.2) * 0.35;
-        const wave2 = Math.sin(t * 5.7 + pos * 3.8) * 0.25;
-        const wave3 = Math.sin(t * 8.3 - pos * 5.1) * 0.15;
-        const bell = Math.exp(-Math.pow((pos - 0.5) * 3.2, 2));
-        const raw = Math.max(0, (wave1 + wave2 + wave3 + 0.6) * bell);
-        bars.push(Math.max(3, Math.round(raw * 44)));
-      }
-      setVolumeBars(bars);
-    };
-    animFrameRef.current = requestAnimationFrame(draw);
-  }, []);
-
-  const transcribeAudio = useCallback(async (blob: Blob, mimeType: string) => {
-    setIsTranscribing(true);
-    try {
-      const formData = new FormData();
-      const ext = mimeType.includes("ogg") ? "ogg" : mimeType.includes("mp4") ? "mp4" : mimeType.includes("wav") ? "wav" : "webm";
-      formData.append("audio", blob, `recording.${ext}`);
-      const res = await fetch("/api/internal/assistant/transcribe", {
-        method: "POST", body: formData, credentials: "include",
-      });
-      if (!res.ok) throw new Error("Server error");
-      const data = await res.json();
-      if (data.transcript?.trim()) {
-        setInput(prev => prev ? `${prev.trim()} ${data.transcript.trim()}` : data.transcript.trim());
-      } else {
-        toast({ title: "No speech detected", description: "Nothing was transcribed. Please try again.", variant: "destructive" });
-      }
-    } catch {
-      toast({ title: "Transcription failed", description: "Could not process audio. Please try again.", variant: "destructive" });
-    } finally {
-      setIsTranscribing(false);
-    }
-  }, [toast]);
-
-  const startRecording = useCallback(async () => {
-    try {
-      stopSpeaking();
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      audioChunksRef.current = [];
-      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus"
-        : MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm"
-        : MediaRecorder.isTypeSupported("audio/ogg") ? "audio/ogg"
-        : "audio/mp4";
-      const recorder = new MediaRecorder(stream, { mimeType });
-      recorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
-      recorder.onstop = () => {
-        stream.getTracks().forEach(t => t.stop());
-        stopVisualization();
-        const blob = new Blob(audioChunksRef.current, { type: mimeType });
-        if (blob.size > 500) transcribeAudio(blob, mimeType);
-        else toast({ title: "No audio captured", description: "Please speak clearly and try again.", variant: "destructive" });
-      };
-      mediaRecorderRef.current = recorder;
-      recorder.start(100);
-      startVisualization();
-      setIsRecording(true);
-    } catch {
-      toast({ title: "Microphone access denied", description: "Please allow microphone access to use voice input.", variant: "destructive" });
-    }
-  }, [stopSpeaking, transcribeAudio, stopVisualization, startVisualization, toast]);
-
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current?.state !== "inactive") mediaRecorderRef.current?.stop();
-    setIsRecording(false);
-  }, []);
 
   const resetConversation = () => {
     stopSpeaking();
-    if (isRecording) stopRecording();
     setMessages([
       { role: "assistant", content: "Hi! I'm Aria, your PhotonicTag sales and product assistant.\n\nBefore I give you a tailored answer, I'll ask a few quick questions to make sure my help is actually useful — not generic. The more context I have about the prospect, meeting stage, or situation, the better I can prepare you.\n\nThat said, if you have a simple factual question (pricing, compliance deadlines, feature details), just ask and I'll answer directly.\n\nWhat's on your mind?" }
     ]);
@@ -1912,35 +1822,6 @@ function TeamAssistantTab() {
                 </button>
               </div>
             )}
-            {isRecording && (
-              <div className="flex flex-col items-center gap-2 py-3">
-                <div className="flex items-end gap-[3px] h-14" aria-label="Voice recording in progress">
-                  {volumeBars.map((h, i) => (
-                    <div
-                      key={i}
-                      className="rounded-full transition-all duration-75"
-                      style={{
-                        width: "4px",
-                        height: `${h}px`,
-                        background: h > 24
-                          ? "#ef4444"
-                          : h > 12
-                          ? "#3b82f6"
-                          : "#93c5fd",
-                        opacity: 0.85 + (i % 3) * 0.05,
-                      }}
-                    />
-                  ))}
-                </div>
-                <button
-                  onClick={stopRecording}
-                  className="text-xs text-red-500 font-medium flex items-center gap-1.5 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 px-4 py-1.5 rounded-full hover:bg-red-100 transition-colors"
-                >
-                  <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                  Listening… tap to stop &amp; send
-                </button>
-              </div>
-            )}
             <div ref={messagesEndRef} />
           </div>
 
@@ -1949,28 +1830,14 @@ function TeamAssistantTab() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
-              placeholder={isRecording ? "Recording… tap mic to stop & transcribe" : isTranscribing ? "Transcribing your voice…" : "Ask about a prospect, pricing, objections, or speak using the mic…"}
+              placeholder="Ask about a prospect, pricing, objections, compliance deadlines, or anything product-related…"
               className="flex-1 min-h-[40px] max-h-[120px] resize-none text-sm"
               data-testid="input-assistant-message"
               rows={1}
-              disabled={isTranscribing}
             />
-            {hasMicSupport && (
-              <Button
-                variant={isRecording ? "destructive" : "outline"}
-                size="icon"
-                onClick={isRecording ? stopRecording : startRecording}
-                disabled={isLoading || isTranscribing}
-                data-testid="button-voice-input"
-                title={isRecording ? "Stop & transcribe" : "Start voice input"}
-                className={`flex-shrink-0 ${isRecording ? "ring-2 ring-red-400 ring-offset-1" : ""}`}
-              >
-                {isRecording ? <MicOff className="w-4 h-4" /> : isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
-              </Button>
-            )}
             <Button
               onClick={() => sendMessage(input)}
-              disabled={!input.trim() || isLoading || isTranscribing}
+              disabled={!input.trim() || isLoading}
               size="icon"
               data-testid="button-send-message"
               className="flex-shrink-0 bg-blue-600 hover:bg-blue-700"
@@ -1981,9 +1848,6 @@ function TeamAssistantTab() {
         </CardContent>
       </Card>
 
-      <p className="text-xs text-muted-foreground text-center">
-        Voice input uses AI transcription — speak in any language (English, German, Hindi, French, Spanish, and 95+ more). For confidential customer data, refer to the CRM tab.
-      </p>
     </div>
   );
 }
