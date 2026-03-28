@@ -465,6 +465,11 @@ function Router() {
           <SAPConnector />
         </DemoProtectedRoute>
       </Route>
+      <Route path="/demo/integrations/sap-operations">
+        <DemoProtectedRoute>
+          <SAPOperations />
+        </DemoProtectedRoute>
+      </Route>
       <Route path="/demo/integrations/sap-demo">
         <DemoProtectedRoute>
           <SAPDemo />
