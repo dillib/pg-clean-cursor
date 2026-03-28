@@ -86,6 +86,40 @@ app.use((req, res, next) => {
     log(`Error checking/seeding demo data: ${error}`);
   }
 
+  // Migrate old product images to new pro versions
+  try {
+    const imageMap: Record<string, string> = {
+      "/assets/stock_images/lithium_ion_battery__913af259.jpg": "/assets/stock_images/battery_pack_pro.png",
+      "/assets/stock_images/lithium_ion_battery__e9545ddb.jpg": "/assets/stock_images/battery_pack_pro.png",
+      "/assets/stock_images/premium_merino_wool__c7ed7cc2.jpg": "/assets/stock_images/wool_sweater_pro.png",
+      "/assets/stock_images/merino_wool_sweater__bf977340.jpg": "/assets/stock_images/wool_sweater_pro.png",
+      "/assets/stock_images/smart_home_hub_devic_8ba94000.jpg": "/assets/stock_images/smarthome_hub_pro.png",
+      "/assets/stock_images/eco_friendly_biodegr_38f4835c.jpg": "/assets/stock_images/packaging_container_pro.png",
+      "/assets/stock_images/electric_vehicle_car_73ff6ee8.jpg": "/assets/stock_images/ev_charging_cable_pro.png",
+      "/assets/stock_images/electric_vehicle_ev__bf4ed89b.jpg": "/assets/stock_images/ev_charging_cable_pro.png",
+      "/assets/stock_images/premium_wireless_hea_9e631693.jpg": "/assets/stock_images/headphones_pro.png",
+      "/assets/stock_images/premium_wireless_noi_6d22461d.jpg": "/assets/stock_images/headphones_pro.png",
+      "/assets/stock_images/luxury_leather_handb_03681045.jpg": "/assets/stock_images/leather_tote_pro.png",
+      "/assets/stock_images/luxury_leather_handb_0c8e215c.jpg": "/assets/stock_images/leather_tote_pro.png",
+      "/assets/stock_images/smart_home_thermosta_3e0251e2.jpg": "/assets/stock_images/thermostat_pro.png",
+      "/assets/stock_images/industrial_rubber_co_6782e308.jpg": "/assets/stock_images/conveyor_belt_pro.png",
+      "/assets/stock_images/industrial_steel_con_6d4421ed.jpg": "/assets/stock_images/conveyor_roller_pro.png",
+      "/assets/stock_images/hiking_backpack_outd_db06293e.jpg": "/assets/stock_images/leather_tote_pro.png",
+      "/assets/stock_images/industrial_iot_senso_ecc9a791.jpg": "/assets/stock_images/conveyor_roller_pro.png",
+    };
+    const allProducts = await storage.getAllProducts();
+    let migratedCount = 0;
+    for (const product of allProducts) {
+      if (product.productImage && imageMap[product.productImage]) {
+        await storage.updateProduct(product.id, { productImage: imageMap[product.productImage] });
+        migratedCount++;
+      }
+    }
+    if (migratedCount > 0) log(`  Migrated ${migratedCount} product image(s) to new pro versions`);
+  } catch (error) {
+    log(`Error migrating product images: ${error}`);
+  }
+
   try {
     const defaultAccounts = [
       { email: "demo@photonictag.com", firstName: "Demo", lastName: "User", company: "PhotonicTag Demo", role: "demo_viewer" as const, status: "active" as const, password: "demo2024" },
