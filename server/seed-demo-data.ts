@@ -279,7 +279,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Germany",
       batchNumber: "GCT-BAT-2025-0842",
       lotNumber: "LOT-2025-Q3-0842",
-      productImage: "/assets/stock_images/lithium_ion_battery__913af259.jpg",
+      productImage: "/assets/stock_images/battery_pack_pro.png",
       materials: "Lithium Cobalt Oxide, Graphite Anode, Polymer Separator, Aluminum Casing, Copper Foil",
       materialBreakdown: [
         { material: "Lithium Cobalt Oxide", percentage: 35, recyclable: true },
@@ -341,7 +341,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Sweden",
       batchNumber: "SKF-TEX-2025-1847",
       lotNumber: "LOT-2025-SUM-1847",
-      productImage: "/assets/stock_images/premium_merino_wool__c7ed7cc2.jpg",
+      productImage: "/assets/stock_images/wool_sweater_pro.png",
       materials: "100% Merino Wool (Patagonian), Organic Cotton Thread, Natural Shell Buttons",
       materialBreakdown: [
         { material: "Merino Wool", percentage: 92, recyclable: true },
@@ -399,7 +399,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Slovenia",
       batchNumber: "TBE-IOT-2025-X200-3421",
       lotNumber: "LOT-2025-APR-3421",
-      productImage: "/assets/stock_images/smart_home_hub_devic_8ba94000.jpg",
+      productImage: "/assets/stock_images/smarthome_hub_pro.png",
       materials: "Recycled ABS Plastic (65%), PCB with Lead-Free Solder, Aluminum Heat Sink, Tempered Glass Display",
       materialBreakdown: [
         { material: "Recycled ABS Plastic", percentage: 45, recyclable: true },
@@ -460,7 +460,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Slovenia",
       batchNumber: "RLP-PKG-2024-MOD-1152",
       lotNumber: "LOT-2024-NOV-1152",
-      productImage: "/assets/stock_images/eco_friendly_biodegr_38f4835c.jpg",
+      productImage: "/assets/stock_images/packaging_container_pro.png",
       materials: "Recycled HDPE (100%), Steel Reinforcement Corners, RFID Tag, QR Label",
       materialBreakdown: [
         { material: "Recycled HDPE", percentage: 88, recyclable: true },
@@ -519,7 +519,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Portugal",
       batchNumber: "CTE-EVC-2025-7500-0892",
       lotNumber: "LOT-2025-SEP-0892",
-      productImage: "/assets/stock_images/electric_vehicle_car_73ff6ee8.jpg",
+      productImage: "/assets/stock_images/ev_charging_cable_pro.png",
       materials: "TPE Outer Jacket (Halogen-Free), Oxygen-Free Copper Conductors, Polycarbonate Connector Housing",
       materialBreakdown: [
         { material: "Oxygen-Free Copper", percentage: 55, recyclable: true },
@@ -577,7 +577,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "China",
       batchNumber: "ATI-AUD-2025-4592",
       lotNumber: "LOT-2025-AUG-4592",
-      productImage: "/assets/stock_images/premium_wireless_hea_9e631693.jpg",
+      productImage: "/assets/stock_images/headphones_pro.png",
       materials: "ABS Plastic, Synthetic Leather, Aluminum, Copper Wiring, Lithium-Ion Battery, Memory Foam",
       materialBreakdown: [
         { material: "ABS Plastic", percentage: 42, recyclable: true },
@@ -639,7 +639,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Italy",
       batchNumber: "BTS-LEA-2025-2847",
       lotNumber: "LOT-2025-SPR-2847",
-      productImage: "/assets/stock_images/luxury_leather_handb_03681045.jpg",
+      productImage: "/assets/stock_images/leather_tote_pro.png",
       materials: "Full-Grain Vegetable-Tanned Leather, Brass Hardware, Cotton Lining, Organic Cotton Thread",
       materialBreakdown: [
         { material: "Full-Grain Leather", percentage: 75, recyclable: true },
@@ -699,7 +699,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "Netherlands",
       batchNumber: "GHT-SMH-2025-8834",
       lotNumber: "LOT-2025-OCT-8834",
-      productImage: "/assets/stock_images/smart_home_thermosta_3e0251e2.jpg",
+      productImage: "/assets/stock_images/thermostat_pro.png",
       materials: "Recycled ABS Plastic, Tempered Glass, PCB with Lead-Free Solder, Temperature Sensors",
       materialBreakdown: [
         { material: "Recycled ABS Plastic", percentage: 55, recyclable: true },
@@ -759,7 +759,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "India",
       batchNumber: "IPB-CVB-2025-EP400-2847",
       lotNumber: "LOT-2025-DEC-2847",
-      productImage: "/assets/stock_images/industrial_rubber_co_6782e308.jpg",
+      productImage: "/assets/stock_images/conveyor_belt_pro.png",
       materials: "Polyester-Nylon (EP) Fabric Plies, Natural Rubber Cover, Synthetic Rubber Compound, Steel Cord Reinforcement",
       materialBreakdown: [
         { material: "Natural Rubber", percentage: 45, recyclable: true },
@@ -820,7 +820,7 @@ const demoProducts: DemoProductData[] = [
       countryOfOrigin: "India",
       batchNumber: "CTS-ROL-2025-DR50-1423",
       lotNumber: "LOT-2025-DEC-1423",
-      productImage: "/assets/stock_images/industrial_steel_con_6d4421ed.jpg",
+      productImage: "/assets/stock_images/conveyor_roller_pro.png",
       materials: "Precision Steel Tube, Deep Groove Ball Bearings, Galvanized Steel Shaft, Polyurethane Coating",
       materialBreakdown: [
         { material: "Carbon Steel Tube", percentage: 55, recyclable: true },

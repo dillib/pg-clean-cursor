@@ -163,7 +163,7 @@ export default function Landing() {
             <div className="relative">
               <div className="absolute inset-0 rounded-xl overflow-hidden opacity-20 dark:opacity-15">
                 <img 
-                  src="/assets/stock_images/person_scanning_qr_c_5dd93375.jpg" 
+                  src="/assets/stock_images/battery_pack_pro.png" 
                   alt="QR code scanning technology"
                   className="w-full h-full object-cover"
                 />
@@ -179,7 +179,7 @@ export default function Landing() {
                   <div className="flex items-start gap-4">
                     <div className="w-24 h-24 rounded-md overflow-hidden flex-shrink-0">
                       <img 
-                        src="/assets/stock_images/lithium_ion_battery__913af259.jpg" 
+                        src="/assets/stock_images/battery_pack_pro.png" 
                         alt="GreenCell Li-Ion Battery Pack"
                         className="w-full h-full object-cover"
                         data-testid="img-hero-product"
@@ -380,7 +380,7 @@ export default function Landing() {
               <CardContent className="p-4 space-y-3">
                 <div className="aspect-square w-full rounded-md overflow-hidden">
                   <img 
-                    src="/assets/stock_images/lithium_ion_battery__e9545ddb.jpg" 
+                    src="/assets/stock_images/battery_pack_pro.png" 
                     alt="Li-Ion Battery Pack"
                     className="w-full h-full object-cover"
                     data-testid="img-showcase-battery"
@@ -408,7 +408,7 @@ export default function Landing() {
               <CardContent className="p-4 space-y-3">
                 <div className="aspect-square w-full rounded-md overflow-hidden">
                   <img 
-                    src="/assets/stock_images/merino_wool_sweater__bf977340.jpg" 
+                    src="/assets/stock_images/wool_sweater_pro.png" 
                     alt="Premium Wool Sweater"
                     className="w-full h-full object-cover"
                     data-testid="img-showcase-textile"
@@ -436,7 +436,7 @@ export default function Landing() {
               <CardContent className="p-4 space-y-3">
                 <div className="aspect-square w-full rounded-md overflow-hidden">
                   <img 
-                    src="/assets/stock_images/luxury_leather_handb_0c8e215c.jpg" 
+                    src="/assets/stock_images/leather_tote_pro.png" 
                     alt="Artisan Leather Tote"
                     className="w-full h-full object-cover"
                     data-testid="img-showcase-leather"
@@ -464,7 +464,7 @@ export default function Landing() {
               <CardContent className="p-4 space-y-3">
                 <div className="aspect-square w-full rounded-md overflow-hidden">
                   <img 
-                    src="/assets/stock_images/smart_home_thermosta_3e0251e2.jpg" 
+                    src="/assets/stock_images/thermostat_pro.png" 
                     alt="Smart Thermostat"
                     className="w-full h-full object-cover"
                     data-testid="img-showcase-smarthome"
