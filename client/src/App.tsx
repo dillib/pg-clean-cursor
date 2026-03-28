@@ -21,6 +21,7 @@ import ProductForm from "@/pages/product-form";
 import ProductDetail from "@/pages/product-detail";
 import IoTDevices from "@/pages/iot-devices";
 import SAPConnector from "@/pages/sap-connector";
+import SAPOperations from "@/pages/sap-operations";
 import SAPDemo from "@/pages/sap-demo";
 import PublicScan from "@/pages/public-scan";
 import Pricing from "@/pages/pricing";
@@ -391,6 +392,11 @@ function Router() {
       <Route path="/integrations/sap">
         <ProtectedRoute>
           <SAPConnector />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/integrations/sap-operations">
+        <ProtectedRoute>
+          <SAPOperations />
         </ProtectedRoute>
       </Route>
       <Route path="/integrations/sap-demo">

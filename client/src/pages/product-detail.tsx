@@ -106,6 +106,18 @@ export default function ProductDetail() {
     queryKey: ["/api/products", params.id],
   });
 
+  const { data: regionalExtensions } = useQuery<Array<{ id: string; regionCode: string; complianceStatus: string; payload: unknown }>>({
+    queryKey: ["/api/products", params.id, "regional-extensions"],
+    queryFn: async () => {
+      const r = await fetch(`/api/products/${params.id}/regional-extensions`);
+      if (!r.ok) return [];
+      return r.json();
+    },
+    enabled: !!params.id,
+  });
+  const euExtension = regionalExtensions?.find(e => e.regionCode === "EU");
+  const euData = euExtension?.payload as import("@shared/schema").EUExtensionData | undefined;
+
   const { data: traceEvents, isLoading: isLoadingTrace } = useQuery<TraceEvent[]>({
     queryKey: ["/api/products", params.id, "trace"],
     enabled: !!params.id,
@@ -383,6 +395,13 @@ export default function ProductDetail() {
                       data-testid="tab-iot-devices"
                     >
                       IoT Devices
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="eu-espr"
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+                      data-testid="tab-eu-espr"
+                    >
+                      EU ESPR
                     </TabsTrigger>
                   </TabsList>
                 </div>
@@ -1309,6 +1328,192 @@ export default function ProductDetail() {
                     </Card>
                   )}
                 </TabsContent>
+
+                {/* ── EU ESPR Tab ─────────────────────────────────── */}
+                <TabsContent value="eu-espr" className="p-6 space-y-6">
+                  {!euData ? (
+                    <div className="text-center py-12">
+                      <Shield className="w-12 h-12 mx-auto text-muted-foreground/40 mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No EU ESPR data</h3>
+                      <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                        Add EU regional extension data to track ESPR (Regulation 2024/1781) compliance,
+                        battery regulation, REACH obligations, and EPR registration.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {/* ESPR Status */}
+                      <div>
+                        <h3 className="font-semibold mb-3 flex items-center gap-2">
+                          <Shield className="h-4 w-4" />
+                          ESPR Compliance — Regulation (EU) 2024/1781
+                        </h3>
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                          <div className="space-y-1">
+                            <div className="text-sm text-muted-foreground">Compliance Status</div>
+                            <Badge
+                              variant={euData.espr.complianceStatus === "compliant" ? "default" : "outline"}
+                              className={euData.espr.complianceStatus === "compliant"
+                                ? "bg-green-600"
+                                : euData.espr.complianceStatus === "pending"
+                                ? "border-amber-500 text-amber-600"
+                                : "border-red-500 text-red-600"}
+                              data-testid="badge-espr-status"
+                            >
+                              {euData.espr.complianceStatus === "compliant" ? "Compliant" : euData.espr.complianceStatus === "pending" ? "Pending" : "Non-Compliant"}
+                            </Badge>
+                          </div>
+                          <div className="space-y-1">
+                            <div className="text-sm text-muted-foreground">DPP Version</div>
+                            <p className="font-mono font-medium" data-testid="text-dpp-version">{euData.espr.dppVersion}</p>
+                          </div>
+                          <div className="space-y-1">
+                            <div className="text-sm text-muted-foreground">Product Category</div>
+                            <p className="font-medium" data-testid="text-espr-category">{euData.espr.productCategory}</p>
+                          </div>
+                          {euData.espr.validFrom && (
+                            <div className="space-y-1">
+                              <div className="text-sm text-muted-foreground">Valid From</div>
+                              <p className="font-medium">{new Date(euData.espr.validFrom).toLocaleDateString()}</p>
+                            </div>
+                          )}
+                          {euData.espr.validUntil && (
+                            <div className="space-y-1">
+                              <div className="text-sm text-muted-foreground">Valid Until</div>
+                              <p className="font-medium">{new Date(euData.espr.validUntil).toLocaleDateString()}</p>
+                            </div>
+                          )}
+                          <div className="space-y-1">
+                            <div className="text-sm text-muted-foreground">CE Marking</div>
+                            <Badge variant={euData.ceMarking ? "default" : "outline"} data-testid="badge-ce-marking">
+                              {euData.ceMarking ? "CE Marked" : "Not CE Marked"}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Battery Regulation */}
+                      {euData.batteryRegulation && (
+                        <>
+                          <Separator />
+                          <div>
+                            <h3 className="font-semibold mb-3 flex items-center gap-2">
+                              <Zap className="h-4 w-4" />
+                              EU Battery Regulation 2023/1542
+                            </h3>
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                              <div className="space-y-1">
+                                <div className="text-sm text-muted-foreground">Battery Type</div>
+                                <p className="font-medium capitalize" data-testid="text-battery-type">{euData.batteryRegulation.batteryType.replace(/_/g, " ")}</p>
+                              </div>
+                              {euData.batteryRegulation.carbonFootprintClass && (
+                                <div className="space-y-1">
+                                  <div className="text-sm text-muted-foreground">Carbon Footprint Class</div>
+                                  <Badge variant="outline" data-testid="text-carbon-class">{euData.batteryRegulation.carbonFootprintClass}</Badge>
+                                </div>
+                              )}
+                              {euData.batteryRegulation.stateOfHealth !== undefined && (
+                                <div className="space-y-1">
+                                  <div className="text-sm text-muted-foreground">State of Health</div>
+                                  <p className="font-medium">{euData.batteryRegulation.stateOfHealth}%</p>
+                                </div>
+                              )}
+                              {euData.batteryRegulation.recycledContentCobalt !== undefined && (
+                                <div className="space-y-1">
+                                  <div className="text-sm text-muted-foreground">Recycled Cobalt</div>
+                                  <p className="font-medium">{euData.batteryRegulation.recycledContentCobalt}%</p>
+                                </div>
+                              )}
+                              {euData.batteryRegulation.recycledContentLithium !== undefined && (
+                                <div className="space-y-1">
+                                  <div className="text-sm text-muted-foreground">Recycled Lithium</div>
+                                  <p className="font-medium">{euData.batteryRegulation.recycledContentLithium}%</p>
+                                </div>
+                              )}
+                              {euData.batteryRegulation.recycledContentNickel !== undefined && (
+                                <div className="space-y-1">
+                                  <div className="text-sm text-muted-foreground">Recycled Nickel</div>
+                                  <p className="font-medium">{euData.batteryRegulation.recycledContentNickel}%</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* REACH / SCIP */}
+                      {euData.reach && (
+                        <>
+                          <Separator />
+                          <div>
+                            <h3 className="font-semibold mb-3 flex items-center gap-2">
+                              <AlertTriangle className="h-4 w-4" />
+                              REACH Regulation — Chemical Compliance
+                            </h3>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                              {euData.reach.scipId && (
+                                <div className="space-y-1">
+                                  <div className="text-sm text-muted-foreground">SCIP ID (ECHA)</div>
+                                  <p className="font-mono text-sm font-medium" data-testid="text-scip-id">{euData.reach.scipId}</p>
+                                </div>
+                              )}
+                              <div className="space-y-1">
+                                <div className="text-sm text-muted-foreground">SVHC Substances</div>
+                                <Badge variant={euData.reach.svhcPresent ? "destructive" : "default"} data-testid="badge-svhc">
+                                  {euData.reach.svhcPresent ? "SVHC Present" : "No SVHC"}
+                                </Badge>
+                              </div>
+                              {euData.reach.svhcPresent && euData.reach.svhcSubstances && (
+                                <div className="space-y-1 col-span-2">
+                                  <div className="text-sm text-muted-foreground">Substances of Very High Concern</div>
+                                  <div className="flex flex-wrap gap-1">
+                                    {euData.reach.svhcSubstances.map((s, i) => (
+                                      <Badge key={i} variant="outline" className="text-xs font-mono">{s}</Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* EPR & Repairability */}
+                      {(euData.eprRegistrationId || euData.repairabilityIndex !== undefined) && (
+                        <>
+                          <Separator />
+                          <div>
+                            <h3 className="font-semibold mb-3 flex items-center gap-2">
+                              <Recycle className="h-4 w-4" />
+                              EPR Registration &amp; Repairability
+                            </h3>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                              {euData.eprRegistrationId && (
+                                <div className="space-y-1">
+                                  <div className="text-sm text-muted-foreground">EPR Registration ID</div>
+                                  <p className="font-mono font-medium text-sm" data-testid="text-epr-id">{euData.eprRegistrationId}</p>
+                                </div>
+                              )}
+                              {euData.repairabilityIndex !== undefined && (
+                                <div className="space-y-1">
+                                  <div className="text-sm text-muted-foreground">Repairability Index</div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-2xl font-bold" data-testid="text-repairability-index">{euData.repairabilityIndex.toFixed(1)}</span>
+                                    <span className="text-muted-foreground">/10</span>
+                                    <Badge variant="outline" className={euData.repairabilityIndex >= 7 ? "border-green-500 text-green-600" : euData.repairabilityIndex >= 5 ? "border-amber-500 text-amber-600" : "border-red-500 text-red-600"}>
+                                      {euData.repairabilityIndex >= 7 ? "Good" : euData.repairabilityIndex >= 5 ? "Moderate" : "Low"}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </TabsContent>
+
               </Tabs>
             </CardContent>
           </Card>

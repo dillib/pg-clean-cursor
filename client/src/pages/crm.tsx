@@ -12,10 +12,12 @@ import {
   Users, TrendingUp, Target, Calendar, Mail, Building, 
   ChevronRight, Search, Filter, ArrowUpRight, ArrowDownRight,
   CheckCircle, Clock, XCircle, Phone, UserPlus, Handshake,
-  Wand2, Loader2, Trash2, Eye, EyeOff, Copy, ExternalLink
+  Wand2, Loader2, Trash2, Eye, EyeOff, Copy, ExternalLink,
+  Globe, Database, ClipboardList
 } from "lucide-react";
 import { useState } from "react";
-import type { Lead, LeadStatus, TierInterest, Partner, DemoConfig } from "@shared/schema";
+import { SiSap } from "react-icons/si";
+import type { Lead, LeadStatus, TierInterest, Partner, DemoConfig, SAPSystemType } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -45,10 +47,43 @@ interface LeadStats {
   lastWeek: number;
 }
 
+const SAP_SYSTEM_LABELS: Record<string, string> = {
+  s4hana_cloud: "S/4HANA Cloud", s4hana_onprem: "S/4HANA On-Prem",
+  ecc: "SAP ECC", business_one: "Business One", no_sap: "No SAP", other_erp: "Other ERP",
+};
+const COMPLIANCE_LABELS: Record<string, string> = {
+  not_started: "Not started", planning: "Planning", in_progress: "In progress", compliant: "Compliant",
+};
+const TIMELINE_LABELS: Record<string, string> = {
+  immediate: "Immediate", "1_3_months": "1–3 months", "3_6_months": "3–6 months",
+  "6_12_months": "6–12 months", exploring: "Exploring",
+};
+
+function assessmentScore(lead: Lead): number {
+  let score = 0;
+  if (lead.sapSystemType && lead.sapSystemType !== "no_sap") score += 25;
+  if (lead.euMarketsActive === "yes") score += 20;
+  if ((lead.dppCategories ?? []).length > 0) score += 20;
+  if (lead.dppComplianceStatus && lead.dppComplianceStatus !== "compliant") score += 10;
+  if (lead.implementationTimeline === "immediate" || lead.implementationTimeline === "1_3_months") score += 15;
+  if (lead.integrationNeeds && lead.integrationNeeds !== "standalone") score += 10;
+  return Math.min(score, 100);
+}
+
+function AssessmentScoreBadge({ score }: { score: number }) {
+  const color = score >= 70 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+    : score >= 40 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+    : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400";
+  if (score === 0) return null;
+  return <Badge variant="outline" className={`text-xs font-medium ${color}`}>{score}% fit</Badge>;
+}
+
 export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [tierFilter, setTierFilter] = useState<string>("all");
+  const [sapFilter, setSapFilter] = useState<boolean>(false);
+  const [assessmentFilter, setAssessmentFilter] = useState<boolean>(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const { toast } = useToast();
 
@@ -84,8 +119,10 @@ export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
     
     const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
     const matchesTier = tierFilter === "all" || lead.tierInterest === tierFilter;
+    const matchesSap = !sapFilter || (lead.sapSystemType && lead.sapSystemType !== "no_sap");
+    const matchesAssessment = !assessmentFilter || !!lead.assessmentCompletedAt;
     
-    return matchesSearch && matchesStatus && matchesTier;
+    return matchesSearch && matchesStatus && matchesTier && matchesSap && matchesAssessment;
   });
 
   const leadVelocity = stats ? (stats.thisWeek - stats.lastWeek) / Math.max(stats.lastWeek, 1) * 100 : 0;
@@ -300,6 +337,22 @@ export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
                   <SelectItem value="enterprise">Enterprise</SelectItem>
                 </SelectContent>
               </Select>
+              <button
+                onClick={() => setSapFilter(v => !v)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${sapFilter ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
+                data-testid="button-filter-sap"
+              >
+                <SiSap className="w-3.5 h-3.5" />
+                SAP
+              </button>
+              <button
+                onClick={() => setAssessmentFilter(v => !v)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${assessmentFilter ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
+                data-testid="button-filter-assessed"
+              >
+                <ClipboardList className="w-3.5 h-3.5" />
+                Assessed
+              </button>
             </div>
           </div>
         </CardHeader>
@@ -318,6 +371,8 @@ export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
             <div className="space-y-2">
               {filteredLeads.map((lead) => {
                 const statusConfig = STATUS_CONFIG[lead.status];
+                const score = assessmentScore(lead);
+                const hasAssessment = !!lead.assessmentCompletedAt || !!lead.sapSystemType;
                 return (
                   <Dialog key={lead.id}>
                     <DialogTrigger asChild>
@@ -325,7 +380,7 @@ export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
                         className="flex items-center gap-4 p-4 rounded-lg border hover-elevate cursor-pointer"
                         data-testid={`lead-row-${lead.id}`}
                       >
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <span className="text-sm font-medium">
                             {lead.firstName[0]}{lead.lastName[0]}
                           </span>
@@ -336,6 +391,13 @@ export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
                             <Badge className={TIER_COLORS[lead.tierInterest]} variant="secondary">
                               {lead.tierInterest}
                             </Badge>
+                            {hasAssessment && score > 0 && <AssessmentScoreBadge score={score} />}
+                            {lead.sapSystemType && lead.sapSystemType !== "no_sap" && (
+                              <Badge variant="outline" className="text-xs gap-1">
+                                <SiSap className="w-2.5 h-2.5" />
+                                {SAP_SYSTEM_LABELS[lead.sapSystemType] ?? lead.sapSystemType}
+                              </Badge>
+                            )}
                           </div>
                           <div className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
                             <span>{lead.email}</span>
@@ -353,90 +415,189 @@ export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
                         <span className="text-xs text-muted-foreground hidden sm:block">
                           {format(new Date(lead.createdAt), "MMM d, yyyy")}
                         </span>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                       </div>
                     </DialogTrigger>
-                    <DialogContent className="max-w-lg">
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
-                        <DialogTitle>{lead.firstName} {lead.lastName}</DialogTitle>
-                        <DialogDescription>{lead.company || "No company"} • {lead.jobTitle || "No title"}</DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center gap-3">
                           <div>
-                            <label className="text-sm text-muted-foreground">Email</label>
-                            <p className="font-medium">{lead.email}</p>
+                            <DialogTitle>{lead.firstName} {lead.lastName}</DialogTitle>
+                            <DialogDescription>{lead.company || "No company"} • {lead.jobTitle || "No title"}</DialogDescription>
                           </div>
-                          <div>
-                            <label className="text-sm text-muted-foreground">Phone</label>
-                            <p className="font-medium">{lead.phone || "-"}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm text-muted-foreground">Tier Interest</label>
-                            <Badge className={TIER_COLORS[lead.tierInterest]} variant="secondary">
-                              {lead.tierInterest}
-                            </Badge>
-                          </div>
-                          <div>
-                            <label className="text-sm text-muted-foreground">Volume</label>
-                            <p className="font-medium">{lead.estimatedVolume || "-"}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm text-muted-foreground">Source</label>
-                            <p className="font-medium capitalize">{lead.source.replace("_", " ")}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm text-muted-foreground">Created</label>
-                            <p className="font-medium">{format(new Date(lead.createdAt), "MMM d, yyyy")}</p>
-                          </div>
+                          {score > 0 && <AssessmentScoreBadge score={score} />}
                         </div>
-                        
-                        {lead.message && (
-                          <div>
-                            <label className="text-sm text-muted-foreground">Message</label>
-                            <p className="text-sm mt-1 p-3 bg-muted rounded-lg">{lead.message}</p>
+                      </DialogHeader>
+
+                      <Tabs defaultValue="contact">
+                        <TabsList className="w-full">
+                          <TabsTrigger value="contact" className="flex-1">
+                            <Mail className="w-3.5 h-3.5 mr-1.5" />Contact
+                          </TabsTrigger>
+                          {hasAssessment && (
+                            <TabsTrigger value="assessment" className="flex-1">
+                              <ClipboardList className="w-3.5 h-3.5 mr-1.5" />Assessment
+                            </TabsTrigger>
+                          )}
+                          <TabsTrigger value="pipeline" className="flex-1">
+                            <Target className="w-3.5 h-3.5 mr-1.5" />Pipeline
+                          </TabsTrigger>
+                        </TabsList>
+
+                        {/* ── Contact tab ── */}
+                        <TabsContent value="contact" className="space-y-4 pt-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs text-muted-foreground uppercase tracking-wide">Email</label>
+                              <p className="font-medium mt-0.5">{lead.email}</p>
+                            </div>
+                            <div>
+                              <label className="text-xs text-muted-foreground uppercase tracking-wide">Phone</label>
+                              <p className="font-medium mt-0.5">{lead.phone || "-"}</p>
+                            </div>
+                            <div>
+                              <label className="text-xs text-muted-foreground uppercase tracking-wide">Tier Interest</label>
+                              <div className="mt-0.5">
+                                <Badge className={TIER_COLORS[lead.tierInterest]} variant="secondary">{lead.tierInterest}</Badge>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="text-xs text-muted-foreground uppercase tracking-wide">Product Volume</label>
+                              <p className="font-medium mt-0.5">{lead.estimatedVolume || "-"}</p>
+                            </div>
+                            <div>
+                              <label className="text-xs text-muted-foreground uppercase tracking-wide">Source</label>
+                              <p className="font-medium mt-0.5 capitalize">{lead.source.replace(/_/g, " ")}</p>
+                            </div>
+                            <div>
+                              <label className="text-xs text-muted-foreground uppercase tracking-wide">Submitted</label>
+                              <p className="font-medium mt-0.5">{format(new Date(lead.createdAt), "MMM d, yyyy")}</p>
+                            </div>
                           </div>
+                          {lead.message && (
+                            <div>
+                              <label className="text-xs text-muted-foreground uppercase tracking-wide">Message</label>
+                              <p className="text-sm mt-1 p-3 bg-muted rounded-lg">{lead.message}</p>
+                            </div>
+                          )}
+                          <div className="flex gap-2 pt-2">
+                            <Button variant="outline" className="flex-1" asChild>
+                              <a href={`mailto:${lead.email}`}><Mail className="w-4 h-4 mr-2" />Email</a>
+                            </Button>
+                            {lead.phone && (
+                              <Button variant="outline" className="flex-1" asChild>
+                                <a href={`tel:${lead.phone}`}><Phone className="w-4 h-4 mr-2" />Call</a>
+                              </Button>
+                            )}
+                          </div>
+                        </TabsContent>
+
+                        {/* ── Assessment tab ── */}
+                        {hasAssessment && (
+                          <TabsContent value="assessment" className="space-y-4 pt-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              {lead.sapSystemType && (
+                                <div className="col-span-2 flex items-center gap-2 p-3 bg-muted/40 rounded-lg">
+                                  <SiSap className="w-5 h-5 text-primary" />
+                                  <div>
+                                    <p className="text-xs text-muted-foreground">SAP System</p>
+                                    <p className="font-medium text-sm">{SAP_SYSTEM_LABELS[lead.sapSystemType] ?? lead.sapSystemType}
+                                      {lead.sapDeployment && ` · ${lead.sapDeployment.replace("_", " ")}`}
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                              {lead.currentErp && (
+                                <div className="col-span-2">
+                                  <label className="text-xs text-muted-foreground uppercase tracking-wide">Current ERP Landscape</label>
+                                  <p className="text-sm mt-0.5">{lead.currentErp}</p>
+                                </div>
+                              )}
+                              {lead.euMarketsActive && (
+                                <div>
+                                  <label className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1"><Globe className="w-3 h-3" />EU Markets</label>
+                                  <p className="text-sm font-medium mt-0.5 capitalize">{lead.euMarketsActive.replace("_", " ")}</p>
+                                </div>
+                              )}
+                              {lead.dppComplianceStatus && (
+                                <div>
+                                  <label className="text-xs text-muted-foreground uppercase tracking-wide">DPP Status</label>
+                                  <p className="text-sm font-medium mt-0.5">{COMPLIANCE_LABELS[lead.dppComplianceStatus] ?? lead.dppComplianceStatus}</p>
+                                </div>
+                              )}
+                              {lead.estimatedSkus && (
+                                <div>
+                                  <label className="text-xs text-muted-foreground uppercase tracking-wide">Est. SKUs</label>
+                                  <p className="text-sm font-medium mt-0.5">{lead.estimatedSkus.replace(/_/g, " ")}</p>
+                                </div>
+                              )}
+                              {lead.implementationTimeline && (
+                                <div>
+                                  <label className="text-xs text-muted-foreground uppercase tracking-wide">Timeline</label>
+                                  <p className="text-sm font-medium mt-0.5">{TIMELINE_LABELS[lead.implementationTimeline] ?? lead.implementationTimeline}</p>
+                                </div>
+                              )}
+                              {lead.primaryUseCase && (
+                                <div>
+                                  <label className="text-xs text-muted-foreground uppercase tracking-wide">Primary Use Case</label>
+                                  <p className="text-sm font-medium mt-0.5 capitalize">{lead.primaryUseCase.replace(/_/g, " ")}</p>
+                                </div>
+                              )}
+                              {lead.integrationNeeds && (
+                                <div>
+                                  <label className="text-xs text-muted-foreground uppercase tracking-wide">Integration Needs</label>
+                                  <p className="text-sm font-medium mt-0.5 capitalize">{lead.integrationNeeds.replace(/_/g, " ")}</p>
+                                </div>
+                              )}
+                              {(lead.dppCategories ?? []).length > 0 && (
+                                <div className="col-span-2">
+                                  <label className="text-xs text-muted-foreground uppercase tracking-wide">DPP Categories</label>
+                                  <div className="flex flex-wrap gap-1.5 mt-1">
+                                    {(lead.dppCategories ?? []).map(cat => (
+                                      <Badge key={cat} variant="secondary" className="text-xs capitalize">{cat.replace(/_/g, " ")}</Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              {lead.assessmentNotes && (
+                                <div className="col-span-2">
+                                  <label className="text-xs text-muted-foreground uppercase tracking-wide">Technical Notes</label>
+                                  <p className="text-sm mt-0.5 p-3 bg-muted/40 rounded-lg">{lead.assessmentNotes}</p>
+                                </div>
+                              )}
+                            </div>
+                          </TabsContent>
                         )}
 
-                        <div>
-                          <label className="text-sm text-muted-foreground mb-2 block">Update Status</label>
-                          <Select 
-                            value={lead.status}
-                            onValueChange={(value) => updateLeadMutation.mutate({ 
-                              id: lead.id, 
-                              updates: { status: value as LeadStatus } 
-                            })}
-                          >
-                            <SelectTrigger data-testid="select-update-status">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {(Object.keys(STATUS_CONFIG) as LeadStatus[]).map((status) => (
-                                <SelectItem key={status} value={status}>
-                                  {STATUS_CONFIG[status].label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1" asChild>
-                            <a href={`mailto:${lead.email}`}>
-                              <Mail className="w-4 h-4 mr-2" />
-                              Email
-                            </a>
-                          </Button>
-                          {lead.phone && (
-                            <Button variant="outline" className="flex-1" asChild>
-                              <a href={`tel:${lead.phone}`}>
-                                <Phone className="w-4 h-4 mr-2" />
-                                Call
-                              </a>
-                            </Button>
+                        {/* ── Pipeline tab ── */}
+                        <TabsContent value="pipeline" className="space-y-4 pt-4">
+                          <div>
+                            <label className="text-xs text-muted-foreground uppercase tracking-wide mb-2 block">Update Status</label>
+                            <Select 
+                              value={lead.status}
+                              onValueChange={(value) => updateLeadMutation.mutate({ 
+                                id: lead.id, 
+                                updates: { status: value as LeadStatus } 
+                              })}
+                            >
+                              <SelectTrigger data-testid="select-update-status">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(Object.keys(STATUS_CONFIG) as LeadStatus[]).map((status) => (
+                                  <SelectItem key={status} value={status}>{STATUS_CONFIG[status].label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          {lead.notes && (
+                            <div>
+                              <label className="text-xs text-muted-foreground uppercase tracking-wide">Internal Notes</label>
+                              <p className="text-sm mt-1 p-3 bg-muted rounded-lg">{lead.notes}</p>
+                            </div>
                           )}
-                        </div>
-                      </div>
+                        </TabsContent>
+                      </Tabs>
                     </DialogContent>
                   </Dialog>
                 );

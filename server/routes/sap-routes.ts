@@ -1,7 +1,8 @@
 import { Router, Request, Response } from "express";
 import { sapMockService, SAPMaterial, SAPConflict } from "../services/sap-mock-service";
+import { SAPODataClient, scheduleConnectorSync, clearScheduledSync, getActiveSchedules } from "../services/sap-odata-client";
 import { storage } from "../storage";
-import type { InsertProduct } from "@shared/schema";
+import type { InsertProduct, SAPConfig } from "@shared/schema";
 
 const router = Router();
 
@@ -334,6 +335,110 @@ router.post("/materials/:matnr/update", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("[SAP API] Error updating material:", error);
     res.status(500).json({ error: "Failed to update material" });
+  }
+});
+
+// ─── Real OData connection test ───────────────────────────────────────────────
+
+router.post("/test-connection", async (req: Request, res: Response) => {
+  try {
+    const config = req.body as SAPConfig;
+    if (!config) {
+      return res.status(400).json({ error: "SAP config required" });
+    }
+    const client = new SAPODataClient(config);
+    const result = await client.testConnection();
+    res.json(result);
+  } catch (error) {
+    console.error("[SAP API] Connection test error:", error);
+    res.status(500).json({ error: "Connection test failed", details: String(error) });
+  }
+});
+
+// Test connection for a persisted connector
+router.post("/connectors/:id/test-real", async (req: Request, res: Response) => {
+  try {
+    const connectors = await storage.getAllEnterpriseConnectors();
+    const connector = connectors.find(c => c.id === req.params.id && c.connectorType === "sap");
+    if (!connector) {
+      return res.status(404).json({ error: "SAP connector not found" });
+    }
+    const config = connector.config as SAPConfig;
+    const client = new SAPODataClient(config);
+    const result = await client.testConnection();
+
+    // Update connector status in DB based on result
+    await storage.updateEnterpriseConnector(connector.id, {
+      status: result.success ? "active" : "error",
+      lastSyncStatus: result.success ? "connection_ok" : result.error,
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error("[SAP API] Connector test error:", error);
+    res.status(500).json({ error: "Test failed", details: String(error) });
+  }
+});
+
+// ─── Scheduler management ─────────────────────────────────────────────────────
+
+router.get("/scheduler/status", (_req: Request, res: Response) => {
+  res.json({ activeConnectors: getActiveSchedules() });
+});
+
+router.post("/scheduler/start/:connectorId", async (req: Request, res: Response) => {
+  try {
+    const connector = await storage.getEnterpriseConnector(req.params.connectorId);
+    if (!connector || connector.connectorType !== "sap") {
+      return res.status(404).json({ error: "SAP connector not found" });
+    }
+    const config = connector.config as SAPConfig;
+
+    scheduleConnectorSync(connector.id, config, async (connectorId, client) => {
+      const result = await client.fetchMaterials({ top: 100 });
+      console.log(`[SAPScheduler] Fetched ${result.materials.length} materials for ${connectorId} (mock: ${result.usedMock})`);
+      await storage.updateEnterpriseConnector(connectorId, {
+        lastSyncStatus: result.error ? `error: ${result.error}` : "ok",
+        productsSynced: result.totalCount,
+      });
+    });
+
+    res.json({ message: "Scheduler started", connectorId: connector.id });
+  } catch (error) {
+    console.error("[SAP API] Scheduler start error:", error);
+    res.status(500).json({ error: "Failed to start scheduler" });
+  }
+});
+
+router.post("/scheduler/stop/:connectorId", (req: Request, res: Response) => {
+  clearScheduledSync(req.params.connectorId);
+  res.json({ message: "Scheduler stopped", connectorId: req.params.connectorId });
+});
+
+// ─── Fetch real materials via OData (with mock fallback) ─────────────────────
+
+router.post("/fetch-materials", async (req: Request, res: Response) => {
+  try {
+    const { connectorId, top = 50, skip = 0, materialTypes, plants } = req.body;
+    
+    let config: SAPConfig | null = null;
+    if (connectorId) {
+      const connector = await storage.getEnterpriseConnector(connectorId);
+      if (connector?.connectorType === "sap") {
+        config = connector.config as SAPConfig;
+      }
+    }
+
+    const client = new SAPODataClient(config ?? {
+      systemType: "S4HANA", hostname: "mock", port: 443, client: "100",
+      systemId: "DEMO", apiType: "OData", oauthEnabled: false, syncFrequency: "manual",
+    });
+
+    const result = await client.fetchMaterials({ top, skip, materialTypes, plants });
+    res.json(result);
+  } catch (error) {
+    console.error("[SAP API] Fetch materials error:", error);
+    res.status(500).json({ error: "Failed to fetch materials" });
   }
 });
 

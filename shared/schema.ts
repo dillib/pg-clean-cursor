@@ -708,18 +708,36 @@ export interface DppModuleSummary {
 // ============================================
 
 export type ConnectorType = "sap" | "oracle" | "microsoft_dynamics" | "siemens" | "infor" | "custom";
-export type ConnectorStatus = "active" | "inactive" | "error" | "pending";
+export type ConnectorStatus = "active" | "inactive" | "error" | "pending" | "connecting";
 export type SyncDirection = "inbound" | "outbound" | "bidirectional";
 
 export interface SAPConfig {
+  // Connection
   systemType: "S4HANA" | "ECC" | "Business_One";
   hostname: string;
   port: number;
   client: string;
   systemId: string;
   apiType: "OData" | "RFC" | "IDoc";
+  baseUrl?: string; // override default OData path
+  sslVerify?: boolean;
+  // Authentication
+  authMethod?: "basic" | "oauth2" | "saml";
+  username?: string;
+  password?: string; // stored; rotate regularly
+  oauthClientId?: string;
+  oauthClientSecret?: string;
+  oauthTokenUrl?: string;
+  oauthScope?: string;
+  // Sync Scheduling
   oauthEnabled: boolean;
   syncFrequency: "realtime" | "hourly" | "daily" | "manual";
+  scheduledSyncEnabled?: boolean;
+  scheduledSyncIntervalMinutes?: number;
+  // SAP-specific scope
+  materialTypes?: string[]; // e.g. ['FERT', 'ROH', 'HALB']
+  plants?: string[]; // e.g. ['1000', '2000']
+  lastSyncCursor?: string; // for delta sync
 }
 
 export interface FieldMapping {
@@ -830,6 +848,12 @@ export type LeadStatus = "new" | "contacted" | "demo_scheduled" | "qualified" | 
 export type LeadSource = "pricing_page" | "contact_form" | "demo_request" | "waitlist" | "referral" | "other";
 export type TierInterest = "poc" | "starter" | "growth" | "enterprise";
 
+export type SAPSystemType = "s4hana_cloud" | "s4hana_onprem" | "ecc" | "business_one" | "no_sap" | "other_erp";
+export type DPPComplianceStatus = "not_started" | "planning" | "in_progress" | "compliant";
+export type ImplementationTimeline = "immediate" | "1_3_months" | "3_6_months" | "6_12_months" | "exploring";
+export type PrimaryUseCase = "regulatory" | "sustainability" | "supply_chain" | "customer_transparency" | "all";
+export type IntegrationNeeds = "sap_only" | "erp_integration" | "standalone" | "api_only";
+
 export const leads = pgTable("leads", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   
@@ -849,6 +873,20 @@ export const leads = pgTable("leads", {
   // Pipeline Tracking
   status: text("status").$type<LeadStatus>().default("new").notNull(),
   source: text("source").$type<LeadSource>().default("contact_form").notNull(),
+  
+  // Pre-Sales Technical Assessment
+  sapSystemType: text("sap_system_type").$type<SAPSystemType>(),
+  sapDeployment: text("sap_deployment"), // 'cloud' | 'on_premise' | 'hybrid'
+  currentErp: text("current_erp"), // free text description
+  euMarketsActive: text("eu_markets_active"), // 'yes' | 'no' | 'planned'
+  dppCategories: text("dpp_categories").array(), // ['electronics', 'batteries', 'textiles', ...]
+  estimatedSkus: text("estimated_skus"), // 'under_100' | '100_1k' | '1k_10k' | '10k_100k' | 'over_100k'
+  dppComplianceStatus: text("dpp_compliance_status").$type<DPPComplianceStatus>(),
+  implementationTimeline: text("implementation_timeline").$type<ImplementationTimeline>(),
+  primaryUseCase: text("primary_use_case").$type<PrimaryUseCase>(),
+  integrationNeeds: text("integration_needs").$type<IntegrationNeeds>(),
+  assessmentNotes: text("assessment_notes"),
+  assessmentCompletedAt: timestamp("assessment_completed_at"),
   
   // Follow-up
   notes: text("notes"),

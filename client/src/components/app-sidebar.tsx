@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Package, LayoutDashboard, Plus, LogOut, QrCode, Wifi, Plug, ArrowLeftRight, Settings2 } from "lucide-react";
+import { Package, LayoutDashboard, Plus, LogOut, QrCode, Wifi, Plug, ArrowLeftRight, Settings2, Activity } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,12 @@ const navigationItems: NavItem[] = [
     title: "SAP Connector",
     url: "/integrations/sap",
     icon: Plug,
+    showIn: ["admin", "demo"],
+  },
+  {
+    title: "SAP Operations",
+    url: "/integrations/sap-operations",
+    icon: Activity,
     showIn: ["admin", "demo"],
   },
   {

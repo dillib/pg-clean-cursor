@@ -1110,28 +1110,85 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
                   
                   {ext.payload && typeof ext.payload === "object" && (
                     <div className="pl-4 border-l-2 border-muted space-y-2">
-                      {ext.regionCode === "EU" && (ext.payload as any).EU && (
-                        <>
-                          {(ext.payload as any).EU.espr && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <FileCheck className="h-4 w-4 text-muted-foreground" />
-                              <span>ESPR DPP v{(ext.payload as any).EU.espr.dppVersion}</span>
-                            </div>
-                          )}
-                          {(ext.payload as any).EU.batteryRegulation && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <Zap className="h-4 w-4 text-muted-foreground" />
-                              <span>EU Battery Regulation - Carbon Class {(ext.payload as any).EU.batteryRegulation.carbonFootprintClass}</span>
-                            </div>
-                          )}
-                          {(ext.payload as any).EU.ceMarking && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-                              <span>CE Marking</span>
-                            </div>
-                          )}
-                        </>
-                      )}
+                      {ext.regionCode === "EU" && (ext.payload as any).EU && (() => {
+                        const eu = (ext.payload as any).EU;
+                        return (
+                          <div className="space-y-2">
+                            {/* ESPR */}
+                            {eu.espr && (
+                              <div className="space-y-1.5">
+                                <div className="flex items-center gap-2 text-sm font-medium">
+                                  <Shield className="h-4 w-4 text-primary" />
+                                  <span>ESPR — Regulation (EU) 2024/1781</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-1.5 pl-6 text-xs text-muted-foreground">
+                                  <div>DPP version: <span className="font-mono text-foreground">{eu.espr.dppVersion}</span></div>
+                                  <div>Category: <span className="text-foreground">{eu.espr.productCategory}</span></div>
+                                  {eu.espr.complianceStatus && (
+                                    <div>Status: <Badge variant={eu.espr.complianceStatus === "compliant" ? "default" : "outline"} className={`text-xs ${eu.espr.complianceStatus === "compliant" ? "bg-green-600" : "border-amber-500 text-amber-600"}`}>{eu.espr.complianceStatus}</Badge></div>
+                                  )}
+                                  {eu.ceMarking && (
+                                    <div className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-600" /><span className="text-foreground">CE Marked</span></div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            {/* Battery Regulation */}
+                            {eu.batteryRegulation && (
+                              <div className="space-y-1.5">
+                                <div className="flex items-center gap-2 text-sm font-medium">
+                                  <Zap className="h-4 w-4 text-amber-500" />
+                                  <span>Battery Regulation 2023/1542</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-1.5 pl-6 text-xs text-muted-foreground">
+                                  <div>Type: <span className="text-foreground capitalize">{eu.batteryRegulation.batteryType?.replace(/_/g, " ")}</span></div>
+                                  {eu.batteryRegulation.carbonFootprintClass && <div>Carbon Class: <span className="text-foreground">{eu.batteryRegulation.carbonFootprintClass}</span></div>}
+                                  {eu.batteryRegulation.stateOfHealth !== undefined && <div>State of Health: <span className="text-foreground">{eu.batteryRegulation.stateOfHealth}%</span></div>}
+                                  {eu.batteryRegulation.recycledContentCobalt !== undefined && <div>Recycled Co: <span className="text-foreground">{eu.batteryRegulation.recycledContentCobalt}%</span></div>}
+                                  {eu.batteryRegulation.recycledContentLithium !== undefined && <div>Recycled Li: <span className="text-foreground">{eu.batteryRegulation.recycledContentLithium}%</span></div>}
+                                  {eu.batteryRegulation.recycledContentNickel !== undefined && <div>Recycled Ni: <span className="text-foreground">{eu.batteryRegulation.recycledContentNickel}%</span></div>}
+                                </div>
+                              </div>
+                            )}
+                            {/* REACH / SCIP */}
+                            {eu.reach && (
+                              <div className="space-y-1.5">
+                                <div className="flex items-center gap-2 text-sm font-medium">
+                                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                                  <span>REACH — Chemical Compliance</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-1.5 pl-6 text-xs text-muted-foreground">
+                                  {eu.reach.scipId && <div>SCIP ID: <span className="font-mono text-foreground">{eu.reach.scipId}</span></div>}
+                                  <div>SVHC: <Badge variant={eu.reach.svhcPresent ? "destructive" : "default"} className="text-xs">{eu.reach.svhcPresent ? "Present" : "None"}</Badge></div>
+                                  {eu.reach.svhcPresent && eu.reach.svhcSubstances?.length > 0 && (
+                                    <div className="col-span-2">Substances: <span className="text-foreground">{eu.reach.svhcSubstances.join(", ")}</span></div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            {/* EPR & Repairability */}
+                            {(eu.eprRegistrationId || eu.repairabilityIndex !== undefined) && (
+                              <div className="space-y-1.5">
+                                <div className="flex items-center gap-2 text-sm font-medium">
+                                  <Recycle className="h-4 w-4 text-green-600" />
+                                  <span>EPR &amp; Repairability</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-1.5 pl-6 text-xs text-muted-foreground">
+                                  {eu.eprRegistrationId && <div>EPR ID: <span className="font-mono text-foreground">{eu.eprRegistrationId}</span></div>}
+                                  {eu.repairabilityIndex !== undefined && (
+                                    <div className="flex items-center gap-1">
+                                      Repairability: <span className="text-foreground font-medium">{eu.repairabilityIndex}/10</span>
+                                      <Badge variant="outline" className={`text-xs ml-1 ${eu.repairabilityIndex >= 7 ? "border-green-500 text-green-600" : eu.repairabilityIndex >= 5 ? "border-amber-500 text-amber-600" : "border-red-500 text-red-600"}`}>
+                                        {eu.repairabilityIndex >= 7 ? "Good" : eu.repairabilityIndex >= 5 ? "Moderate" : "Low"}
+                                      </Badge>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                       {ext.regionCode === "CN" && (ext.payload as any).CN && (
                         <>
                           {(ext.payload as any).CN.ccc && (
