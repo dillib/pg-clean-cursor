@@ -65,11 +65,14 @@ export default function LandingValidation() {
           </h1>
 
           <p
-            className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
+            className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 leading-relaxed"
             data-testid="text-hero-subtitle"
           >
-            Digital Product Passports are mandatory under EU ESPR 2024/1781 — starting with batteries in 2027.
-            PhotonicTag gets your products compliant in weeks with AI insights, tamper-proof identity, and native SAP integration.
+            EU Digital Product Passports are mandatory under ESPR 2024/1781 — non-compliance means
+            fines up to <strong className="text-foreground">€100,000+ per violation</strong> and EU market access restrictions.
+          </p>
+          <p className="text-base text-muted-foreground max-w-xl mx-auto mb-10 leading-relaxed">
+            PhotonicTag gets you compliant in weeks — with AI-powered sustainability scoring, tamper-proof product identity, and native SAP integration.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
@@ -87,10 +90,10 @@ export default function LandingValidation() {
             </Button>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground mb-12">
             <div className="flex items-center gap-2" data-testid="badge-eu-ready">
               <CheckCircle className="w-4 h-4 text-emerald-500" />
-              <span>EU ESPR 2027 Ready</span>
+              <span>EU ESPR 2024/1781 Ready</span>
             </div>
             <div className="flex items-center gap-2" data-testid="badge-sap">
               <CheckCircle className="w-4 h-4 text-emerald-500" />
@@ -98,11 +101,31 @@ export default function LandingValidation() {
             </div>
             <div className="flex items-center gap-2" data-testid="badge-ai">
               <CheckCircle className="w-4 h-4 text-emerald-500" />
-              <span>AI-Powered Sustainability Scoring</span>
+              <span>5 AI Sustainability Modules</span>
             </div>
             <div className="flex items-center gap-2" data-testid="badge-live">
               <CheckCircle className="w-4 h-4 text-emerald-500" />
-              <span>Live in 4–6 Weeks</span>
+              <span>Go Live in 4–6 Weeks</span>
+            </div>
+          </div>
+
+          {/* Key metrics strip */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border rounded-xl overflow-hidden border" data-testid="metrics-strip">
+            <div className="bg-background px-5 py-4 text-center">
+              <p className="text-2xl font-bold text-primary leading-none mb-1">Feb 2027</p>
+              <p className="text-xs text-muted-foreground">First DPP deadline</p>
+            </div>
+            <div className="bg-background px-5 py-4 text-center">
+              <p className="text-2xl font-bold text-primary leading-none mb-1">€100K+</p>
+              <p className="text-xs text-muted-foreground">Per violation fine</p>
+            </div>
+            <div className="bg-background px-5 py-4 text-center">
+              <p className="text-2xl font-bold text-primary leading-none mb-1">4–6 wks</p>
+              <p className="text-xs text-muted-foreground">Average go-live time</p>
+            </div>
+            <div className="bg-background px-5 py-4 text-center">
+              <p className="text-2xl font-bold text-primary leading-none mb-1">99.9%</p>
+              <p className="text-xs text-muted-foreground">Platform uptime SLA</p>
             </div>
           </div>
         </div>
@@ -227,11 +250,15 @@ export default function LandingValidation() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-destructive/5 border-y">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-14">
+            <Badge variant="destructive" className="mb-4 gap-1.5" data-testid="badge-problem">
+              <AlertTriangle className="w-3 h-3" />
+              Non-Compliance Risk
+            </Badge>
             <h2 className="text-3xl sm:text-4xl font-bold mb-4" data-testid="text-problem-title">
-              The Stakes Are Real
+              The Clock Is Ticking.<br className="hidden sm:block" /> Are You Ready?
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              EU regulators are not waiting. Companies that miss deadlines face enforcement actions, market exclusion, and reputational damage.
+              The EU is not extending deadlines. Enforcement is active. Companies that wait until the last quarter won't have time to comply.
             </p>
           </div>
 
@@ -241,9 +268,9 @@ export default function LandingValidation() {
                 <div className="w-12 h-12 rounded-md bg-destructive/10 flex items-center justify-center mb-4">
                   <Clock className="w-6 h-6 text-destructive" />
                 </div>
-                <h3 className="font-semibold mb-2">Deadlines Are Fixed</h3>
+                <h3 className="font-semibold mb-2">Deadlines Are Non-Negotiable</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Batteries: February 2027. Textiles & electronics: late 2027. All products: 2030. The EU is not extending these dates — and implementation takes longer than most teams expect.
+                  Battery passports: <strong className="text-foreground">February 18, 2027</strong>. Textiles & electronics: late 2027. Full rollout by 2030. Implementation takes 4–6 weeks minimum — that's time you can't afford to lose.
                 </p>
               </CardContent>
             </Card>
@@ -253,9 +280,9 @@ export default function LandingValidation() {
                 <div className="w-12 h-12 rounded-md bg-destructive/10 flex items-center justify-center mb-4">
                   <AlertTriangle className="w-6 h-6 text-destructive" />
                 </div>
-                <h3 className="font-semibold mb-2">Penalties Are Severe</h3>
+                <h3 className="font-semibold mb-2">Penalties Compound Fast</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Fines from €10,000 to €100,000+ per product, per violation. Plus recalls, EU market access restrictions, and supply chain disruption that compounds year over year.
+                  Fines of <strong className="text-foreground">€10,000–€100,000+ per violation</strong>, per product. Non-compliant goods face EU market access blocks, forced recalls, and lasting reputational damage with retailers and consumers.
                 </p>
               </CardContent>
             </Card>
@@ -265,9 +292,9 @@ export default function LandingValidation() {
                 <div className="w-12 h-12 rounded-md bg-destructive/10 flex items-center justify-center mb-4">
                   <Building2 className="w-6 h-6 text-destructive" />
                 </div>
-                <h3 className="font-semibold mb-2">Data Requirements Are Complex</h3>
+                <h3 className="font-semibold mb-2">Data Collection Is Harder Than It Looks</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Carbon footprint, material origins, repairability scores, recycling instructions, certifications — across every SKU, synced with your ERP. Most companies don't have a clear path to get there.
+                  Carbon footprint, material origins, repairability scores, certifications — structured across every SKU, accessible to regulators and consumers. Most teams underestimate how complex this data operation really is.
                 </p>
               </CardContent>
             </Card>
@@ -279,11 +306,15 @@ export default function LandingValidation() {
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-14">
+            <Badge variant="outline" className="mb-4 gap-1.5">
+              <Zap className="w-3 h-3" />
+              The PhotonicTag Platform
+            </Badge>
             <h2 className="text-3xl sm:text-4xl font-bold mb-4" data-testid="text-solution-title">
-              One Platform. Complete Compliance.
+              One Platform. Complete DPP Compliance.
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              PhotonicTag handles everything — from connecting your SAP data to generating compliant passports, AI sustainability scoring, and consumer-ready QR codes.
+              PhotonicTag handles everything — connecting your SAP data, generating AI-enriched passports, issuing tamper-proof QR codes, and publishing consumer-ready scan pages.
             </p>
           </div>
 
@@ -482,24 +513,29 @@ export default function LandingValidation() {
             </Card>
           </div>
 
-          {/* Uptime / SLA strip */}
-          <div className="mt-10 rounded-xl border bg-muted/40 px-8 py-6">
-            <div className="flex flex-wrap justify-around gap-8 text-center">
+          {/* Compliance certifications strip */}
+          <div className="mt-10 rounded-xl border bg-muted/40 px-8 py-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center mb-4">Compliance & Standards Alignment</p>
+            <div className="flex flex-wrap justify-around gap-6 text-center">
               <div>
-                <p className="text-2xl font-bold text-primary">99.9%</p>
-                <p className="text-xs text-muted-foreground mt-1">Platform uptime SLA</p>
+                <p className="text-sm font-semibold">ESPR 2024/1781</p>
+                <p className="text-xs text-muted-foreground mt-0.5">EU DPP Framework</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-primary">4–6 weeks</p>
-                <p className="text-xs text-muted-foreground mt-1">Average time to go live</p>
+                <p className="text-sm font-semibold">GDPR 2016/679</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Data Privacy</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-primary">5 AI modules</p>
-                <p className="text-xs text-muted-foreground mt-1">Sustainability, repair, risk & more</p>
+                <p className="text-sm font-semibold">Battery Reg. 2023/1542</p>
+                <p className="text-xs text-muted-foreground mt-0.5">EU Battery Passport</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-primary">3 connectors</p>
-                <p className="text-xs text-muted-foreground mt-1">SAP S/4HANA, ECC, Business One</p>
+                <p className="text-sm font-semibold">ISO/IEC 27001</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Security Framework</p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold">GS1 Digital Link</p>
+                <p className="text-xs text-muted-foreground mt-0.5">QR Standard</p>
               </div>
             </div>
           </div>
@@ -586,17 +622,18 @@ export default function LandingValidation() {
       {/* ── CTA ── */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-primary text-primary-foreground">
         <div className="max-w-3xl mx-auto text-center">
+          <p className="text-sm font-semibold uppercase tracking-widest opacity-75 mb-4">Start This Week</p>
           <h2 className="text-3xl sm:text-4xl font-bold mb-5" data-testid="text-cta-title">
-            Ready to Get EU Compliant?
+            Get EU Compliant<br className="hidden sm:block" /> Before Your Deadline.
           </h2>
           <p className="text-lg opacity-90 mb-3 leading-relaxed max-w-2xl mx-auto">
-            Companies that prepare now gain a first-mover advantage — in consumer trust, sustainability perception, and regulatory peace of mind.
+            The brands that move now will lead on consumer trust, retailer preference, and regulatory confidence — while competitors scramble.
           </p>
           <p className="text-sm opacity-70 mb-10 max-w-xl mx-auto">
-            Start with a POC from €499/month. No long-term commitment. Credits apply to your upgrade.
+            Start with a POC from <strong>€499/month</strong>. No long-term commitment. Full credits apply when you upgrade.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Button size="lg" variant="secondary" asChild data-testid="button-cta-demo">
               <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer" className="gap-2">
                 <Calendar className="w-4 h-4" />
@@ -614,6 +651,21 @@ export default function LandingValidation() {
                 Talk to Sales
               </Link>
             </Button>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm opacity-75">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle className="w-3.5 h-3.5" />
+              <span>No long-term contract</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle className="w-3.5 h-3.5" />
+              <span>Dedicated onboarding lead</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle className="w-3.5 h-3.5" />
+              <span>Live in 4–6 weeks</span>
+            </div>
           </div>
         </div>
       </section>
