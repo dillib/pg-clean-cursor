@@ -24,9 +24,9 @@ router.get("/api/export/presentation.pptx", async (_req: Request, res: Response)
 
     const BRAND_DARK = "0F172A";
     const BRAND_NAVY = "1E293B";
-    const BRAND_CYAN = "D97706";
-    const BRAND_TEAL = "B45309";
-    const BRAND_BLUE = "D97706";
+    const BRAND_CYAN = "EAB308";
+    const BRAND_TEAL = "A16207";
+    const BRAND_BLUE = "EAB308";
     const CARD_DARK = "1E293B";
     const CARD_BORDER = "334155";
     const SUBTLE_TEXT = "94A3B8";

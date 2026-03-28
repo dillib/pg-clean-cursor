@@ -11,34 +11,34 @@
   --elevate-2: rgba(0,0,0, .08);
   --background: 0 0% 100%;
   --foreground: 30 12% 10%;
-  --border: 38 15% 88%;
-  --card: 40 20% 99%;
+  --border: 52 15% 88%;
+  --card: 54 20% 99%;
   --card-foreground: 30 12% 10%;
-  --card-border: 38 15% 93%;
-  --sidebar: 40 18% 96%;
+  --card-border: 52 15% 93%;
+  --sidebar: 54 18% 97%;
   --sidebar-foreground: 30 12% 10%;
-  --sidebar-border: 38 15% 90%;
-  --sidebar-primary: 38 90% 46%;
+  --sidebar-border: 52 15% 91%;
+  --sidebar-primary: 52 100% 46%;
   --sidebar-primary-foreground: 30 10% 5%;
-  --sidebar-accent: 40 16% 93%;
+  --sidebar-accent: 52 16% 94%;
   --sidebar-accent-foreground: 30 12% 10%;
-  --sidebar-ring: 38 90% 46%;
-  --popover: 40 16% 96%;
+  --sidebar-ring: 52 100% 46%;
+  --popover: 52 16% 97%;
   --popover-foreground: 30 12% 10%;
-  --popover-border: 38 15% 88%;
-  --primary: 38 90% 46%;
+  --popover-border: 52 15% 88%;
+  --primary: 52 100% 46%;
   --primary-foreground: 30 10% 5%;
-  --secondary: 38 15% 91%;
+  --secondary: 52 15% 91%;
   --secondary-foreground: 30 12% 10%;
-  --muted: 38 14% 92%;
-  --muted-foreground: 30 8% 38%;
-  --accent: 40 16% 93%;
+  --muted: 52 14% 93%;
+  --muted-foreground: 40 8% 40%;
+  --accent: 52 16% 94%;
   --accent-foreground: 30 12% 10%;
   --destructive: 0 84% 48%;
   --destructive-foreground: 0 0% 98%;
-  --input: 38 15% 73%;
-  --ring: 38 90% 46%;
-  --chart-1: 38 90% 46%;
+  --input: 52 15% 74%;
+  --ring: 52 100% 46%;
+  --chart-1: 52 100% 46%;
   --chart-2: 16 85% 52%;
   --chart-3: 48 96% 50%;
   --chart-4: 173 80% 35%;
@@ -47,14 +47,14 @@
   --font-serif: Georgia, serif;
   --font-mono: JetBrains Mono, monospace;
   --radius: .5rem;
-  --shadow-2xs: 0px 2px 0px 0px hsl(38 90% 46% / 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(38 90% 46% / 0.00);
-  --shadow-sm: 0px 2px 0px 0px hsl(38 90% 46% / 0.00), 0px 1px 2px -1px hsl(38 90% 46% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(38 90% 46% / 0.00), 0px 1px 2px -1px hsl(38 90% 46% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(38 90% 46% / 0.00), 0px 2px 4px -1px hsl(38 90% 46% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(38 90% 46% / 0.00), 0px 4px 6px -1px hsl(38 90% 46% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(38 90% 46% / 0.00), 0px 8px 10px -1px hsl(38 90% 46% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(38 90% 46% / 0.00);
+  --shadow-2xs: 0px 2px 0px 0px hsl(52 100% 46% / 0.00);
+  --shadow-xs: 0px 2px 0px 0px hsl(52 100% 46% / 0.00);
+  --shadow-sm: 0px 2px 0px 0px hsl(52 100% 46% / 0.00), 0px 1px 2px -1px hsl(52 100% 46% / 0.00);
+  --shadow: 0px 2px 0px 0px hsl(52 100% 46% / 0.00), 0px 1px 2px -1px hsl(52 100% 46% / 0.00);
+  --shadow-md: 0px 2px 0px 0px hsl(52 100% 46% / 0.00), 0px 2px 4px -1px hsl(52 100% 46% / 0.00);
+  --shadow-lg: 0px 2px 0px 0px hsl(52 100% 46% / 0.00), 0px 4px 6px -1px hsl(52 100% 46% / 0.00);
+  --shadow-xl: 0px 2px 0px 0px hsl(52 100% 46% / 0.00), 0px 8px 10px -1px hsl(52 100% 46% / 0.00);
+  --shadow-2xl: 0px 2px 0px 0px hsl(52 100% 46% / 0.00);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
@@ -102,39 +102,39 @@
   --sidebar: 30 12% 11%;
   --sidebar-foreground: 40 30% 96%;
   --sidebar-border: 35 12% 15%;
-  --sidebar-primary: 38 90% 56%;
+  --sidebar-primary: 52 100% 56%;
   --sidebar-primary-foreground: 30 10% 5%;
   --sidebar-accent: 35 12% 14%;
   --sidebar-accent-foreground: 40 30% 96%;
-  --sidebar-ring: 38 90% 56%;
+  --sidebar-ring: 52 100% 56%;
   --popover: 35 12% 13%;
   --popover-foreground: 40 30% 96%;
   --popover-border: 35 12% 17%;
-  --primary: 38 90% 52%;
+  --primary: 52 100% 52%;
   --primary-foreground: 30 10% 5%;
   --secondary: 35 12% 16%;
   --secondary-foreground: 40 30% 96%;
   --muted: 35 12% 15%;
-  --muted-foreground: 38 15% 68%;
+  --muted-foreground: 50 10% 68%;
   --accent: 35 12% 13%;
   --accent-foreground: 40 30% 96%;
   --destructive: 0 84% 48%;
   --destructive-foreground: 0 0% 98%;
   --input: 35 12% 28%;
-  --ring: 38 90% 56%;
-  --chart-1: 38 90% 62%;
+  --ring: 52 100% 56%;
+  --chart-1: 52 100% 62%;
   --chart-2: 16 85% 62%;
   --chart-3: 48 96% 62%;
   --chart-4: 173 80% 58%;
   --chart-5: 200 85% 58%;
-  --shadow-2xs: 0px 2px 0px 0px hsl(38 90% 52% / 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(38 90% 52% / 0.00);
-  --shadow-sm: 0px 2px 0px 0px hsl(38 90% 52% / 0.00), 0px 1px 2px -1px hsl(38 90% 52% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(38 90% 52% / 0.00), 0px 1px 2px -1px hsl(38 90% 52% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(38 90% 52% / 0.00), 0px 2px 4px -1px hsl(38 90% 52% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(38 90% 52% / 0.00), 0px 4px 6px -1px hsl(38 90% 52% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(38 90% 52% / 0.00), 0px 8px 10px -1px hsl(38 90% 52% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(38 90% 52% / 0.00);
+  --shadow-2xs: 0px 2px 0px 0px hsl(52 100% 52% / 0.00);
+  --shadow-xs: 0px 2px 0px 0px hsl(52 100% 52% / 0.00);
+  --shadow-sm: 0px 2px 0px 0px hsl(52 100% 52% / 0.00), 0px 1px 2px -1px hsl(52 100% 52% / 0.00);
+  --shadow: 0px 2px 0px 0px hsl(52 100% 52% / 0.00), 0px 1px 2px -1px hsl(52 100% 52% / 0.00);
+  --shadow-md: 0px 2px 0px 0px hsl(52 100% 52% / 0.00), 0px 2px 4px -1px hsl(52 100% 52% / 0.00);
+  --shadow-lg: 0px 2px 0px 0px hsl(52 100% 52% / 0.00), 0px 4px 6px -1px hsl(52 100% 52% / 0.00);
+  --shadow-xl: 0px 2px 0px 0px hsl(52 100% 52% / 0.00), 0px 8px 10px -1px hsl(52 100% 52% / 0.00);
+  --shadow-2xl: 0px 2px 0px 0px hsl(52 100% 52% / 0.00);
 
 /* Fallback for older browsers */
   --sidebar-primary-border: hsl(var(--sidebar-primary));
@@ -288,35 +288,35 @@
 }
 
 /* ============================================================
- * GOLD GLASS DESIGN SYSTEM
- * Sun-aligned brand — metallic gold, glass depth, warm glow
+ * YELLOW GLASS DESIGN SYSTEM
+ * Sun-aligned brand — vivid yellow, glass depth, bright glow
  * ============================================================ */
 
-/* 1. Page background — warm ambient radial glow for glass depth */
+/* 1. Page background — bright ambient radial glow for glass depth */
 body {
   background:
-    radial-gradient(ellipse 90% 70% at 8% 12%, hsla(38,90%,62%,0.09) 0%, transparent 60%),
-    radial-gradient(ellipse 70% 55% at 92% 88%, hsla(45,95%,58%,0.07) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 50% 0%,  hsla(38,90%,55%,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse 90% 70% at 8% 12%, hsla(52,100%,62%,0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 55% at 92% 88%, hsla(52,100%,58%,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 50% 0%,  hsla(52,100%,55%,0.05) 0%, transparent 50%),
     hsl(var(--background));
   min-height: 100vh;
 }
 .dark body {
   background:
-    radial-gradient(ellipse 90% 70% at 8% 12%,  hsla(38,80%,40%,0.10) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 92% 88%,  hsla(38,80%,35%,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 70% at 8% 12%,  hsla(52,100%,45%,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 92% 88%,  hsla(52,100%,40%,0.07) 0%, transparent 55%),
     hsl(var(--background));
 }
 
-/* 2. Metallic gold gradient — all bg-primary elements */
+/* 2. Yellow gradient — all bg-primary elements */
 .bg-primary {
   background: linear-gradient(
     148deg,
-    hsl(48 100% 64%) 0%,
-    hsl(40 92% 50%) 28%,
-    hsl(36 88% 44%) 55%,
-    hsl(28 84% 38%) 78%,
-    hsl(40 92% 52%) 100%
+    hsl(56 100% 68%) 0%,
+    hsl(52 100% 54%) 28%,
+    hsl(50 100% 46%) 55%,
+    hsl(48 100% 40%) 78%,
+    hsl(52 100% 52%) 100%
   ) !important;
 }
 
@@ -324,10 +324,10 @@ body {
 button.bg-primary,
 a.bg-primary {
   box-shadow:
-    0 1px 2px rgba(100, 45, 0, 0.28),
-    0 3px 10px rgba(180, 83, 9, 0.22),
-    inset 0 1px 0 rgba(255, 248, 180, 0.60),
-    inset 0 -1px 0 rgba(100, 45, 0, 0.18) !important;
+    0 1px 2px rgba(120, 100, 0, 0.28),
+    0 3px 10px rgba(180, 150, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 200, 0.65),
+    inset 0 -1px 0 rgba(120, 100, 0, 0.18) !important;
   overflow: hidden;
   position: relative;
 }
@@ -336,29 +336,29 @@ a.bg-primary {
 div.bg-primary,
 span.bg-primary {
   box-shadow:
-    0 2px 8px rgba(180, 83, 9, 0.30),
-    inset 0 1px 0 rgba(255, 248, 180, 0.55),
-    inset 0 -1px 0 rgba(100, 45, 0, 0.20) !important;
+    0 2px 8px rgba(180, 150, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 200, 0.60),
+    inset 0 -1px 0 rgba(120, 100, 0, 0.20) !important;
   position: relative;
 }
 
-/* CTA section — large polished gold surface */
+/* CTA section — large bright yellow surface */
 section.bg-primary {
   background: linear-gradient(
     135deg,
-    hsl(46 100% 62%) 0%,
-    hsl(40 94% 50%) 18%,
-    hsl(36 88% 44%) 38%,
-    hsl(30 84% 38%) 55%,
-    hsl(36 88% 44%) 70%,
-    hsl(42 92% 52%) 85%,
-    hsl(48 100% 60%) 100%
+    hsl(56 100% 65%) 0%,
+    hsl(52 100% 52%) 18%,
+    hsl(50 100% 46%) 38%,
+    hsl(48 100% 40%) 55%,
+    hsl(50 100% 46%) 70%,
+    hsl(52 100% 54%) 85%,
+    hsl(56 100% 64%) 100%
   ) !important;
   position: relative;
   overflow: hidden;
   box-shadow:
-    inset 0 1px 0 rgba(255, 248, 180, 0.35),
-    inset 0 -1px 0 rgba(100, 45, 0, 0.15) !important;
+    inset 0 1px 0 rgba(255, 255, 200, 0.40),
+    inset 0 -1px 0 rgba(120, 100, 0, 0.15) !important;
 }
 
 /* Slow grand shimmer on the CTA section */
@@ -371,16 +371,16 @@ section.bg-primary::before {
     transparent 0%,
     transparent 35%,
     rgba(255, 255, 255, 0.10) 45%,
-    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.20) 50%,
     rgba(255, 255, 255, 0.10) 55%,
     transparent 65%,
     transparent 100%
   );
-  animation: ctaGoldSweep 7s ease-in-out infinite;
+  animation: ctaSweep 7s ease-in-out infinite;
   pointer-events: none;
 }
 
-@keyframes ctaGoldSweep {
+@keyframes ctaSweep {
   0%, 15%   { transform: translateX(-100%); opacity: 0; }
   20%        { opacity: 1; }
   75%        { opacity: 1; }
@@ -398,97 +398,97 @@ a.bg-primary::before {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.42) 40%,
-    rgba(255, 255, 255, 0.50) 50%,
-    rgba(255, 255, 255, 0.42) 60%,
+    rgba(255, 255, 255, 0.44) 40%,
+    rgba(255, 255, 255, 0.52) 50%,
+    rgba(255, 255, 255, 0.44) 60%,
     transparent 100%
   );
   transform: skewX(-18deg);
-  animation: goldShimmer 4s ease-in-out infinite;
+  animation: yellowShimmer 4s ease-in-out infinite;
   pointer-events: none;
   z-index: 2;
 }
 
-@keyframes goldShimmer {
+@keyframes yellowShimmer {
   0%, 20%  { left: -120%; opacity: 0; }
   25%      { opacity: 1; }
   62%      { opacity: 1; }
   68%, 100% { left: 180%;  opacity: 0; }
 }
 
-/* bg-amber-500 elements (timeline dots, badges) — same metallic treatment */
+/* bg-amber-500 elements (timeline dots, badges) — yellow treatment */
 .bg-amber-500 {
-  background: linear-gradient(145deg, hsl(48 100% 62%), hsl(38 90% 46%), hsl(28 82% 38%)) !important;
-  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.30), inset 0 1px 0 rgba(255, 248, 180, 0.50) !important;
+  background: linear-gradient(145deg, hsl(56 100% 65%), hsl(52 100% 50%), hsl(48 100% 42%)) !important;
+  box-shadow: 0 2px 8px rgba(180, 150, 0, 0.30), inset 0 1px 0 rgba(255, 255, 200, 0.55) !important;
 }
 
-/* 3. Gold focus glow ring */
+/* 3. Yellow focus glow ring */
 button:focus-visible {
   outline: none !important;
   box-shadow:
     0 0 0 2px hsl(var(--background)),
-    0 0 0 4px hsl(38 90% 50% / 0.55),
-    0 0 14px hsl(38 90% 50% / 0.25) !important;
+    0 0 0 4px hsl(52 100% 50% / 0.55),
+    0 0 14px hsl(52 100% 50% / 0.25) !important;
 }
 
 /* 4. Glass sidebar */
 [data-sidebar="sidebar"] {
-  background: rgba(255, 251, 232, 0.84) !important;
+  background: rgba(255, 255, 230, 0.84) !important;
   backdrop-filter: blur(18px) saturate(175%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(175%) !important;
-  border-right: 1px solid rgba(245, 158, 11, 0.17) !important;
-  box-shadow: 2px 0 24px rgba(180, 83, 9, 0.07) !important;
+  border-right: 1px solid rgba(234, 179, 8, 0.18) !important;
+  box-shadow: 2px 0 24px rgba(161, 130, 0, 0.07) !important;
 }
 .dark [data-sidebar="sidebar"] {
-  background: rgba(14, 9, 3, 0.88) !important;
+  background: rgba(10, 10, 3, 0.88) !important;
   backdrop-filter: blur(18px) saturate(175%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(175%) !important;
-  border-right: 1px solid rgba(217, 119, 6, 0.14) !important;
+  border-right: 1px solid rgba(234, 179, 8, 0.14) !important;
   box-shadow: 2px 0 24px rgba(0, 0, 0, 0.45) !important;
 }
 
-/* 5. Gold active glow on sidebar nav items */
+/* 5. Yellow active glow on sidebar nav items */
 [data-sidebar="menu-button"][data-active="true"],
 [data-sidebar="menu-button"].active {
-  background: linear-gradient(135deg, hsl(44 96% 56%), hsl(36 88% 46%)) !important;
-  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.3), inset 0 1px 0 rgba(255,248,180,0.4) !important;
+  background: linear-gradient(135deg, hsl(54 100% 60%), hsl(50 100% 50%)) !important;
+  box-shadow: 0 2px 8px rgba(161, 130, 0, 0.30), inset 0 1px 0 rgba(255,255,200,0.45) !important;
   color: hsl(30 10% 5%) !important;
 }
 
 /* 6. Glass cards */
 .shadcn-card {
-  background: rgba(255, 253, 242, 0.82) !important;
+  background: rgba(255, 255, 242, 0.82) !important;
   backdrop-filter: blur(10px) saturate(150%) !important;
   -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
-  border-color: rgba(245, 158, 11, 0.13) !important;
+  border-color: rgba(234, 179, 8, 0.13) !important;
   box-shadow:
-    0 2px 20px rgba(180, 83, 9, 0.055),
-    0 1px 3px rgba(100, 45, 0, 0.06),
+    0 2px 20px rgba(161, 130, 0, 0.055),
+    0 1px 3px rgba(120, 100, 0, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
 }
 .dark .shadcn-card {
-  background: rgba(20, 13, 5, 0.80) !important;
+  background: rgba(12, 12, 3, 0.80) !important;
   backdrop-filter: blur(10px) saturate(150%) !important;
   -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
-  border-color: rgba(217, 119, 6, 0.09) !important;
+  border-color: rgba(234, 179, 8, 0.09) !important;
   box-shadow:
     0 2px 20px rgba(0, 0, 0, 0.38),
-    inset 0 1px 0 rgba(255, 200, 80, 0.05) !important;
+    inset 0 1px 0 rgba(255, 240, 80, 0.05) !important;
 }
 
-/* 7. Gold gradient header accent line on cards */
+/* 7. Yellow header accent line on cards */
 .shadcn-card > .p-6:first-child,
 .shadcn-card > [class*="CardHeader"] {
-  border-bottom: 1px solid rgba(245, 158, 11, 0.12);
+  border-bottom: 1px solid rgba(234, 179, 8, 0.12);
 }
 
-/* 8. Subtle gold shimmer on card top edge */
+/* 8. Subtle yellow shimmer on card top edge */
 .shadcn-card::before {
   content: '';
   position: absolute;
   top: 0; left: 10%; right: 10%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.55), rgba(255, 220, 100, 0.70), rgba(251, 191, 36, 0.55), transparent);
+  background: linear-gradient(90deg, transparent, rgba(234, 179, 8, 0.55), rgba(253, 224, 71, 0.70), rgba(234, 179, 8, 0.55), transparent);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -496,7 +496,7 @@ button:focus-visible {
   position: relative;
 }
 
-/* 9. Input fields — warm tinted glass */
+/* 9. Input fields — yellow-tinted glass */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -506,17 +506,17 @@ textarea,
 select,
 .flex.h-9.rounded-md,
 .flex.h-10.rounded-md {
-  background: rgba(255, 252, 238, 0.70) !important;
+  background: rgba(255, 255, 230, 0.70) !important;
   backdrop-filter: blur(4px) !important;
-  border-color: rgba(245, 158, 11, 0.22) !important;
+  border-color: rgba(234, 179, 8, 0.22) !important;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 input:focus,
 textarea:focus,
 select:focus {
-  border-color: rgba(245, 158, 11, 0.55) !important;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12), 0 0 0 1px rgba(245, 158, 11, 0.35) !important;
-  background: rgba(255, 252, 238, 0.90) !important;
+  border-color: rgba(234, 179, 8, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.12), 0 0 0 1px rgba(234, 179, 8, 0.35) !important;
+  background: rgba(255, 255, 230, 0.90) !important;
 }
 .dark input[type="text"],
 .dark input[type="email"],
@@ -525,6 +525,6 @@ select:focus {
 .dark input[type="number"],
 .dark textarea,
 .dark select {
-  background: rgba(20, 13, 5, 0.65) !important;
-  border-color: rgba(217, 119, 6, 0.18) !important;
+  background: rgba(15, 15, 3, 0.65) !important;
+  border-color: rgba(234, 179, 8, 0.18) !important;
 }
