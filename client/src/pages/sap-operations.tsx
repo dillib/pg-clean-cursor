@@ -26,19 +26,20 @@ import type { EnterpriseConnector, FieldMapping } from "@shared/schema";
 interface SyncLog {
   id: string;
   connectorId: string;
+  syncType: "full" | "delta" | "manual";
   startedAt: string;
   completedAt?: string;
-  status: "running" | "success" | "failed" | "partial";
+  status: "running" | "completed" | "failed";
   recordsProcessed?: number;
+  recordsCreated?: number;
+  recordsUpdated?: number;
   recordsFailed?: number;
   errorMessage?: string;
-  details?: string;
 }
 
 function SyncStatusBadge({ status }: { status: string }) {
   switch (status) {
-    case "success": return <Badge className="bg-green-600 text-white gap-1"><CheckCircle2 className="w-3 h-3" />Success</Badge>;
-    case "partial": return <Badge variant="outline" className="border-amber-500 text-amber-600 gap-1"><AlertTriangle className="w-3 h-3" />Partial</Badge>;
+    case "completed": return <Badge className="bg-green-600 text-white gap-1"><CheckCircle2 className="w-3 h-3" />Completed</Badge>;
     case "failed": return <Badge variant="destructive" className="gap-1"><XCircle className="w-3 h-3" />Failed</Badge>;
     case "running": return <Badge variant="outline" className="border-blue-500 text-blue-600 gap-1"><Loader2 className="w-3 h-3 animate-spin" />Running</Badge>;
     default: return <Badge variant="outline">{status}</Badge>;
@@ -139,7 +140,7 @@ export default function SAPOperations() {
 
   // Computed health metrics
   const totalRuns = syncLogs.length;
-  const successRuns = syncLogs.filter(l => l.status === "success").length;
+  const successRuns = syncLogs.filter(l => l.status === "completed").length;
   const failedRuns = syncLogs.filter(l => l.status === "failed").length;
   const successRate = totalRuns > 0 ? (successRuns / totalRuns) * 100 : 100;
   const recentFailures = syncLogs.slice(0, 10).filter(l => l.status === "failed").length;
@@ -294,10 +295,13 @@ export default function SAPOperations() {
             {lastSync && (
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Last Sync</CardTitle>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    Last Sync
+                    <Badge variant="outline" className="text-xs capitalize">{lastSync.syncType}</Badge>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                     <div>
                       <p className="text-xs text-muted-foreground">Status</p>
                       <SyncStatusBadge status={lastSync.status} />
@@ -307,12 +311,16 @@ export default function SAPOperations() {
                       <p className="font-medium text-sm">{format(new Date(lastSync.startedAt), "MMM d, HH:mm")}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Records processed</p>
+                      <p className="text-xs text-muted-foreground">Processed</p>
                       <p className="font-medium text-sm">{lastSync.recordsProcessed ?? "—"}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Records failed</p>
-                      <p className="font-medium text-sm">{lastSync.recordsFailed ?? 0}</p>
+                      <p className="text-xs text-muted-foreground">Created / Updated</p>
+                      <p className="font-medium text-sm text-green-600">{lastSync.recordsCreated ?? 0} / {lastSync.recordsUpdated ?? 0}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Failed</p>
+                      <p className={`font-medium text-sm ${(lastSync.recordsFailed ?? 0) > 0 ? "text-destructive" : ""}`}>{lastSync.recordsFailed ?? 0}</p>
                     </div>
                   </div>
                   {lastSync.errorMessage && (
@@ -358,12 +366,13 @@ export default function SAPOperations() {
                 ) : (
                   <div className="space-y-1">
                     {/* Header */}
-                    <div className="grid grid-cols-5 gap-4 text-xs font-medium text-muted-foreground px-2 pb-2 border-b">
+                    <div className="grid grid-cols-6 gap-3 text-xs font-medium text-muted-foreground px-2 pb-2 border-b">
                       <div>Status</div>
+                      <div>Type</div>
                       <div>Started</div>
                       <div>Duration</div>
-                      <div>Records OK</div>
-                      <div>Records Failed</div>
+                      <div>Processed</div>
+                      <div>Failed</div>
                     </div>
                     {syncLogs.map(log => {
                       const duration = log.completedAt
@@ -373,11 +382,12 @@ export default function SAPOperations() {
                       return (
                         <div key={log.id} data-testid={`sync-log-row-${log.id}`}>
                           <button
-                            className="w-full grid grid-cols-5 gap-4 text-sm px-2 py-2.5 rounded hover:bg-muted/50 transition-colors text-left"
+                            className="w-full grid grid-cols-6 gap-3 text-sm px-2 py-2.5 rounded hover:bg-muted/50 transition-colors text-left items-center"
                             onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
                           >
                             <div><SyncStatusBadge status={log.status} /></div>
-                            <div className="font-medium">{format(new Date(log.startedAt), "MMM d, HH:mm:ss")}</div>
+                            <div><Badge variant="outline" className="text-xs capitalize">{log.syncType}</Badge></div>
+                            <div className="font-medium">{format(new Date(log.startedAt), "MMM d, HH:mm")}</div>
                             <div className="text-muted-foreground">{duration !== null ? `${duration}s` : "—"}</div>
                             <div className="text-green-600">{log.recordsProcessed ?? 0}</div>
                             <div className={log.recordsFailed ? "text-destructive" : "text-muted-foreground"}>
@@ -386,13 +396,17 @@ export default function SAPOperations() {
                           </button>
                           {isExpanded && (
                             <div className="mx-2 mb-2 p-3 bg-muted/40 rounded-lg text-sm space-y-2">
-                              {log.details && <p className="text-muted-foreground">{log.details}</p>}
+                              <div className="grid grid-cols-3 gap-3 text-xs">
+                                <div><span className="text-muted-foreground">Created: </span><span className="text-green-600 font-medium">{log.recordsCreated ?? 0}</span></div>
+                                <div><span className="text-muted-foreground">Updated: </span><span className="font-medium">{log.recordsUpdated ?? 0}</span></div>
+                                <div><span className="text-muted-foreground">Failed: </span><span className={`font-medium ${(log.recordsFailed ?? 0) > 0 ? "text-destructive" : ""}`}>{log.recordsFailed ?? 0}</span></div>
+                              </div>
                               {log.errorMessage && (
                                 <div className="p-2 bg-destructive/5 rounded font-mono text-xs text-destructive">
                                   {log.errorMessage}
                                 </div>
                               )}
-                              {!log.details && !log.errorMessage && <p className="text-muted-foreground text-xs">No additional details available.</p>}
+                              {!log.errorMessage && <p className="text-muted-foreground text-xs">Sync completed without errors.</p>}
                             </div>
                           )}
                         </div>
