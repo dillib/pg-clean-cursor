@@ -113,7 +113,7 @@ const demoProduct: Partial<Product> & { id: string; productName: string; manufac
   hazardWarnings: "Risk of fire if damaged. Do not puncture, crush, or expose to temperatures above 60C.",
   takeBackPrograms: ["GreenCell Take-Back Program", "EU Battery Collection Network"],
   qrCodeData: null,
-  productImage: "/assets/stock_images/lithium_ion_battery__913af259.jpg",
+  productImage: "/assets/stock_images/battery_pack_pro.png",
 };
 
 const demoTraceEvents: Partial<TraceEvent>[] = [
