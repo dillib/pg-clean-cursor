@@ -21,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
 const STATUS_CONFIG: Record<LeadStatus, { label: string; color: string; icon: any }> = {
-  new: { label: "New", color: "bg-blue-500/10 text-blue-600 border-blue-200", icon: Clock },
+  new: { label: "New", color: "bg-amber-500/10 text-amber-600 border-amber-200", icon: Clock },
   contacted: { label: "Contacted", color: "bg-yellow-500/10 text-yellow-600 border-yellow-200", icon: Mail },
   demo_scheduled: { label: "Demo Scheduled", color: "bg-purple-500/10 text-purple-600 border-purple-200", icon: Calendar },
   qualified: { label: "Qualified", color: "bg-green-500/10 text-green-600 border-green-200", icon: Target },

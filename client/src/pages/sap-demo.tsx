@@ -121,7 +121,7 @@ function SyncEventBadge({ status }: { status: string }) {
 function DirectionIcon({ direction }: { direction: string }) {
   switch (direction) {
     case "sap_to_pt":
-      return <ArrowRight className="h-4 w-4 text-blue-500" />;
+      return <ArrowRight className="h-4 w-4 text-amber-500" />;
     case "pt_to_sap":
       return <ArrowLeft className="h-4 w-4 text-purple-500" />;
     case "bidirectional":
@@ -167,7 +167,7 @@ function SyncAnimation({ isActive, direction }: { isActive: boolean; direction: 
         <Loader2 className="h-8 w-8 text-primary animate-spin" />
         {(direction === "right" || direction === "both") && (
           <div className="flex items-center">
-            <ArrowRight className="h-8 w-8 text-blue-500 animate-pulse" />
+            <ArrowRight className="h-8 w-8 text-amber-500 animate-pulse" />
           </div>
         )}
       </div>
@@ -386,7 +386,7 @@ export default function SAPDemoPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Layers className="h-4 w-4 text-blue-500 shrink-0" />
+              <Layers className="h-4 w-4 text-amber-500 shrink-0" />
               <span className="truncate">SAP Materials</span>
             </CardTitle>
           </CardHeader>
@@ -457,7 +457,7 @@ export default function SAPDemoPage() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
-                <Database className="h-5 w-5 text-blue-500" />
+                <Database className="h-5 w-5 text-amber-500" />
                 SAP S/4HANA
               </CardTitle>
               <Badge variant="outline" className="text-xs">Mock System</Badge>
@@ -781,9 +781,9 @@ export default function SAPDemoPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg border-2 border-blue-500/30 bg-blue-500/5">
+                <div className="p-4 rounded-lg border-2 border-blue-500/30 bg-amber-500/5">
                   <div className="flex items-center gap-2 mb-3">
-                    <Database className="h-4 w-4 text-blue-500" />
+                    <Database className="h-4 w-4 text-amber-500" />
                     <span className="font-medium text-sm">SAP Value</span>
                   </div>
                   <div className="p-3 rounded bg-background border">

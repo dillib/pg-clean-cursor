@@ -195,7 +195,7 @@ export default function SAPConnector() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-600 rounded-lg">
+          <div className="p-2 bg-amber-500 rounded-lg">
             <SiSap className="w-8 h-8 text-white" />
           </div>
           <div>

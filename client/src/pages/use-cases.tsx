@@ -178,8 +178,8 @@ const useCases: UseCase[] = [
     title: "Consumer Electronics",
     subtitle: "Right to Repair & Longevity",
     icon: Smartphone,
-    gradient: "from-blue-500/20 via-blue-500/5 to-transparent",
-    iconBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+    gradient: "from-amber-500/20 via-amber-500/5 to-transparent",
+    iconBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
     demoProductName: "SmartHome Hub Pro",
     demoProductSearch: "SmartHome Hub",
     challenge: {

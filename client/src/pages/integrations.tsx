@@ -83,7 +83,7 @@ export default function Integrations() {
             <Card className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="grid md:grid-cols-2">
-                  <div className="p-8 bg-blue-600 text-white">
+                  <div className="p-8 bg-amber-500 text-amber-950">
                     <div className="flex items-center gap-3 mb-4">
                       <SiSap className="w-10 h-10" />
                     </div>

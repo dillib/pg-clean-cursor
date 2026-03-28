@@ -97,7 +97,7 @@ function ProductCard({ product }: { product: Product }) {
             <span>{product.recyclabilityPercent || 0}% recyclable</span>
           </div>
           <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Shield className="h-3.5 w-3.5 text-blue-600" />
+            <Shield className="h-3.5 w-3.5 text-amber-600" />
             <span>Score: {product.repairabilityScore || 0}/10</span>
           </div>
         </div>

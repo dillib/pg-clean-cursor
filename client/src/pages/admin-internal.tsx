@@ -417,7 +417,7 @@ function CRMTab() {
                 <div className="grid grid-cols-4 gap-2 text-center">
                   <div><p className="text-lg font-bold">{importResult.totalRows}</p><p className="text-xs text-muted-foreground">Total Rows</p></div>
                   <div><p className="text-lg font-bold text-green-600">{importResult.created}</p><p className="text-xs text-muted-foreground">Created</p></div>
-                  <div><p className="text-lg font-bold text-blue-600">{importResult.updated}</p><p className="text-xs text-muted-foreground">Updated</p></div>
+                  <div><p className="text-lg font-bold text-amber-600">{importResult.updated}</p><p className="text-xs text-muted-foreground">Updated</p></div>
                   <div><p className="text-lg font-bold text-muted-foreground">{importResult.skipped}</p><p className="text-xs text-muted-foreground">Skipped</p></div>
                 </div>
                 {importResult.mappedColumns.length > 0 && (
@@ -606,7 +606,7 @@ function DemoFactoryTab() {
         <Card><CardContent className="p-5">
           <div className="flex items-center justify-between">
             <div><p className="text-sm text-muted-foreground">Generating</p><p className="text-2xl font-bold">{generatingDemos.length}</p></div>
-            <Loader2 className="w-8 h-8 text-blue-500/30" />
+            <Loader2 className="w-8 h-8 text-amber-500/30" />
           </div>
         </CardContent></Card>
         <Card><CardContent className="p-5">
@@ -637,8 +637,8 @@ function DemoFactoryTab() {
             ))}
           </div>
           {createDemoMutation.isPending && (
-            <div className="flex items-center gap-2 mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-              <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+            <div className="flex items-center gap-2 mt-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+              <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
               <span className="text-sm text-blue-700 dark:text-blue-300">Generating demo products with AI...</span>
             </div>
           )}
@@ -856,7 +856,7 @@ function SupportTriageTab() {
         <Card><CardContent className="p-5">
           <div className="flex items-center justify-between">
             <div><p className="text-sm text-muted-foreground">Open</p><p className="text-2xl font-bold">{openTickets.length}</p></div>
-            <Clock className="w-8 h-8 text-blue-500/30" />
+            <Clock className="w-8 h-8 text-amber-500/30" />
           </div>
         </CardContent></Card>
         <Card><CardContent className="p-5">
@@ -1056,7 +1056,7 @@ function PlatformOpsTab() {
                 <p className="text-sm text-muted-foreground">Uptime</p>
                 <p className="text-xl font-bold">{health?.uptimeFormatted || "0h 0m"}</p>
               </div>
-              <Clock className="w-8 h-8 text-blue-500/30" />
+              <Clock className="w-8 h-8 text-amber-500/30" />
             </div>
           </CardContent>
         </Card>
@@ -1082,7 +1082,7 @@ function PlatformOpsTab() {
           <CardContent>
             <div className="space-y-4">
               {[
-                { label: "RSS (Total)", value: health?.memory?.rss || 0, max: 512, color: "bg-blue-500" },
+                { label: "RSS (Total)", value: health?.memory?.rss || 0, max: 512, color: "bg-amber-500" },
                 { label: "Heap Used", value: health?.memory?.heapUsed || 0, max: health?.memory?.heapTotal || 256, color: "bg-green-500" },
                 { label: "External", value: health?.memory?.external || 0, max: 128, color: "bg-purple-500" },
               ].map(item => (
@@ -1228,7 +1228,7 @@ function UserManagementTab() {
         <Card><CardContent className="p-5">
           <div className="flex items-center justify-between">
             <div><p className="text-sm text-muted-foreground">Total Users</p><p className="text-2xl font-bold">{partners.length}</p></div>
-            <Users className="w-8 h-8 text-blue-500/30" />
+            <Users className="w-8 h-8 text-amber-500/30" />
           </div>
         </CardContent></Card>
         <Card><CardContent className="p-5">
@@ -1708,14 +1708,14 @@ function TeamAssistantTab() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center">
             <Bot className="w-5 h-5 text-white" />
           </div>
           <div>
             <h2 className="text-lg font-semibold">Aria — Team Assistant</h2>
             <p className="text-sm text-muted-foreground">Product knowledge, sales prep & meeting coaching</p>
           </div>
-          <Badge variant="outline" className="text-xs gap-1 text-blue-600 border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+          <Badge variant="outline" className="text-xs gap-1 text-amber-600 border-amber-200 bg-amber-50 dark:bg-amber-950 dark:border-blue-800">
             <Sparkles className="w-3 h-3" /> AI Powered
           </Badge>
         </div>
@@ -1734,7 +1734,7 @@ function TeamAssistantTab() {
             onClick={() => sendMessage(q.prompt)}
             disabled={isLoading}
             data-testid={`button-quick-${q.label.toLowerCase().replace(/\s+/g, "-")}`}
-            className="text-xs px-3 py-1.5 rounded-full border border-border bg-muted hover:bg-accent hover:border-blue-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-xs px-3 py-1.5 rounded-full border border-border bg-muted hover:bg-accent hover:border-amber-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {q.label}
           </button>
@@ -1746,10 +1746,10 @@ function TeamAssistantTab() {
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((msg, i) => (
               <div key={i} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold ${msg.role === "assistant" ? "bg-blue-600 text-white" : "bg-muted text-muted-foreground"}`}>
+                <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold ${msg.role === "assistant" ? "bg-amber-500 text-amber-950" : "bg-muted text-muted-foreground"}`}>
                   {msg.role === "assistant" ? <Bot className="w-4 h-4" /> : "You"}
                 </div>
-                <div className={`max-w-[78%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${msg.role === "assistant" ? "bg-muted text-foreground rounded-tl-sm" : "bg-blue-600 text-white rounded-tr-sm"}`}
+                <div className={`max-w-[78%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${msg.role === "assistant" ? "bg-muted text-foreground rounded-tl-sm" : "bg-amber-500 text-amber-950 rounded-tr-sm"}`}
                   data-testid={`message-${msg.role}-${i}`}>
                   {msg.content}
                 </div>
@@ -1757,14 +1757,14 @@ function TeamAssistantTab() {
             ))}
             {isLoading && (
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
                 <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2">
                   <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <span className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
                   <span className="text-xs text-muted-foreground">Aria is thinking...</span>
                 </div>
@@ -1788,7 +1788,7 @@ function TeamAssistantTab() {
               disabled={!input.trim() || isLoading}
               size="icon"
               data-testid="button-send-message"
-              className="flex-shrink-0 bg-blue-600 hover:bg-blue-700"
+              className="flex-shrink-0 bg-amber-500 hover:bg-amber-600"
             >
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>
