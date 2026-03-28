@@ -286,3 +286,180 @@
     inset: -1px;
   }
 }
+
+/* ============================================================
+ * GOLD GLASS DESIGN SYSTEM
+ * Sun-aligned brand — metallic gold, glass depth, warm glow
+ * ============================================================ */
+
+/* 1. Page background — warm ambient radial glow for glass depth */
+body {
+  background:
+    radial-gradient(ellipse 90% 70% at 8% 12%, hsla(38,90%,62%,0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 55% at 92% 88%, hsla(45,95%,58%,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 50% 0%,  hsla(38,90%,55%,0.05) 0%, transparent 50%),
+    hsl(var(--background));
+  min-height: 100vh;
+}
+.dark body {
+  background:
+    radial-gradient(ellipse 90% 70% at 8% 12%,  hsla(38,80%,40%,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 92% 88%,  hsla(38,80%,35%,0.07) 0%, transparent 55%),
+    hsl(var(--background));
+}
+
+/* 2. Metallic gold gradient on primary buttons */
+button.bg-primary,
+a.bg-primary {
+  background: linear-gradient(
+    148deg,
+    hsl(48 100% 64%) 0%,
+    hsl(40 92% 50%) 28%,
+    hsl(36 88% 44%) 55%,
+    hsl(28 84% 38%) 78%,
+    hsl(40 92% 52%) 100%
+  ) !important;
+  box-shadow:
+    0 1px 2px rgba(100, 45, 0, 0.28),
+    0 3px 10px rgba(180, 83, 9, 0.22),
+    inset 0 1px 0 rgba(255, 248, 180, 0.60),
+    inset 0 -1px 0 rgba(100, 45, 0, 0.18) !important;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Shimmer sweep — light reflecting off gold */
+button.bg-primary::before,
+a.bg-primary::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: -120%;
+  width: 55%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.42) 40%,
+    rgba(255, 255, 255, 0.50) 50%,
+    rgba(255, 255, 255, 0.42) 60%,
+    transparent 100%
+  );
+  transform: skewX(-18deg);
+  animation: goldShimmer 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes goldShimmer {
+  0%, 20%  { left: -120%; opacity: 0; }
+  25%      { opacity: 1; }
+  62%      { opacity: 1; }
+  68%, 100% { left: 180%;  opacity: 0; }
+}
+
+/* 3. Gold focus glow ring */
+button:focus-visible {
+  outline: none !important;
+  box-shadow:
+    0 0 0 2px hsl(var(--background)),
+    0 0 0 4px hsl(38 90% 50% / 0.55),
+    0 0 14px hsl(38 90% 50% / 0.25) !important;
+}
+
+/* 4. Glass sidebar */
+[data-sidebar="sidebar"] {
+  background: rgba(255, 251, 232, 0.84) !important;
+  backdrop-filter: blur(18px) saturate(175%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(175%) !important;
+  border-right: 1px solid rgba(245, 158, 11, 0.17) !important;
+  box-shadow: 2px 0 24px rgba(180, 83, 9, 0.07) !important;
+}
+.dark [data-sidebar="sidebar"] {
+  background: rgba(14, 9, 3, 0.88) !important;
+  backdrop-filter: blur(18px) saturate(175%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(175%) !important;
+  border-right: 1px solid rgba(217, 119, 6, 0.14) !important;
+  box-shadow: 2px 0 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* 5. Gold active glow on sidebar nav items */
+[data-sidebar="menu-button"][data-active="true"],
+[data-sidebar="menu-button"].active {
+  background: linear-gradient(135deg, hsl(44 96% 56%), hsl(36 88% 46%)) !important;
+  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.3), inset 0 1px 0 rgba(255,248,180,0.4) !important;
+  color: hsl(30 10% 5%) !important;
+}
+
+/* 6. Glass cards */
+.shadcn-card {
+  background: rgba(255, 253, 242, 0.82) !important;
+  backdrop-filter: blur(10px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
+  border-color: rgba(245, 158, 11, 0.13) !important;
+  box-shadow:
+    0 2px 20px rgba(180, 83, 9, 0.055),
+    0 1px 3px rgba(100, 45, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
+}
+.dark .shadcn-card {
+  background: rgba(20, 13, 5, 0.80) !important;
+  backdrop-filter: blur(10px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
+  border-color: rgba(217, 119, 6, 0.09) !important;
+  box-shadow:
+    0 2px 20px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 200, 80, 0.05) !important;
+}
+
+/* 7. Gold gradient header accent line on cards */
+.shadcn-card > .p-6:first-child,
+.shadcn-card > [class*="CardHeader"] {
+  border-bottom: 1px solid rgba(245, 158, 11, 0.12);
+}
+
+/* 8. Subtle gold shimmer on card top edge */
+.shadcn-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.55), rgba(255, 220, 100, 0.70), rgba(251, 191, 36, 0.55), transparent);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.shadcn-card {
+  position: relative;
+}
+
+/* 9. Input fields — warm tinted glass */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+textarea,
+select,
+.flex.h-9.rounded-md,
+.flex.h-10.rounded-md {
+  background: rgba(255, 252, 238, 0.70) !important;
+  backdrop-filter: blur(4px) !important;
+  border-color: rgba(245, 158, 11, 0.22) !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: rgba(245, 158, 11, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12), 0 0 0 1px rgba(245, 158, 11, 0.35) !important;
+  background: rgba(255, 252, 238, 0.90) !important;
+}
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="search"],
+.dark input[type="number"],
+.dark textarea,
+.dark select {
+  background: rgba(20, 13, 5, 0.65) !important;
+  border-color: rgba(217, 119, 6, 0.18) !important;
+}
