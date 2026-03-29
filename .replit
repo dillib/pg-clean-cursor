@@ -44,3 +44,12 @@ integrations = ["javascript_openai_ai_integrations:2.0.0", "javascript_log_in_wi
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
+
+[userenv]
+
+[userenv.shared]
+SMTP_HOST = "smtp.protonmail.ch"
+SMTP_PORT = "587"
+SMTP_SECURE = "false"
+SMTP_FROM = "PhotonicTag <sales@photonictag.com>"
+NOTIFY_EMAIL = "sales@photonictag.com"
