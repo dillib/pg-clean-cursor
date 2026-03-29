@@ -334,214 +334,95 @@
 }
 
 /* ============================================================
- * YELLOW GLASS DESIGN SYSTEM
- * Brand color #FDB813 — hsl(50 100% 50%) — yellow
- * ============================================================ */
+   * YELLOW FLAT DESIGN SYSTEM
+   * Brand color #FFD400 — hsl(50 100% 50%) — yellow
+   * ============================================================ */
 
-/* 1. Page background — warm ambient radial glow for glass depth */
-body {
-  background:
-    radial-gradient(ellipse 90% 70% at 8% 12%, hsla(50,100%,65%,0.09) 0%, transparent 60%),
-    radial-gradient(ellipse 70% 55% at 92% 88%, hsla(50,100%,60%,0.07) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 50% 0%,  hsla(50,100%,58%,0.05) 0%, transparent 50%),
-    hsl(var(--background));
-  min-height: 100vh;
-}
-.dark body {
-  background:
-    radial-gradient(ellipse 90% 70% at 8% 12%,  hsla(48,95%,42%,0.10) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 92% 88%,  hsla(48,90%,38%,0.07) 0%, transparent 55%),
-    hsl(var(--background));
-}
+  /* 1. Page background — plain */
+  body {
+    background: hsl(var(--background));
+    min-height: 100vh;
+  }
 
-/* 2. Yellow gradient — all bg-primary elements */
-.bg-primary {
-  background: linear-gradient(
-    148deg,
-    hsl(52 100% 68%) 0%,
-    hsl(50 100% 50%) 28%,
-    hsl(47 95% 43%) 55%,
-    hsl(44 90% 36%) 78%,
-    hsl(50 100% 50%) 100%
-  ) !important;
-}
+  /* 2. Flat yellow — all bg-primary elements */
+  .bg-primary {
+    background: hsl(var(--primary)) !important;
+  }
 
-/* Buttons & links — add shadow + overflow for shimmer */
-button.bg-primary,
-a.bg-primary {
-  box-shadow:
-    0 1px 2px rgba(100, 80, 0, 0.28),
-    0 3px 10px rgba(180, 140, 0, 0.22),
-    inset 0 1px 0 rgba(255, 248, 150, 0.65),
-    inset 0 -1px 0 rgba(100, 80, 0, 0.18) !important;
-  overflow: hidden;
-  position: relative;
-}
+  /* Buttons & links — simple shadow only */
+  button.bg-primary,
+  a.bg-primary {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+  }
 
-/* Logo icon backgrounds — rich inset highlight */
-div.bg-primary,
-span.bg-primary {
-  box-shadow:
-    0 2px 8px rgba(180, 140, 0, 0.32),
-    inset 0 1px 0 rgba(255, 248, 150, 0.60),
-    inset 0 -1px 0 rgba(100, 80, 0, 0.20) !important;
-  position: relative;
-}
+  /* Logo icon backgrounds */
+  div.bg-primary,
+  span.bg-primary {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+  }
 
-/* CTA section — large yellow surface */
-section.bg-primary {
-  background: linear-gradient(
-    135deg,
-    hsl(52 100% 68%) 0%,
-    hsl(50 100% 50%) 18%,
-    hsl(47 95% 43%) 38%,
-    hsl(44 90% 36%) 55%,
-    hsl(47 95% 43%) 70%,
-    hsl(50 100% 50%) 85%,
-    hsl(52 100% 66%) 100%
-  ) !important;
-  position: relative;
-  overflow: hidden;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 248, 150, 0.40),
-    inset 0 -1px 0 rgba(100, 80, 0, 0.15) !important;
-}
+  /* CTA section — flat yellow */
+  section.bg-primary {
+    background: hsl(var(--primary)) !important;
+    box-shadow: none !important;
+  }
 
-/* Slow grand shimmer on the CTA section */
-section.bg-primary::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    105deg,
-    transparent 0%,
-    transparent 35%,
-    rgba(255, 255, 255, 0.10) 45%,
-    rgba(255, 255, 255, 0.18) 50%,
-    rgba(255, 255, 255, 0.10) 55%,
-    transparent 65%,
-    transparent 100%
-  );
-  animation: ctaSweep 7s ease-in-out infinite;
-  pointer-events: none;
-}
+  /* bg-amber-500 elements — flat */
+  .bg-amber-500 {
+    background: hsl(50 100% 50%) !important;
+    box-shadow: none !important;
+  }
 
-@keyframes ctaSweep {
-  0%, 15%   { transform: translateX(-100%); opacity: 0; }
-  20%        { opacity: 1; }
-  75%        { opacity: 1; }
-  80%, 100% { transform: translateX(100%); opacity: 0; }
-}
+  /* 3. Focus ring — clean outline */
+  button:focus-visible {
+    outline: none !important;
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px hsl(var(--primary)) !important;
+  }
 
-/* Shimmer sweep on buttons & links */
-button.bg-primary::before,
-a.bg-primary::before {
-  content: '';
-  position: absolute;
-  top: 0; bottom: 0;
-  left: -120%;
-  width: 55%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.42) 40%,
-    rgba(255, 255, 255, 0.50) 50%,
-    rgba(255, 255, 255, 0.42) 60%,
-    transparent 100%
-  );
-  transform: skewX(-18deg);
-  animation: yellowShimmer 4s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 2;
-}
+  /* 4. Sidebar — solid background */
+  [data-sidebar="sidebar"] {
+    background: hsl(var(--sidebar)) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-right: 1px solid hsl(var(--sidebar-border)) !important;
+    box-shadow: none !important;
+  }
+  .dark [data-sidebar="sidebar"] {
+    background: hsl(var(--sidebar)) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-right: 1px solid hsl(var(--sidebar-border)) !important;
+    box-shadow: none !important;
+  }
 
-@keyframes yellowShimmer {
-  0%, 20%  { left: -120%; opacity: 0; }
-  25%      { opacity: 1; }
-  62%      { opacity: 1; }
-  68%, 100% { left: 180%;  opacity: 0; }
-}
+  /* 5. Active sidebar nav items — flat */
+  [data-sidebar="menu-button"][data-active="true"],
+  [data-sidebar="menu-button"].active {
+    background: hsl(var(--primary)) !important;
+    box-shadow: none !important;
+    color: hsl(30 10% 5%) !important;
+  }
 
-/* bg-amber-500 elements (timeline dots, badges) — yellow treatment */
-.bg-amber-500 {
-  background: linear-gradient(145deg, hsl(52 100% 68%), hsl(50 100% 50%), hsl(32 88% 38%)) !important;
-  box-shadow: 0 2px 8px rgba(180, 140, 0, 0.32), inset 0 1px 0 rgba(255, 248, 150, 0.52) !important;
-}
+  /* 6. Cards — solid background */
+  .shadcn-card {
+    background: hsl(var(--card)) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: hsl(var(--card-border)) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+    position: relative;
+  }
+  .dark .shadcn-card {
+    background: hsl(var(--card)) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: hsl(var(--card-border)) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+  }
 
-/* 3. Yellow focus glow ring */
-button:focus-visible {
-  outline: none !important;
-  box-shadow:
-    0 0 0 2px hsl(var(--background)),
-    0 0 0 4px hsl(50 100% 50% / 0.55),
-    0 0 14px hsl(50 100% 50% / 0.25) !important;
-}
-
-/* 4. Glass sidebar */
-[data-sidebar="sidebar"] {
-  background: rgba(255, 252, 228, 0.84) !important;
-  backdrop-filter: blur(18px) saturate(175%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(175%) !important;
-  border-right: 1px solid rgba(253, 184, 19, 0.18) !important;
-  box-shadow: 2px 0 24px rgba(180, 110, 0, 0.07) !important;
-}
-.dark [data-sidebar="sidebar"] {
-  background: rgba(12, 8, 2, 0.88) !important;
-  backdrop-filter: blur(18px) saturate(175%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(175%) !important;
-  border-right: 1px solid rgba(253, 184, 19, 0.14) !important;
-  box-shadow: 2px 0 24px rgba(0, 0, 0, 0.45) !important;
-}
-
-/* 5. Yellow active glow on sidebar nav items */
-[data-sidebar="menu-button"][data-active="true"],
-[data-sidebar="menu-button"].active {
-  background: linear-gradient(135deg, hsl(46 100% 58%), hsl(40 96% 46%)) !important;
-  box-shadow: 0 2px 8px rgba(180, 110, 0, 0.30), inset 0 1px 0 rgba(255,245,170,0.45) !important;
-  color: hsl(30 10% 5%) !important;
-}
-
-/* 6. Glass cards */
-.shadcn-card {
-  background: rgba(255, 253, 238, 0.82) !important;
-  backdrop-filter: blur(10px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
-  border-color: rgba(253, 184, 19, 0.13) !important;
-  box-shadow:
-    0 2px 20px rgba(180, 110, 0, 0.055),
-    0 1px 3px rgba(100, 80, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
-}
-.dark .shadcn-card {
-  background: rgba(12, 8, 2, 0.80) !important;
-  backdrop-filter: blur(10px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
-  border-color: rgba(253, 184, 19, 0.09) !important;
-  box-shadow:
-    0 2px 20px rgba(0, 0, 0, 0.38),
-    inset 0 1px 0 rgba(253, 184, 19, 0.05) !important;
-}
-
-/* 7. Yellow header accent line on cards */
-.shadcn-card > .p-6:first-child,
-.shadcn-card > [class*="CardHeader"] {
-  border-bottom: 1px solid rgba(253, 184, 19, 0.12);
-}
-
-/* 8. Subtle yellow shimmer on card top edge */
-.shadcn-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 10%; right: 10%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(253, 184, 19, 0.55), rgba(255, 220, 100, 0.72), rgba(253, 184, 19, 0.55), transparent);
-  border-radius: 50%;
-  pointer-events: none;
-}
-.shadcn-card {
-  position: relative;
-}
-
+  
 /* 9. Input fields — neutral background, blue focus */
 input[type="text"],
 input[type="email"],
