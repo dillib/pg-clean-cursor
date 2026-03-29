@@ -542,7 +542,7 @@ button:focus-visible {
   position: relative;
 }
 
-/* 9. Input fields — warm gold-tinted glass */
+/* 9. Input fields — neutral background, blue focus */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -552,17 +552,17 @@ textarea,
 select,
 .flex.h-9.rounded-md,
 .flex.h-10.rounded-md {
-  background: rgba(255, 252, 228, 0.70) !important;
-  backdrop-filter: blur(4px) !important;
-  border-color: rgba(253, 184, 19, 0.22) !important;
+  background: #F5F5F5 !important;
+  backdrop-filter: none !important;
+  border-color: hsl(var(--input)) !important;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 input:focus,
 textarea:focus,
 select:focus {
-  border-color: rgba(253, 184, 19, 0.55) !important;
-  box-shadow: 0 0 0 3px rgba(253, 184, 19, 0.12), 0 0 0 1px rgba(253, 184, 19, 0.35) !important;
-  background: rgba(255, 252, 228, 0.90) !important;
+  border-color: rgb(59 130 246) !important;
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.25) !important;
+  background: #F5F5F5 !important;
 }
 .dark input[type="text"],
 .dark input[type="email"],
@@ -573,4 +573,10 @@ select:focus {
 .dark select {
   background: rgba(12, 8, 2, 0.65) !important;
   border-color: rgba(253, 184, 19, 0.18) !important;
+}
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: rgb(59 130 246) !important;
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.25) !important;
 }
