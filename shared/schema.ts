@@ -1199,6 +1199,8 @@ export const demoBookings = pgTable("demo_bookings", {
   status: text("status").$type<DemoBookingStatus>().default("pending").notNull(),
   notes: text("notes"),
   leadId: varchar("lead_id"),
+  reminder24hSentAt: timestamp("reminder_24h_sent_at"),
+  reminder1hSentAt: timestamp("reminder_1h_sent_at"),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });

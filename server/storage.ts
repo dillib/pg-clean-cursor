@@ -1,4 +1,4 @@
-import { eq, desc, and, gte, lte, or } from "drizzle-orm";
+import { eq, desc, and, gte, lte, or, isNull, ne } from "drizzle-orm";
 import { db } from "./db";
 import {
   type User,
@@ -236,6 +236,9 @@ export interface IStorage {
   createDemoBooking(booking: InsertDemoBooking): Promise<DemoBooking>;
   updateDemoBookingStatus(id: string, status: DemoBookingStatus): Promise<DemoBooking | undefined>;
   updateDemoBookingLeadId(bookingId: string, leadId: string): Promise<void>;
+  getUpcomingBookingsForReminders(): Promise<DemoBooking[]>;
+  markReminder24hSent(id: string): Promise<void>;
+  markReminder1hSent(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -986,6 +989,35 @@ export class DatabaseStorage implements IStorage {
       .where(eq(demoBookings.id, id))
       .returning();
     return updated;
+  }
+
+  async getUpcomingBookingsForReminders(): Promise<DemoBooking[]> {
+    const now = new Date();
+    const in26h = new Date(now.getTime() + 26 * 60 * 60 * 1000);
+    return db
+      .select()
+      .from(demoBookings)
+      .where(
+        and(
+          ne(demoBookings.status, "cancelled"),
+          gte(demoBookings.slotDatetime, now),
+          lte(demoBookings.slotDatetime, in26h)
+        )
+      );
+  }
+
+  async markReminder24hSent(id: string): Promise<void> {
+    await db
+      .update(demoBookings)
+      .set({ reminder24hSentAt: new Date(), updatedAt: new Date() })
+      .where(eq(demoBookings.id, id));
+  }
+
+  async markReminder1hSent(id: string): Promise<void> {
+    await db
+      .update(demoBookings)
+      .set({ reminder1hSentAt: new Date(), updatedAt: new Date() })
+      .where(eq(demoBookings.id, id));
   }
 }
 

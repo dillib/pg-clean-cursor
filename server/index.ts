@@ -8,6 +8,7 @@ import { storage } from "./storage";
 import { seedDemoData } from "./seed-demo-data";
 import bcrypt from "bcryptjs";
 import { scheduleConnectorSync } from "./services/sap-odata-client";
+import { startReminderScheduler } from "./services/reminder-scheduler";
 import type { SAPConfig } from "@shared/schema";
 
 const app = express();
@@ -178,6 +179,9 @@ app.use((req, res, next) => {
   } catch (error) {
     log(`[SAPScheduler] Error initializing schedulers: ${error}`);
   }
+
+  // Start demo booking reminder scheduler
+  startReminderScheduler();
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
