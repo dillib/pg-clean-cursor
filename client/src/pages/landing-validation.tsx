@@ -637,22 +637,22 @@ export default function LandingValidation() {
 
         <div className="relative max-w-3xl mx-auto text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-black/20 text-white rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest mb-6">
-            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+          <div className="inline-flex items-center gap-2 bg-black/15 text-black/80 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest mb-6">
+            <span className="w-1.5 h-1.5 bg-black/60 rounded-full animate-pulse" />
             Start This Week
           </div>
 
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-5 leading-tight" data-testid="text-cta-title">
+          <h2 className="text-4xl sm:text-5xl font-bold text-black mb-5 leading-tight" data-testid="text-cta-title">
             Get EU Compliant<br className="hidden sm:block" /> Before Your Deadline.
           </h2>
 
-          <p className="text-lg text-white/90 mb-4 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-lg text-black/80 mb-4 leading-relaxed max-w-2xl mx-auto">
             The brands that move now will lead on consumer trust, retailer preference, and regulatory confidence — while competitors scramble.
           </p>
 
-          <p className="text-sm text-white/70 mb-10 max-w-xl mx-auto">
+          <p className="text-sm text-black/60 mb-10 max-w-xl mx-auto">
             Start with a POC from{" "}
-            <strong className="text-white font-bold">{symbol}499/month</strong>.{" "}
+            <strong className="text-black font-bold">{symbol}499/month</strong>.{" "}
             No long-term commitment. Full credits apply when you upgrade.
           </p>
 
@@ -670,7 +670,7 @@ export default function LandingValidation() {
             </Button>
             <Button
               size="lg"
-              className="bg-transparent text-white border-2 border-white/40 hover:border-white/75 hover:bg-white/10 font-medium gap-2"
+              className="bg-transparent text-black border-2 border-black/35 hover:border-black/60 hover:bg-black/8 font-medium gap-2"
               asChild
               data-testid="button-cta-contact"
             >
@@ -681,19 +681,19 @@ export default function LandingValidation() {
           </div>
 
           {/* Trust strip */}
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-white/85">
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-black/70">
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-white shrink-0" />
+              <CheckCircle className="w-4 h-4 text-black/70 shrink-0" />
               <span>No long-term contract</span>
             </div>
-            <div className="hidden sm:block w-px h-4 bg-white/30" />
+            <div className="hidden sm:block w-px h-4 bg-black/20" />
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-white shrink-0" />
+              <CheckCircle className="w-4 h-4 text-black/70 shrink-0" />
               <span>Dedicated onboarding lead</span>
             </div>
-            <div className="hidden sm:block w-px h-4 bg-white/30" />
+            <div className="hidden sm:block w-px h-4 bg-black/20" />
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-white shrink-0" />
+              <CheckCircle className="w-4 h-4 text-black/70 shrink-0" />
               <span>Live in 4–6 weeks</span>
             </div>
           </div>
