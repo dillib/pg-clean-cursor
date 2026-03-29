@@ -11,7 +11,7 @@ export function PublicFooter() {
               <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
                 <QrCode className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="font-semibold">PhotonicTag</span>
+              <span className="font-semibold">PhotonicTag Corp.</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
               Identity, at the speed of light.
@@ -44,7 +44,7 @@ export function PublicFooter() {
         </div>
         <div className="border-t pt-6 text-center">
           <p className="text-xs text-muted-foreground">
-            &copy; 2026 PhotonicTag. All rights reserved.
+            &copy; 2026 PhotonicTag Corp. All rights reserved.
           </p>
         </div>
       </div>
