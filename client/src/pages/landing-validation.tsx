@@ -648,7 +648,7 @@ export default function LandingValidation() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
             <Button
               size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-xl shadow-black/30 border border-black/15 gap-2"
+              className="bg-black text-white hover:bg-black/85 font-semibold gap-2"
               asChild
               data-testid="button-cta-demo"
             >
