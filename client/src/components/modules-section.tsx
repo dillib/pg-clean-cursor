@@ -103,23 +103,48 @@ export function ModulesSection({ compact = false }: ModulesSectionProps) {
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {modules.map((module) => (
-            <Card key={module.name} data-testid={`card-module-${module.slug}`}>
+            <Card
+              key={module.name}
+              className="overflow-hidden border-primary/15 hover:border-primary/40 hover:shadow-lg transition-all duration-200 group"
+              data-testid={`card-module-${module.slug}`}
+            >
+              {/* Gold accent top bar */}
+              <div className="h-[3px] bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
+
               <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                {/* Icon + title */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-11 h-11 rounded-xl bg-primary/15 ring-1 ring-primary/30 flex items-center justify-center shrink-0 group-hover:bg-primary/22 transition-colors">
                     <module.icon className="w-5 h-5 text-primary" />
                   </div>
-                  <h3 className="font-semibold" data-testid={`text-module-name-${module.slug}`}>{module.name}</h3>
+                  <h3 className="font-bold text-foreground leading-tight" data-testid={`text-module-name-${module.slug}`}>
+                    {module.name}
+                  </h3>
                 </div>
-                <p className="text-sm text-muted-foreground mb-4" data-testid={`text-module-desc-${module.slug}`}>{module.description}</p>
-                <ul className="space-y-1.5">
-                  {module.features.map((feature, index) => (
-                    <li key={feature} className="flex items-center gap-2 text-xs text-muted-foreground" data-testid={`text-module-feature-${module.slug}-${index}`}>
-                      <CheckCircle className="w-3.5 h-3.5 text-primary shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+
+                {/* Description */}
+                <p
+                  className="text-sm text-foreground/70 mb-5 leading-relaxed"
+                  data-testid={`text-module-desc-${module.slug}`}
+                >
+                  {module.description}
+                </p>
+
+                {/* Feature list */}
+                <div className="border-t border-primary/12 pt-4">
+                  <ul className="space-y-2">
+                    {module.features.map((feature, index) => (
+                      <li
+                        key={feature}
+                        className="flex items-center gap-2.5 text-xs text-foreground/65"
+                        data-testid={`text-module-feature-${module.slug}-${index}`}
+                      >
+                        <CheckCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </CardContent>
             </Card>
           ))}
