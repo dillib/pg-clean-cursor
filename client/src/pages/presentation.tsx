@@ -6,8 +6,8 @@ import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
 import {
   QrCode, Shield, Cpu, Leaf, ArrowRight, CheckCircle, Globe,
-  Layers, BarChart3, Lock, Zap, Building2, Clock, AlertTriangle,
-  FileText, RefreshCw, Smartphone, Database, Eye, Calendar, Download, Loader2
+  BarChart3, Lock, Zap, Clock, AlertTriangle,
+  FileText, RefreshCw, Smartphone, Database, Calendar, Download, Loader2, Star, Users, TrendingUp
 } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
@@ -36,12 +36,12 @@ const platformCapabilities = [
   {
     icon: Database,
     title: "SAP & ERP Integration",
-    description: "Enterprise-grade bidirectional sync with SAP S/4HANA, ECC, and Business One. Automated field mapping, conflict detection, and resolution — no manual data entry required.",
+    description: "Enterprise-grade bidirectional sync with SAP S/4HANA, ECC, and Business One. Automated field mapping with no manual data entry required.",
   },
   {
     icon: BarChart3,
     title: "Supply Chain Traceability",
-    description: "End-to-end visibility from raw material sourcing to end-of-life recycling. CloudEvents-based audit trail for every product interaction, ownership transfer, and compliance check.",
+    description: "End-to-end visibility from raw material sourcing to end-of-life recycling. Full audit trail for every product interaction, ownership transfer, and compliance check.",
   },
 ];
 
@@ -68,6 +68,13 @@ const targetIndustries = [
   { name: "Automotive & EV", examples: "EV components, parts, accessories", deadline: "2028" },
   { name: "Furniture & Home", examples: "Office furniture, home furnishings, mattresses", deadline: "2029" },
   { name: "Industrial Packaging", examples: "Cardboard, biodegradable packaging, reusable containers", deadline: "2029" },
+];
+
+const outcomes = [
+  { metric: "< 6 weeks", label: "Average time to first DPP live", icon: Clock },
+  { metric: "100%", label: "ESPR field coverage out of the box", icon: CheckCircle },
+  { metric: "€100K+", label: "Per-violation penalties avoided", icon: Shield },
+  { metric: "3 ERP types", label: "SAP S/4HANA, ECC, Business One", icon: Database },
 ];
 
 export default function Presentation() {
@@ -104,6 +111,7 @@ export default function Presentation() {
       </Helmet>
       <PublicNav />
 
+      {/* Hero */}
       <section className="relative pt-20 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
@@ -117,8 +125,8 @@ export default function Presentation() {
             Identity, at the speed of light.
           </p>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-8">
-            An AI-powered Digital Product Passport platform that transforms product identity into a physics-rooted, 
-            tamper-proof signature — bridging physical and digital worlds for enhanced trust, traceability, and transparency 
+            An AI-powered Digital Product Passport platform that transforms product identity into a physics-rooted,
+            tamper-proof signature — bridging physical and digital worlds for enhanced trust, traceability, and transparency
             under EU ESPR Regulation (EU) 2024/1781.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -131,7 +139,7 @@ export default function Presentation() {
             <Button size="lg" variant="outline" asChild data-testid="button-presentation-docs">
               <Link href="/docs" className="gap-2">
                 <FileText className="w-4 h-4" />
-                Product Documentation
+                Documentation
               </Link>
             </Button>
             <Button size="lg" variant="outline" onClick={handleDownloadPPT} disabled={downloading} data-testid="button-download-ppt" className="gap-2">
@@ -142,6 +150,24 @@ export default function Presentation() {
         </div>
       </section>
 
+      {/* Key outcomes */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 border-t bg-muted/20">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {outcomes.map((o, i) => (
+              <div key={i} className="text-center" data-testid={`outcome-${i}`}>
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                  <o.icon className="w-5 h-5 text-primary" />
+                </div>
+                <p className="text-2xl font-bold text-primary">{o.metric}</p>
+                <p className="text-xs text-muted-foreground mt-1">{o.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Compliance Timeline */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 border-t">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
@@ -173,6 +199,7 @@ export default function Presentation() {
         </div>
       </section>
 
+      {/* Platform Capabilities */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30 border-t">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
@@ -197,6 +224,7 @@ export default function Presentation() {
         </div>
       </section>
 
+      {/* Why PhotonicTag */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 border-t">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
@@ -221,12 +249,13 @@ export default function Presentation() {
         </div>
       </section>
 
+      {/* Target Industries */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30 border-t">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight mb-3" data-testid="text-industries-title">Target Industries</h2>
+            <h2 className="text-3xl font-bold tracking-tight mb-3" data-testid="text-industries-title">Industries We Serve</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Pre-configured templates and compliance schemas for industries affected by ESPR phased rollout.
+              Pre-configured compliance schemas and product templates for every industry affected by the ESPR phased rollout.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -243,107 +272,86 @@ export default function Presentation() {
         </div>
       </section>
 
+      {/* How It Works */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 border-t">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight mb-3" data-testid="text-architecture-title">Technical Architecture</h2>
+            <h2 className="text-3xl font-bold tracking-tight mb-3">How It Works</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Modern cloud-native architecture designed for scalability, security, and enterprise integration.
+              From onboarding to your first live Digital Product Passport in as little as two weeks.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-8">
-            <Card className="border">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-primary" />
-                  Platform Stack
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">Frontend</span>
-                    <span className="font-medium">React + TypeScript + Vite</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">Backend</span>
-                    <span className="font-medium">Node.js + Express</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">Database</span>
-                    <span className="font-medium">PostgreSQL + Drizzle ORM</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">AI Engine</span>
-                    <span className="font-medium">OpenAI GPT-4o</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">Authentication</span>
-                    <span className="font-medium">OAuth 2.0 / OIDC + RBAC</span>
-                  </div>
-                  <div className="flex justify-between py-2">
-                    <span className="text-muted-foreground">Events</span>
-                    <span className="font-medium">CloudEvents Bus</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-primary" />
-                  Security & Compliance
-                </h3>
-                <div className="space-y-3">
-                  {[
-                    "GDPR-compliant data processing and storage",
-                    "Role-based access control (Super Admin, Internal, Demo)",
-                    "Encrypted session management with PostgreSQL store",
-                    "CloudEvents audit trail for all operations",
-                    "Tamper-proof product identity signatures",
-                    "SOC 2 Type II ready architecture",
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30 border-t">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight mb-3" data-testid="text-operations-title">Internal Operations Platform</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              A comprehensive back-office system for managing customers, generating demos, triaging support requests, and monitoring platform health.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-4 gap-6">
             {[
-              { title: "AI-Driven CRM", desc: "Customer account management with AI health scoring (0-100), next-best-action generation, MRR tracking, at-risk detection, and Excel bulk import with auto-column mapping.", icon: BarChart3 },
-              { title: "Demo Factory", desc: "One-click demo generation from 6 industry templates or custom AI prompts. Per-demo credentials, shareable URLs, and instant product creation for prospect presentations.", icon: Zap },
-              { title: "Support Triage", desc: "AI-powered ticket categorization with automatic priority suggestion, tag generation, and summary analysis. Streamlines support workflow for faster resolution.", icon: Eye },
-              { title: "Platform Ops", desc: "Real-time health monitoring with uptime tracking, memory usage, entity counts, and auto-refresh. System-wide visibility for operational confidence.", icon: Cpu },
-            ].map((item, i) => (
-              <div key={i} className="p-6 rounded-lg border bg-card" data-testid={`ops-card-${i}`}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <item.icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <h3 className="font-semibold">{item.title}</h3>
+              { step: "1", title: "Connect", desc: "Sync your SAP or ERP system. Import existing product data automatically — no manual re-entry.", icon: Database },
+              { step: "2", title: "Map", desc: "Our AI maps your product fields to EU ESPR requirements. Fill gaps with guided data entry.", icon: Zap },
+              { step: "3", title: "Certify", desc: "Generate QR-linked Digital Product Passports with tamper-proof identity signatures for every product.", icon: QrCode },
+              { step: "4", title: "Monitor", desc: "Track compliance status, consumer scans, and sustainability scores across your entire product catalogue.", icon: TrendingUp },
+            ].map((s, i) => (
+              <div key={i} className="text-center" data-testid={`step-${i}`}>
+                <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-lg flex items-center justify-center mx-auto mb-4">
+                  {s.step}
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                <h3 className="font-semibold mb-2">{s.title}</h3>
+                <p className="text-sm text-muted-foreground">{s.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* Trust signals */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30 border-t">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tight mb-3">Built for Enterprise Confidence</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Security, compliance, and reliability at every layer of the platform.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: Shield,
+                title: "GDPR Compliant",
+                points: ["Encrypted session management", "Role-based access control", "Full audit trail on all operations", "Data sovereignty options"],
+              },
+              {
+                icon: Globe,
+                title: "EU Regulation Ready",
+                points: ["ESPR (EU) 2024/1781 full coverage", "EU Battery Regulation 2023/1542", "REACH / SCIP substance tracking", "CE marking & EPR registration"],
+              },
+              {
+                icon: Users,
+                title: "Enterprise Support",
+                points: ["Dedicated onboarding team", "SAP integration consulting", "Custom field mapping assistance", "Priority technical support"],
+              },
+            ].map((col, i) => (
+              <div key={i} className="p-6 rounded-lg border bg-card" data-testid={`trust-card-${i}`}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <col.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <h3 className="font-semibold">{col.title}</h3>
+                </div>
+                <ul className="space-y-2">
+                  {col.points.map((p, j) => (
+                    <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
+                      {p}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 border-t">
         <div className="max-w-3xl mx-auto text-center">
+          <Badge variant="secondary" className="mb-4">Get Started</Badge>
           <h2 className="text-3xl font-bold tracking-tight mb-4">Ready to get compliant?</h2>
           <p className="text-lg text-muted-foreground mb-8">
             Schedule a personalized demo to see how PhotonicTag can help your organization meet EU DPP requirements ahead of the deadline.
