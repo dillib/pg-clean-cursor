@@ -87,22 +87,10 @@ function DocContent({ section }: { section: DocSection }) {
         <UL>
           <LI><Bold>EU DPP Compliance:</Bold> Full coverage of ESPR Regulation (EU) 2024/1781 — product identification, material composition, environmental impact, durability, and end-of-life documentation.</LI>
           <LI><Bold>SAP Integration:</Bold> Bidirectional synchronization with SAP S/4HANA, ECC, and Business One, connecting existing ERP data directly to Digital Product Passports.</LI>
-          <LI><Bold>AI Automation:</Bold> Sustainability scoring, circularity assessment, repair guides, and risk analysis powered by GPT-4o.</LI>
+          <LI><Bold>AI Automation:</Bold> Sustainability scoring, circularity assessment, repair guides, and risk analysis powered by advanced AI models.</LI>
           <LI><Bold>Consumer Transparency:</Bold> Every product gets a unique QR code linking to a public-facing Digital Product Passport accessible on any device.</LI>
           <LI><Bold>Rapid Deployment:</Bold> Go live in weeks with pre-built industry templates, automated field mapping, and guided onboarding.</LI>
         </UL>
-        <H3>Architecture Overview</H3>
-        <DTable
-          headers={["Layer", "Technology"]}
-          rows={[
-            ["Frontend", "React + TypeScript, Vite, Tailwind CSS, Shadcn/ui"],
-            ["Backend", "Node.js + Express, TypeScript, RESTful APIs"],
-            ["Database", "PostgreSQL with Drizzle ORM"],
-            ["AI Engine", "OpenAI GPT-4o via API"],
-            ["Authentication", "OAuth 2.0 / OpenID Connect with role-based access"],
-            ["Events", "CloudEvents-based audit logging"],
-          ]}
-        />
       </div>
     );
   }
@@ -175,7 +163,7 @@ function DocContent({ section }: { section: DocSection }) {
         <H3>Module 2 — QR Identity</H3>
         <P>Tamper-proof QR code generation linking physical products to their digital passports. Server-side generation with data URL storage. Public scan pages optimized for mobile access with structured DPP data display.</P>
         <H3>Module 3 — Supply Chain Traceability</H3>
-        <P>End-to-end event tracking using CloudEvents specification. Records product creation, updates, QR generation, identity assignment, trace events, and AI insight generation. Complete audit trail for regulatory compliance.</P>
+        <P>End-to-end event tracking across the full product lifecycle. Records product creation, updates, QR generation, identity assignment, trace events, and AI insight generation. Complete audit trail for regulatory compliance.</P>
         <H3>Module 4 — Authentication & Anti-Counterfeiting</H3>
         <P>Physics-rooted identity signatures ensuring product authenticity. Verifiable proof-of-origin accessible via any smartphone. Integration with IoT sensors for real-time tamper detection.</P>
         <H3>Module 5 — IoT Smart Tagging</H3>
@@ -238,7 +226,7 @@ function DocContent({ section }: { section: DocSection }) {
     return (
       <div>
         <H2>AI Intelligence</H2>
-        <P>Five AI-powered insight types providing automated product analysis and compliance assessment, powered by OpenAI GPT-4o.</P>
+        <P>Five AI-powered insight types providing automated product analysis and compliance assessment.</P>
         <H3>Insight Types</H3>
         <H4>1. AI Summary</H4>
         <P>Generates a concise product overview highlighting key features, materials, and compliance status. Useful for quick product evaluation and consumer-facing descriptions.</P>
@@ -313,8 +301,8 @@ function DocContent({ section }: { section: DocSection }) {
         <H3>Data Protection</H3>
         <UL>
           <LI>GDPR-compliant data processing and storage</LI>
-          <LI>All passwords hashed with bcrypt (cost factor 10)</LI>
-          <LI>CloudEvents audit trail on all data operations</LI>
+          <LI>All passwords hashed using industry-standard cryptographic algorithms</LI>
+          <LI>Complete audit trail on all data operations</LI>
           <LI>No sensitive data exposed in API responses</LI>
         </UL>
       </div>
@@ -325,58 +313,17 @@ function DocContent({ section }: { section: DocSection }) {
     return (
       <div>
         <H2>API Reference</H2>
-        <P>RESTful JSON APIs under the <IC>/api/*</IC> prefix. All write endpoints require authentication.</P>
-        <H3>Products</H3>
-        <DTable
-          headers={["Method", "Endpoint", "Description"]}
-          rows={[
-            ["GET", "/api/products", "List all products"],
-            ["GET", "/api/products/:id", "Get product by ID"],
-            ["POST", "/api/products", "Create new product"],
-            ["PATCH", "/api/products/:id", "Update product"],
-            ["DELETE", "/api/products/:id", "Delete product"],
-          ]}
-        />
-        <H3>IoT Devices</H3>
-        <DTable
-          headers={["Method", "Endpoint", "Description"]}
-          rows={[
-            ["GET", "/api/iot/devices", "List all IoT devices"],
-            ["POST", "/api/iot/devices", "Register new device"],
-            ["PATCH", "/api/iot/devices/:id", "Update device"],
-            ["DELETE", "/api/iot/devices/:id", "Remove device"],
-            ["POST", "/api/iot/devices/:id/readings", "Submit sensor reading"],
-            ["GET", "/api/iot/devices/:id/readings", "Get device readings"],
-          ]}
-        />
-        <H3>AI Insights</H3>
-        <DTable
-          headers={["Method", "Endpoint", "Description"]}
-          rows={[
-            ["GET", "/api/ai/summary/:productId", "Get / generate AI summary"],
-            ["GET", "/api/ai/sustainability/:productId", "Get / generate sustainability analysis"],
-            ["GET", "/api/ai/repair-guide/:productId", "Get / generate repair guide"],
-            ["GET", "/api/ai/circularity/:productId", "Get / generate circularity score"],
-            ["GET", "/api/ai/risk-assessment/:productId", "Get / generate risk assessment"],
-          ]}
-        />
-        <H3>SAP Integration</H3>
-        <DTable
-          headers={["Method", "Endpoint", "Description"]}
-          rows={[
-            ["GET", "/api/integrations/connectors", "List connectors"],
-            ["POST", "/api/integrations/connectors", "Create connector"],
-            ["POST", "/api/integrations/connectors/:id/test", "Test connection"],
-            ["POST", "/api/integrations/connectors/:id/sync", "Trigger sync"],
-            ["GET", "/api/integrations/connectors/:id/logs", "Get sync logs"],
-          ]}
-        />
-        <H3>Public Endpoints</H3>
-        <P>The following endpoints are publicly accessible without authentication:</P>
+        <P>PhotonicTag provides a secure API layer for programmatic access to your Digital Product Passport data. Full API documentation — including endpoint specifications, authentication flows, and code examples — is available to customers upon onboarding.</P>
+        <H3>Available API Capabilities</H3>
         <UL>
-          <LI><IC>GET /product/:id</IC> — Public DPP scan page</LI>
-          <LI><IC>POST /api/leads</IC> — Contact form submission</LI>
+          <LI><Bold>Product Management:</Bold> Create, read, update, and delete Digital Product Passports programmatically.</LI>
+          <LI><Bold>AI Insights:</Bold> Trigger and retrieve AI-generated sustainability analysis, circularity scores, repair guides, and risk assessments.</LI>
+          <LI><Bold>IoT Integration:</Bold> Register devices, submit sensor readings, and retrieve real-time monitoring data.</LI>
+          <LI><Bold>SAP Connector:</Bold> Manage synchronisation with your SAP system — test connections, trigger syncs, and retrieve logs.</LI>
+          <LI><Bold>Public Scan Pages:</Bold> Every product's DPP is accessible via a public URL — no authentication required for end consumers.</LI>
         </UL>
+        <H3>Access & Authentication</H3>
+        <P>All write operations require authentication. Role-based access controls ensure each user and integration has access only to the data they are authorised for. Contact our team to receive your API credentials and full developer documentation.</P>
       </div>
     );
   }
