@@ -15,7 +15,7 @@ import {
   TrendingUp, ChevronRight, Search, Eye, UserPlus, Trash2, Edit, KeyRound,
   Upload, FileSpreadsheet, CheckCircle2, AlertCircle,
   Link2, Copy, ExternalLink, Settings, FileText, Download, Globe,
-  MessageCircle, Bot, Send, RotateCcw, Sparkles,
+  MessageCircle, Bot, Send, RotateCcw, Sparkles, Calendar,
 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -23,9 +23,17 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type {
   CustomerAccount, AccountActivity, NextBestAction,
-  SupportTicket, DemoConfig,
+  SupportTicket, DemoConfig, DemoBooking,
   AccountStatus, AccountTier, TicketPriority, TicketStatus,
 } from "@shared/schema";
+
+const INTEREST_LABELS: Record<string, string> = {
+  eu_dpp: "EU DPP Compliance",
+  sap_integration: "SAP Integration",
+  product_traceability: "Product Traceability",
+  sustainability: "Sustainability Reporting",
+  demo_only: "General Demo",
+};
 
 const ACCOUNT_STATUS_COLORS: Record<string, string> = {
   prospect: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
@@ -1827,7 +1835,7 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
 
       {isFull ? (
         <Tabs defaultValue="assistant" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7" data-testid="tabs-internal">
+          <TabsList className="grid w-full grid-cols-8" data-testid="tabs-internal">
             <TabsTrigger value="assistant" data-testid="tab-assistant" className="gap-1">
               <Bot className="w-4 h-4" />
               <span className="hidden sm:inline">Aria AI</span>
@@ -1835,6 +1843,10 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
             <TabsTrigger value="crm" data-testid="tab-crm" className="gap-1">
               <Users className="w-4 h-4" />
               <span className="hidden sm:inline">CRM</span>
+            </TabsTrigger>
+            <TabsTrigger value="bookings" data-testid="tab-bookings" className="gap-1">
+              <Calendar className="w-4 h-4" />
+              <span className="hidden sm:inline">Bookings</span>
             </TabsTrigger>
             <TabsTrigger value="proposals" data-testid="tab-proposals" className="gap-1">
               <FileText className="w-4 h-4" />
@@ -1860,6 +1872,7 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
 
           <TabsContent value="assistant"><TeamAssistantTab /></TabsContent>
           <TabsContent value="crm"><CRMTab /></TabsContent>
+          <TabsContent value="bookings"><BookingsInternalTab /></TabsContent>
           <TabsContent value="proposals"><ProposalGeneratorTab /></TabsContent>
           <TabsContent value="demos"><DemoFactoryTab /></TabsContent>
           <TabsContent value="users"><UserManagementTab /></TabsContent>
@@ -1868,7 +1881,7 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
         </Tabs>
       ) : (
         <Tabs defaultValue="assistant" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4" data-testid="tabs-internal">
+          <TabsList className="grid w-full grid-cols-5" data-testid="tabs-internal">
             <TabsTrigger value="assistant" data-testid="tab-assistant" className="gap-1">
               <Bot className="w-4 h-4" />
               <span>Aria AI</span>
@@ -1876,6 +1889,10 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
             <TabsTrigger value="crm" data-testid="tab-crm" className="gap-1">
               <Users className="w-4 h-4" />
               <span>CRM</span>
+            </TabsTrigger>
+            <TabsTrigger value="bookings" data-testid="tab-bookings" className="gap-1">
+              <Calendar className="w-4 h-4" />
+              <span>Bookings</span>
             </TabsTrigger>
             <TabsTrigger value="proposals" data-testid="tab-proposals" className="gap-1">
               <FileText className="w-4 h-4" />
@@ -1889,10 +1906,142 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
 
           <TabsContent value="assistant"><TeamAssistantTab /></TabsContent>
           <TabsContent value="crm"><CRMTab /></TabsContent>
+          <TabsContent value="bookings"><BookingsInternalTab /></TabsContent>
           <TabsContent value="proposals"><ProposalGeneratorTab /></TabsContent>
           <TabsContent value="demos"><DemoFactoryTab /></TabsContent>
         </Tabs>
       )}
+    </div>
+  );
+}
+function BookingsInternalTab() {
+  const { toast } = useToast();
+
+  const { data: bookings, isLoading, refetch } = useQuery<DemoBooking[]>({
+    queryKey: ["/api/demo-bookings"],
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      await apiRequest("PATCH", `/api/demo-bookings/${id}/status`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/demo-bookings"] });
+      toast({ title: "Status updated" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update status", variant: "destructive" });
+    },
+  });
+
+  const statusColor: Record<string, string> = {
+    pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+    confirmed: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+    cancelled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+  };
+
+  const pending = bookings?.filter(b => b.status === "pending").length ?? 0;
+  const confirmed = bookings?.filter(b => b.status === "confirmed").length ?? 0;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Demo Bookings</h2>
+          <p className="text-sm text-muted-foreground">Scheduled demos from the /book-demo chatbot</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => refetch()} data-testid="button-refresh-bookings">
+          <Clock className="w-3.5 h-3.5 mr-1" />
+          Refresh
+        </Button>
+      </div>
+
+      {bookings && bookings.length > 0 && (
+        <div className="grid grid-cols-3 gap-3">
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground mb-1">Total Booked</p>
+              <p className="text-2xl font-bold">{bookings.length}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground mb-1">Pending</p>
+              <p className="text-2xl font-bold text-yellow-600">{pending}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground mb-1">Confirmed</p>
+              <p className="text-2xl font-bold text-green-600">{confirmed}</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-10 gap-2 text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-sm">Loading bookings...</span>
+            </div>
+          ) : !bookings || bookings.length === 0 ? (
+            <div className="text-center py-14 text-muted-foreground">
+              <Calendar className="w-8 h-8 mx-auto mb-3 opacity-30" />
+              <p className="text-sm font-medium">No demo bookings yet</p>
+              <p className="text-xs mt-1">When visitors schedule demos at /book-demo, they'll appear here.</p>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {bookings.map((booking) => (
+                <div key={booking.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-start gap-4" data-testid={`booking-row-${booking.id}`}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-sm">{booking.name}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor[booking.status]}`}>
+                        {booking.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-0.5">
+                      {booking.email}{booking.company ? ` · ${booking.company}` : ""}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {format(new Date(booking.slotDatetime), "EEE, MMM d yyyy 'at' h:mm a 'CET'")}
+                      </span>
+                      <span>·</span>
+                      <span>{INTEREST_LABELS[booking.interestArea] || booking.interestArea}</span>
+                      {booking.userTimezone && booking.userTimezone !== "Europe/Berlin" && (
+                        <span className="text-muted-foreground/60">({booking.userTimezone})</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button size="sm" variant="outline" asChild data-testid={`button-download-ics-${booking.id}`}>
+                      <a href={`/api/demo-bookings/${booking.id}/calendar.ics`} download>
+                        <Download className="w-3.5 h-3.5 mr-1" />
+                        ICS
+                      </a>
+                    </Button>
+                    <select
+                      value={booking.status}
+                      onChange={e => statusMutation.mutate({ id: booking.id, status: e.target.value })}
+                      className="text-xs border rounded px-2 py-1.5 bg-background"
+                      data-testid={`select-status-${booking.id}`}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
