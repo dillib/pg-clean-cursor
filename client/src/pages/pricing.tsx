@@ -7,6 +7,7 @@ import { Link } from "wouter";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
 import { ModulesSection } from "@/components/modules-section";
+import { useCurrency } from "@/hooks/use-currency";
 
 const platformTiers = [
   {
@@ -57,7 +58,8 @@ const identityPricing = [
     icon: Layers,
     description: "For products manufactured in batches or lots",
     examples: "Batteries, textiles, packaging, components",
-    pricing: "€0.01 - €0.05",
+    priceMin: 0.01,
+    priceMax: 0.05,
     unit: "per batch identity",
     note: "One Digital Product Passport per manufacturing batch",
   },
@@ -66,7 +68,8 @@ const identityPricing = [
     icon: GitBranch,
     description: "For products requiring individual identification",
     examples: "Electronics, appliances, automotive parts",
-    pricing: "€0.05 - €0.25",
+    priceMin: 0.05,
+    priceMax: 0.25,
     unit: "per product identity",
     note: "One Digital Product Passport per individual unit",
   },
@@ -75,13 +78,24 @@ const identityPricing = [
     icon: Award,
     description: "For products requiring full ownership history",
     examples: "Timepieces, accessories, collectibles, art",
-    pricing: "€0.50 - €2.00",
+    priceMin: 0.50,
+    priceMax: 2.00,
     unit: "per product identity",
     note: "Enhanced authentication and ownership transfer records",
   },
 ];
 
+function formatPrice(symbol: string, value: number) {
+  return `${symbol}${value.toFixed(value < 1 ? 2 : 0)}`;
+}
+
+function formatRange(symbol: string, min: number, max: number) {
+  return `${formatPrice(symbol, min)} – ${formatPrice(symbol, max)}`;
+}
+
 export default function Pricing() {
+  const { code, symbol, loading, setCurrency } = useCurrency();
+
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
@@ -98,9 +112,40 @@ export default function Pricing() {
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4" data-testid="text-pricing-title">
             Pricing That Fits Your Needs
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
             Choose your platform plan, then select the tracking approach that matches your compliance requirements.
           </p>
+
+          {/* Currency toggle */}
+          <div className="inline-flex items-center gap-1 p-1 rounded-lg border bg-muted/40" data-testid="currency-toggle">
+            <button
+              onClick={() => setCurrency("EUR")}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                code === "EUR"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              data-testid="button-currency-eur"
+            >
+              € EUR
+            </button>
+            <button
+              onClick={() => setCurrency("USD")}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                code === "USD"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              data-testid="button-currency-usd"
+            >
+              $ USD
+            </button>
+          </div>
+          {!loading && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Prices shown in {code === "EUR" ? "Euros (€)" : "US Dollars ($)"}. Detected from your location.
+            </p>
+          )}
         </div>
 
         <section className="mb-12">
@@ -109,10 +154,10 @@ export default function Pricing() {
               <div className="flex items-start gap-4">
                 <AlertTriangle className="w-6 h-6 text-destructive shrink-0 mt-1" />
                 <div>
-                  <h3 className="font-bold mb-1">EU DPP Deadlines: Feb 2027 - 2030</h3>
+                  <h3 className="font-bold mb-1">EU DPP Deadlines: Feb 2027 – 2030</h3>
                   <p className="text-sm text-muted-foreground">
-                    Batteries by Feb 18, 2027. Textiles & electronics by late 2027. All products by 2030. 
-                    Non-compliance penalties: <span className="font-semibold text-destructive">€10,000 - €100,000+ per violation</span>. 
+                    Batteries by Feb 18, 2027. Textiles & electronics by late 2027. All products by 2030.
+                    Non-compliance penalties: <span className="font-semibold text-destructive">€10,000 – €100,000+ per violation</span>.
                     PhotonicTag costs a fraction of one penalty.
                   </p>
                 </div>
@@ -128,9 +173,9 @@ export default function Pricing() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {platformTiers.map((plan) => (
-              <Card 
-                key={plan.name} 
-                className={`relative ${plan.popular ? 'border-primary shadow-lg' : ''}`}
+              <Card
+                key={plan.name}
+                className={`relative ${plan.popular ? "border-primary shadow-lg" : ""}`}
                 data-testid={`card-plan-${plan.name.toLowerCase()}`}
               >
                 {plan.popular && (
@@ -141,11 +186,17 @@ export default function Pricing() {
                 <CardHeader className="text-center pb-2">
                   <CardTitle className="text-xl">{plan.name}</CardTitle>
                   <div className="mt-4">
-                    {plan.price ? (
-                      <>
-                        <span className="text-4xl font-bold">€{plan.price}</span>
-                        <span className="text-muted-foreground">/mo</span>
-                      </>
+                    {plan.price !== null ? (
+                      loading ? (
+                        <div className="h-10 w-24 mx-auto rounded bg-muted animate-pulse" />
+                      ) : (
+                        <>
+                          <span className="text-4xl font-bold" data-testid={`price-${plan.name.toLowerCase()}`}>
+                            {symbol}{plan.price}
+                          </span>
+                          <span className="text-muted-foreground">/mo</span>
+                        </>
+                      )
                     ) : (
                       <span className="text-4xl font-bold">Custom</span>
                     )}
@@ -161,8 +212,8 @@ export default function Pricing() {
                       </li>
                     ))}
                   </ul>
-                  <Button 
-                    className="w-full gap-2" 
+                  <Button
+                    className="w-full gap-2"
                     variant={plan.popular ? "default" : "outline"}
                     asChild
                     data-testid={`button-plan-${plan.name.toLowerCase()}`}
@@ -186,10 +237,10 @@ export default function Pricing() {
               Every option delivers full EU DPP compliance — select the tracking approach that fits your products
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-6">
             {identityPricing.map((tier) => (
-              <Card key={tier.category} data-testid={`card-identity-${tier.category.toLowerCase().replace(' ', '-')}`}>
+              <Card key={tier.category} data-testid={`card-identity-${tier.category.toLowerCase().replace(" ", "-")}`}>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -200,7 +251,13 @@ export default function Pricing() {
                   <p className="text-sm text-muted-foreground mb-2">{tier.description}</p>
                   <p className="text-xs text-muted-foreground mb-4">{tier.examples}</p>
                   <div className="border-t pt-4">
-                    <p className="text-2xl font-bold text-primary">{tier.pricing}</p>
+                    {loading ? (
+                      <div className="h-8 w-32 rounded bg-muted animate-pulse mb-1" />
+                    ) : (
+                      <p className="text-2xl font-bold text-primary" data-testid={`identity-price-${tier.category.toLowerCase().replace(" ", "-")}`}>
+                        {formatRange(symbol, tier.priceMin, tier.priceMax)}
+                      </p>
+                    )}
                     <p className="text-sm text-muted-foreground">{tier.unit}</p>
                     <p className="text-xs text-muted-foreground mt-2">{tier.note}</p>
                   </div>
@@ -211,7 +268,8 @@ export default function Pricing() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
-              Volume discounts available for all tracking options. <Link href="/contact" className="text-primary underline">Contact us</Link> for details.
+              Volume discounts available for all tracking options.{" "}
+              <Link href="/contact" className="text-primary underline">Contact us</Link> for details.
             </p>
           </div>
         </section>
@@ -228,7 +286,7 @@ export default function Pricing() {
             <Card>
               <CardContent className="p-6 text-center">
                 <Shield className="w-8 h-8 text-primary mx-auto mb-3" />
-                <p className="text-3xl font-bold text-primary">50-100x</p>
+                <p className="text-3xl font-bold text-primary">50–100x</p>
                 <p className="text-sm text-muted-foreground">Return vs. one compliance penalty</p>
               </CardContent>
             </Card>
