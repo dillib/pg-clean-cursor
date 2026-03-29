@@ -7,6 +7,7 @@ export interface BookingEmailData {
   company?: string | null;
   interestArea: string;
   slotDatetime: Date;
+  userTimezone?: string | null;
 }
 
 export function isSmtpConfigured(): boolean {
@@ -25,22 +26,57 @@ function createTransporter() {
   });
 }
 
-function formatSlotCET(slot: Date): string {
-  const cetMs = slot.getTime() + 1 * 60 * 60 * 1000;
-  const d = new Date(cetMs);
-  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  const day = days[d.getUTCDay()];
-  const date = d.getUTCDate();
-  const month = months[d.getUTCMonth()];
-  const year = d.getUTCFullYear();
-  const hours = d.getUTCHours().toString().padStart(2, "0");
-  const minutes = d.getUTCMinutes().toString().padStart(2, "0");
-  const endMs = cetMs + 30 * 60 * 1000;
-  const endD = new Date(endMs);
-  const endHours = endD.getUTCHours().toString().padStart(2, "0");
-  const endMinutes = endD.getUTCMinutes().toString().padStart(2, "0");
-  return `${day}, ${date} ${month} ${year} · ${hours}:${minutes}–${endHours}:${endMinutes} CET`;
+const CET_TZ = "Europe/Berlin";
+
+function formatInTz(slot: Date, tz: string, includeDate = true): string {
+  const end = new Date(slot.getTime() + 30 * 60 * 1000);
+  const dateOpts: Intl.DateTimeFormatOptions = {
+    timeZone: tz,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  };
+  const timeOpts: Intl.DateTimeFormatOptions = {
+    timeZone: tz,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  };
+  const tzAbbr =
+    new Intl.DateTimeFormat("en", { timeZone: tz, timeZoneName: "short" })
+      .formatToParts(slot)
+      .find(p => p.type === "timeZoneName")?.value ?? tz;
+  const startTime = new Intl.DateTimeFormat("en-GB", timeOpts).format(slot);
+  const endTime = new Intl.DateTimeFormat("en-GB", timeOpts).format(end);
+  if (includeDate) {
+    const dateStr = new Intl.DateTimeFormat("en-GB", dateOpts).format(slot);
+    return `${dateStr} · ${startTime}–${endTime} ${tzAbbr}`;
+  }
+  return `${startTime}–${endTime} ${tzAbbr}`;
+}
+
+/** Returns the primary slot label for emails.
+ *  If the user's timezone is known and differs from CET, shows local time first with CET in brackets.
+ *  Otherwise shows CET only. */
+function formatSlotForEmail(slot: Date, userTimezone?: string | null): string {
+  const cetLabel = formatInTz(slot, CET_TZ);
+  if (!userTimezone || userTimezone === CET_TZ || userTimezone.startsWith("Europe/")) {
+    return cetLabel;
+  }
+  const localLabel = formatInTz(slot, userTimezone);
+  const cetTimeOnly = formatInTz(slot, CET_TZ, false);
+  return `${localLabel}<br><span style="font-size:13px;color:#888;">(= ${cetTimeOnly})</span>`;
+}
+
+/** Plain-text slot label (no HTML) for subject lines and plain contexts. */
+function formatSlotPlain(slot: Date, userTimezone?: string | null): string {
+  if (!userTimezone || userTimezone === CET_TZ || userTimezone.startsWith("Europe/")) {
+    return formatInTz(slot, CET_TZ);
+  }
+  const local = formatInTz(slot, userTimezone);
+  const cetTime = formatInTz(slot, CET_TZ, false);
+  return `${local} (= ${cetTime})`;
 }
 
 function escapeICS(value: string): string {
@@ -162,7 +198,8 @@ export async function sendBookingConfirmation(booking: BookingEmailData): Promis
     return;
   }
 
-  const slotLabel = formatSlotCET(booking.slotDatetime);
+  const slotLabelHtml = formatSlotForEmail(booking.slotDatetime, booking.userTimezone);
+  const slotLabelPlain = formatSlotPlain(booking.slotDatetime, booking.userTimezone);
   const from = process.env.SMTP_FROM || "PhotonicTag <sales@photonictag.com>";
   const icsContent = generateICS(booking);
 
@@ -174,7 +211,7 @@ export async function sendBookingConfirmation(booking: BookingEmailData): Promis
         <p style="margin:0 0 28px;color:#555;font-size:15px;font-family:Arial,sans-serif;line-height:1.6;">
           Hi ${booking.name}, we're looking forward to showing you what PhotonicTag can do. Your 30-minute demo is locked in below.
         </p>
-        ${slotCard(slotLabel, booking.interestArea, booking.company)}
+        ${slotCard(slotLabelHtml, booking.interestArea, booking.company)}
         <p style="margin:0 0 8px;color:#0f0f0f;font-size:14px;font-weight:700;font-family:Arial,sans-serif;text-transform:uppercase;letter-spacing:1px;">What to expect</p>
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
           <tr>
@@ -214,7 +251,7 @@ export async function sendBookingConfirmation(booking: BookingEmailData): Promis
   await transporter.sendMail({
     from,
     to: booking.email,
-    subject: `Confirmed: Your PhotonicTag demo — ${slotLabel}`,
+    subject: `Confirmed: Your PhotonicTag demo — ${slotLabelPlain}`,
     html: wrapEmail(body),
     attachments: [
       {
@@ -239,7 +276,8 @@ export async function sendReminderEmail(
     return;
   }
 
-  const slotLabel = formatSlotCET(booking.slotDatetime);
+  const slotLabelHtml = formatSlotForEmail(booking.slotDatetime, booking.userTimezone);
+  const slotLabelPlain = formatSlotPlain(booking.slotDatetime, booking.userTimezone);
   const from = process.env.SMTP_FROM || "PhotonicTag <sales@photonictag.com>";
   const icsContent = generateICS(booking);
 
@@ -261,7 +299,7 @@ export async function sendReminderEmail(
         <p style="margin:0 0 28px;color:#555;font-size:15px;font-family:Arial,sans-serif;line-height:1.6;">
           Hi ${booking.name}, this is a friendly reminder about your upcoming PhotonicTag demo session.
         </p>
-        ${slotCard(slotLabel, booking.interestArea, booking.company)}
+        ${slotCard(slotLabelHtml, booking.interestArea, booking.company)}
         <table width="100%" cellpadding="0" cellspacing="0" style="background:#fffbf0;border-radius:6px;margin-bottom:28px;">
           <tr>
             <td style="padding:16px 20px;">
@@ -285,7 +323,7 @@ export async function sendReminderEmail(
   await transporter.sendMail({
     from,
     to: booking.email,
-    subject: `${subjectPrefix}: PhotonicTag demo — ${slotLabel}`,
+    subject: `${subjectPrefix}: PhotonicTag demo — ${slotLabelPlain}`,
     html: wrapEmail(body),
     ...(type === "24h" && {
       attachments: [
@@ -314,7 +352,7 @@ export async function sendTeamNotification(booking: BookingEmailData): Promise<v
     return;
   }
 
-  const slotLabel = formatSlotCET(booking.slotDatetime);
+  const slotLabelPlain = formatSlotPlain(booking.slotDatetime, booking.userTimezone);
   const from = process.env.SMTP_FROM || "PhotonicTag <sales@photonictag.com>";
 
   const body = `
@@ -329,7 +367,7 @@ export async function sendTeamNotification(booking: BookingEmailData): Promise<v
             ["Email", `<a href="mailto:${booking.email}" style="color:#FDB813;text-decoration:none;">${booking.email}</a>`],
             ...(booking.company ? [["Company", booking.company]] : []),
             ["Interest Area", booking.interestArea],
-            ["Slot", `<strong>${slotLabel}</strong>`],
+            ["Slot", `<strong>${slotLabelPlain}</strong>`],
           ].map(([label, value]) => `
           <tr>
             <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;width:120px;font-family:Arial,sans-serif;">${label}</td>
@@ -345,7 +383,7 @@ export async function sendTeamNotification(booking: BookingEmailData): Promise<v
   await transporter.sendMail({
     from,
     to: notifyEmail,
-    subject: `New demo booked: ${booking.name}${booking.company ? ` (${booking.company})` : ""} — ${slotLabel}`,
+    subject: `New demo booked: ${booking.name}${booking.company ? ` (${booking.company})` : ""} — ${slotLabelPlain}`,
     html: wrapEmail(body),
   });
 

@@ -1205,6 +1205,7 @@ export async function registerRoutes(
         company: booking.company,
         interestArea: booking.interestArea,
         slotDatetime: new Date(booking.slotDatetime),
+        userTimezone: booking.userTimezone,
       };
       sendBookingConfirmation(emailData).catch((err) =>
         console.error("[Email] Failed to send booking confirmation:", err)

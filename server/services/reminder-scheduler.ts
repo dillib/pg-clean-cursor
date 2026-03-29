@@ -28,6 +28,7 @@ async function processReminders(): Promise<void> {
       company: booking.company,
       interestArea: booking.interestArea,
       slotDatetime: new Date(booking.slotDatetime),
+      userTimezone: booking.userTimezone,
     };
 
     // 24h reminder: send when 22–26h before the slot (window accounts for 10-min check cadence)

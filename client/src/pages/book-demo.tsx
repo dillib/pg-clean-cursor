@@ -55,34 +55,82 @@ function getBotMessage(step: Step, info?: Partial<ContactInfo>): string {
   }
 }
 
-/** Format a UTC ISO slot string as CET (UTC+1) display time. */
-function formatSlotTime(isoString: string): string {
-  const d = parseISO(isoString);
-  // Shift to CET = UTC+1
-  const cetMs = d.getTime() + 60 * 60 * 1000;
-  const cetDate = new Date(cetMs);
-  return format(cetDate, "EEEE, MMMM d 'at' h:mm a 'CET'");
+// Detect the visitor's IANA timezone once (e.g. "America/New_York", "Asia/Kolkata")
+const USER_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const CET_TZ = "Europe/Berlin"; // correctly handles CET (UTC+1) and CEST (UTC+2)
+
+function tzAbbr(d: Date, tz: string): string {
+  return (
+    new Intl.DateTimeFormat("en", { timeZone: tz, timeZoneName: "short" })
+      .formatToParts(d)
+      .find(p => p.type === "timeZoneName")?.value ?? tz
+  );
 }
 
-/** Format a UTC ISO slot string as short CET display time. */
+/** Format a UTC ISO slot string in the visitor's local timezone. */
+function formatSlotTime(isoString: string): string {
+  const d = parseISO(isoString);
+  const local = new Intl.DateTimeFormat("en", {
+    timeZone: USER_TZ,
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(d);
+  const abbr = tzAbbr(d, USER_TZ);
+  const isCET = USER_TZ === CET_TZ || USER_TZ.startsWith("Europe/");
+  if (isCET) return `${local} ${abbr}`;
+  // Show CET alongside for non-European visitors
+  const cetTime = new Intl.DateTimeFormat("en", {
+    timeZone: CET_TZ,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZoneName: "short",
+  }).format(d);
+  return `${local} ${abbr} (= ${cetTime})`;
+}
+
+/** Short time label for slot chips — local time only. */
 function formatSlotTimeShort(isoString: string): string {
   const d = parseISO(isoString);
-  const cetMs = d.getTime() + 60 * 60 * 1000;
-  const cetDate = new Date(cetMs);
-  return format(cetDate, "h:mm a");
+  return new Intl.DateTimeFormat("en", {
+    timeZone: USER_TZ,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(d);
+}
+
+/** CET time for slot chips secondary label. */
+function formatSlotTimeCETShort(isoString: string): string {
+  const d = parseISO(isoString);
+  return new Intl.DateTimeFormat("en", {
+    timeZone: CET_TZ,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZoneName: "short",
+  }).format(d);
 }
 
 function groupSlotsByDay(slots: string[]): Record<string, string[]> {
   const grouped: Record<string, string[]> = {};
   for (const slot of slots) {
     const d = parseISO(slot);
-    // Group by CET date (UTC+1) so that late-UTC slots appear on the correct day
-    const cetDate = new Date(d.getTime() + 60 * 60 * 1000);
-    const dayKey = format(cetDate, "yyyy-MM-dd");
-    if (!grouped[dayKey]) grouped[dayKey] = [];
-    grouped[dayKey].push(slot);
+    // Group by visitor's local date so slots appear on the correct day for them
+    const localDate = new Intl.DateTimeFormat("en-CA", { timeZone: USER_TZ }).format(d); // "yyyy-MM-dd"
+    if (!grouped[localDate]) grouped[localDate] = [];
+    grouped[localDate].push(slot);
   }
   return grouped;
+}
+
+function localDayLabel(dayKey: string): string {
+  const d = new Date(dayKey + "T12:00:00Z");
+  return new Intl.DateTimeFormat("en", { weekday: "long", month: "short", day: "numeric" }).format(d);
 }
 
 export default function BookDemo() {
@@ -114,6 +162,7 @@ export default function BookDemo() {
         company: contact.company || undefined,
         interestArea,
         slotDatetime: selectedSlot,
+        userTimezone: USER_TZ,
       });
       return response.json();
     },
@@ -230,7 +279,7 @@ export default function BookDemo() {
           <Badge variant="secondary" className="mb-3">Book a Demo</Badge>
           <h1 className="text-3xl font-bold tracking-tight">Schedule Your 30-Minute Demo</h1>
           <p className="text-muted-foreground mt-2">
-            Mon–Fri · 9am–5pm CET · 30 minutes · No preparation needed
+            Mon–Fri · 9am–5pm CET · 30 minutes · Times shown in your local timezone
           </p>
         </div>
 
@@ -350,19 +399,25 @@ export default function BookDemo() {
                       {visibleDays.map(day => (
                         <div key={day}>
                           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
-                            {format(parseISO(day), "EEEE, MMMM d")}
+                            {localDayLabel(day)}
                           </p>
                           <div className="flex flex-wrap gap-1.5">
-                            {groupedSlots[day].map(slot => (
-                              <button
-                                key={slot}
-                                onClick={() => handleSlotSelect(slot)}
-                                className="px-3 py-1.5 text-xs font-medium rounded-md border bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
-                                data-testid={`slot-${slot}`}
-                              >
-                                {formatSlotTimeShort(slot)}
-                              </button>
-                            ))}
+                            {groupedSlots[day].map(slot => {
+                              const isCET = USER_TZ === CET_TZ || USER_TZ.startsWith("Europe/");
+                              return (
+                                <button
+                                  key={slot}
+                                  onClick={() => handleSlotSelect(slot)}
+                                  className="px-3 py-1.5 text-xs font-medium rounded-md border bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors flex flex-col items-center leading-tight"
+                                  data-testid={`slot-${slot}`}
+                                >
+                                  <span>{formatSlotTimeShort(slot)}</span>
+                                  {!isCET && (
+                                    <span className="opacity-50 text-[10px]">{formatSlotTimeCETShort(slot)}</span>
+                                  )}
+                                </button>
+                              );
+                            })}
                           </div>
                         </div>
                       ))}
@@ -436,7 +491,7 @@ export default function BookDemo() {
               <div className="flex items-center gap-3">
                 <div className="flex-1 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-lg px-4 py-2.5 text-sm text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 shrink-0" />
-                  Demo confirmed for {selectedSlot ? format(parseISO(selectedSlot), "MMM d 'at' h:mm a 'CET'") : ""}
+                  Demo confirmed for {selectedSlot ? formatSlotTime(selectedSlot) : ""}
                 </div>
                 <Button
                   asChild
