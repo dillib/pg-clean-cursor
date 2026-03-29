@@ -749,7 +749,7 @@ function BookingsTab() {
                     <select
                       value={booking.status}
                       onChange={e => statusMutation.mutate({ id: booking.id, status: e.target.value })}
-                      className="text-xs border rounded px-2 py-1.5 bg-background"
+                      className="text-xs border rounded px-2 py-1.5 bg-white dark:bg-zinc-900"
                       data-testid={`select-status-${booking.id}`}
                     >
                       <option value="pending">Pending</option>
