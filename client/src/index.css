@@ -31,7 +31,7 @@
   --secondary: 43 15% 91%;
   --secondary-foreground: 30 12% 10%;
   --muted: 43 14% 93%;
-  --muted-foreground: 38 8% 40%;
+  --muted-foreground: 38 8% 33%;
   --accent: 43 16% 94%;
   --accent-foreground: 30 12% 10%;
   --destructive: 0 84% 48%;
@@ -347,6 +347,15 @@
   /* 2. Flat yellow — all bg-primary elements */
   .bg-primary {
     background: hsl(var(--primary)) !important;
+  }
+
+  /* text-primary fix: yellow is unreadable on light backgrounds.
+     Use dark amber (≥4.5:1 on white) for text; keep bg-primary yellow. */
+  .text-primary {
+    color: hsl(44 100% 28%) !important; /* #8F7200 — 5.5:1 on white, passes AA */
+  }
+  .dark .text-primary {
+    color: hsl(50 100% 55%) !important; /* bright yellow on dark bg */
   }
 
   /* Buttons & links — simple shadow only */

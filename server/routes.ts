@@ -546,7 +546,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/products/:productId/regional-extensions", isAuthenticated, async (req: Request, res: Response) => {
+  app.post("/api/products/:productId/regional-extensions", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const { productId } = req.params;
       const product = await storage.getProduct(productId);
@@ -565,7 +565,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/regional-extensions/:id", isAuthenticated, async (req: Request, res: Response) => {
+  app.patch("/api/regional-extensions/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const extension = await storage.updateRegionalExtension(req.params.id, req.body);
       if (!extension) {
@@ -752,7 +752,15 @@ export async function registerRoutes(
   // Public endpoint for contact form submissions
   app.post("/api/leads", async (req: Request, res: Response) => {
     try {
-      const parsed = insertLeadSchema.safeParse(req.body);
+      // Coerce ISO date strings to Date objects for timestamp fields
+      const body = { ...req.body };
+      if (typeof body.assessmentCompletedAt === "string" && body.assessmentCompletedAt) {
+        body.assessmentCompletedAt = new Date(body.assessmentCompletedAt);
+      }
+      if (typeof body.nextFollowUp === "string" && body.nextFollowUp) {
+        body.nextFollowUp = new Date(body.nextFollowUp);
+      }
+      const parsed = insertLeadSchema.safeParse(body);
       if (!parsed.success) {
         return res.status(400).json({ error: "Invalid lead data", details: parsed.error.issues });
       }
