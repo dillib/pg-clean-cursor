@@ -4,6 +4,7 @@ import OpenAI from "openai";
 import { insertProductSchema, insertIoTDeviceSchema, insertEnterpriseConnectorSchema, insertLeadSchema, insertPartnerSchema, insertDemoConfigSchema, insertDemoBookingSchema } from "@shared/schema";
 import { productService } from "./services/product-service";
 import { qrService } from "./services/qr-service";
+import { sendBookingConfirmation, sendTeamNotification } from "./services/email";
 import { identityService } from "./services/identity-service";
 import { traceService } from "./services/trace-service";
 import { aiService } from "./services/ai-service";
@@ -1195,6 +1196,22 @@ export async function registerRoutes(
       }
 
       res.status(201).json(booking);
+
+      // Fire-and-forget emails — do not block the response
+      const emailData = {
+        id: booking.id,
+        name: booking.name,
+        email: booking.email,
+        company: booking.company,
+        interestArea: booking.interestArea,
+        slotDatetime: new Date(booking.slotDatetime),
+      };
+      sendBookingConfirmation(emailData).catch((err) =>
+        console.error("[Email] Failed to send booking confirmation:", err)
+      );
+      sendTeamNotification(emailData).catch((err) =>
+        console.error("[Email] Failed to send team notification:", err)
+      );
     } catch (error) {
       console.error("Error creating demo booking:", error);
       res.status(500).json({ error: "Failed to create demo booking" });

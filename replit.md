@@ -58,6 +58,8 @@ Preferred communication style: Simple, everyday language.
 - **EU ESPR DPP Compliance**: Full EU ESPR tab in product editor (ESPR Reg 2024/1781, EU Battery Reg 2023/1542, REACH/SCIP ID, CE marking, EPR registration, repairability index). All EU fields visible in expanded Regional Compliance section on public product scan pages.
 - **AI-Generated Insights**: System providing AI Summary, Sustainability Analysis, Repair Guide, Circularity Score, and Risk Assessment for products.
 - **IoT Tagging System**: Management of NFC/RFID/BLE devices, including registration, sensor readings, and scan tracking.
+- **Demo Scheduling Chatbot**: Self-hosted guided booking wizard at `/book-demo`. 5-step conversational UI (name/email/company → interest area → slot picker → confirm → success). Bookings stored in `demo_bookings` table, linked to CRM leads. Confirmation email with `.ics` calendar attachment sent to the user; team notification email sent to `NOTIFY_EMAIL`. ICS files are RFC 5545 compliant and import into any calendar app. Admin "Bookings" tab added to CRM.
+- **Email Service** (`server/services/email.ts`): Nodemailer-based transactional email. Requires env vars: `SMTP_HOST`, `SMTP_PORT` (default 587), `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `NOTIFY_EMAIL`. Gracefully skipped if SMTP is not configured.
 - **QR Code System**: Server-side generation of QR codes stored as data URLs, linking to public product scan pages.
 - **Event-Driven Architecture**: In-process CloudEvents bus for decoupled event handling and audit logging.
 
