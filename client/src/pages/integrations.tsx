@@ -83,12 +83,12 @@ export default function Integrations() {
             <Card className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="grid md:grid-cols-2">
-                  <div className="p-8 bg-amber-500 text-amber-950">
+                  <div className="p-8 bg-amber-500 text-black">
                     <div className="flex items-center gap-3 mb-4">
                       <SiSap className="w-10 h-10" />
                     </div>
                     <h2 className="text-2xl font-bold mb-2">SAP Integration</h2>
-                    <p className="text-blue-100 mb-6">
+                    <p className="text-black/80 mb-6">
                       Enterprise-grade bidirectional sync. Your Material Master data flows directly into Digital Product Passports.
                     </p>
                     <div className="grid grid-cols-2 gap-3 text-sm">
