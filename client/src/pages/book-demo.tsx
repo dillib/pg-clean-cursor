@@ -267,25 +267,25 @@ export default function BookDemo() {
   const getInterestLabel = (id: string) => INTEREST_AREAS.find(a => a.id === id)?.label || id;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
       <Helmet>
         <title>Book a Demo - PhotonicTag | EU Digital Product Passport</title>
         <meta name="description" content="Schedule a 30-minute demo with the PhotonicTag team. See how our EU DPP compliance platform can work for your organization." />
       </Helmet>
       <PublicNav hideBookDemo />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-10">
-        <div className="text-center mb-8">
-          <Badge variant="secondary" className="mb-3">Book a Demo</Badge>
-          <h1 className="text-3xl font-bold tracking-tight">Schedule Your 30-Minute Demo</h1>
-          <p className="text-muted-foreground mt-2">
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 pt-4 pb-2 flex flex-col overflow-hidden min-h-0">
+        <div className="text-center mb-3 shrink-0">
+          <Badge variant="secondary" className="mb-1.5">Book a Demo</Badge>
+          <h1 className="text-2xl font-bold tracking-tight">Schedule Your 30-Minute Demo</h1>
+          <p className="text-muted-foreground text-sm mt-1">
             Mon–Fri · 9am–5pm CET · 30 minutes · Times shown in your local timezone
           </p>
         </div>
 
         {/* Chat window */}
-        <Card className="mb-4 overflow-hidden">
-          <div className="h-[420px] overflow-y-auto p-5 space-y-4" data-testid="chat-window">
+        <Card className="flex-1 overflow-hidden flex flex-col min-h-0 mb-2">
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 min-h-0" data-testid="chat-window">
             {messages.map((msg, i) => (
               <div
                 key={i}
@@ -517,7 +517,7 @@ export default function BookDemo() {
         </Card>
 
         {/* Trust strip */}
-        <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground py-1.5 shrink-0">
           <div className="flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-primary" />
             <span>30-minute session</span>
@@ -536,8 +536,6 @@ export default function BookDemo() {
           </div>
         </div>
       </main>
-
-      <PublicFooter />
     </div>
   );
 }
