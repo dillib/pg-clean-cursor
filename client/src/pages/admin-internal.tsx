@@ -1834,12 +1834,8 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
       </div>
 
       {isFull ? (
-        <Tabs defaultValue="assistant" className="space-y-6">
+        <Tabs defaultValue="crm" className="space-y-6">
           <TabsList className="grid w-full grid-cols-8" data-testid="tabs-internal">
-            <TabsTrigger value="assistant" data-testid="tab-assistant" className="gap-1">
-              <Bot className="w-4 h-4" />
-              <span className="hidden sm:inline">Aria AI</span>
-            </TabsTrigger>
             <TabsTrigger value="crm" data-testid="tab-crm" className="gap-1">
               <Users className="w-4 h-4" />
               <span className="hidden sm:inline">CRM</span>
@@ -1856,6 +1852,10 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
               <Rocket className="w-4 h-4" />
               <span className="hidden sm:inline">Demo Factory</span>
             </TabsTrigger>
+            <TabsTrigger value="assistant" data-testid="tab-assistant" className="gap-1">
+              <Bot className="w-4 h-4" />
+              <span className="hidden sm:inline">Aria AI</span>
+            </TabsTrigger>
             <TabsTrigger value="users" data-testid="tab-users" className="gap-1">
               <UserPlus className="w-4 h-4" />
               <span className="hidden sm:inline">Users</span>
@@ -1870,22 +1870,18 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="assistant"><TeamAssistantTab /></TabsContent>
           <TabsContent value="crm"><CRMTab /></TabsContent>
           <TabsContent value="bookings"><BookingsInternalTab /></TabsContent>
           <TabsContent value="proposals"><ProposalGeneratorTab /></TabsContent>
           <TabsContent value="demos"><DemoFactoryTab /></TabsContent>
+          <TabsContent value="assistant"><TeamAssistantTab /></TabsContent>
           <TabsContent value="users"><UserManagementTab /></TabsContent>
           <TabsContent value="support"><SupportTriageTab /></TabsContent>
           <TabsContent value="ops"><PlatformOpsTab /></TabsContent>
         </Tabs>
       ) : (
-        <Tabs defaultValue="assistant" className="space-y-6">
+        <Tabs defaultValue="crm" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5" data-testid="tabs-internal">
-            <TabsTrigger value="assistant" data-testid="tab-assistant" className="gap-1">
-              <Bot className="w-4 h-4" />
-              <span>Aria AI</span>
-            </TabsTrigger>
             <TabsTrigger value="crm" data-testid="tab-crm" className="gap-1">
               <Users className="w-4 h-4" />
               <span>CRM</span>
@@ -1902,13 +1898,17 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
               <Rocket className="w-4 h-4" />
               <span>Demo Factory</span>
             </TabsTrigger>
+            <TabsTrigger value="assistant" data-testid="tab-assistant" className="gap-1">
+              <Bot className="w-4 h-4" />
+              <span>Aria AI</span>
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="assistant"><TeamAssistantTab /></TabsContent>
           <TabsContent value="crm"><CRMTab /></TabsContent>
           <TabsContent value="bookings"><BookingsInternalTab /></TabsContent>
           <TabsContent value="proposals"><ProposalGeneratorTab /></TabsContent>
           <TabsContent value="demos"><DemoFactoryTab /></TabsContent>
+          <TabsContent value="assistant"><TeamAssistantTab /></TabsContent>
         </Tabs>
       )}
     </div>
