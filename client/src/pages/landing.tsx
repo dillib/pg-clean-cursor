@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { FadeUp, StaggerContainer, StaggerItem, HoverLift } from "@/components/motion";
 import {
   Accordion,
   AccordionContent,
@@ -117,7 +118,7 @@ export default function Landing() {
         <div className="relative max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="space-y-8">
-              <div className="space-y-4">
+              <FadeUp delay={0.05} className="space-y-4">
                 <Badge variant="secondary" className="gap-1" data-testid="badge-hero-ai">
                   <Shield className="w-3 h-3" />
                   EU DPP Compliance Ready
@@ -130,9 +131,9 @@ export default function Landing() {
                   PhotonicTag creates tamper-proof Digital Product Passports that travel with your products from factory to consumer. 
                   Verify authenticity, track sustainability, and build customer trust — all with a single scan.
                 </p>
-              </div>
+              </FadeUp>
               
-              <div className="flex flex-col sm:flex-row gap-4">
+              <FadeUp delay={0.18} className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" asChild data-testid="button-hero-start">
                   <a href="/api/login" className="gap-2">
                     Get Started Free
@@ -142,9 +143,9 @@ export default function Landing() {
                 <Button size="lg" variant="outline" asChild data-testid="button-hero-demo">
                   <Link href="/scan/demo">View Demo Passport</Link>
                 </Button>
-              </div>
+              </FadeUp>
 
-              <div className="flex items-center gap-6 pt-4 flex-wrap">
+              <FadeUp delay={0.28} className="flex items-center gap-6 pt-4 flex-wrap">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground" data-testid="badge-eu-dpp">
                   <CheckCircle className="w-4 h-4 text-primary" />
                   <span>EU DPP 2027 Ready</span>
@@ -157,7 +158,7 @@ export default function Landing() {
                   <CheckCircle className="w-4 h-4 text-primary" />
                   <span>GDPR Compliant</span>
                 </div>
-              </div>
+              </FadeUp>
             </div>
 
             <div className="relative">
@@ -170,8 +171,8 @@ export default function Landing() {
               </div>
               <div className="relative bg-card border rounded-lg p-6 shadow-lg">
                 <div className="absolute -top-3 -right-3">
-                  <Badge className="gap-1">
-                    <Zap className="w-3 h-3" />
+                  <Badge className="gap-2">
+                    <span className="pulse-dot" />
                     Live Preview
                   </Badge>
                 </div>
@@ -375,119 +376,111 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="group overflow-visible hover-elevate" data-testid="showcase-battery">
-              <CardContent className="p-4 space-y-3">
-                <div className="aspect-square w-full rounded-md overflow-hidden">
-                  <img 
-                    src="/assets/stock_images/battery_pack_pro.png" 
-                    alt="Li-Ion Battery Pack"
-                    className="w-full h-full object-cover"
-                    data-testid="img-showcase-battery"
-                  />
-                </div>
-                <div>
-                  <Badge variant="secondary" className="text-xs mb-2">Batteries</Badge>
-                  <h3 className="font-semibold">EcoPower Li-Ion Battery</h3>
-                  <p className="text-xs text-muted-foreground mt-1">EU Battery Passport Compliant</p>
-                </div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
-                  <span className="flex items-center gap-1">
-                    <Leaf className="w-3 h-3 text-primary" />
-                    45kg CO2
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Recycle className="w-3 h-3 text-primary" />
-                    95% Recyclable
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+          <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-4 gap-6" delay={0.1}>
+            <StaggerItem>
+              <HoverLift>
+                <Card className="group overflow-hidden shadow-sm border-primary/5" data-testid="showcase-battery">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="aspect-square w-full rounded inner-rounded overflow-hidden">
+                      <img 
+                        src="/assets/stock_images/battery_pack_pro.png" 
+                        alt="Li-Ion Battery Pack"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        data-testid="img-showcase-battery"
+                      />
+                    </div>
+                    <div>
+                      <Badge variant="secondary" className="text-xs mb-2">Batteries</Badge>
+                      <h3 className="font-semibold">EcoPower Li-Ion Battery</h3>
+                      <p className="text-xs text-muted-foreground mt-1">EU Battery Passport Compliant</p>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
+                      <span className="flex items-center gap-1"><Leaf className="w-3 h-3 text-primary" />45kg CO2</span>
+                      <span className="flex items-center gap-1"><Recycle className="w-3 h-3 text-primary" />95% Recyclable</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </HoverLift>
+            </StaggerItem>
 
-            <Card className="group overflow-visible hover-elevate" data-testid="showcase-textile">
-              <CardContent className="p-4 space-y-3">
-                <div className="aspect-square w-full rounded-md overflow-hidden">
-                  <img 
-                    src="/assets/stock_images/wool_sweater_pro.png" 
-                    alt="Premium Wool Sweater"
-                    className="w-full h-full object-cover"
-                    data-testid="img-showcase-textile"
-                  />
-                </div>
-                <div>
-                  <Badge variant="secondary" className="text-xs mb-2">Textiles</Badge>
-                  <h3 className="font-semibold">Nordic Wool Sweater</h3>
-                  <p className="text-xs text-muted-foreground mt-1">Mulesing-Free Merino</p>
-                </div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
-                  <span className="flex items-center gap-1">
-                    <Leaf className="w-3 h-3 text-primary" />
-                    8kg CO2
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-primary" />
-                    9/10 Repair
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+            <StaggerItem>
+              <HoverLift>
+                <Card className="group overflow-hidden shadow-sm border-primary/5" data-testid="showcase-textile">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="aspect-square w-full rounded inner-rounded overflow-hidden">
+                      <img 
+                        src="/assets/stock_images/wool_sweater_pro.png" 
+                        alt="Premium Wool Sweater"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        data-testid="img-showcase-textile"
+                      />
+                    </div>
+                    <div>
+                      <Badge variant="secondary" className="text-xs mb-2">Textiles</Badge>
+                      <h3 className="font-semibold">Nordic Wool Sweater</h3>
+                      <p className="text-xs text-muted-foreground mt-1">Mulesing-Free Merino</p>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
+                      <span className="flex items-center gap-1"><Leaf className="w-3 h-3 text-primary" />8kg CO2</span>
+                      <span className="flex items-center gap-1"><Sparkles className="w-3 h-3 text-primary" />9/10 Repair</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </HoverLift>
+            </StaggerItem>
 
-            <Card className="group overflow-visible hover-elevate" data-testid="showcase-leather">
-              <CardContent className="p-4 space-y-3">
-                <div className="aspect-square w-full rounded-md overflow-hidden">
-                  <img 
-                    src="/assets/stock_images/leather_tote_pro.png" 
-                    alt="Artisan Leather Tote"
-                    className="w-full h-full object-cover"
-                    data-testid="img-showcase-leather"
-                  />
-                </div>
-                <div>
-                  <Badge variant="secondary" className="text-xs mb-2">Fashion</Badge>
-                  <h3 className="font-semibold">Milano Artisan Tote</h3>
-                  <p className="text-xs text-muted-foreground mt-1">Made in Italy</p>
-                </div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
-                  <span className="flex items-center gap-1">
-                    <Shield className="w-3 h-3 text-primary" />
-                    25yr Lifespan
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Recycle className="w-3 h-3 text-primary" />
-                    95% Natural
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+            <StaggerItem>
+              <HoverLift>
+                <Card className="group overflow-hidden shadow-sm border-primary/5" data-testid="showcase-leather">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="aspect-square w-full rounded inner-rounded overflow-hidden">
+                      <img 
+                        src="/assets/stock_images/leather_tote_pro.png" 
+                        alt="Artisan Leather Tote"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        data-testid="img-showcase-leather"
+                      />
+                    </div>
+                    <div>
+                      <Badge variant="secondary" className="text-xs mb-2">Fashion</Badge>
+                      <h3 className="font-semibold">Milano Artisan Tote</h3>
+                      <p className="text-xs text-muted-foreground mt-1">Made in Italy</p>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
+                      <span className="flex items-center gap-1"><Shield className="w-3 h-3 text-primary" />25yr Lifespan</span>
+                      <span className="flex items-center gap-1"><Recycle className="w-3 h-3 text-primary" />95% Natural</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </HoverLift>
+            </StaggerItem>
 
-            <Card className="group overflow-visible hover-elevate" data-testid="showcase-smarthome">
-              <CardContent className="p-4 space-y-3">
-                <div className="aspect-square w-full rounded-md overflow-hidden">
-                  <img 
-                    src="/assets/stock_images/thermostat_pro.png" 
-                    alt="Smart Thermostat"
-                    className="w-full h-full object-cover"
-                    data-testid="img-showcase-smarthome"
-                  />
-                </div>
-                <div>
-                  <Badge variant="secondary" className="text-xs mb-2">Smart Home</Badge>
-                  <h3 className="font-semibold">EcoNest Thermostat Pro</h3>
-                  <p className="text-xs text-muted-foreground mt-1">Energy Star Certified</p>
-                </div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
-                  <span className="flex items-center gap-1">
-                    <Zap className="w-3 h-3 text-primary" />
-                    23% Energy Save
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Recycle className="w-3 h-3 text-primary" />
-                    55% Recycled
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            <StaggerItem>
+              <HoverLift>
+                <Card className="group overflow-hidden shadow-sm border-primary/5" data-testid="showcase-smarthome">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="aspect-square w-full rounded inner-rounded overflow-hidden">
+                      <img 
+                        src="/assets/stock_images/thermostat_pro.png" 
+                        alt="Smart Thermostat"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        data-testid="img-showcase-smarthome"
+                      />
+                    </div>
+                    <div>
+                      <Badge variant="secondary" className="text-xs mb-2">Smart Home</Badge>
+                      <h3 className="font-semibold">EcoNest Thermostat Pro</h3>
+                      <p className="text-xs text-muted-foreground mt-1">Energy Star Certified</p>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
+                      <span className="flex items-center gap-1"><Zap className="w-3 h-3 text-primary" />23% Energy Save</span>
+                      <span className="flex items-center gap-1"><Recycle className="w-3 h-3 text-primary" />55% Recycled</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </HoverLift>
+            </StaggerItem>
+          </StaggerContainer>
 
           <div className="text-center mt-8">
             <Button size="lg" variant="outline" asChild data-testid="button-explore-demo">

@@ -47,14 +47,14 @@
   --font-serif: Georgia, serif;
   --font-mono: JetBrains Mono, monospace;
   --radius: .5rem;
-  --shadow-2xs: 0px 2px 0px 0px hsl(43 98% 50% / 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(43 98% 50% / 0.00);
-  --shadow-sm: 0px 2px 0px 0px hsl(43 98% 50% / 0.00), 0px 1px 2px -1px hsl(43 98% 50% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(43 98% 50% / 0.00), 0px 1px 2px -1px hsl(43 98% 50% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(43 98% 50% / 0.00), 0px 2px 4px -1px hsl(43 98% 50% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(43 98% 50% / 0.00), 0px 4px 6px -1px hsl(43 98% 50% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(43 98% 50% / 0.00), 0px 8px 10px -1px hsl(43 98% 50% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(43 98% 50% / 0.00);
+  --shadow-2xs: 0px 1px 2px 0px rgb(0 0 0 / 0.04);
+  --shadow-xs: 0px 1px 3px 0px rgb(0 0 0 / 0.06);
+  --shadow-sm: 0px 1px 2px 0px rgb(0 0 0 / 0.04), 0px 2px 4px -1px rgb(0 0 0 / 0.04);
+  --shadow: 0px 2px 4px -1px rgb(0 0 0 / 0.06), 0px 4px 8px -2px rgb(0 0 0 / 0.06);
+  --shadow-md: 0px 4px 6px -1px rgb(0 0 0 / 0.07), 0px 8px 12px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0px 8px 16px -4px rgb(0 0 0 / 0.08), 0px 16px 24px -6px rgb(0 0 0 / 0.06);
+  --shadow-xl: 0px 16px 24px -6px rgb(0 0 0 / 0.08), 0px 24px 40px -8px rgb(0 0 0 / 0.08);
+  --shadow-2xl: 0px 24px 48px -12px rgb(0 0 0 / 0.14);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
@@ -127,14 +127,14 @@
   --chart-3: 48 96% 62%;
   --chart-4: 173 80% 58%;
   --chart-5: 200 85% 58%;
-  --shadow-2xs: 0px 2px 0px 0px hsl(43 98% 55% / 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(43 98% 55% / 0.00);
-  --shadow-sm: 0px 2px 0px 0px hsl(43 98% 55% / 0.00), 0px 1px 2px -1px hsl(43 98% 55% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(43 98% 55% / 0.00), 0px 1px 2px -1px hsl(43 98% 55% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(43 98% 55% / 0.00), 0px 2px 4px -1px hsl(43 98% 55% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(43 98% 55% / 0.00), 0px 4px 6px -1px hsl(43 98% 55% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(43 98% 55% / 0.00), 0px 8px 10px -1px hsl(43 98% 55% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(43 98% 55% / 0.00);
+  --shadow-2xs: 0px 1px 2px 0px rgb(0 0 0 / 0.15);
+  --shadow-xs: 0px 1px 3px 0px rgb(0 0 0 / 0.2);
+  --shadow-sm: 0px 1px 2px 0px rgb(0 0 0 / 0.15), 0px 2px 4px -1px rgb(0 0 0 / 0.15);
+  --shadow: 0px 2px 4px -1px rgb(0 0 0 / 0.2), 0px 4px 8px -2px rgb(0 0 0 / 0.2);
+  --shadow-md: 0px 4px 6px -1px rgb(0 0 0 / 0.25), 0px 8px 12px -2px rgb(0 0 0 / 0.2);
+  --shadow-lg: 0px 8px 16px -4px rgb(0 0 0 / 0.28), 0px 16px 24px -6px rgb(0 0 0 / 0.24);
+  --shadow-xl: 0px 16px 24px -6px rgb(0 0 0 / 0.3), 0px 24px 40px -8px rgb(0 0 0 / 0.3);
+  --shadow-2xl: 0px 24px 48px -12px rgb(0 0 0 / 0.4);
 
 /* Fallback for older browsers */
   --sidebar-primary-border: hsl(var(--sidebar-primary));
@@ -285,6 +285,52 @@
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
   }
+
+  /* Shimmer skeleton animation */
+  .shimmer {
+    background: linear-gradient(
+      105deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted) / 0.6) 40%,
+      hsl(var(--muted)) 80%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+
+  /* Live pulse dot */
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: hsl(var(--primary));
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+    animation: pulse-ring 2s ease-out infinite;
+  }
+
+  /* Glassmorphism utility */
+  .glass {
+    background: hsl(var(--background) / 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.6);
+  }
+
+  /* Concentric inner rounding for nested elements */
+  .inner-rounded {
+    border-radius: calc(var(--radius) - 4px);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.5); }
+  70% { box-shadow: 0 0 0 8px hsl(var(--primary) / 0); }
+  100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
 }
 
 /* ============================================================

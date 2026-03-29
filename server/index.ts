@@ -7,6 +7,8 @@ import { setupEventHandlers } from "./events/handlers";
 import { storage } from "./storage";
 import { seedDemoData } from "./seed-demo-data";
 import bcrypt from "bcryptjs";
+import { scheduleConnectorSync } from "./services/sap-odata-client";
+import type { SAPConfig } from "@shared/schema";
 
 const app = express();
 const httpServer = createServer(app);
@@ -149,6 +151,32 @@ app.use((req, res, next) => {
     log(`Partner accounts ready (${allPartners.length} total)`);
   } catch (error) {
     log(`Error seeding partner accounts: ${error}`);
+  }
+
+  // Auto-start SAP sync schedulers for active connectors
+  try {
+    const connectors = await storage.getAllEnterpriseConnectors();
+    const sapConnectors = connectors.filter(c => c.connectorType === "sap" && c.status === "active");
+    for (const connector of sapConnectors) {
+      const config = connector.config as SAPConfig;
+      if (config?.scheduledSyncEnabled) {
+        scheduleConnectorSync(connector.id, config, async (connectorId, client) => {
+          try {
+            const result = await client.fetchMaterials({ top: 100 });
+            await storage.updateEnterpriseConnector(connectorId, {
+              lastSyncStatus: result.error ? `error: ${result.error}` : "ok",
+              productsSynced: result.totalCount,
+            });
+            log(`[SAPScheduler] Auto-sync ${connectorId}: ${result.materials.length} materials (mock: ${result.usedMock})`);
+          } catch (err) {
+            log(`[SAPScheduler] Auto-sync error for ${connectorId}: ${err}`);
+          }
+        });
+        log(`[SAPScheduler] Started scheduler for connector: ${connector.name}`);
+      }
+    }
+  } catch (error) {
+    log(`[SAPScheduler] Error initializing schedulers: ${error}`);
   }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

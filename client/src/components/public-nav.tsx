@@ -12,12 +12,12 @@ const navLinks = [
 
 export function PublicNav({ hideBookDemo = false }: { hideBookDemo?: boolean } = {}) {
   return (
-    <nav className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 border-b border-border/60 bg-background/75 backdrop-blur-xl shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           <Link href="/">
             <div className="flex items-center gap-2 cursor-pointer" data-testid="nav-logo">
-              <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
+              <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center shadow-sm">
                 <QrCode className="w-5 h-5 text-primary-foreground" />
               </div>
               <span className="text-xl font-bold tracking-tight">PhotonicTag</span>
@@ -28,7 +28,7 @@ export function PublicNav({ hideBookDemo = false }: { hideBookDemo?: boolean } =
               <Link 
                 key={link.href} 
                 href={link.href}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
                 data-testid={`link-${link.label.toLowerCase().replace(/\s/g, '-')}`}
               >
                 {link.label}

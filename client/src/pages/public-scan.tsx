@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
 import { PublicNav } from "@/components/public-nav";
@@ -30,7 +30,10 @@ import {
   BarChart3,
   FileCheck,
   Award,
+  Copy,
+  Check,
 } from "lucide-react";
+import { StaggerContainer, StaggerItem, FadeUp } from "@/components/motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -362,6 +365,28 @@ function CollapsibleSection({ title, icon: Icon, children, defaultOpen = false, 
   );
 }
 
+function CopyButton({ text, label }: { text: string; label?: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = useCallback(() => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }, [text]);
+  return (
+    <button
+      onClick={copy}
+      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors ml-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded"
+      aria-label={`Copy ${label ?? text}`}
+      data-testid={`button-copy-${(label ?? "value").replace(/\s+/g, "-")}`}
+    >
+      {copied
+        ? <Check className="w-3 h-3 text-green-500" />
+        : <Copy className="w-3 h-3" />}
+    </button>
+  );
+}
+
 interface PublicScanProps {
   isDemo?: boolean;
 }
@@ -425,14 +450,19 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
       <div className="min-h-screen bg-background">
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
           <div className="text-center space-y-4">
-            <Skeleton className="h-12 w-12 rounded-full mx-auto" />
-            <Skeleton className="h-10 w-64 mx-auto" />
-            <Skeleton className="h-6 w-48 mx-auto" />
+            <div className="shimmer h-12 w-12 rounded-full mx-auto" />
+            <div className="shimmer h-10 w-64 mx-auto rounded-lg" />
+            <div className="shimmer h-6 w-48 mx-auto rounded-lg" />
           </div>
-          <Skeleton className="h-64 w-full rounded-lg" />
+          <div className="shimmer h-64 w-full rounded-xl" />
           <div className="grid gap-4 sm:grid-cols-2">
-            <Skeleton className="h-32 w-full rounded-lg" />
-            <Skeleton className="h-32 w-full rounded-lg" />
+            <div className="shimmer h-32 w-full rounded-xl" />
+            <div className="shimmer h-32 w-full rounded-xl" />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="shimmer h-24 w-full rounded-xl" />
+            <div className="shimmer h-24 w-full rounded-xl" />
+            <div className="shimmer h-24 w-full rounded-xl" />
           </div>
         </div>
       </div>
@@ -523,6 +553,7 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
               <Badge variant="outline" className="font-mono gap-1">
                 <Hash className="h-3 w-3" />
                 {product.batchNumber}
+                <CopyButton text={product.batchNumber ?? ""} label="batch number" />
               </Badge>
               {product.ceMarking && (
                 <Badge variant="secondary" className="gap-1">

@@ -76,6 +76,42 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Product, AISummary, SustainabilityInsight, RepairSummary, CircularityScore, RiskAssessment, TraceEvent, IoTDevice, AIInsight } from "@shared/schema";
 
+const ESPR_CATEGORIES = [
+  "Batteries", "Electronics", "Textiles", "Furniture", "Machinery",
+  "Construction Products", "Vehicles", "Chemicals", "Packaging", "Footwear",
+];
+
+interface EsprFormState {
+  productCategory: string;
+  complianceStatus: "compliant" | "pending" | "non_compliant";
+  dppVersion: string;
+  validFrom: string;
+  validUntil: string;
+  ceMarking: boolean;
+  eprRegistrationId: string;
+  repairabilityIndex: string;
+  // REACH
+  scipId: string;
+  svhcPresent: boolean;
+  svhcSubstances: string;
+  // Battery Regulation
+  includeBattery: boolean;
+  batteryType: "ev" | "industrial" | "portable" | "light_means_of_transport";
+  stateOfHealth: string;
+  carbonFootprintClass: string;
+  recycledContentCobalt: string;
+  recycledContentLithium: string;
+  recycledContentNickel: string;
+}
+
+const defaultEsprForm: EsprFormState = {
+  productCategory: "", complianceStatus: "pending", dppVersion: "1.0",
+  validFrom: "", validUntil: "", ceMarking: false, eprRegistrationId: "",
+  repairabilityIndex: "", scipId: "", svhcPresent: false, svhcSubstances: "",
+  includeBattery: false, batteryType: "industrial", stateOfHealth: "",
+  carbonFootprintClass: "", recycledContentCobalt: "", recycledContentLithium: "", recycledContentNickel: "",
+};
+
 const eventTypes = [
   { value: "manufactured", label: "Manufactured" },
   { value: "shipped", label: "Shipped" },
@@ -95,6 +131,8 @@ export default function ProductDetail() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const [traceDialogOpen, setTraceDialogOpen] = useState(false);
+  const [esprDialogOpen, setEsprDialogOpen] = useState(false);
+  const [esprForm, setEsprForm] = useState<EsprFormState>(defaultEsprForm);
   const [traceForm, setTraceForm] = useState({
     eventType: "shipped",
     actor: "",
@@ -205,6 +243,84 @@ export default function ProductDetail() {
   const storedRepair = repairMutation.data || getStoredInsight<RepairSummary>("repair");
   const storedCircularity = circularityMutation.data || getStoredInsight<CircularityScore>("circularity");
   const storedRisk = riskMutation.data || getStoredInsight<RiskAssessment>("risk_assessment");
+
+  const openEsprDialog = () => {
+    if (euData) {
+      setEsprForm({
+        productCategory: euData.espr.productCategory,
+        complianceStatus: euData.espr.complianceStatus,
+        dppVersion: euData.espr.dppVersion,
+        validFrom: euData.espr.validFrom ?? "",
+        validUntil: euData.espr.validUntil ?? "",
+        ceMarking: euData.ceMarking,
+        eprRegistrationId: euData.eprRegistrationId ?? "",
+        repairabilityIndex: euData.repairabilityIndex?.toString() ?? "",
+        scipId: euData.reach?.scipId ?? "",
+        svhcPresent: euData.reach?.svhcPresent ?? false,
+        svhcSubstances: euData.reach?.svhcSubstances?.join(", ") ?? "",
+        includeBattery: !!euData.batteryRegulation,
+        batteryType: euData.batteryRegulation?.batteryType ?? "industrial",
+        stateOfHealth: euData.batteryRegulation?.stateOfHealth?.toString() ?? "",
+        carbonFootprintClass: euData.batteryRegulation?.carbonFootprintClass ?? "",
+        recycledContentCobalt: euData.batteryRegulation?.recycledContentCobalt?.toString() ?? "",
+        recycledContentLithium: euData.batteryRegulation?.recycledContentLithium?.toString() ?? "",
+        recycledContentNickel: euData.batteryRegulation?.recycledContentNickel?.toString() ?? "",
+      });
+    } else {
+      setEsprForm(defaultEsprForm);
+    }
+    setEsprDialogOpen(true);
+  };
+
+  const saveEsprMutation = useMutation({
+    mutationFn: async (form: EsprFormState) => {
+      const payload = {
+        regionCode: "EU" as const,
+        complianceStatus: form.complianceStatus,
+        payload: {
+          espr: {
+            productCategory: form.productCategory,
+            complianceStatus: form.complianceStatus,
+            dppVersion: form.dppVersion,
+            validFrom: form.validFrom || undefined,
+            validUntil: form.validUntil || undefined,
+          },
+          ceMarking: form.ceMarking,
+          eprRegistrationId: form.eprRegistrationId || undefined,
+          repairabilityIndex: form.repairabilityIndex ? parseFloat(form.repairabilityIndex) : undefined,
+          reach: {
+            scipId: form.scipId || undefined,
+            svhcPresent: form.svhcPresent,
+            svhcSubstances: form.svhcSubstances
+              ? form.svhcSubstances.split(",").map(s => s.trim()).filter(Boolean)
+              : undefined,
+          },
+          batteryRegulation: form.includeBattery ? {
+            batteryType: form.batteryType,
+            stateOfHealth: form.stateOfHealth ? parseFloat(form.stateOfHealth) : undefined,
+            carbonFootprintClass: form.carbonFootprintClass || undefined,
+            recycledContentCobalt: form.recycledContentCobalt ? parseFloat(form.recycledContentCobalt) : undefined,
+            recycledContentLithium: form.recycledContentLithium ? parseFloat(form.recycledContentLithium) : undefined,
+            recycledContentNickel: form.recycledContentNickel ? parseFloat(form.recycledContentNickel) : undefined,
+          } : undefined,
+        },
+      };
+      if (euExtension) {
+        const r = await apiRequest("PATCH", `/api/regional-extensions/${euExtension.id}`, payload);
+        return r.json();
+      }
+      const r = await apiRequest("POST", `/api/products/${params.id}/regional-extensions`, payload);
+      return r.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products", params.id, "regional-extensions"] });
+      setEsprDialogOpen(false);
+      toast({ title: "EU ESPR data saved", description: "Regional compliance data has been updated." });
+    },
+    onError: () => {
+      toast({ title: "Save failed", description: "Could not save EU ESPR data.", variant: "destructive" });
+    },
+  });
 
   const addTraceMutation = useMutation({
     mutationFn: async () => {
@@ -1335,13 +1451,23 @@ export default function ProductDetail() {
                     <div className="text-center py-12">
                       <Shield className="w-12 h-12 mx-auto text-muted-foreground/40 mb-4" />
                       <h3 className="text-lg font-medium mb-2">No EU ESPR data</h3>
-                      <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                      <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
                         Add EU regional extension data to track ESPR (Regulation 2024/1781) compliance,
                         battery regulation, REACH obligations, and EPR registration.
                       </p>
+                      <Button onClick={openEsprDialog} data-testid="button-add-espr">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add EU ESPR Data
+                      </Button>
                     </div>
                   ) : (
                     <div className="space-y-6">
+                      <div className="flex justify-end">
+                        <Button variant="outline" size="sm" onClick={openEsprDialog} data-testid="button-edit-espr">
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit EU ESPR Data
+                        </Button>
+                      </div>
                       {/* ESPR Status */}
                       <div>
                         <h3 className="font-semibold mb-3 flex items-center gap-2">
@@ -1578,6 +1704,165 @@ export default function ProductDetail() {
           )}
         </div>
       </div>
+
+      {/* ── EU ESPR Edit Dialog ─────────────────────────────────────────── */}
+      <Dialog open={esprDialogOpen} onOpenChange={setEsprDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              {euData ? "Edit EU ESPR Data" : "Add EU ESPR Data"}
+            </DialogTitle>
+            <DialogDescription>
+              Configure EU regional compliance data under ESPR Regulation (EU) 2024/1781, EU Battery Regulation 2023/1542, and REACH.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-5 py-2">
+            {/* ESPR Core */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">ESPR Core</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Product Category</Label>
+                  <Select value={esprForm.productCategory} onValueChange={v => setEsprForm(f => ({ ...f, productCategory: v }))}>
+                    <SelectTrigger className="mt-1" data-testid="select-espr-category">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ESPR_CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Compliance Status</Label>
+                  <Select value={esprForm.complianceStatus} onValueChange={v => setEsprForm(f => ({ ...f, complianceStatus: v as EsprFormState["complianceStatus"] }))}>
+                    <SelectTrigger className="mt-1" data-testid="select-espr-status">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="compliant">Compliant</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="non_compliant">Non-Compliant</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>DPP Version</Label>
+                  <Input className="mt-1" value={esprForm.dppVersion} onChange={e => setEsprForm(f => ({ ...f, dppVersion: e.target.value }))} placeholder="1.0" data-testid="input-dpp-version" />
+                </div>
+                <div>
+                  <Label>EPR Registration ID</Label>
+                  <Input className="mt-1" value={esprForm.eprRegistrationId} onChange={e => setEsprForm(f => ({ ...f, eprRegistrationId: e.target.value }))} placeholder="EPR-DE-2025-xxxxx" data-testid="input-epr-id" />
+                </div>
+                <div>
+                  <Label>Valid From</Label>
+                  <Input className="mt-1" type="date" value={esprForm.validFrom} onChange={e => setEsprForm(f => ({ ...f, validFrom: e.target.value }))} data-testid="input-espr-valid-from" />
+                </div>
+                <div>
+                  <Label>Valid Until</Label>
+                  <Input className="mt-1" type="date" value={esprForm.validUntil} onChange={e => setEsprForm(f => ({ ...f, validUntil: e.target.value }))} data-testid="input-espr-valid-until" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-center gap-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" className="w-4 h-4 rounded" checked={esprForm.ceMarking} onChange={e => setEsprForm(f => ({ ...f, ceMarking: e.target.checked }))} data-testid="checkbox-ce-marking" />
+                  <span className="text-sm font-medium">CE Marking</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm">Repairability Index (0-10)</Label>
+                  <Input className="w-20" value={esprForm.repairabilityIndex} onChange={e => setEsprForm(f => ({ ...f, repairabilityIndex: e.target.value }))} placeholder="7.5" data-testid="input-repairability" />
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* REACH */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">REACH — Chemical Compliance</h4>
+              <div className="space-y-3">
+                <div>
+                  <Label>SCIP ID (ECHA)</Label>
+                  <Input className="mt-1" value={esprForm.scipId} onChange={e => setEsprForm(f => ({ ...f, scipId: e.target.value }))} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" data-testid="input-scip-id" />
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" className="w-4 h-4 rounded" checked={esprForm.svhcPresent} onChange={e => setEsprForm(f => ({ ...f, svhcPresent: e.target.checked }))} data-testid="checkbox-svhc" />
+                  <span className="text-sm font-medium">SVHC Substances Present</span>
+                </label>
+                {esprForm.svhcPresent && (
+                  <div>
+                    <Label>SVHC Substances (comma-separated)</Label>
+                    <Input className="mt-1" value={esprForm.svhcSubstances} onChange={e => setEsprForm(f => ({ ...f, svhcSubstances: e.target.value }))} placeholder="Lead, Cadmium, Mercury" data-testid="input-svhc-substances" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Battery Regulation */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" className="w-4 h-4 rounded" checked={esprForm.includeBattery} onChange={e => setEsprForm(f => ({ ...f, includeBattery: e.target.checked }))} data-testid="checkbox-battery-reg" />
+                  <span className="text-sm font-semibold">EU Battery Regulation 2023/1542</span>
+                </label>
+              </div>
+              {esprForm.includeBattery && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Battery Type</Label>
+                    <Select value={esprForm.batteryType} onValueChange={v => setEsprForm(f => ({ ...f, batteryType: v as EsprFormState["batteryType"] }))}>
+                      <SelectTrigger className="mt-1" data-testid="select-battery-type">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ev">EV Battery</SelectItem>
+                        <SelectItem value="industrial">Industrial</SelectItem>
+                        <SelectItem value="portable">Portable</SelectItem>
+                        <SelectItem value="light_means_of_transport">Light Transport</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Carbon Footprint Class</Label>
+                    <Input className="mt-1" value={esprForm.carbonFootprintClass} onChange={e => setEsprForm(f => ({ ...f, carbonFootprintClass: e.target.value }))} placeholder="A" data-testid="input-carbon-class" />
+                  </div>
+                  <div>
+                    <Label>State of Health (%)</Label>
+                    <Input className="mt-1" value={esprForm.stateOfHealth} onChange={e => setEsprForm(f => ({ ...f, stateOfHealth: e.target.value }))} placeholder="95" data-testid="input-state-of-health" />
+                  </div>
+                  <div>
+                    <Label>Recycled Cobalt (%)</Label>
+                    <Input className="mt-1" value={esprForm.recycledContentCobalt} onChange={e => setEsprForm(f => ({ ...f, recycledContentCobalt: e.target.value }))} placeholder="12" data-testid="input-recycled-cobalt" />
+                  </div>
+                  <div>
+                    <Label>Recycled Lithium (%)</Label>
+                    <Input className="mt-1" value={esprForm.recycledContentLithium} onChange={e => setEsprForm(f => ({ ...f, recycledContentLithium: e.target.value }))} placeholder="4" data-testid="input-recycled-lithium" />
+                  </div>
+                  <div>
+                    <Label>Recycled Nickel (%)</Label>
+                    <Input className="mt-1" value={esprForm.recycledContentNickel} onChange={e => setEsprForm(f => ({ ...f, recycledContentNickel: e.target.value }))} placeholder="4" data-testid="input-recycled-nickel" />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEsprDialogOpen(false)} data-testid="button-espr-cancel">Cancel</Button>
+            <Button
+              onClick={() => saveEsprMutation.mutate(esprForm)}
+              disabled={saveEsprMutation.isPending || !esprForm.productCategory}
+              data-testid="button-espr-save"
+            >
+              {saveEsprMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Shield className="w-4 h-4 mr-2" />}
+              Save EU ESPR Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
