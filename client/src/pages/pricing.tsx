@@ -57,7 +57,7 @@ const identityPricing = [
     icon: Layers,
     description: "For products manufactured in batches or lots",
     examples: "Batteries, textiles, packaging, components",
-    pricing: "$0.01 - $0.05",
+    pricing: "€0.01 - €0.05",
     unit: "per batch identity",
     note: "One Digital Product Passport per manufacturing batch",
   },
@@ -66,7 +66,7 @@ const identityPricing = [
     icon: GitBranch,
     description: "For products requiring individual identification",
     examples: "Electronics, appliances, automotive parts",
-    pricing: "$0.05 - $0.25",
+    pricing: "€0.05 - €0.25",
     unit: "per product identity",
     note: "One Digital Product Passport per individual unit",
   },
@@ -75,7 +75,7 @@ const identityPricing = [
     icon: Award,
     description: "For products requiring full ownership history",
     examples: "Timepieces, accessories, collectibles, art",
-    pricing: "$0.50 - $2.00",
+    pricing: "€0.50 - €2.00",
     unit: "per product identity",
     note: "Enhanced authentication and ownership transfer records",
   },
@@ -143,7 +143,7 @@ export default function Pricing() {
                   <div className="mt-4">
                     {plan.price ? (
                       <>
-                        <span className="text-4xl font-bold">${plan.price}</span>
+                        <span className="text-4xl font-bold">€{plan.price}</span>
                         <span className="text-muted-foreground">/mo</span>
                       </>
                     ) : (
