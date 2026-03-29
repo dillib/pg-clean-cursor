@@ -622,30 +622,53 @@ export default function LandingValidation() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-primary text-primary-foreground">
-        <div className="max-w-3xl mx-auto text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest opacity-75 mb-4">Start This Week</p>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-5" data-testid="text-cta-title">
+      <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Layered gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-400 via-primary to-amber-600" />
+        {/* Radial glow for depth */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(255,255,255,0.18)_0%,transparent_70%)]" />
+        {/* Subtle dot texture */}
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "28px 28px" }}
+        />
+
+        <div className="relative max-w-3xl mx-auto text-center">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-black/20 text-white rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest mb-6">
+            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+            Start This Week
+          </div>
+
+          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-5 leading-tight" data-testid="text-cta-title">
             Get EU Compliant<br className="hidden sm:block" /> Before Your Deadline.
           </h2>
-          <p className="text-lg opacity-90 mb-3 leading-relaxed max-w-2xl mx-auto">
+
+          <p className="text-lg text-white/90 mb-4 leading-relaxed max-w-2xl mx-auto">
             The brands that move now will lead on consumer trust, retailer preference, and regulatory confidence — while competitors scramble.
           </p>
-          <p className="text-sm opacity-70 mb-10 max-w-xl mx-auto">
-            Start with a POC from <strong>{symbol}499/month</strong>. No long-term commitment. Full credits apply when you upgrade.
+
+          <p className="text-sm text-white/70 mb-10 max-w-xl mx-auto">
+            Start with a POC from{" "}
+            <strong className="text-white font-bold">{symbol}499/month</strong>.{" "}
+            No long-term commitment. Full credits apply when you upgrade.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Button size="lg" variant="secondary" asChild data-testid="button-cta-demo">
-              <Link href="/book-demo" className="gap-2">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
+            <Button
+              size="lg"
+              className="bg-white text-amber-900 hover:bg-white/92 font-semibold shadow-xl shadow-black/25 gap-2"
+              asChild
+              data-testid="button-cta-demo"
+            >
+              <Link href="/book-demo">
                 <Calendar className="w-4 h-4" />
                 Book a Demo
               </Link>
             </Button>
             <Button
               size="lg"
-              variant="outline"
-              className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+              className="bg-transparent text-white border-2 border-white/40 hover:border-white/75 hover:bg-white/10 font-medium gap-2"
               asChild
               data-testid="button-cta-contact"
             >
@@ -655,17 +678,20 @@ export default function LandingValidation() {
             </Button>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm opacity-75">
-            <div className="flex items-center gap-1.5">
-              <CheckCircle className="w-3.5 h-3.5" />
+          {/* Trust strip */}
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-white/85">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-white shrink-0" />
               <span>No long-term contract</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <CheckCircle className="w-3.5 h-3.5" />
+            <div className="hidden sm:block w-px h-4 bg-white/30" />
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-white shrink-0" />
               <span>Dedicated onboarding lead</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <CheckCircle className="w-3.5 h-3.5" />
+            <div className="hidden sm:block w-px h-4 bg-white/30" />
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-white shrink-0" />
               <span>Live in 4–6 weeks</span>
             </div>
           </div>
