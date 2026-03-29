@@ -47,7 +47,7 @@ function getBotMessage(step: Step, info?: Partial<ContactInfo>): string {
     case "interest":
       return "What area of PhotonicTag are you most interested in exploring? This helps us tailor the demo for you.";
     case "slot":
-      return "Perfect! Let's find a time that works for you. I have 30-minute slots available Monday through Friday, 9am–5pm CET.";
+      return `Perfect! Let's find a time that works for you. I have 30-minute slots available Monday through Friday, ${localBusinessHours()}.`;
     case "confirm":
       return "Here's a summary of your booking. Does everything look correct?";
     case "success":
@@ -129,8 +129,42 @@ function groupSlotsByDay(slots: string[]): Record<string, string[]> {
 }
 
 function localDayLabel(dayKey: string): string {
-  const d = new Date(dayKey + "T12:00:00Z");
-  return new Intl.DateTimeFormat("en", { weekday: "long", month: "short", day: "numeric" }).format(d);
+  // Use noon in the visitor's timezone so the date doesn't flip near midnight
+  const d = parseISO(dayKey + "T12:00:00Z");
+  return new Intl.DateTimeFormat("en", {
+    timeZone: USER_TZ,
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  }).format(d);
+}
+
+/** Formats a UTC Date as "3am" / "11:30pm" etc. in the visitor's local timezone. */
+function fmtLocalHour(d: Date): string {
+  const parts = new Intl.DateTimeFormat("en", {
+    timeZone: USER_TZ,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).formatToParts(d);
+  const hour = parts.find(p => p.type === "hour")?.value ?? "";
+  const minute = parts.find(p => p.type === "minute")?.value ?? "00";
+  const period = parts.find(p => p.type === "dayPeriod")?.value?.toLowerCase() ?? "";
+  return minute === "00" ? `${hour}${period}` : `${hour}:${minute}${period}`;
+}
+
+/** Returns business hours label in the visitor's timezone, e.g. "3am–11am EST". */
+function localBusinessHours(): string {
+  const isCET = USER_TZ === CET_TZ || USER_TZ.startsWith("Europe/");
+  const now = new Date();
+  if (isCET) return `9am–5pm ${tzAbbr(now, CET_TZ)}`;
+
+  // Server generates slots: 9am–5pm CET (UTC+1 hardcoded) → 08:00–16:00 UTC
+  const y = now.getUTCFullYear(), mo = now.getUTCMonth(), d = now.getUTCDate();
+  const openUTC = new Date(Date.UTC(y, mo, d, 8, 0, 0));
+  const closeUTC = new Date(Date.UTC(y, mo, d, 16, 0, 0));
+  const abbr = tzAbbr(openUTC, USER_TZ);
+  return `${fmtLocalHour(openUTC)}–${fmtLocalHour(closeUTC)} ${abbr}`;
 }
 
 export default function BookDemo() {
@@ -279,7 +313,7 @@ export default function BookDemo() {
           <Badge variant="secondary" className="mb-1.5">Book a Demo</Badge>
           <h1 className="text-2xl font-bold tracking-tight">Schedule Your 30-Minute Demo</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Mon–Fri · 9am–5pm CET · 30 minutes · Times shown in your local timezone
+            Mon–Fri · {localBusinessHours()} · 30 minutes
           </p>
         </div>
 
@@ -524,7 +558,7 @@ export default function BookDemo() {
           </div>
           <div className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-primary" />
-            <span>Mon–Fri, 9am–5pm CET</span>
+            <span>Mon–Fri, {localBusinessHours()}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <CheckCircle className="w-3.5 h-3.5 text-primary" />
