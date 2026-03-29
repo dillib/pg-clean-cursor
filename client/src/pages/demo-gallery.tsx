@@ -167,10 +167,10 @@ export default function DemoGallery() {
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Button asChild data-testid="button-book-demo">
-                <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer" className="gap-2">
+                <Link href="/book-demo" className="gap-2">
                   <Calendar className="w-4 h-4" />
                   Book a Demo
-                </a>
+                </Link>
               </Button>
               <Link href="/contact">
                 <Button variant="outline" data-testid="button-contact">

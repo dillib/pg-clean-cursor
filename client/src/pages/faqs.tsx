@@ -259,10 +259,10 @@ export default function FAQs() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild data-testid="button-faqs-demo">
-              <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer" className="gap-2">
+              <Link href="/book-demo" className="gap-2">
                 <Calendar className="w-4 h-4" />
                 Schedule a Demo
-              </a>
+              </Link>
             </Button>
             <Button size="lg" variant="outline" asChild data-testid="button-faqs-contact">
               <Link href="/contact" className="gap-2">

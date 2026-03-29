@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { type Server } from "http";
 import OpenAI from "openai";
-import { insertProductSchema, insertIoTDeviceSchema, insertEnterpriseConnectorSchema, insertLeadSchema, insertPartnerSchema, insertDemoConfigSchema } from "@shared/schema";
+import { insertProductSchema, insertIoTDeviceSchema, insertEnterpriseConnectorSchema, insertLeadSchema, insertPartnerSchema, insertDemoConfigSchema, insertDemoBookingSchema } from "@shared/schema";
 import { productService } from "./services/product-service";
 import { qrService } from "./services/qr-service";
 import { identityService } from "./services/identity-service";
@@ -1101,6 +1101,142 @@ export async function registerRoutes(
     }
   });
 
+  // ==========================================
+  // DEMO BOOKING ENDPOINTS
+  // ==========================================
+
+  // GET /api/demo-slots — returns available 30-min slots for the next 14 days (Mon–Fri 09:00–17:00 CET)
+  // Optional query param: ?startDate=<ISO8601> to paginate/offset the window; defaults to now.
+  app.get("/api/demo-slots", async (req: Request, res: Response) => {
+    try {
+      const now = new Date();
+      let startDate = now;
+      if (typeof req.query.startDate === "string" && req.query.startDate) {
+        const parsed = new Date(req.query.startDate);
+        if (!isNaN(parsed.getTime()) && parsed > now) {
+          startDate = parsed;
+        }
+      }
+      const endDate = new Date(startDate.getTime() + 14 * 24 * 60 * 60 * 1000);
+      const bookedSlots = await storage.getBookedSlots(startDate, endDate);
+      const slots = getAvailableSlots(startDate, bookedSlots);
+      res.json({ slots: slots.map(s => s.toISOString()) });
+    } catch (error) {
+      console.error("Error fetching demo slots:", error);
+      res.status(500).json({ error: "Failed to fetch demo slots" });
+    }
+  });
+
+  // GET /api/demo-bookings — admin-only, lists all bookings
+  app.get("/api/demo-bookings", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+    try {
+      const bookings = await storage.getAllDemoBookings();
+      res.json(bookings);
+    } catch (error) {
+      console.error("Error fetching demo bookings:", error);
+      res.status(500).json({ error: "Failed to fetch demo bookings" });
+    }
+  });
+
+  // POST /api/demo-bookings — create a booking and upsert a lead
+  app.post("/api/demo-bookings", async (req: Request, res: Response) => {
+    try {
+      const parsed = insertDemoBookingSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid booking data", details: parsed.error.issues });
+      }
+
+      const slot = new Date(parsed.data.slotDatetime);
+
+      // Validate slot is within Mon–Fri 09:00–16:30 CET window and next 14 days
+      if (!isValidSlot(slot)) {
+        return res.status(400).json({ error: "Invalid slot. Please choose a weekday slot between 9:00 and 17:00 CET within the next 14 days." });
+      }
+
+      // Verify the slot has not already been booked
+      const slotEnd = new Date(slot.getTime() + 30 * 60 * 1000);
+      const bookedSlots = await storage.getBookedSlots(slot, slotEnd);
+      const isBooked = bookedSlots.some(s => s.getTime() === slot.getTime());
+      if (isBooked) {
+        return res.status(409).json({ error: "This slot is no longer available. Please choose another time." });
+      }
+
+      // Create the booking
+      const booking = await storage.createDemoBooking(parsed.data);
+
+      // Upsert a lead record with status demo_scheduled
+      try {
+        const nameParts = parsed.data.name.trim().split(/\s+/);
+        const firstName = nameParts[0] || parsed.data.name;
+        const lastName = nameParts.slice(1).join(" ") || "-";
+
+        const existingLead = await storage.getLeadByEmail(parsed.data.email);
+        if (existingLead) {
+          await storage.updateLead(existingLead.id, {
+            status: "demo_scheduled",
+            company: parsed.data.company || existingLead.company,
+          });
+          await storage.updateDemoBookingLeadId(booking.id, existingLead.id);
+        } else {
+          const newLead = await storage.createLead({
+            firstName,
+            lastName,
+            email: parsed.data.email,
+            company: parsed.data.company || undefined,
+            status: "demo_scheduled",
+            source: "demo_request",
+            tierInterest: "poc",
+            message: `Demo booked for ${parsed.data.interestArea} on ${slot.toISOString()}`,
+          });
+          await storage.updateDemoBookingLeadId(booking.id, newLead.id);
+        }
+      } catch (leadErr) {
+        console.error("Failed to upsert lead for booking:", leadErr);
+      }
+
+      res.status(201).json(booking);
+    } catch (error) {
+      console.error("Error creating demo booking:", error);
+      res.status(500).json({ error: "Failed to create demo booking" });
+    }
+  });
+
+  // PATCH /api/demo-bookings/:id/status — update booking status (admin)
+  app.patch("/api/demo-bookings/:id/status", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+    try {
+      const { status } = req.body;
+      if (!["pending", "confirmed", "cancelled"].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+      const booking = await storage.updateDemoBookingStatus(req.params.id, status);
+      if (!booking) {
+        return res.status(404).json({ error: "Demo booking not found" });
+      }
+      res.json(booking);
+    } catch (error) {
+      console.error("Error updating demo booking status:", error);
+      res.status(500).json({ error: "Failed to update demo booking status" });
+    }
+  });
+
+  // GET /api/demo-bookings/:id/calendar.ics — ICS file download
+  app.get("/api/demo-bookings/:id/calendar.ics", async (req: Request, res: Response) => {
+    try {
+      const booking = await storage.getDemoBooking(req.params.id);
+      if (!booking) {
+        return res.status(404).json({ error: "Demo booking not found" });
+      }
+
+      const icsContent = generateICS(booking);
+      res.setHeader("Content-Type", "text/calendar; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename="demo-booking-${booking.id}.ics"`);
+      res.send(icsContent);
+    } catch (error) {
+      console.error("Error generating ICS:", error);
+      res.status(500).json({ error: "Failed to generate calendar file" });
+    }
+  });
+
   app.get("/api/demo-configs/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const config = await storage.getDemoConfig(req.params.id);
@@ -1205,4 +1341,124 @@ Respond ONLY with a valid JSON array, no markdown.`;
     console.error("Error in generateDemoProducts:", error);
     await storage.updateDemoConfig(configId, { status: "failed" });
   }
+}
+
+// ============================================
+// DEMO BOOKING HELPERS
+// ============================================
+
+/**
+ * Returns available 30-minute booking slots for the next 14 days.
+ * Business hours: Mon–Fri, 09:00–17:00 CET (UTC+1, no DST adjustment).
+ * Slots start on the hour and half-hour; the last slot starts at 16:30 CET.
+ */
+function getAvailableSlots(startDate: Date, bookedSlots: Date[]): Date[] {
+  const slots: Date[] = [];
+  const bookedMs = new Set(bookedSlots.map(s => s.getTime()));
+  const now = new Date();
+
+  for (let day = 0; day < 14; day++) {
+    const base = new Date(startDate);
+    base.setDate(base.getDate() + day);
+
+    // Use the calendar date from the base date (local server date)
+    const year = base.getFullYear();
+    const month = base.getMonth();
+    const date = base.getDate();
+
+    // Determine day-of-week in CET: CET = UTC+1, so we check the wall-clock date at UTC+1
+    const cetMidnight = new Date(Date.UTC(year, month, date, 0, 0, 0, 0));
+    const cetDayOfWeek = new Date(cetMidnight.getTime() + 60 * 60 * 1000).getDay();
+    if (cetDayOfWeek === 0 || cetDayOfWeek === 6) continue;
+
+    // Generate 30-min slots from 09:00 to 16:30 CET (last start), i.e. 08:00–15:30 UTC
+    for (let hour = 9; hour < 17; hour++) {
+      for (const minute of [0, 30]) {
+        // 16:30 CET is the last allowed start (slot ends at 17:00 CET)
+        if (hour === 16 && minute > 30) continue;
+        if (hour === 17) continue;
+
+        // Slot time in UTC: CET = UTC+1 means CET hour:minute = UTC (hour-1):minute
+        const slot = new Date(Date.UTC(year, month, date, hour - 1, minute, 0, 0));
+
+        if (slot <= now) continue;
+        if (bookedMs.has(slot.getTime())) continue;
+
+        slots.push(slot);
+      }
+    }
+  }
+
+  return slots;
+}
+
+/**
+ * Returns true if the given slot is a valid bookable time:
+ * - Within the next 14 days from now
+ * - Mon–Fri 09:00–16:30 CET (start time), slots on the half-hour
+ * - In the future
+ */
+function isValidSlot(slot: Date): boolean {
+  const now = new Date();
+  if (slot <= now) return false;
+  if (slot.getTime() > now.getTime() + 14 * 24 * 60 * 60 * 1000) return false;
+
+  // CET = UTC+1; compute CET wall-clock time
+  const cetHour = slot.getUTCHours() + 1; // CET = UTC+1
+  const cetMinute = slot.getUTCMinutes();
+
+  // Day-of-week in CET (shift UTC date by +1 hour before reading day)
+  const cetTs = new Date(slot.getTime() + 60 * 60 * 1000);
+  const dayOfWeek = cetTs.getUTCDay();
+  if (dayOfWeek === 0 || dayOfWeek === 6) return false;
+
+  // Hours 09:00–16:30 CET, minutes must be 0 or 30
+  if (cetMinute !== 0 && cetMinute !== 30) return false;
+  if (cetHour < 9) return false;
+  if (cetHour > 16) return false;
+  if (cetHour === 16 && cetMinute > 30) return false;
+
+  return true;
+}
+
+/** Escape text for ICS per RFC 5545: backslash, semicolon, comma, and newlines must be escaped. */
+function escapeICS(value: string): string {
+  return value
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\r?\n/g, '\\n');
+}
+
+function generateICS(booking: { id: string; name: string; email: string; company?: string | null; interestArea: string; slotDatetime: Date }): string {
+  const start = new Date(booking.slotDatetime);
+  const end = new Date(start.getTime() + 30 * 60 * 1000);
+
+  const formatDT = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+
+  const uid = `demo-booking-${booking.id}@photonictag.com`;
+  const summary = escapeICS(`PhotonicTag Demo \u2014 ${booking.name}`);
+  const description = escapeICS(
+    `Demo scheduled with PhotonicTag\nInterest area: ${booking.interestArea}\nCompany: ${booking.company || 'N/A'}\nContact: ${booking.email}`
+  );
+
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//PhotonicTag//Demo Scheduling//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:REQUEST',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTAMP:${formatDT(new Date())}`,
+    `DTSTART:${formatDT(start)}Z`,
+    `DTEND:${formatDT(end)}Z`,
+    `SUMMARY:${summary}`,
+    `DESCRIPTION:${description}`,
+    'ORGANIZER:mailto:demo@photonictag.com',
+    `ATTENDEE;RSVP=TRUE:mailto:${booking.email}`,
+    'STATUS:CONFIRMED',
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n');
 }

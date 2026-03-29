@@ -79,10 +79,10 @@ export default function LandingValidation() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
             <Button size="lg" asChild data-testid="button-hero-demo">
-              <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer" className="gap-2">
+              <Link href="/book-demo" className="gap-2">
                 <Calendar className="w-4 h-4" />
                 Book a Demo
-              </a>
+              </Link>
             </Button>
             <Button size="lg" variant="outline" asChild data-testid="button-hero-see-demo">
               <Link href="/scan/demo" className="gap-2">
@@ -239,10 +239,10 @@ export default function LandingValidation() {
 
           <div className="text-center mt-12">
             <Button asChild data-testid="button-timeline-demo">
-              <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer" className="gap-2">
+              <Link href="/book-demo" className="gap-2">
                 <Calendar className="w-4 h-4" />
                 Check Your Specific Deadline
-              </a>
+              </Link>
             </Button>
           </div>
         </div>
@@ -637,10 +637,10 @@ export default function LandingValidation() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Button size="lg" variant="secondary" asChild data-testid="button-cta-demo">
-              <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer" className="gap-2">
+              <Link href="/book-demo" className="gap-2">
                 <Calendar className="w-4 h-4" />
                 Book a Demo
-              </a>
+              </Link>
             </Button>
             <Button
               size="lg"

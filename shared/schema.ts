@@ -1184,6 +1184,39 @@ export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
 export type SupportTicket = typeof supportTickets.$inferSelect;
 
 // ============================================
+// DEMO BOOKINGS (Native scheduling chatbot)
+// ============================================
+
+export type DemoBookingStatus = "pending" | "confirmed" | "cancelled";
+
+export const demoBookings = pgTable("demo_bookings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  company: text("company"),
+  interestArea: text("interest_area").notNull(),
+  slotDatetime: timestamp("slot_datetime").notNull(),
+  status: text("status").$type<DemoBookingStatus>().default("pending").notNull(),
+  notes: text("notes"),
+  leadId: varchar("lead_id"),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertDemoBookingSchema = createInsertSchema(demoBookings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  leadId: true,
+  status: true,
+}).extend({
+  slotDatetime: z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)).transform(s => new Date(s)),
+});
+
+export type InsertDemoBooking = z.infer<typeof insertDemoBookingSchema>;
+export type DemoBooking = typeof demoBookings.$inferSelect;
+
+// ============================================
 // PLATFORM METRICS (Ops Monitoring)
 // ============================================
 

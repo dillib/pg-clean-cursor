@@ -39,9 +39,9 @@ export function PublicNav({ hideBookDemo = false }: { hideBookDemo?: boolean } =
             <ThemeToggle />
             {!hideBookDemo && (
               <Button asChild data-testid="button-book-demo">
-                <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer">
+                <Link href="/book-demo">
                   Book a Demo
-                </a>
+                </Link>
               </Button>
             )}
           </div>

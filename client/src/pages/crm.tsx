@@ -155,6 +155,12 @@ export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
             </TabsTrigger>
           )}
           {isAdmin && (
+            <TabsTrigger value="bookings" data-testid="tab-bookings" className="gap-1">
+              <Calendar className="w-4 h-4" />
+              Bookings
+            </TabsTrigger>
+          )}
+          {isAdmin && (
             <TabsTrigger value="demos" data-testid="tab-demos" className="gap-1">
               <Wand2 className="w-4 h-4" />
               Demo Generator
@@ -612,6 +618,10 @@ export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
           <PartnersTab />
         </TabsContent>
 
+        <TabsContent value="bookings">
+          <BookingsTab />
+        </TabsContent>
+
         <TabsContent value="demos">
           <DemoGeneratorTab />
         </TabsContent>
@@ -630,6 +640,132 @@ const SAMPLE_PROMPTS = [
 ];
 
 type SafePartner = Omit<Partner, "passwordHash">;
+
+type DemoBooking = {
+  id: string;
+  name: string;
+  email: string;
+  company: string | null;
+  interestArea: string;
+  slotDatetime: string;
+  status: "pending" | "confirmed" | "cancelled";
+  notes: string | null;
+  createdAt: string | null;
+};
+
+const INTEREST_LABELS: Record<string, string> = {
+  eu_dpp_compliance: "EU DPP Compliance",
+  battery_regulation: "Battery Regulation",
+  sap_integration: "SAP Integration",
+  supply_chain: "Supply Chain Traceability",
+  ai_sustainability: "AI Sustainability",
+  other: "General Overview",
+};
+
+function BookingsTab() {
+  const { toast } = useToast();
+
+  const { data: bookings, isLoading, refetch } = useQuery<DemoBooking[]>({
+    queryKey: ["/api/demo-bookings"],
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      await apiRequest("PATCH", `/api/demo-bookings/${id}/status`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/demo-bookings"] });
+      toast({ title: "Status updated" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update status", variant: "destructive" });
+    },
+  });
+
+  const statusColor: Record<string, string> = {
+    pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+    confirmed: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+    cancelled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Demo Bookings</h2>
+          <p className="text-sm text-muted-foreground">Manage scheduled demo appointments</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => refetch()} data-testid="button-refresh-bookings">
+          <Clock className="w-3.5 h-3.5 mr-1" />
+          Refresh
+        </Button>
+      </div>
+
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-10 gap-2 text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-sm">Loading bookings...</span>
+            </div>
+          ) : !bookings || bookings.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Calendar className="w-8 h-8 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">No demo bookings yet.</p>
+              <p className="text-xs mt-1">When users schedule demos via /book-demo, they'll appear here.</p>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {bookings.map((booking) => (
+                <div key={booking.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-start gap-4" data-testid={`booking-row-${booking.id}`}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-sm">{booking.name}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor[booking.status]}`}>
+                        {booking.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-0.5">{booking.email}{booking.company ? ` · ${booking.company}` : ""}</p>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {format(new Date(booking.slotDatetime), "EEE, MMM d yyyy 'at' h:mm a 'CET'")}
+                      </span>
+                      <span>·</span>
+                      <span>{INTEREST_LABELS[booking.interestArea] || booking.interestArea}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      asChild
+                      data-testid={`button-download-ics-${booking.id}`}
+                    >
+                      <a href={`/api/demo-bookings/${booking.id}/calendar.ics`} download>
+                        ICS
+                      </a>
+                    </Button>
+                    <select
+                      value={booking.status}
+                      onChange={e => statusMutation.mutate({ id: booking.id, status: e.target.value })}
+                      className="text-xs border rounded px-2 py-1.5 bg-background"
+                      data-testid={`select-status-${booking.id}`}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 function PartnersTab() {
   const { toast } = useToast();

@@ -18,6 +18,7 @@ import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 
 const DPP_CATEGORIES = [
@@ -59,7 +60,7 @@ const contactFormSchema = z.object({
 
 type ContactFormData = z.infer<typeof contactFormSchema>;
 
-const CALENDLY_LINK = "https://calendar.app.google/Aa9nfUnJiZvcjXi28";
+const CALENDLY_LINK = "/book-demo";
 
 export default function Contact() {
   const { toast } = useToast();
@@ -121,9 +122,9 @@ export default function Contact() {
             {showAssessment && " Your technical assessment has been saved and will help us prepare a tailored proposal."}
           </p>
           <Button asChild>
-            <a href={CALENDLY_LINK} target="_blank" rel="noopener noreferrer">
+            <Link href={CALENDLY_LINK}>
               Book a Demo Now
-            </a>
+            </Link>
           </Button>
         </main>
         <PublicFooter />
@@ -529,7 +530,7 @@ export default function Contact() {
                       See PhotonicTag in action. 30-minute personalised demo with a product specialist.
                     </p>
                     <Button asChild data-testid="button-book-demo">
-                      <a href={CALENDLY_LINK} target="_blank" rel="noopener noreferrer">Book a Demo</a>
+                      <Link href={CALENDLY_LINK}>Book a Demo</Link>
                     </Button>
                   </div>
                 </div>

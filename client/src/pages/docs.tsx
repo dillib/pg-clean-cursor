@@ -485,7 +485,7 @@ export default function Docs() {
                 <p className="text-sm text-muted-foreground">Schedule a personalized demo to see PhotonicTag with your products.</p>
               </div>
               <Button asChild className="shrink-0" data-testid="button-docs-demo">
-                <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer">Book Demo</a>
+                <Link href="/book-demo">Book Demo</Link>
               </Button>
             </CardContent>
           </Card>

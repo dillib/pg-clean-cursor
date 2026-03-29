@@ -511,9 +511,9 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
               This is an example passport. See how PhotonicTag can work for your products.
             </p>
             <Button size="sm" asChild data-testid="button-demo-signup">
-              <a href="https://calendar.app.google/Aa9nfUnJiZvcjXi28" target="_blank" rel="noopener noreferrer">
+              <Link href="/book-demo">
                 Book a Demo
-              </a>
+              </Link>
             </Button>
           </div>
         </div>

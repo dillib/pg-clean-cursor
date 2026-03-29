@@ -39,6 +39,7 @@ import AdminInternal from "@/pages/admin-internal";
 import Docs from "@/pages/docs";
 import Presentation from "@/pages/presentation";
 import FAQs from "@/pages/faqs";
+import BookDemo from "@/pages/book-demo";
 import NotFound from "@/pages/not-found";
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -486,6 +487,7 @@ function Router() {
       <Route path="/faqs" component={FAQs} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
+      <Route path="/book-demo" component={BookDemo} />
       <Route component={NotFound} />
     </Switch>
   );

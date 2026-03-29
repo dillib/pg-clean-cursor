@@ -1,4 +1,4 @@
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, gte, lte, or } from "drizzle-orm";
 import { db } from "./db";
 import {
   type User,
@@ -55,6 +55,9 @@ import {
   type SupportTicket,
   type InsertSupportTicket,
   type TicketStatus,
+  type DemoBooking,
+  type InsertDemoBooking,
+  type DemoBookingStatus,
   users,
   products,
   roles,
@@ -80,6 +83,7 @@ import {
   personaTemplates,
   supportTickets,
   platformMetrics,
+  demoBookings,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -224,6 +228,14 @@ export interface IStorage {
   // Platform Metrics
   recordMetric(metricType: string, value: number, metadata?: Record<string, unknown>): Promise<void>;
   getMetrics(metricType?: string, limit?: number): Promise<Array<{ metricType: string; value: number; metadata: Record<string, unknown> | null; recordedAt: Date }>>;
+
+  // Demo Bookings
+  getAllDemoBookings(): Promise<DemoBooking[]>;
+  getDemoBooking(id: string): Promise<DemoBooking | undefined>;
+  getBookedSlots(startDate: Date, endDate: Date): Promise<Date[]>;
+  createDemoBooking(booking: InsertDemoBooking): Promise<DemoBooking>;
+  updateDemoBookingStatus(id: string, status: DemoBookingStatus): Promise<DemoBooking | undefined>;
+  updateDemoBookingLeadId(bookingId: string, leadId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -927,6 +939,53 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(platformMetrics)
       .orderBy(desc(platformMetrics.recordedAt))
       .limit(limit);
+  }
+
+  // Demo Bookings
+  async getAllDemoBookings(): Promise<DemoBooking[]> {
+    return db.select().from(demoBookings).orderBy(desc(demoBookings.slotDatetime));
+  }
+
+  async getDemoBooking(id: string): Promise<DemoBooking | undefined> {
+    const [booking] = await db.select().from(demoBookings).where(eq(demoBookings.id, id));
+    return booking;
+  }
+
+  async getBookedSlots(startDate: Date, endDate: Date): Promise<Date[]> {
+    const bookings = await db.select({ slotDatetime: demoBookings.slotDatetime })
+      .from(demoBookings)
+      .where(
+        and(
+          gte(demoBookings.slotDatetime, startDate),
+          lte(demoBookings.slotDatetime, endDate),
+          or(
+            eq(demoBookings.status, "pending" as DemoBookingStatus),
+            eq(demoBookings.status, "confirmed" as DemoBookingStatus)
+          )
+        )
+      );
+    return bookings.map(b => b.slotDatetime);
+  }
+
+  async updateDemoBookingLeadId(bookingId: string, leadId: string): Promise<void> {
+    await db
+      .update(demoBookings)
+      .set({ leadId, updatedAt: new Date() })
+      .where(eq(demoBookings.id, bookingId));
+  }
+
+  async createDemoBooking(booking: InsertDemoBooking): Promise<DemoBooking> {
+    const [created] = await db.insert(demoBookings).values(booking as typeof demoBookings.$inferInsert).returning();
+    return created;
+  }
+
+  async updateDemoBookingStatus(id: string, status: DemoBookingStatus): Promise<DemoBooking | undefined> {
+    const [updated] = await db
+      .update(demoBookings)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(demoBookings.id, id))
+      .returning();
+    return updated;
   }
 }
 
