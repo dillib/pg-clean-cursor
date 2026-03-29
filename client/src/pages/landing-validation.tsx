@@ -622,18 +622,7 @@ export default function LandingValidation() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Rich gold base — deep warm bronze at edges */}
-        <div className="absolute inset-0 bg-[#8B6000]" />
-        {/* Diagonal gold highlight — bright brand gold sweeping from top-left */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#FFD44A] via-[#FDB813] to-[#7A5200]" />
-        {/* Radial gleam — bright gold shine from upper-center */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_48%_30%,rgba(255,228,100,0.50)_0%,transparent_65%)]" />
-        {/* Subtle dot texture */}
-        <div
-          className="absolute inset-0 opacity-[0.055]"
-          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "28px 28px" }}
-        />
+      <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#FFD400]">
 
         <div className="relative max-w-3xl mx-auto text-center">
           {/* Badge */}
