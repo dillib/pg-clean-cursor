@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useCurrency } from "@/hooks/use-currency";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -62,6 +63,7 @@ const CALENDLY_LINK = "https://calendar.app.google/Aa9nfUnJiZvcjXi28";
 
 export default function Contact() {
   const { toast } = useToast();
+  const { symbol } = useCurrency();
   const [showAssessment, setShowAssessment] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -215,8 +217,8 @@ export default function Contact() {
                             </FormControl>
                             <SelectContent>
                               <SelectItem value="poc">POC (Free pilot)</SelectItem>
-                              <SelectItem value="starter">Starter (€1,499/mo)</SelectItem>
-                              <SelectItem value="growth">Growth (€2,999/mo)</SelectItem>
+                              <SelectItem value="starter">Starter ({symbol}99/mo)</SelectItem>
+                              <SelectItem value="growth">Growth ({symbol}499/mo)</SelectItem>
                               <SelectItem value="enterprise">Enterprise (Custom)</SelectItem>
                             </SelectContent>
                           </Select>

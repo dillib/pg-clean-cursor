@@ -27,8 +27,10 @@ import {
   Users
 } from "lucide-react";
 import { Link } from "wouter";
+import { useCurrency } from "@/hooks/use-currency";
 
 export default function LandingValidation() {
+  const { symbol } = useCurrency();
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
@@ -630,7 +632,7 @@ export default function LandingValidation() {
             The brands that move now will lead on consumer trust, retailer preference, and regulatory confidence — while competitors scramble.
           </p>
           <p className="text-sm opacity-70 mb-10 max-w-xl mx-auto">
-            Start with a POC from <strong>€499/month</strong>. No long-term commitment. Full credits apply when you upgrade.
+            Start with a POC from <strong>{symbol}499/month</strong>. No long-term commitment. Full credits apply when you upgrade.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">

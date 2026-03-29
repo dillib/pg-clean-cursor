@@ -62,7 +62,7 @@ const faqItems = [
   },
   {
     question: "How much does PhotonicTag cost?",
-    answer: "PhotonicTag offers flexible, usage-based pricing. Our Starter plan begins at $99/month for up to 1,000 product identities, ideal for small brands getting started. Growth ($499/month) supports up to 25,000 products with advanced analytics and basic AI insights. Enterprise ($2,000+/month) offers unlimited products, custom integrations, and the full AI Intelligence suite. All plans include a 14-day free trial with no credit card required. Visit our Pricing page for detailed information."
+    answer: "PhotonicTag offers straightforward monthly plans. Our Starter plan begins at €99/month, covering the full admin dashboard, QR code generation, public scan pages, and API access. Growth (€499/month) adds advanced analytics, up to 5 team members, priority support, and IoT device integration. Enterprise pricing is custom and includes SAP S/4HANA integration, unlimited users, and dedicated account management. All prices are in EUR for EU customers; USD billing is available for non-EU customers. Visit our Pricing page for current plan details."
   },
   {
     question: "How long does it take to implement PhotonicTag?",

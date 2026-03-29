@@ -337,7 +337,7 @@ const useCases: UseCase[] = [
     metrics: [
       { value: "99.7%", label: "Counterfeit Detection Rate" },
       { value: "4 hrs", label: "Recall Response Time" },
-      { value: "$12M", label: "Fraud Prevented Annually" }
+      { value: "€12M", label: "Fraud Prevented Annually" }
     ],
     regulations: ["EU Type Approval", "UNECE R155", "IATF 16949", "Conflict Minerals Regulation"]
   },

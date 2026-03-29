@@ -22,9 +22,9 @@ const caseStudies = [
     company: "TechParts Global",
     industry: "Electronics Manufacturing",
     title: "Eliminating Counterfeit Components",
-    excerpt: "A leading electronics manufacturer implemented PhotonicTag to verify authentic parts across 200+ suppliers, preventing $2M in counterfeit losses.",
+    excerpt: "A leading electronics manufacturer implemented PhotonicTag to verify authentic parts across 200+ suppliers, preventing €2M in counterfeit losses.",
     metrics: [
-      { label: "Counterfeit Prevention", value: "$2M" },
+      { label: "Counterfeit Prevention", value: "€2M" },
       { label: "Verification Time", value: "-80%" },
       { label: "Supplier Compliance", value: "100%" },
     ],
