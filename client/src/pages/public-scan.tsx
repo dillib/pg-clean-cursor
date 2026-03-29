@@ -318,11 +318,11 @@ const regionNames: Record<string, string> = {
 };
 
 const regionFlags: Record<string, string> = {
-  EU: "EU",
-  CN: "CN",
-  US: "US",
-  IN: "IN",
-  OTHER: "INT"
+  EU: "🇪🇺",
+  CN: "🇨🇳",
+  US: "🇺🇸",
+  IN: "🇮🇳",
+  OTHER: "🌐"
 };
 
 interface CollapsibleSectionProps {
