@@ -349,10 +349,10 @@
     background: hsl(var(--primary)) !important;
   }
 
-  /* text-primary fix: yellow is unreadable on light backgrounds.
-     Use dark amber (≥4.5:1 on white) for text; keep bg-primary yellow. */
+  /* text-primary: yellow is unreadable on light backgrounds.
+     Use black for text; keep bg-primary yellow for buttons/fills. */
   .text-primary {
-    color: hsl(44 100% 28%) !important; /* #8F7200 — 5.5:1 on white, passes AA */
+    color: hsl(0 0% 0%) !important;
   }
   .dark .text-primary {
     color: hsl(50 100% 55%) !important; /* bright yellow on dark bg */
