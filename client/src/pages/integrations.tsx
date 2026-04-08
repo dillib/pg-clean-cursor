@@ -46,8 +46,13 @@ export default function Integrations() {
       <Helmet>
         <title>Integrations - PhotonicTag | SAP, ERP & Identity Technologies</title>
         <meta name="description" content="Connect PhotonicTag with SAP S/4HANA, ERP systems, QR codes, NFC tags, and RFID. Bidirectional sync, real-time product data flow. Enterprise-ready integrations." />
+        <link rel="canonical" href="https://www.photonictag.com/integrations" />
         <meta property="og:title" content="PhotonicTag Integrations - SAP & ERP Connectivity" />
         <meta property="og:description" content="Enterprise integrations for EU DPP. SAP S/4HANA sync. QR, NFC, RFID support." />
+        <meta property="og:url" content="https://www.photonictag.com/integrations" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="PhotonicTag Integrations - SAP S/4HANA, ERP & IoT" />
+        <meta name="twitter:description" content="Native SAP S/4HANA, ECC, Business One integration for EU Digital Product Passports. QR, NFC, RFID support." />
       </Helmet>
       <PublicNav />
 

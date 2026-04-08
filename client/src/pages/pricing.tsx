@@ -101,8 +101,25 @@ export default function Pricing() {
       <Helmet>
         <title>Pricing - PhotonicTag | EU DPP Compliance Platform</title>
         <meta name="description" content="Simple, transparent pricing for EU Digital Product Passport compliance under ESPR 2024/1781. Platform plans from €99/month. Battery deadline Feb 2027, all products by 2030." />
+        <link rel="canonical" href="https://www.photonictag.com/pricing" />
         <meta property="og:title" content="PhotonicTag Pricing - EU DPP Compliance Platform" />
         <meta property="og:description" content="Affordable EU DPP compliance. Platform plans from €99/month. Avoid €100K+ penalties." />
+        <meta property="og:url" content="https://www.photonictag.com/pricing" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="PhotonicTag Pricing - EU DPP Compliance from €99/mo" />
+        <meta name="twitter:description" content="Simple, transparent pricing for EU Digital Product Passport compliance. Starter €99/mo, Growth €499/mo, Enterprise custom." />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "PhotonicTag Pricing",
+          "url": "https://www.photonictag.com/pricing",
+          "description": "Pricing plans for EU Digital Product Passport compliance platform.",
+          "offers": [
+            { "@type": "Offer", "name": "Starter", "price": "99", "priceCurrency": "EUR", "priceSpecification": { "@type": "UnitPriceSpecification", "billingDuration": "P1M" } },
+            { "@type": "Offer", "name": "Growth", "price": "499", "priceCurrency": "EUR", "priceSpecification": { "@type": "UnitPriceSpecification", "billingDuration": "P1M" } },
+            { "@type": "Offer", "name": "Enterprise", "price": "0", "priceCurrency": "EUR", "description": "Custom pricing — contact sales" }
+          ]
+        })}</script>
       </Helmet>
       <PublicNav />
 

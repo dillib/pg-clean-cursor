@@ -9,6 +9,8 @@ export default function Privacy() {
       <Helmet>
         <title>Privacy Policy - PhotonicTag</title>
         <meta name="description" content="PhotonicTag privacy policy. Learn how we collect, use, and protect your data on our EU Digital Product Passport platform." />
+        <link rel="canonical" href="https://www.photonictag.com/privacy" />
+        <meta name="robots" content="noindex, follow" />
       </Helmet>
       <PublicNav />
 

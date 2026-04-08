@@ -9,6 +9,8 @@ export default function Terms() {
       <Helmet>
         <title>Terms of Service - PhotonicTag</title>
         <meta name="description" content="PhotonicTag terms of service. Review the terms governing your use of our EU Digital Product Passport platform." />
+        <link rel="canonical" href="https://www.photonictag.com/terms" />
+        <meta name="robots" content="noindex, follow" />
       </Helmet>
       <PublicNav />
 

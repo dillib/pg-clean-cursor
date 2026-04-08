@@ -36,9 +36,63 @@ export default function LandingValidation() {
       <Helmet>
         <title>PhotonicTag — EU Digital Product Passport Compliance Platform</title>
         <meta name="description" content="EU Digital Product Passports (DPP) are mandatory starting 2027. PhotonicTag gets you compliant in weeks — with AI insights, tamper-proof QR identity, and SAP integration. ESPR 2024/1781 ready." />
+        <meta name="keywords" content="digital product passport, EU DPP compliance, ESPR 2024/1781, battery passport, SAP DPP integration, product traceability, EU ESPR regulation" />
+        <link rel="canonical" href="https://www.photonictag.com/" />
         <meta property="og:title" content="PhotonicTag — Turn EU Compliance Into a Competitive Edge" />
         <meta property="og:description" content="Digital Product Passports for EU ESPR compliance. Avoid €100K+ penalties. SAP integration. Live in weeks." />
         <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.photonictag.com/" />
+        <meta property="og:site_name" content="PhotonicTag" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="PhotonicTag — EU Digital Product Passport Compliance Platform" />
+        <meta name="twitter:description" content="EU DPP mandatory from 2027. Get compliant in weeks with AI-powered product passports and SAP integration." />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://www.photonictag.com/#organization",
+              "name": "PhotonicTag",
+              "url": "https://www.photonictag.com",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.photonictag.com/favicon.png"
+              },
+              "description": "AI-powered Digital Product Passport platform for EU ESPR compliance. Tamper-proof product identity, QR traceability, and SAP integration.",
+              "foundingDate": "2024",
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "contactType": "sales",
+                "url": "https://www.photonictag.com/contact"
+              },
+              "sameAs": []
+            },
+            {
+              "@type": "SoftwareApplication",
+              "@id": "https://www.photonictag.com/#software",
+              "name": "PhotonicTag",
+              "applicationCategory": "BusinessApplication",
+              "operatingSystem": "Web",
+              "url": "https://www.photonictag.com",
+              "description": "EU Digital Product Passport (DPP) compliance platform under ESPR Regulation 2024/1781. Includes AI sustainability analysis, QR/NFC product identity, SAP S/4HANA integration, and battery passport support.",
+              "offers": {
+                "@type": "AggregateOffer",
+                "priceCurrency": "EUR",
+                "lowPrice": "99",
+                "highPrice": "499",
+                "offerCount": "3"
+              },
+              "publisher": { "@id": "https://www.photonictag.com/#organization" }
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://www.photonictag.com/#website",
+              "url": "https://www.photonictag.com",
+              "name": "PhotonicTag",
+              "publisher": { "@id": "https://www.photonictag.com/#organization" }
+            }
+          ]
+        })}</script>
       </Helmet>
 
       <div className="fixed top-0 left-0 right-0 z-50">

@@ -137,6 +137,13 @@ export default function Contact() {
       <Helmet>
         <title>Contact Sales - PhotonicTag | EU DPP Compliance</title>
         <meta name="description" content="Get in touch with PhotonicTag. Book a demo, request a consultation, or discuss your EU Digital Product Passport compliance needs." />
+        <link rel="canonical" href="https://www.photonictag.com/contact" />
+        <meta property="og:title" content="Contact PhotonicTag - EU DPP Compliance Consultation" />
+        <meta property="og:description" content="Talk to our team about EU Digital Product Passport compliance. Book a demo or request a consultation." />
+        <meta property="og:url" content="https://www.photonictag.com/contact" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Contact PhotonicTag - EU DPP Compliance" />
+        <meta name="twitter:description" content="Book a demo or get in touch with the PhotonicTag team about your EU DPP compliance needs." />
       </Helmet>
       <PublicNav />
 

@@ -206,8 +206,49 @@ export default function FAQs() {
       <Helmet>
         <title>FAQs - PhotonicTag | EU Digital Product Passport Questions</title>
         <meta name="description" content="Frequently asked questions about PhotonicTag. EU DPP compliance, SAP integration, security, pricing, and technical documentation." />
+        <link rel="canonical" href="https://www.photonictag.com/faqs" />
         <meta property="og:title" content="PhotonicTag - Frequently Asked Questions" />
         <meta property="og:description" content="Common questions about EU Digital Product Passport compliance, SAP integration, and the PhotonicTag platform." />
+        <meta property="og:url" content="https://www.photonictag.com/faqs" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="PhotonicTag FAQs - EU DPP Compliance Questions" />
+        <meta name="twitter:description" content="Common questions about EU Digital Product Passport compliance, SAP integration, security, and pricing." />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is the EU Digital Product Passport (DPP) regulation?",
+              "acceptedAnswer": { "@type": "Answer", "text": "The Digital Product Passport is mandated by the EU Ecodesign for Sustainable Products Regulation (ESPR), Regulation (EU) 2024/1781, adopted on June 27, 2024. It requires that all products sold in the EU carry a standardized digital record accessible via a unique product identifier (typically a QR code or data carrier)." }
+            },
+            {
+              "@type": "Question",
+              "name": "When does my industry need to comply with EU DPP?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Phase 1 (February 18, 2027): Industrial and EV batteries. Phase 2 (2028): Textiles, electronics, ICT equipment, iron/steel. Phase 3 (2029): Furniture, construction materials, chemicals, tires. Phase 4 (2030): Universal mandate across all remaining product categories sold in the EU." }
+            },
+            {
+              "@type": "Question",
+              "name": "What are the penalties for non-compliance with ESPR?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Non-compliance with ESPR carries fines of €100,000 or more per product violation, product seizure at EU borders, market withdrawal orders, and public naming of non-compliant companies." }
+            },
+            {
+              "@type": "Question",
+              "name": "Does PhotonicTag support SAP integration for DPP?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Yes, PhotonicTag provides native SAP integration supporting S/4HANA, ECC, and Business One. Bidirectional sync maps SAP material master data to DPP fields automatically, with real-time status monitoring." }
+            },
+            {
+              "@type": "Question",
+              "name": "How quickly can we achieve EU DPP compliance?",
+              "acceptedAnswer": { "@type": "Answer", "text": "PhotonicTag's typical implementation follows a 4-6 week timeline: discovery and data audit (week 1-2), integration and configuration (week 2-3), data population with AI enrichment (week 3-4), validation and testing (week 4-5), and go-live (week 5-6)." }
+            },
+            {
+              "@type": "Question",
+              "name": "What does PhotonicTag cost?",
+              "acceptedAnswer": { "@type": "Answer", "text": "PhotonicTag offers three tiers: Starter at €99/month, Growth at €499/month, and Enterprise with custom pricing. All plans include EU DPP compliance, QR code generation, and AI-powered product insights." }
+            }
+          ]
+        })}</script>
       </Helmet>
       <PublicNav />
 

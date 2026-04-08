@@ -305,6 +305,13 @@ export default function BookDemo() {
       <Helmet>
         <title>Book a Demo - PhotonicTag | EU Digital Product Passport</title>
         <meta name="description" content="Schedule a 30-minute demo with the PhotonicTag team. See how our EU DPP compliance platform can work for your organization." />
+        <link rel="canonical" href="https://www.photonictag.com/book-demo" />
+        <meta property="og:title" content="Book a Demo - PhotonicTag EU DPP Compliance Platform" />
+        <meta property="og:description" content="Schedule a 30-minute demo to see PhotonicTag in action. EU DPP compliance, SAP integration, AI product passports." />
+        <meta property="og:url" content="https://www.photonictag.com/book-demo" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Book a PhotonicTag Demo - EU DPP Compliance" />
+        <meta name="twitter:description" content="30-minute demo to see EU Digital Product Passport compliance in action. SAP integration included." />
       </Helmet>
       <PublicNav hideBookDemo />
 

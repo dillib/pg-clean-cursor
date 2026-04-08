@@ -339,8 +339,13 @@ export default function Docs() {
       <Helmet>
         <title>Product Documentation - PhotonicTag | EU Digital Product Passport Platform</title>
         <meta name="description" content="Comprehensive product documentation for PhotonicTag. DPP schema, SAP integration, AI intelligence, IoT tagging, API reference." />
+        <link rel="canonical" href="https://www.photonictag.com/docs" />
         <meta property="og:title" content="PhotonicTag - Product Documentation" />
         <meta property="og:description" content="Complete technical and product documentation for the PhotonicTag EU Digital Product Passport platform." />
+        <meta property="og:url" content="https://www.photonictag.com/docs" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="PhotonicTag Product Documentation" />
+        <meta name="twitter:description" content="DPP schema, SAP integration, AI insights, IoT tagging, and API documentation for PhotonicTag." />
       </Helmet>
       <PublicNav />
 
