@@ -16,6 +16,7 @@ import { storage } from "./storage";
 import sapRoutes from "./routes/sap-routes";
 import internalRoutes from "./routes/internal-routes";
 import exportRoutes from "./routes/export-routes";
+import productImportRoutes from "./routes/product-import-routes";
 import bcrypt from "bcryptjs";
 import type { RequestHandler } from "express";
 
@@ -81,7 +82,9 @@ ${pages.map(p => `  <url>
 
   // PRODUCT ENDPOINTS
   // ==========================================
-  
+  // PLM bulk-import, batch creation & QR export routes (must be before /:id)
+  app.use("/api/products", isAuthenticatedOrTeam, productImportRoutes);
+
   app.get("/api/products", async (req: Request, res: Response) => {
     try {
       const products = await productService.getAllProducts();

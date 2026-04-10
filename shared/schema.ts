@@ -105,6 +105,10 @@ export const products = pgTable("products", {
   qrCodeData: text("qr_code_data"),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+
+  // === ENTERPRISE / PLM FIELDS ===
+  businessUnit: text("business_unit"),
+  importBatchId: text("import_batch_id"),
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({
