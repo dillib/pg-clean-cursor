@@ -62,13 +62,18 @@ Preferred communication style: Simple, everyday language.
 - **Email Service** (`server/services/email.ts`): Nodemailer-based transactional email. Requires env vars: `SMTP_HOST`, `SMTP_PORT` (default 587), `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `NOTIFY_EMAIL`. Gracefully skipped if SMTP is not configured.
 - **QR Code System**: Server-side generation of QR codes stored as data URLs, linking to public product scan pages.
 - **Event-Driven Architecture**: In-process CloudEvents bus for decoupled event handling and audit logging.
-- **PLM Bulk Import System** (`server/routes/product-import-routes.ts`): Enterprise-grade product registration at scale.
-  - `GET /api/products/import-template` — Download pre-formatted Excel template with all DPP columns and an example row.
-  - `POST /api/products/bulk-import` — Upload Excel/CSV (up to 25 MB); auto-maps 50+ column name aliases to DPP fields; `?preview=true` returns column mapping + first 5 rows before committing; returns `importBatchId` for tracing.
-  - `POST /api/products/batch` — JSON batch creation API; accepts up to 5,000 products per call; generates QR codes for each; returns 207 with per-item success/failure.
-  - `POST /api/products/qr-export` — Returns a printable/print-ready HTML page with all QR codes for given product IDs or an importBatchId. Print or save as PDF from browser.
+- **PLM Bulk Import System** (`server/routes/product-import-routes.ts`): Enterprise-grade product registration with AI-assisted data enrichment.
+  - `GET /api/products/import-template` — Download pre-formatted Excel template with all DPP columns and example row.
+  - `POST /api/products/bulk-import` — Upload Excel/CSV (up to 25 MB); auto-maps 50+ column aliases (EN/DE); `?preview=true` returns column mapping + first 5 rows + all mapped rows for AI.
+  - `POST /api/products/bulk-import/ai-analyze` — AI enrichment endpoint: sends parsed rows to GPT-4o, returns per-row suggestions for missing DPP fields (materials, carbon footprint, repairability, warranty, recycling) with confidence scores (0–1) and reasons. Flags suspicious values. Only enriches rows with missing data.
+  - `POST /api/products/bulk-import/confirmed` — Accepts user-reviewed, AI-merged rows as JSON and creates products. Called after the human review step.
+  - `POST /api/products/batch` — JSON batch creation API; up to 5,000 products per call; returns 207 with per-item success/failure.
+  - `POST /api/products/qr-export` — Printable HTML page with all QR codes for given product IDs or importBatchId.
   - Products schema extended with `businessUnit` (text) and `importBatchId` (text) fields.
-  - Products list page (`client/src/pages/products.tsx`) updated with: Import Excel button + multi-step dialog (upload → preview/column map → results), Export QR dropdown (all/selected/filtered), Business Unit filter chip, multi-select checkboxes in list view.
+  - **5-step import dialog** (`client/src/pages/products.tsx`): Upload → Column Map Preview → AI Review → Importing → Done.
+    - Step 2 (Column Map): shows detected aliases, first 5 rows, "Import without AI" escape hatch, or "Analyse with AI" trigger.
+    - Step 3 (AI Review): summary stats (total / enriched / flagged / complete); per-row review cards with amber-highlighted AI suggestions; confidence dots (green/amber/red); inline field editing; per-row accept/reject toggles; "Accept all" / "Reject all" bulk actions; auto-accepts high-confidence rows (≥0.75) as default. Only data explicitly accepted or edited by the user is committed.
+  - Export QR dropdown (all / selected / filtered), Business Unit filter, multi-select checkboxes in list view.
 
 ## External Dependencies
 
