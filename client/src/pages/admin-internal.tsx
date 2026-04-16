@@ -280,17 +280,17 @@ function CRMTab() {
               <CardTitle>Customer Accounts</CardTitle>
               <CardDescription>Unified tracking for prospects and active customers</CardDescription>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input placeholder="Search accounts..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9 w-48" data-testid="input-search-accounts" />
+                <Input placeholder="Search accounts..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9 w-full sm:w-48" data-testid="input-search-accounts" />
               </div>
               <Button variant="outline" onClick={() => { setShowImportDialog(true); setImportResult(null); }} data-testid="button-import-excel">
-                <Upload className="w-4 h-4 mr-1" /> Import Excel
+                <Upload className="w-4 h-4 mr-1" /> <span className="hidden sm:inline">Import Excel</span><span className="sm:hidden">Import</span>
               </Button>
               <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                 <DialogTrigger asChild>
-                  <Button data-testid="button-create-account"><Plus className="w-4 h-4 mr-1" /> Add Account</Button>
+                  <Button data-testid="button-create-account"><Plus className="w-4 h-4 mr-1" /> <span className="hidden sm:inline">Add Account</span><span className="sm:hidden">Add</span></Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
@@ -422,7 +422,7 @@ function CRMTab() {
                   )}
                   <span className="font-medium">Import Results</span>
                 </div>
-                <div className="grid grid-cols-4 gap-2 text-center">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                   <div><p className="text-lg font-bold">{importResult.totalRows}</p><p className="text-xs text-muted-foreground">Total Rows</p></div>
                   <div><p className="text-lg font-bold text-green-600">{importResult.created}</p><p className="text-xs text-muted-foreground">Created</p></div>
                   <div><p className="text-lg font-bold text-amber-600">{importResult.updated}</p><p className="text-xs text-muted-foreground">Updated</p></div>
@@ -463,7 +463,7 @@ function CreateAccountForm({ onSubmit, isPending }: { onSubmit: (data: Record<st
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><Label>Company Name *</Label><Input value={form.companyName} onChange={e => setForm({ ...form, companyName: e.target.value })} data-testid="input-company-name" /></div>
         <div><Label>Contact Name *</Label><Input value={form.contactName} onChange={e => setForm({ ...form, contactName: e.target.value })} data-testid="input-contact-name" /></div>
         <div><Label>Email *</Label><Input type="email" value={form.contactEmail} onChange={e => setForm({ ...form, contactEmail: e.target.value })} data-testid="input-contact-email" /></div>
@@ -659,7 +659,7 @@ function DemoFactoryTab() {
           <CardDescription>Write your own prompt to generate a demo tailored to a specific prospect</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><Label>Demo Name</Label><Input placeholder="e.g., Acme Corp Battery Demo" value={customName} onChange={e => setCustomName(e.target.value)} data-testid="input-custom-demo-name" /></div>
             <div><Label>Industry</Label><Input placeholder="e.g., Batteries, Textiles" value={customIndustry} onChange={e => setCustomIndustry(e.target.value)} data-testid="input-custom-demo-industry" /></div>
           </div>
@@ -1009,7 +1009,7 @@ function CreateTicketForm({ onSubmit, isPending }: { onSubmit: (data: Record<str
     <div className="space-y-4">
       <div><Label>Subject *</Label><Input value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} data-testid="input-ticket-subject" /></div>
       <div><Label>Description *</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={4} data-testid="input-ticket-description" /></div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><Label>Submitter Email *</Label><Input type="email" value={form.submitterEmail} onChange={e => setForm({ ...form, submitterEmail: e.target.value })} data-testid="input-ticket-email" /></div>
         <div><Label>Submitter Name</Label><Input value={form.submitterName} onChange={e => setForm({ ...form, submitterName: e.target.value })} data-testid="input-ticket-name" /></div>
       </div>
@@ -1379,7 +1379,7 @@ function CreateUserForm({ onSubmit, isPending }: { onSubmit: (data: Record<strin
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><Label>First Name *</Label><Input value={form.firstName} onChange={e => setForm({ ...form, firstName: e.target.value })} data-testid="input-user-firstname" /></div>
         <div><Label>Last Name *</Label><Input value={form.lastName} onChange={e => setForm({ ...form, lastName: e.target.value })} data-testid="input-user-lastname" /></div>
       </div>
@@ -1818,7 +1818,7 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
   const isFull = mode === "full";
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-6 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
         <div>
           <h1 className="text-3xl font-bold" data-testid="text-internal-title">
@@ -1884,23 +1884,23 @@ export default function AdminInternal({ mode = "full" }: { mode?: AdminInternalM
           <TabsList className="grid w-full grid-cols-5" data-testid="tabs-internal">
             <TabsTrigger value="crm" data-testid="tab-crm" className="gap-1">
               <Users className="w-4 h-4" />
-              <span>CRM</span>
+              <span className="hidden sm:inline">CRM</span>
             </TabsTrigger>
             <TabsTrigger value="bookings" data-testid="tab-bookings" className="gap-1">
               <Calendar className="w-4 h-4" />
-              <span>Bookings</span>
+              <span className="hidden sm:inline">Bookings</span>
             </TabsTrigger>
             <TabsTrigger value="proposals" data-testid="tab-proposals" className="gap-1">
               <FileText className="w-4 h-4" />
-              <span>Proposals</span>
+              <span className="hidden sm:inline">Proposals</span>
             </TabsTrigger>
             <TabsTrigger value="demos" data-testid="tab-demos" className="gap-1">
               <Rocket className="w-4 h-4" />
-              <span>Demo Factory</span>
+              <span className="hidden sm:inline">Demo Factory</span>
             </TabsTrigger>
             <TabsTrigger value="assistant" data-testid="tab-assistant" className="gap-1">
               <Bot className="w-4 h-4" />
-              <span>Aria AI</span>
+              <span className="hidden sm:inline">Aria AI</span>
             </TabsTrigger>
           </TabsList>
 
