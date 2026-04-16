@@ -78,6 +78,59 @@ function AssessmentScoreBadge({ score }: { score: number }) {
   return <Badge variant="outline" className={`text-xs font-medium ${color}`}>{score}% fit</Badge>;
 }
 
+function buildOutreachMailto(lead: Lead, actionLabel: string): string {
+  const to = lead.email;
+  const company = lead.company ? ` (${lead.company})` : "";
+  const name = lead.firstName;
+  const templates: Record<string, { subject: string; body: string }> = {
+    "Send assessment form": {
+      subject: `Technical Assessment — PhotonicTag DPP for ${lead.company || "your company"}`,
+      body: `Hi ${name},\n\nThank you for your interest in PhotonicTag.\n\nTo make sure we tailor our demo to your situation, could you take 3 minutes to complete a brief technical assessment?\n\nhttps://photonictag.com/contact\n\nBest regards,\nPhotonicTag Team`,
+    },
+    "Book SAP demo": {
+      subject: `SAP + DPP Demo — PhotonicTag for ${lead.company || "your company"}`,
+      body: `Hi ${name},\n\nI'd love to show you how PhotonicTag integrates with ${lead.sapSystemType?.replace("_", " ") || "SAP"} to generate EU-compliant Digital Product Passports automatically.\n\nBook a slot that works for you:\nhttps://photonictag.com/book-demo\n\nBest regards,\nPhotonicTag Team`,
+    },
+    "Share EU DPP guide": {
+      subject: `EU ESPR Compliance Guide — What ${lead.company || "you"} need to know`,
+      body: `Hi ${name},\n\nGiven your EU market activity, I wanted to share our practical guide on EU ESPR Digital Product Passport requirements for 2027.\n\nhttps://photonictag.com/docs\n\nHappy to walk through your specific product categories.\n\nBest regards,\nPhotonicTag Team`,
+    },
+    "Qualify lead": {
+      subject: `Quick question about your DPP requirements${company}`,
+      body: `Hi ${name},\n\nI wanted to follow up on your interest in PhotonicTag.\n\nCould you share a bit more about your current EU compliance situation and which product categories you're focused on?\n\nBest regards,\nPhotonicTag Team`,
+    },
+    "Send ROI analysis": {
+      subject: `PhotonicTag ROI Analysis for ${lead.company || "your company"}`,
+      body: `Hi ${name},\n\nBased on your profile, I've put together a quick ROI analysis showing how PhotonicTag could reduce your EU compliance costs and accelerate time-to-market.\n\nI'd love to walk you through it on a brief call.\n\nBest regards,\nPhotonicTag Team`,
+    },
+    "Follow up in 3 days": {
+      subject: `Following up — PhotonicTag DPP for ${lead.company || "your company"}`,
+      body: `Hi ${name},\n\nJust checking in to see if you had a chance to review our earlier conversation.\n\nHappy to answer any questions or arrange a quick demo at your convenience.\n\nBest regards,\nPhotonicTag Team`,
+    },
+    "Send POC proposal": {
+      subject: `PhotonicTag POC Proposal for ${lead.company || "your company"}`,
+      body: `Hi ${name},\n\nI'm excited to share our Proof of Concept proposal for PhotonicTag at ${lead.company || "your company"}.\n\nThis outlines our implementation approach, timeline, and commercial terms for a 4-week POC.\n\nLet me know if you'd like to review it together.\n\nBest regards,\nPhotonicTag Team`,
+    },
+    "Start onboarding": {
+      subject: `Welcome to PhotonicTag — Next steps for ${lead.company || "your company"}`,
+      body: `Hi ${name},\n\nWelcome aboard! We're thrilled to have ${lead.company || "you"} as a PhotonicTag customer.\n\nHere's what happens next:\n1. Platform setup call (30 min)\n2. SAP connector configuration\n3. First products imported\n\nWhen would you like to schedule our kickoff call?\n\nBest regards,\nPhotonicTag Team`,
+    },
+    "Re-engage in 90 days": {
+      subject: `Checking in — EU DPP deadline approaching for ${lead.company || "your company"}`,
+      body: `Hi ${name},\n\nI wanted to reach out as the EU ESPR 2027 deadline is getting closer.\n\nWe've added several new features since we last spoke and would love to show you what's new.\n\nWould you be open to a quick 15-minute catch-up?\n\nBest regards,\nPhotonicTag Team`,
+    },
+    "Prepare tailored demo": {
+      subject: `Your upcoming PhotonicTag demo — ${lead.company || lead.firstName}`,
+      body: `Hi ${name},\n\nLooking forward to your upcoming demo!\n\nTo make sure we show you the most relevant features, could you confirm:\n1. Your primary product categories?\n2. Any specific SAP modules in use?\n\nBest regards,\nPhotonicTag Team`,
+    },
+  };
+  const template = templates[actionLabel] ?? {
+    subject: `PhotonicTag follow-up for ${lead.company || lead.firstName}`,
+    body: `Hi ${name},\n\nI wanted to follow up on your interest in PhotonicTag.\n\nBest regards,\nPhotonicTag Team`,
+  };
+  return `mailto:${to}?subject=${encodeURIComponent(template.subject)}&body=${encodeURIComponent(template.body)}`;
+}
+
 function nextBestAction(lead: Lead): { label: string; color: string } | null {
   const score = assessmentScore(lead);
   const hasSap = lead.sapSystemType && lead.sapSystemType !== "no_sap";
@@ -447,6 +500,20 @@ export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
                                 <span className={`text-xs font-medium ${nextAction.color}`} data-testid={`text-next-action-${lead.id}`}>
                                   → {nextAction.label}
                                 </span>
+                                <a
+                                  href={buildOutreachMailto(lead, nextAction.label)}
+                                  data-testid={`link-outreach-${lead.id}`}
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    if (lead.status === "new") {
+                                      updateLeadMutation.mutate({ id: lead.id, updates: { status: "contacted" } });
+                                    }
+                                  }}
+                                  className="ml-0.5 text-muted-foreground/60 hover:text-primary transition-colors"
+                                  title={`Open email to ${lead.email}`}
+                                >
+                                  <Mail className="w-3 h-3 inline" />
+                                </a>
                               </>
                             )}
                           </div>

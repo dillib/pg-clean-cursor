@@ -742,6 +742,9 @@ export interface SAPConfig {
   materialTypes?: string[]; // e.g. ['FERT', 'ROH', 'HALB']
   plants?: string[]; // e.g. ['1000', '2000']
   lastSyncCursor?: string; // for delta sync
+  // Alert configuration
+  alertThresholdConsecutiveFailures?: number; // send alert when this many of last N runs fail
+  alertEmailTo?: string; // email to notify when alert fires
 }
 
 export interface FieldMapping {

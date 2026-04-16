@@ -2,7 +2,7 @@
  * SAP Operations Dashboard — T004
  * Sync health, field mapping editor, alert configuration, and sync history drill-down.
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -65,6 +65,8 @@ export default function SAPOperations() {
   const [mappings, setMappings] = useState<FieldMapping[]>([]);
   const [mappingsDirty, setMappingsDirty] = useState(false);
   const [alertThreshold, setAlertThreshold] = useState(3);
+  const [alertEmailTo, setAlertEmailTo] = useState("");
+  const [alertSettingsDirty, setAlertSettingsDirty] = useState(false);
   const [activeTab, setActiveTab] = useState("health");
 
   const { data: connectors = [] } = useQuery<EnterpriseConnector[]>({
@@ -73,6 +75,16 @@ export default function SAPOperations() {
 
   const sapConnectors = connectors.filter(c => c.connectorType === "sap");
   const selectedConnector = sapConnectors.find(c => c.id === selectedConnectorId) ?? sapConnectors[0];
+
+  // Sync alert settings from connector config when connector changes
+  useEffect(() => {
+    if (selectedConnector?.config) {
+      const cfg = selectedConnector.config as Record<string, unknown>;
+      setAlertThreshold((cfg.alertThresholdConsecutiveFailures as number) || 3);
+      setAlertEmailTo((cfg.alertEmailTo as string) || "");
+      setAlertSettingsDirty(false);
+    }
+  }, [selectedConnector?.id]);
 
   // Sync logs for selected connector
   const { data: syncLogs = [], isLoading: logsLoading, refetch: refetchLogs } = useQuery<SyncLog[]>({
@@ -140,13 +152,33 @@ export default function SAPOperations() {
         : "";
       toast({
         title: "Sync complete",
-        description: `${data.created} created, ${data.updated} updated, ${data.failed} failed${mappingNote}.`,
+        description: `${data.created} created, ${data.updated} updated, ${data.failed} failed${mappingNote}.${data.firstError ? ` Error: ${data.firstError}` : ""}`,
       });
       setTimeout(() => refetchLogs(), 500);
       queryClient.invalidateQueries({ queryKey: ["/api/integrations/connectors"] });
     },
     onError: () => {
       toast({ title: "Sync failed", description: "Could not start sync.", variant: "destructive" });
+    },
+  });
+
+  const saveAlertSettings = useMutation({
+    mutationFn: async () => {
+      if (!selectedConnector) throw new Error("No connector");
+      const updatedConfig = {
+        ...selectedConnector.config,
+        alertThresholdConsecutiveFailures: alertThreshold,
+        alertEmailTo: alertEmailTo.trim() || undefined,
+      };
+      return apiRequest("PATCH", `/api/integrations/connectors/${selectedConnector.id}`, { config: updatedConfig });
+    },
+    onSuccess: () => {
+      setAlertSettingsDirty(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/integrations/connectors"] });
+      toast({ title: "Alert settings saved", description: "Threshold and notification email updated." });
+    },
+    onError: () => {
+      toast({ title: "Save failed", description: "Could not save alert settings.", variant: "destructive" });
     },
   });
 
@@ -568,15 +600,30 @@ export default function SAPOperations() {
           <TabsContent value="alerts" className="space-y-4 pt-4">
             <Card>
               <CardHeader>
-                <CardTitle>Alert Thresholds</CardTitle>
-                <CardDescription>Configure when sync failures trigger warnings in the health dashboard</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Alert Thresholds</CardTitle>
+                    <CardDescription>Configure when sync failures trigger warnings and email notifications</CardDescription>
+                  </div>
+                  {alertSettingsDirty && (
+                    <Button
+                      size="sm"
+                      onClick={() => saveAlertSettings.mutate()}
+                      disabled={saveAlertSettings.isPending}
+                      data-testid="button-save-alerts"
+                    >
+                      {saveAlertSettings.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                      Save settings
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div>
                     <label className="text-sm font-medium">Failure alert threshold</label>
                     <p className="text-xs text-muted-foreground mb-2">
-                      Alert when this many consecutive failures occur in the last 10 sync runs
+                      Send alert when this many of the last 10 sync runs fail
                     </p>
                     <div className="flex items-center gap-3">
                       <Input
@@ -584,7 +631,7 @@ export default function SAPOperations() {
                         min={1}
                         max={10}
                         value={alertThreshold}
-                        onChange={e => setAlertThreshold(parseInt(e.target.value) || 3)}
+                        onChange={e => { setAlertThreshold(parseInt(e.target.value) || 3); setAlertSettingsDirty(true); }}
                         className="w-24"
                         data-testid="input-alert-threshold"
                       />
@@ -609,6 +656,21 @@ export default function SAPOperations() {
                       )}
                     </div>
                   </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Notification email</label>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Receive an email alert when the threshold is exceeded. Leave blank to disable email notifications.
+                  </p>
+                  <Input
+                    type="email"
+                    placeholder="ops-team@yourcompany.com"
+                    value={alertEmailTo}
+                    onChange={e => { setAlertEmailTo(e.target.value); setAlertSettingsDirty(true); }}
+                    className="max-w-sm"
+                    data-testid="input-alert-email"
+                  />
                 </div>
 
                 <Separator />

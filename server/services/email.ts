@@ -28,6 +28,43 @@ function createTransporter() {
 
 const CET_TZ = "Europe/Berlin";
 
+export async function sendSAPAlertEmail(opts: {
+  connectorName: string;
+  failureCount: number;
+  threshold: number;
+  recentErrors: string[];
+  alertEmailTo: string;
+}): Promise<void> {
+  if (!isSmtpConfigured()) {
+    console.log("[Email] SMTP not configured — skipping SAP alert email");
+    return;
+  }
+  const { connectorName, failureCount, threshold, recentErrors, alertEmailTo } = opts;
+  const from = process.env.SMTP_FROM || process.env.SMTP_USER!;
+  const subject = `⚠️ SAP Sync Alert: ${failureCount} failures on ${connectorName}`;
+  const errorList = recentErrors.length > 0
+    ? `<ul>${recentErrors.map(e => `<li>${e}</li>`).join("")}</ul>`
+    : "<p>No specific error messages recorded.</p>";
+  const body = `
+    <h2 style="color:#dc2626">SAP Sync Alert</h2>
+    <p>The connector <strong>${connectorName}</strong> has exceeded the failure alert threshold.</p>
+    <table style="border-collapse:collapse;width:100%;max-width:400px">
+      <tr><td style="padding:6px;font-weight:600">Failures detected:</td><td style="padding:6px;color:#dc2626">${failureCount} of last 10 runs</td></tr>
+      <tr><td style="padding:6px;font-weight:600">Alert threshold:</td><td style="padding:6px">${threshold} failures</td></tr>
+    </table>
+    <h3 style="margin-top:20px">Recent error messages</h3>
+    ${errorList}
+    <p style="margin-top:20px">
+      <a href="${process.env.REPL_HOME_URL || "https://photonictag.com"}/integrations/sap-operations" 
+         style="background:#FFD400;color:#000;padding:10px 20px;text-decoration:none;border-radius:6px;font-weight:600">
+        View SAP Operations Dashboard
+      </a>
+    </p>`;
+  const transporter = createTransporter();
+  await transporter.sendMail({ from, to: alertEmailTo, subject, html: body });
+  console.log(`[Email] SAP alert sent to ${alertEmailTo} — ${failureCount} failures on ${connectorName}`);
+}
+
 function formatInTz(slot: Date, tz: string, includeDate = true): string {
   const end = new Date(slot.getTime() + 30 * 60 * 1000);
   const dateOpts: Intl.DateTimeFormatOptions = {

@@ -117,11 +117,18 @@ router.post("/sync/from-sap", async (req: Request, res: Response) => {
             updated++;
           }
         } else {
+          const md1 = mappedData as Record<string, unknown>;
+          const rawDate1 = md1.dateOfManufacture;
           const newProduct = await storage.createProduct({
             ...mappedData,
             description: `Imported from SAP Material ${material.MARA.MATNR}`,
-            materials: "",
+            materials: md1.materials as string || "",
             safetyCertifications: [],
+            carbonFootprint: Math.round(Number(md1.carbonFootprint ?? 0)),
+            repairabilityScore: Math.round(Number(md1.repairabilityScore ?? 0)),
+            warrantyInfo: md1.warrantyInfo as string || "",
+            recyclingInstructions: md1.recyclingInstructions as string || "",
+            dateOfManufacture: rawDate1 instanceof Date ? rawDate1 : rawDate1 ? new Date(rawDate1 as string) : undefined,
           } as unknown as InsertProduct);
           
           sapMockService.linkToPhotonicTag(material.MARA.MATNR, newProduct.id);
@@ -256,11 +263,18 @@ router.post("/sync/bidirectional", async (req: Request, res: Response) => {
         const mappedData = fieldMappings.length
           ? applyFieldMappings(material, fieldMappings)
           : sapMockService.mapToPhotonicTagProduct(material);
+        const md2 = mappedData as Record<string, unknown>;
+        const rawDate2 = md2.dateOfManufacture;
         const newProduct = await storage.createProduct({
           ...mappedData,
           description: `Imported from SAP Material ${material.MARA.MATNR}`,
-          materials: "",
+          materials: md2.materials as string || "",
           safetyCertifications: [],
+          carbonFootprint: Math.round(Number(md2.carbonFootprint ?? 0)),
+          repairabilityScore: Math.round(Number(md2.repairabilityScore ?? 0)),
+          warrantyInfo: md2.warrantyInfo as string || "",
+          recyclingInstructions: md2.recyclingInstructions as string || "",
+          dateOfManufacture: rawDate2 instanceof Date ? rawDate2 : rawDate2 ? new Date(rawDate2 as string) : undefined,
         } as unknown as InsertProduct);
         
         sapMockService.linkToPhotonicTag(material.MARA.MATNR, newProduct.id);

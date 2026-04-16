@@ -4,7 +4,7 @@ import OpenAI from "openai";
 import { insertProductSchema, insertIoTDeviceSchema, insertEnterpriseConnectorSchema, insertLeadSchema, insertPartnerSchema, insertDemoConfigSchema, insertDemoBookingSchema } from "@shared/schema";
 import { productService } from "./services/product-service";
 import { qrService } from "./services/qr-service";
-import { sendBookingConfirmation, sendTeamNotification } from "./services/email";
+import { sendBookingConfirmation, sendTeamNotification, sendSAPAlertEmail } from "./services/email";
 import { identityService } from "./services/identity-service";
 import { traceService } from "./services/trace-service";
 import { aiService } from "./services/ai-service";
@@ -826,6 +826,7 @@ ${pages.map(p => `  <url>
 
       // Run real sync against mock SAP (or real SAP via OData client)
       let created = 0, updated = 0, failed = 0;
+      const errors: string[] = [];
       try {
         const materials = sapMockService.getAllMaterials()
           .filter(m => m.syncStatus === "pending" && !m.photonicTagId)
@@ -845,17 +846,31 @@ ${pages.map(p => `  <url>
               sapMockService.linkToPhotonicTag(material.MARA.MATNR, existing.id);
               updated++;
             } else {
-              const newProduct = await storage.createProduct({
+              const md = mappedData as Record<string, unknown>;
+            const rawDate = md.dateOfManufacture;
+            const dateOfManufacture = rawDate instanceof Date
+              ? rawDate
+              : rawDate ? new Date(rawDate as string) : undefined;
+            const insertData = {
                 ...mappedData,
                 description: `Imported from SAP Material ${material.MARA.MATNR}`,
-                materials: "",
+                materials: md.materials as string || "",
                 safetyCertifications: [],
-              } as unknown as import("@shared/schema").InsertProduct);
+                carbonFootprint: Math.round(Number(md.carbonFootprint ?? 0)),
+                repairabilityScore: Math.round(Number(md.repairabilityScore ?? 0)),
+                warrantyInfo: md.warrantyInfo as string || "",
+                recyclingInstructions: md.recyclingInstructions as string || "",
+                dateOfManufacture,
+              };
+              const newProduct = await storage.createProduct(insertData as unknown as import("@shared/schema").InsertProduct);
               sapMockService.linkToPhotonicTag(material.MARA.MATNR, newProduct.id);
               created++;
             }
           } catch (err) {
-            console.error("[Connector Sync] Material error:", (err as Error).message);
+            const e = err as Error;
+            const errMsg = `${material.MARA.MATNR}: ${e.message}`;
+            console.error("[Connector Sync] Material error:", errMsg);
+            errors.push(errMsg);
             failed++;
           }
         }
@@ -881,12 +896,40 @@ ${pages.map(p => `  <url>
         productsSynced: (connector.productsSynced || 0) + created + updated,
       } as any);
 
+      // Check alert thresholds and send email if exceeded
+      const sapConfig = connector.config as import("@shared/schema").SAPConfig;
+      const alertThreshold = sapConfig?.alertThresholdConsecutiveFailures;
+      const alertEmailTo = sapConfig?.alertEmailTo;
+      if (alertThreshold && alertEmailTo) {
+        const recentLogs = await storage.getSyncLogsByConnectorId(connector.id);
+        const last10 = recentLogs.slice(0, 10);
+        const recentFailureCount = last10.filter(l => l.status === "failed").length;
+        if (recentFailureCount >= alertThreshold) {
+          const recentErrors = last10
+            .filter(l => l.status === "failed" && l.errorMessage)
+            .map(l => l.errorMessage!)
+            .slice(0, 5);
+          try {
+            await sendSAPAlertEmail({
+              connectorName: connector.name,
+              failureCount: recentFailureCount,
+              threshold: alertThreshold,
+              recentErrors,
+              alertEmailTo,
+            });
+          } catch (emailErr) {
+            console.error("[SAP Alert] Failed to send alert email:", emailErr);
+          }
+        }
+      }
+
       res.json({
         success: true,
         message: `Sync completed: ${created} created, ${updated} updated, ${failed} failed`,
         syncLogId: syncLog.id,
         created, updated, failed,
         fieldMappingsUsed: fieldMappings.length,
+        firstError: errors[0] ?? null,
       });
     } catch (error) {
       console.error("Error syncing connector:", error);
