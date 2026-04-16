@@ -75,6 +75,24 @@ Preferred communication style: Simple, everyday language.
     - Step 3 (AI Review): summary stats (total / enriched / flagged / complete); per-row review cards with amber-highlighted AI suggestions; confidence dots (green/amber/red); inline field editing; per-row accept/reject toggles; "Accept all" / "Reject all" bulk actions; auto-accepts high-confidence rows (≥0.75) as default. Only data explicitly accepted or edited by the user is committed.
   - Export QR dropdown (all / selected / filtered), Business Unit filter, multi-select checkboxes in list view.
 
+- **Scan Intelligence System** (`server/routes.ts`, `shared/schema.ts`): Consumer engagement layer that creates the B2B2C flywheel.
+  - `POST /api/products/:id/scan` — public, no auth. Records every QR scan with timestamp, country (from Accept-Language), user agent, and session ID for deduplication.
+  - `GET /api/products/:id/scan-analytics` — authenticated. Returns 4 analytics datasets: stats (total/unique/last30d), recent scans, 30-day scan-by-day histogram, and product registrations. Auto-refreshes every 30s in the admin UI.
+  - `POST /api/products/:id/register` — public. Consumer registers product ownership (name, email, purchase date/location, warranty activation, marketing opt-in).
+  - `GET /api/products/:id/registrations` — authenticated. Lists all consumer registrations for a product.
+  - Schema: `productScans` table (id, productId, scannedAt, country, userAgent, referrer, sessionId, isUnique) and `productRegistrations` table (id, productId, registeredAt, ownerName, ownerEmail, purchaseDate, purchaseLocation, warrantyActivated, marketingOptIn).
+- **Consumer DPP Experience** (public scan page, `client/src/pages/public-scan.tsx`):
+  - Auto-fires scan tracking on every page load (fire-and-forget, uses sessionStorage for unique visitor deduplication).
+  - "Register This Product" card near the bottom of every product page — opens a dialog to capture consumer name, email, purchase details, warranty activation, marketing opt-in.
+  - Registration success screen with warranty activation confirmation.
+  - "Share This Passport" section with Copy link (clipboard), WhatsApp, and LinkedIn share buttons.
+- **Scan Intelligence Tab** (admin product detail, `client/src/pages/product-detail.tsx`):
+  - New "Scan Intelligence" tab (8th tab in product detail) showing:
+    - 4 KPI cards: Total Scans, Unique Visitors, Last 30 Days, Registrations
+    - CSS bar chart of daily scan volume over last 30 days
+    - Recent scans timeline with country, device, and unique visitor indicator
+    - Full registrations table with consumer name, email, purchase info, warranty/marketing flags
+
 ## External Dependencies
 
 ### Database

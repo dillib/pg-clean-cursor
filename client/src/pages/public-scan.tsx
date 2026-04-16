@@ -32,6 +32,9 @@ import {
   Award,
   Copy,
   Check,
+  UserPlus,
+  Share2,
+  Loader2,
 } from "lucide-react";
 import { StaggerContainer, StaggerItem, FadeUp } from "@/components/motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,12 +43,21 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import type { Product, TraceEvent, QRCode as QRCodeType, DppRegionalExtension, AIInsight } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -434,6 +446,48 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
       scanMutation.mutate(qrCode.id);
     }
   }, [qrCode?.id, isDemo]);
+
+  // Registration dialog state
+  const [showRegister, setShowRegister] = useState(false);
+  const [regForm, setRegForm] = useState({ ownerName: "", ownerEmail: "", purchaseDate: "", purchaseLocation: "", warrantyActivated: true, marketingOptIn: false });
+  const [regSubmitting, setRegSubmitting] = useState(false);
+  const [regDone, setRegDone] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  // Track this scan in the Scan Intelligence layer
+  useEffect(() => {
+    if (!isDemo && params.id && params.id !== "demo") {
+      let sid = sessionStorage.getItem("pt_sid");
+      if (!sid) { sid = Math.random().toString(36).slice(2); sessionStorage.setItem("pt_sid", sid); }
+      fetch(`/api/products/${params.id}/scan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: sid }),
+      }).catch(() => {});
+    }
+  }, [params.id, isDemo]);
+
+  const handleRegister = async () => {
+    if (!regForm.ownerName || !regForm.ownerEmail || !params.id) return;
+    setRegSubmitting(true);
+    try {
+      const resp = await fetch(`/api/products/${params.id}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(regForm),
+      });
+      if (resp.ok) setRegDone(true);
+    } catch (_) { }
+    finally { setRegSubmitting(false); }
+  };
+
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const copyShareLink = () => {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2500);
+    });
+  };
 
   const product = isDemo ? (demoProduct as Product) : fetchedProduct;
   const traceEvents = isDemo ? (demoTraceEvents as TraceEvent[]) : fetchedTraceEvents;
@@ -1325,6 +1379,48 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
           </Card>
         )}
 
+        {/* ── Register & Share — Consumer Engagement Layer ─────── */}
+        {!isDemo && (
+          <Card className="border-primary/30 overflow-hidden">
+            <div className="bg-gradient-to-r from-primary/8 via-primary/4 to-transparent p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-lg flex items-center gap-2">
+                    <UserPlus className="h-5 w-5 text-primary" />
+                    Register This Product
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Activate your warranty and get recycling reminders at end of life.
+                  </p>
+                </div>
+                <Button onClick={() => setShowRegister(true)} className="shrink-0" data-testid="button-register-product">
+                  Register Ownership
+                </Button>
+              </div>
+              <Separator />
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-sm font-medium flex items-center gap-1.5 text-muted-foreground">
+                  <Share2 className="h-4 w-4" />Share this passport:
+                </span>
+                <Button variant="outline" size="sm" onClick={copyShareLink} data-testid="button-share-copy">
+                  {linkCopied ? <Check className="h-3.5 w-3.5 mr-1.5 text-green-500" /> : <Copy className="h-3.5 w-3.5 mr-1.5" />}
+                  {linkCopied ? "Copied!" : "Copy link"}
+                </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <a href={`https://wa.me/?text=${encodeURIComponent("Verified product passport: " + shareUrl)}`} target="_blank" rel="noopener noreferrer" data-testid="button-share-whatsapp">
+                    WhatsApp
+                  </a>
+                </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" data-testid="button-share-linkedin">
+                    LinkedIn
+                  </a>
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {allProducts.length > 1 && (
           <Card>
             <CardHeader>
@@ -1377,7 +1473,79 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
           </Card>
         )}
       </main>
-      
+
+      {/* ── Product Registration Dialog ─────────────────────── */}
+      <Dialog open={showRegister} onOpenChange={setShowRegister}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-primary" />
+              Register This Product
+            </DialogTitle>
+            <DialogDescription>
+              Activate your warranty and get recycling reminders when this product reaches end of life.
+            </DialogDescription>
+          </DialogHeader>
+
+          {regDone ? (
+            <div className="text-center py-8 space-y-4">
+              <div className="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="h-8 w-8 text-green-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-lg">Registered!</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Your warranty is active. We'll remind you when it's time to recycle this product responsibly.
+                </p>
+              </div>
+              <Button onClick={() => { setShowRegister(false); setRegDone(false); }} data-testid="button-reg-done">
+                Done
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4 py-1">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="reg-name">Your Name *</Label>
+                  <Input id="reg-name" className="mt-1" value={regForm.ownerName} onChange={e => setRegForm(f => ({ ...f, ownerName: e.target.value }))} placeholder="Jane Smith" data-testid="input-reg-name" />
+                </div>
+                <div>
+                  <Label htmlFor="reg-email">Email *</Label>
+                  <Input id="reg-email" className="mt-1" type="email" value={regForm.ownerEmail} onChange={e => setRegForm(f => ({ ...f, ownerEmail: e.target.value }))} placeholder="jane@example.com" data-testid="input-reg-email" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="reg-date">Purchase Date</Label>
+                  <Input id="reg-date" className="mt-1" type="date" value={regForm.purchaseDate} onChange={e => setRegForm(f => ({ ...f, purchaseDate: e.target.value }))} />
+                </div>
+                <div>
+                  <Label htmlFor="reg-location">Where Purchased</Label>
+                  <Input id="reg-location" className="mt-1" value={regForm.purchaseLocation} onChange={e => setRegForm(f => ({ ...f, purchaseLocation: e.target.value }))} placeholder="Amazon, Best Buy..." />
+                </div>
+              </div>
+              <div className="space-y-2 pt-1">
+                <label className="flex items-start gap-2 text-sm cursor-pointer">
+                  <input type="checkbox" className="rounded mt-0.5" checked={regForm.warrantyActivated} onChange={e => setRegForm(f => ({ ...f, warrantyActivated: e.target.checked }))} data-testid="checkbox-warranty" />
+                  <span>Activate warranty registration</span>
+                </label>
+                <label className="flex items-start gap-2 text-sm cursor-pointer">
+                  <input type="checkbox" className="rounded mt-0.5" checked={regForm.marketingOptIn} onChange={e => setRegForm(f => ({ ...f, marketingOptIn: e.target.checked }))} data-testid="checkbox-marketing" />
+                  <span>Receive product updates &amp; sustainability tips from {product?.manufacturer}</span>
+                </label>
+              </div>
+              <div className="flex gap-3 justify-end pt-2">
+                <Button variant="outline" onClick={() => setShowRegister(false)}>Cancel</Button>
+                <Button onClick={handleRegister} disabled={regSubmitting || !regForm.ownerName || !regForm.ownerEmail} data-testid="button-reg-submit">
+                  {regSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <UserPlus className="h-4 w-4 mr-2" />}
+                  Register
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <PublicFooter />
     </div>
   );

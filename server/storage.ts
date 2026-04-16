@@ -58,6 +58,10 @@ import {
   type DemoBooking,
   type InsertDemoBooking,
   type DemoBookingStatus,
+  type ProductScan,
+  type InsertProductScan,
+  type ProductRegistration,
+  type InsertProductRegistration,
   users,
   products,
   roles,
@@ -84,6 +88,8 @@ import {
   supportTickets,
   platformMetrics,
   demoBookings,
+  productScans,
+  productRegistrations,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -239,6 +245,16 @@ export interface IStorage {
   getUpcomingBookingsForReminders(): Promise<DemoBooking[]>;
   markReminder24hSent(id: string): Promise<void>;
   markReminder1hSent(id: string): Promise<void>;
+
+  // Product Scans (Scan Intelligence)
+  recordProductScan(scan: InsertProductScan): Promise<ProductScan>;
+  getProductScanStats(productId: string): Promise<{ total: number; unique: number; last30Days: number }>;
+  getRecentProductScans(productId: string, limit?: number): Promise<ProductScan[]>;
+  getScansByDay(productId: string, days?: number): Promise<Array<{ date: string; count: number }>>;
+
+  // Product Registrations (Consumer ownership)
+  createProductRegistration(reg: InsertProductRegistration): Promise<ProductRegistration>;
+  getProductRegistrations(productId: string): Promise<ProductRegistration[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1018,6 +1034,61 @@ export class DatabaseStorage implements IStorage {
       .update(demoBookings)
       .set({ reminder1hSentAt: new Date(), updatedAt: new Date() })
       .where(eq(demoBookings.id, id));
+  }
+
+  // Product Scans
+  async recordProductScan(scan: InsertProductScan): Promise<ProductScan> {
+    const [created] = await db.insert(productScans).values(scan).returning();
+    return created;
+  }
+
+  async getProductScanStats(productId: string): Promise<{ total: number; unique: number; last30Days: number }> {
+    const allScans = await db.select().from(productScans).where(eq(productScans.productId, productId));
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return {
+      total: allScans.length,
+      unique: allScans.filter(s => s.isUnique).length,
+      last30Days: allScans.filter(s => s.scannedAt >= thirtyDaysAgo).length,
+    };
+  }
+
+  async getRecentProductScans(productId: string, limit = 20): Promise<ProductScan[]> {
+    return db.select().from(productScans)
+      .where(eq(productScans.productId, productId))
+      .orderBy(desc(productScans.scannedAt))
+      .limit(limit);
+  }
+
+  async getScansByDay(productId: string, days = 30): Promise<Array<{ date: string; count: number }>> {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+    const scans = await db.select().from(productScans)
+      .where(and(eq(productScans.productId, productId), gte(productScans.scannedAt, since)));
+
+    const buckets: Record<string, number> = {};
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      buckets[d.toISOString().slice(0, 10)] = 0;
+    }
+    for (const s of scans) {
+      const key = s.scannedAt.toISOString().slice(0, 10);
+      if (buckets[key] !== undefined) buckets[key]++;
+    }
+    return Object.entries(buckets).map(([date, count]) => ({ date, count }));
+  }
+
+  // Product Registrations
+  async createProductRegistration(reg: InsertProductRegistration): Promise<ProductRegistration> {
+    const [created] = await db.insert(productRegistrations).values(reg).returning();
+    return created;
+  }
+
+  async getProductRegistrations(productId: string): Promise<ProductRegistration[]> {
+    return db.select().from(productRegistrations)
+      .where(eq(productRegistrations.productId, productId))
+      .orderBy(desc(productRegistrations.registeredAt));
   }
 }
 

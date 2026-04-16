@@ -448,7 +448,12 @@ export default function SAPOperations() {
                   <div className="text-center py-8">
                     <ArrowLeftRight className="w-10 h-10 mx-auto text-muted-foreground/40 mb-3" />
                     <p className="text-sm text-muted-foreground mb-4">No field mappings configured yet.</p>
-                    <Button variant="outline" size="sm" onClick={loadMappings}>Load from connector</Button>
+                    <div className="flex justify-center gap-2">
+                      <Button variant="outline" size="sm" onClick={loadMappings}>Load from connector</Button>
+                      <Button variant="outline" size="sm" onClick={addMapping} data-testid="button-add-mapping">
+                        <Plus className="w-4 h-4 mr-1" />Add Mapping
+                      </Button>
+                    </div>
                   </div>
                 )}
                 {mappings.length > 0 && (

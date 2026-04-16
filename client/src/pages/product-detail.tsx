@@ -34,6 +34,12 @@ import {
   Calendar,
   Award,
   Phone,
+  BarChart3,
+  Users,
+  ScanLine,
+  Globe,
+  TrendingUp,
+  UserCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -123,6 +129,163 @@ const eventTypes = [
   { value: "disposed", label: "Disposed" },
   { value: "custom", label: "Custom Event" },
 ];
+
+// ─── Scan Intelligence Tab Component ──────────────────────────────────────
+interface ScanAnalytics {
+  stats: { total: number; unique: number; last30Days: number };
+  recent: Array<{ id: string; scannedAt: string; country?: string; userAgent?: string; isUnique: boolean }>;
+  byDay: Array<{ date: string; count: number }>;
+  registrations: Array<{ id: string; ownerName: string; ownerEmail: string; purchaseDate?: string; purchaseLocation?: string; registeredAt: string; warrantyActivated: boolean; marketingOptIn: boolean }>;
+}
+
+function ScanIntelligenceTab({ productId }: { productId: string }) {
+  const { data, isLoading } = useQuery<ScanAnalytics>({
+    queryKey: ["/api/products", productId, "scan-analytics"],
+    refetchInterval: 30000,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[1,2,3,4].map(i => <Skeleton key={i} className="h-24 w-full" />)}
+      </div>
+    );
+  }
+
+  const stats = data?.stats || { total: 0, unique: 0, last30Days: 0 };
+  const byDay = data?.byDay || [];
+  const recent = data?.recent || [];
+  const registrations = data?.registrations || [];
+  const maxDayCount = Math.max(...byDay.map(d => d.count), 1);
+
+  return (
+    <div className="space-y-6">
+      {/* KPI Row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { icon: <ScanLine className="h-5 w-5" />, label: "Total Scans", value: stats.total, color: "text-primary" },
+          { icon: <Users className="h-5 w-5" />, label: "Unique Visitors", value: stats.unique, color: "text-blue-500" },
+          { icon: <TrendingUp className="h-5 w-5" />, label: "Last 30 Days", value: stats.last30Days, color: "text-green-500" },
+          { icon: <UserCheck className="h-5 w-5" />, label: "Registrations", value: registrations.length, color: "text-amber-500" },
+        ].map(kpi => (
+          <Card key={kpi.label}>
+            <CardContent className="p-4 text-center">
+              <div className={`flex justify-center mb-2 ${kpi.color}`}>{kpi.icon}</div>
+              <p className={`text-2xl font-bold ${kpi.color}`}>{kpi.value}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{kpi.label}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* 30-day scan chart */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Scan Activity — Last 30 Days
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {stats.last30Days === 0 ? (
+            <div className="text-center py-8 text-muted-foreground text-sm">
+              <ScanLine className="h-8 w-8 mx-auto mb-2 opacity-30" />
+              No scans recorded yet. Share the product QR code to start collecting data.
+            </div>
+          ) : (
+            <div className="flex items-end gap-0.5 h-28 w-full">
+              {byDay.map((d, i) => (
+                <div key={d.date} className="flex-1 flex flex-col items-center gap-0.5" title={`${d.date}: ${d.count} scan${d.count !== 1 ? "s" : ""}`}>
+                  <div
+                    className="w-full rounded-t bg-primary/70 hover:bg-primary transition-colors min-h-[2px]"
+                    style={{ height: `${Math.max((d.count / maxDayCount) * 100, d.count > 0 ? 8 : 2)}%` }}
+                  />
+                  {(i === 0 || i === Math.floor(byDay.length / 2) || i === byDay.length - 1) && (
+                    <span className="text-[9px] text-muted-foreground rotate-45 origin-left mt-1 whitespace-nowrap">{d.date.slice(5)}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Recent Scans */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Recent Scans
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {recent.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-4">No scans yet</p>
+          ) : (
+            <div className="divide-y">
+              {recent.slice(0, 10).map(scan => (
+                <div key={scan.id} className="flex items-center gap-3 py-2.5 text-sm">
+                  <div className={`h-2 w-2 rounded-full shrink-0 ${scan.isUnique ? "bg-green-500" : "bg-muted-foreground/40"}`} title={scan.isUnique ? "Unique visitor" : "Returning visitor"} />
+                  <span className="text-muted-foreground font-mono text-xs flex-1 truncate">
+                    {new Date(scan.scannedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                  {scan.country && (
+                    <Badge variant="outline" className="text-xs shrink-0">
+                      <Globe className="h-3 w-3 mr-1" />{scan.country}
+                    </Badge>
+                  )}
+                  <span className="text-xs text-muted-foreground truncate max-w-[120px] hidden sm:block">
+                    {scan.userAgent?.split(" ")[0] || "Unknown device"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Registrations */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <UserCheck className="h-4 w-4" />
+            Product Registrations ({registrations.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {registrations.length === 0 ? (
+            <div className="text-center py-6 text-sm text-muted-foreground">
+              <UserCheck className="h-8 w-8 mx-auto mb-2 opacity-30" />
+              No registrations yet. Consumers can register ownership from the public DPP scan page.
+            </div>
+          ) : (
+            <div className="divide-y">
+              {registrations.map(reg => (
+                <div key={reg.id} className="py-3 text-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-medium">{reg.ownerName}</p>
+                      <p className="text-muted-foreground text-xs">{reg.ownerEmail}</p>
+                    </div>
+                    <div className="flex gap-1.5 shrink-0">
+                      {reg.warrantyActivated && <Badge variant="outline" className="text-xs text-green-600 border-green-300">Warranty</Badge>}
+                      {reg.marketingOptIn && <Badge variant="outline" className="text-xs">Marketing</Badge>}
+                    </div>
+                  </div>
+                  <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
+                    {reg.purchaseDate && <span>Purchased: {reg.purchaseDate}</span>}
+                    {reg.purchaseLocation && <span>From: {reg.purchaseLocation}</span>}
+                    <span>Registered: {new Date(reg.registeredAt).toLocaleDateString("en-GB")}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 export default function ProductDetail() {
   const link = usePrefixedLink();
@@ -468,8 +631,8 @@ export default function ProductDetail() {
           <Card>
             <CardContent className="p-0">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <div className="border-b px-4">
-                  <TabsList className="h-12 bg-transparent p-0">
+                <div className="border-b px-4 overflow-x-auto">
+                  <TabsList className="h-12 bg-transparent p-0 w-max min-w-full">
                     <TabsTrigger
                       value="overview"
                       className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
@@ -518,6 +681,14 @@ export default function ProductDetail() {
                       data-testid="tab-eu-espr"
                     >
                       EU ESPR
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="scan-intelligence"
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+                      data-testid="tab-scan-intelligence"
+                    >
+                      <ScanLine className="h-3.5 w-3.5 mr-1.5" />
+                      Scan Intelligence
                     </TabsTrigger>
                   </TabsList>
                 </div>
@@ -1638,6 +1809,11 @@ export default function ProductDetail() {
                       )}
                     </div>
                   )}
+                </TabsContent>
+
+                {/* ── Scan Intelligence Tab ─────────────────────────────── */}
+                <TabsContent value="scan-intelligence" className="p-6 space-y-6">
+                  <ScanIntelligenceTab productId={product.id} />
                 </TabsContent>
 
               </Tabs>

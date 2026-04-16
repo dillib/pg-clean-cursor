@@ -629,10 +629,98 @@ ${pages.map(p => `  <url>
   });
 
   // ==========================================
+  // SCAN INTELLIGENCE & CONSUMER REGISTRATION
+  // ==========================================
+
+  // Record a scan — public, no auth
+  app.post("/api/products/:productId/scan", async (req: Request, res: Response) => {
+    try {
+      const { productId } = req.params;
+      const product = await storage.getProduct(productId);
+      if (!product) return res.status(404).json({ error: "Product not found" });
+
+      const sessionId = (req.body?.sessionId as string) || (req.headers["x-session-id"] as string) || null;
+      const userAgent = (req.headers["user-agent"] || "").slice(0, 255);
+      const referrer = (req.headers.referer || "").slice(0, 255);
+      // Simple country hint from Accept-Language (e.g. "en-US,en;q=0.9" → "US")
+      const acceptLang = req.headers["accept-language"] || "";
+      const country = acceptLang.match(/[a-z]{2}-([A-Z]{2})/)?.[1] || null;
+
+      const scan = await storage.recordProductScan({
+        productId,
+        country,
+        userAgent,
+        referrer,
+        sessionId,
+        isUnique: !!sessionId,
+      });
+      res.status(201).json({ id: scan.id });
+    } catch (error) {
+      console.error("Error recording scan:", error);
+      res.status(500).json({ error: "Failed to record scan" });
+    }
+  });
+
+  // Get scan analytics — authenticated
+  app.get("/api/products/:productId/scan-analytics", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+    try {
+      const { productId } = req.params;
+      const [stats, recent, byDay, registrations] = await Promise.all([
+        storage.getProductScanStats(productId),
+        storage.getRecentProductScans(productId, 20),
+        storage.getScansByDay(productId, 30),
+        storage.getProductRegistrations(productId),
+      ]);
+      res.json({ stats, recent, byDay, registrations });
+    } catch (error) {
+      console.error("Error fetching scan analytics:", error);
+      res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // Consumer product registration — public
+  app.post("/api/products/:productId/register", async (req: Request, res: Response) => {
+    try {
+      const { productId } = req.params;
+      const product = await storage.getProduct(productId);
+      if (!product) return res.status(404).json({ error: "Product not found" });
+
+      const { ownerName, ownerEmail, purchaseDate, purchaseLocation, notes, warrantyActivated, marketingOptIn } = req.body;
+      if (!ownerName || !ownerEmail) return res.status(400).json({ error: "Name and email are required" });
+
+      const reg = await storage.createProductRegistration({
+        productId,
+        ownerName: String(ownerName),
+        ownerEmail: String(ownerEmail),
+        purchaseDate: purchaseDate || null,
+        purchaseLocation: purchaseLocation || null,
+        notes: notes || null,
+        warrantyActivated: warrantyActivated !== false,
+        marketingOptIn: marketingOptIn === true,
+      });
+      res.status(201).json({ id: reg.id, message: "Product registered successfully" });
+    } catch (error) {
+      console.error("Error registering product:", error);
+      res.status(500).json({ error: "Failed to register product" });
+    }
+  });
+
+  // Get registrations for a product — authenticated
+  app.get("/api/products/:productId/registrations", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+    try {
+      const registrations = await storage.getProductRegistrations(req.params.productId);
+      res.json(registrations);
+    } catch (error) {
+      console.error("Error fetching registrations:", error);
+      res.status(500).json({ error: "Failed to fetch registrations" });
+    }
+  });
+
+  // ==========================================
   // ENTERPRISE INTEGRATIONS ENDPOINTS
   // ==========================================
 
-  app.get("/api/integrations/connectors", isAuthenticated, async (req: Request, res: Response) => {
+  app.get("/api/integrations/connectors", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const connectors = await storage.getAllEnterpriseConnectors();
       res.json(connectors);
@@ -642,7 +730,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.get("/api/integrations/connectors/:id", isAuthenticated, async (req: Request, res: Response) => {
+  app.get("/api/integrations/connectors/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const connector = await storage.getEnterpriseConnector(req.params.id);
       if (!connector) {
@@ -758,7 +846,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.get("/api/integrations/connectors/:id/logs", isAuthenticated, async (req: Request, res: Response) => {
+  app.get("/api/integrations/connectors/:id/logs", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const logs = await storage.getSyncLogsByConnectorId(req.params.id);
       res.json(logs);

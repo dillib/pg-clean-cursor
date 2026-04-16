@@ -1234,3 +1234,43 @@ export const platformMetrics = pgTable("platform_metrics", {
   metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
   recordedAt: timestamp("recorded_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
+
+// ============================================
+// SCAN INTELLIGENCE (Consumer engagement layer)
+// ============================================
+
+export const productScans = pgTable("product_scans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").notNull(),
+  scannedAt: timestamp("scanned_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  country: text("country"),
+  userAgent: text("user_agent"),
+  referrer: text("referrer"),
+  sessionId: text("session_id"),
+  isUnique: boolean("is_unique").default(true).notNull(),
+});
+
+export const insertProductScanSchema = createInsertSchema(productScans).omit({ id: true, scannedAt: true });
+export type InsertProductScan = z.infer<typeof insertProductScanSchema>;
+export type ProductScan = typeof productScans.$inferSelect;
+
+// ============================================
+// PRODUCT REGISTRATIONS (Consumer ownership)
+// ============================================
+
+export const productRegistrations = pgTable("product_registrations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").notNull(),
+  registeredAt: timestamp("registered_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  ownerName: text("owner_name").notNull(),
+  ownerEmail: text("owner_email").notNull(),
+  purchaseDate: text("purchase_date"),
+  purchaseLocation: text("purchase_location"),
+  notes: text("notes"),
+  warrantyActivated: boolean("warranty_activated").default(true).notNull(),
+  marketingOptIn: boolean("marketing_opt_in").default(false).notNull(),
+});
+
+export const insertProductRegistrationSchema = createInsertSchema(productRegistrations).omit({ id: true, registeredAt: true });
+export type InsertProductRegistration = z.infer<typeof insertProductRegistrationSchema>;
+export type ProductRegistration = typeof productRegistrations.$inferSelect;

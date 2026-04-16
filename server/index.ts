@@ -154,6 +154,38 @@ app.use((req, res, next) => {
     log(`Error seeding partner accounts: ${error}`);
   }
 
+  // Seed a demo SAP connector if none exists
+  try {
+    const existingConnectors = await storage.getAllEnterpriseConnectors();
+    const hasSap = existingConnectors.some(c => c.connectorType === "sap");
+    if (!hasSap) {
+      await storage.createEnterpriseConnector({
+        name: "PhotonicTag Demo SAP (S/4HANA)",
+        connectorType: "sap",
+        status: "active",
+        config: {
+          systemType: "S4HANA", hostname: "demo.sap.example.com", port: 443,
+          client: "100", systemId: "PT1", apiType: "OData",
+          authMethod: "basic", username: "PTDEMO", password: "",
+          oauthEnabled: false, syncDirection: "inbound",
+          syncFrequency: "daily", scheduledSyncEnabled: false,
+          scheduledSyncIntervalMinutes: 60, sslVerify: true,
+        } as SAPConfig,
+        fieldMappings: [
+          { sourceField: "MATNR", targetField: "productName", transformation: "trim" },
+          { sourceField: "MAKTX", targetField: "productCategory" },
+          { sourceField: "WERKS", targetField: "manufacturer" },
+          { sourceField: "CHARG", targetField: "batchNumber" },
+          { sourceField: "MATNR_EXT", targetField: "sku" },
+          { sourceField: "MATKL", targetField: "materials" },
+        ],
+      });
+      log("SAP demo connector seeded");
+    }
+  } catch (error) {
+    log(`[SAP Seed] Error seeding demo connector: ${error}`);
+  }
+
   // Auto-start SAP sync schedulers for active connectors
   try {
     const connectors = await storage.getAllEnterpriseConnectors();
