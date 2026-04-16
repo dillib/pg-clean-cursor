@@ -1,8 +1,8 @@
 import { Router, Request, Response } from "express";
 import { sapMockService, SAPMaterial, SAPConflict } from "../services/sap-mock-service";
-import { SAPODataClient, scheduleConnectorSync, clearScheduledSync, getActiveSchedules } from "../services/sap-odata-client";
+import { SAPODataClient, scheduleConnectorSync, clearScheduledSync, getActiveSchedules, applyFieldMappings } from "../services/sap-odata-client";
 import { storage } from "../storage";
-import type { InsertProduct, SAPConfig } from "@shared/schema";
+import type { InsertProduct, SAPConfig, FieldMapping } from "@shared/schema";
 
 const router = Router();
 
@@ -67,8 +67,17 @@ router.get("/conflicts", async (_req: Request, res: Response) => {
 
 router.post("/sync/from-sap", async (req: Request, res: Response) => {
   try {
-    const { matnrs, limit = 10 } = req.body;
+    const { matnrs, limit = 10, connectorId } = req.body;
     const materials = sapMockService.getAllMaterials();
+
+    // Load connector field mappings if a connectorId is provided
+    let fieldMappings: FieldMapping[] = [];
+    if (connectorId) {
+      const connector = await storage.getEnterpriseConnector(connectorId);
+      if (connector?.fieldMappings?.length) {
+        fieldMappings = connector.fieldMappings as FieldMapping[];
+      }
+    }
     
     let toSync: SAPMaterial[];
     if (matnrs && Array.isArray(matnrs)) {
@@ -89,6 +98,11 @@ router.post("/sync/from-sap", async (req: Request, res: Response) => {
         const existingProducts = await storage.getAllProducts();
         const existing = existingProducts.find(p => p.modelNumber === material.MARA.MATNR);
 
+        // Use user-configured field mappings if available, otherwise hardcoded baseline
+        const mappedData = fieldMappings.length
+          ? applyFieldMappings(material, fieldMappings)
+          : sapMockService.mapToPhotonicTagProduct(material);
+
         if (existing) {
           const detectedConflicts = sapMockService.detectConflicts(material, existing);
           if (detectedConflicts.length > 0) {
@@ -98,13 +112,11 @@ router.post("/sync/from-sap", async (req: Request, res: Response) => {
             }
             material.syncStatus = "conflict";
           } else {
-            const mappedData = sapMockService.mapToPhotonicTagProduct(material);
             await storage.updateProduct(existing.id, mappedData);
             sapMockService.linkToPhotonicTag(material.MARA.MATNR, existing.id);
             updated++;
           }
         } else {
-          const mappedData = sapMockService.mapToPhotonicTagProduct(material);
           const newProduct = await storage.createProduct({
             ...mappedData,
             description: `Imported from SAP Material ${material.MARA.MATNR}`,
@@ -221,8 +233,17 @@ router.post("/sync/to-sap", async (req: Request, res: Response) => {
 
 router.post("/sync/bidirectional", async (req: Request, res: Response) => {
   try {
-    const { limit = 20 } = req.body;
+    const { limit = 20, connectorId } = req.body;
     const materials = sapMockService.getAllMaterials();
+
+    // Load connector field mappings if a connectorId is provided
+    let fieldMappings: FieldMapping[] = [];
+    if (connectorId) {
+      const connector = await storage.getEnterpriseConnector(connectorId);
+      if (connector?.fieldMappings?.length) {
+        fieldMappings = connector.fieldMappings as FieldMapping[];
+      }
+    }
     
     let created = 0;
     let updated = 0;
@@ -232,7 +253,9 @@ router.post("/sync/bidirectional", async (req: Request, res: Response) => {
     const unlinked = materials.filter(m => !m.photonicTagId).slice(0, limit);
     for (const material of unlinked) {
       try {
-        const mappedData = sapMockService.mapToPhotonicTagProduct(material);
+        const mappedData = fieldMappings.length
+          ? applyFieldMappings(material, fieldMappings)
+          : sapMockService.mapToPhotonicTagProduct(material);
         const newProduct = await storage.createProduct({
           ...mappedData,
           description: `Imported from SAP Material ${material.MARA.MATNR}`,

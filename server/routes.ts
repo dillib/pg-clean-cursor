@@ -14,6 +14,8 @@ import { seedDemoData } from "./seed-demo-data";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { storage } from "./storage";
 import sapRoutes from "./routes/sap-routes";
+import { applyFieldMappings } from "./services/sap-odata-client";
+import { sapMockService } from "./services/sap-mock-service";
 import internalRoutes from "./routes/internal-routes";
 import exportRoutes from "./routes/export-routes";
 import productImportRoutes from "./routes/product-import-routes";
@@ -801,13 +803,15 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.post("/api/integrations/connectors/:id/sync", isAuthenticated, async (req: Request, res: Response) => {
+  app.post("/api/integrations/connectors/:id/sync", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const connector = await storage.getEnterpriseConnector(req.params.id);
       if (!connector) {
         return res.status(404).json({ error: "Connector not found" });
       }
-      
+
+      const fieldMappings = (connector.fieldMappings ?? []) as import("@shared/schema").FieldMapping[];
+
       // Create sync log
       const syncLog = await storage.createIntegrationSyncLog({
         connectorId: connector.id,
@@ -819,27 +823,71 @@ ${pages.map(p => `  <url>
         recordsFailed: 0,
         startedAt: new Date(),
       });
-      
-      // Simulate sync (in production, this would pull data from SAP)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Update sync log as completed
+
+      // Run real sync against mock SAP (or real SAP via OData client)
+      let created = 0, updated = 0, failed = 0;
+      try {
+        const materials = sapMockService.getAllMaterials()
+          .filter(m => m.syncStatus === "pending" && !m.photonicTagId)
+          .slice(0, 20);
+
+        const existingProducts = await storage.getAllProducts();
+
+        for (const material of materials) {
+          try {
+            const mappedData = fieldMappings.length
+              ? applyFieldMappings(material, fieldMappings)
+              : sapMockService.mapToPhotonicTagProduct(material);
+
+            const existing = existingProducts.find(p => p.modelNumber === material.MARA.MATNR);
+            if (existing) {
+              await storage.updateProduct(existing.id, mappedData);
+              sapMockService.linkToPhotonicTag(material.MARA.MATNR, existing.id);
+              updated++;
+            } else {
+              const newProduct = await storage.createProduct({
+                ...mappedData,
+                description: `Imported from SAP Material ${material.MARA.MATNR}`,
+                materials: "",
+                safetyCertifications: [],
+              } as unknown as import("@shared/schema").InsertProduct);
+              sapMockService.linkToPhotonicTag(material.MARA.MATNR, newProduct.id);
+              created++;
+            }
+          } catch (err) {
+            console.error("[Connector Sync] Material error:", (err as Error).message);
+            failed++;
+          }
+        }
+      } catch (err) {
+        console.error("[Connector Sync] Error:", err);
+      }
+
+      const total = created + updated + failed;
+
       await storage.updateIntegrationSyncLog(syncLog.id, {
-        status: "completed",
-        recordsProcessed: 10,
-        recordsCreated: 5,
-        recordsUpdated: 5,
+        status: failed > 0 && created + updated === 0 ? "failed" : "completed",
+        recordsProcessed: total,
+        recordsCreated: created,
+        recordsUpdated: updated,
+        recordsFailed: failed,
         completedAt: new Date(),
+        ...(failed > 0 ? { errorMessage: `${failed} record(s) failed to sync` } : {}),
       });
-      
-      // Update connector with last sync info
+
       await storage.updateEnterpriseConnector(connector.id, {
         lastSyncAt: new Date(),
-        lastSyncStatus: "completed",
-        productsSynced: (connector.productsSynced || 0) + 10,
+        lastSyncStatus: failed > 0 && total === failed ? "error" : "completed",
+        productsSynced: (connector.productsSynced || 0) + created + updated,
       } as any);
-      
-      res.json({ success: true, message: "Sync completed", syncLogId: syncLog.id });
+
+      res.json({
+        success: true,
+        message: `Sync completed: ${created} created, ${updated} updated, ${failed} failed`,
+        syncLogId: syncLog.id,
+        created, updated, failed,
+        fieldMappingsUsed: fieldMappings.length,
+      });
     } catch (error) {
       console.error("Error syncing connector:", error);
       res.status(500).json({ error: "Sync failed" });

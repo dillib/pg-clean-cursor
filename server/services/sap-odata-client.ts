@@ -4,7 +4,8 @@
  * Authentication: Basic, OAuth2 (Client Credentials), SAML
  */
 
-import type { SAPConfig } from "@shared/schema";
+import type { SAPConfig, FieldMapping } from "@shared/schema";
+import type { SAPMaterial } from "./sap-mock-service";
 import { sapMockService } from "./sap-mock-service";
 
 export interface ODataMaterial {
@@ -321,6 +322,63 @@ export class SAPODataClient {
       return null;
     }
   }
+}
+
+// ─── Field Mapping Engine ─────────────────────────────────────────────────────
+
+/**
+ * Flatten a SAPMaterial into a single lookup map of all accessible field names.
+ * Supports both "MATNR" (MARA field) and "MARC.WERKS" (dotted sub-struct) forms.
+ */
+function flattenMaterial(material: SAPMaterial): Record<string, unknown> {
+  const flat: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(material.MARA)) flat[k] = v;
+  for (const [k, v] of Object.entries(material.MARC)) flat[`MARC.${k}`] = v;
+  flat["syncStatus"] = material.syncStatus;
+  flat["photonicTagId"] = material.photonicTagId ?? "";
+  return flat;
+}
+
+function applyTransformation(value: unknown, transform?: string): unknown {
+  const str = String(value ?? "");
+  switch (transform) {
+    case "trim":      return str.trim();
+    case "uppercase": return str.toUpperCase();
+    case "lowercase": return str.toLowerCase();
+    case "number":    return isNaN(Number(str)) ? 0 : Number(str);
+    case "boolean":   return ["true", "1", "yes"].includes(str.toLowerCase());
+    case "date_iso":  {
+      const d = new Date(str);
+      return isNaN(d.getTime()) ? str : d.toISOString().split("T")[0];
+    }
+    default:          return value ?? "";
+  }
+}
+
+/**
+ * Apply user-configured FieldMappings to a SAPMaterial, producing a partial
+ * PhotonicTag product record. Falls back to sapMockService hardcoded mapping
+ * for any fields not covered by the user's mappings.
+ */
+export function applyFieldMappings(
+  material: SAPMaterial,
+  mappings: FieldMapping[],
+): Record<string, unknown> {
+  const flat = flattenMaterial(material);
+
+  // Start with the hardcoded baseline so un-mapped fields are still populated
+  const base = sapMockService.mapToPhotonicTagProduct(material) as Record<string, unknown>;
+  const result: Record<string, unknown> = { ...base };
+
+  const validMappings = mappings.filter(m => m.sourceField.trim() && m.targetField.trim());
+  for (const mapping of validMappings) {
+    const raw = flat[mapping.sourceField.trim()];
+    if (raw !== undefined) {
+      result[mapping.targetField.trim()] = applyTransformation(raw, mapping.transformation);
+    }
+  }
+
+  return result;
 }
 
 // Scheduler registry — active sync jobs keyed by connectorId

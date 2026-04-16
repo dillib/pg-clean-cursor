@@ -126,11 +126,23 @@ export default function SAPOperations() {
   const triggerSync = useMutation({
     mutationFn: async () => {
       if (!selectedConnector) throw new Error("No connector");
-      return apiRequest("POST", `/api/integrations/connectors/${selectedConnector.id}/sync`);
+      const r = await fetch(`/api/integrations/connectors/${selectedConnector.id}/sync`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      if (!r.ok) throw new Error("Sync failed");
+      return r.json() as Promise<{ created: number; updated: number; failed: number; fieldMappingsUsed: number }>;
     },
-    onSuccess: () => {
-      toast({ title: "Sync triggered", description: "Pull started — check sync history below." });
-      setTimeout(() => refetchLogs(), 2000);
+    onSuccess: (data) => {
+      const mappingNote = data.fieldMappingsUsed > 0
+        ? ` using ${data.fieldMappingsUsed} custom field mapping${data.fieldMappingsUsed !== 1 ? "s" : ""}`
+        : "";
+      toast({
+        title: "Sync complete",
+        description: `${data.created} created, ${data.updated} updated, ${data.failed} failed${mappingNote}.`,
+      });
+      setTimeout(() => refetchLogs(), 500);
       queryClient.invalidateQueries({ queryKey: ["/api/integrations/connectors"] });
     },
     onError: () => {

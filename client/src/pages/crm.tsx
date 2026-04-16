@@ -78,6 +78,33 @@ function AssessmentScoreBadge({ score }: { score: number }) {
   return <Badge variant="outline" className={`text-xs font-medium ${color}`}>{score}% fit</Badge>;
 }
 
+function nextBestAction(lead: Lead): { label: string; color: string } | null {
+  const score = assessmentScore(lead);
+  const hasSap = lead.sapSystemType && lead.sapSystemType !== "no_sap";
+  const hasAssessment = !!lead.assessmentCompletedAt || !!lead.sapSystemType;
+
+  switch (lead.status) {
+    case "new":
+      if (!hasAssessment) return { label: "Send assessment form", color: "text-blue-600" };
+      if (hasSap && score >= 60) return { label: "Book SAP demo", color: "text-green-600" };
+      if (lead.euMarketsActive === "yes") return { label: "Share EU DPP guide", color: "text-primary" };
+      return { label: "Qualify lead", color: "text-muted-foreground" };
+    case "contacted":
+      if (score >= 70) return { label: "Send ROI analysis", color: "text-green-600" };
+      return { label: "Follow up in 3 days", color: "text-amber-600" };
+    case "demo_scheduled":
+      return { label: "Prepare tailored demo", color: "text-blue-600" };
+    case "qualified":
+      return { label: "Send POC proposal", color: "text-green-600" };
+    case "won":
+      return { label: "Start onboarding", color: "text-green-600" };
+    case "lost":
+      return { label: "Re-engage in 90 days", color: "text-muted-foreground" };
+    default:
+      return null;
+  }
+}
+
 export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -379,6 +406,7 @@ export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
                 const statusConfig = STATUS_CONFIG[lead.status];
                 const score = assessmentScore(lead);
                 const hasAssessment = !!lead.assessmentCompletedAt || !!lead.sapSystemType;
+                const nextAction = nextBestAction(lead);
                 return (
                   <Dialog key={lead.id}>
                     <DialogTrigger asChild>
@@ -405,12 +433,20 @@ export default function CRM({ isAdmin = true }: { isAdmin?: boolean }) {
                               </Badge>
                             )}
                           </div>
-                          <div className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
-                            <span>{lead.email}</span>
+                          <div className="text-sm flex items-center gap-2 flex-wrap mt-0.5">
+                            <span className="text-muted-foreground">{lead.email}</span>
                             {lead.company && (
                               <>
                                 <span className="text-muted-foreground/50">•</span>
-                                <span>{lead.company}</span>
+                                <span className="text-muted-foreground">{lead.company}</span>
+                              </>
+                            )}
+                            {nextAction && (
+                              <>
+                                <span className="text-muted-foreground/40">·</span>
+                                <span className={`text-xs font-medium ${nextAction.color}`} data-testid={`text-next-action-${lead.id}`}>
+                                  → {nextAction.label}
+                                </span>
                               </>
                             )}
                           </div>

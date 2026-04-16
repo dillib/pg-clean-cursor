@@ -186,6 +186,55 @@ app.use((req, res, next) => {
     log(`[SAP Seed] Error seeding demo connector: ${error}`);
   }
 
+  // Seed demo sync history logs for compelling dashboard demo
+  try {
+    const connectors = await storage.getAllEnterpriseConnectors();
+    const sapConnector = connectors.find(c => c.connectorType === "sap");
+    if (sapConnector) {
+      const existingLogs = await storage.getSyncLogsByConnectorId(sapConnector.id);
+      if (existingLogs.length < 5) {
+        const now = Date.now();
+        const DAY = 86_400_000;
+        // 14-day demo history: mostly successful with 2 realistic failures
+        const demoRuns: Array<{ daysAgo: number; status: "completed" | "failed"; processed: number; created: number; updated: number; failed: number; error?: string; syncType: "full" | "delta" | "manual" }> = [
+          { daysAgo: 14, status: "completed", processed: 20, created: 20, updated: 0, failed: 0, syncType: "full" },
+          { daysAgo: 13, status: "completed", processed: 3,  created: 0,  updated: 3,  failed: 0, syncType: "delta" },
+          { daysAgo: 12, status: "completed", processed: 7,  created: 1,  updated: 6,  failed: 0, syncType: "delta" },
+          { daysAgo: 11, status: "completed", processed: 5,  created: 0,  updated: 5,  failed: 0, syncType: "delta" },
+          { daysAgo: 10, status: "failed",    processed: 0,  created: 0,  updated: 0,  failed: 0, syncType: "delta", error: "Connection timeout: SAP host unreachable after 30s" },
+          { daysAgo: 9,  status: "completed", processed: 12, created: 2,  updated: 10, failed: 0, syncType: "full" },
+          { daysAgo: 8,  status: "completed", processed: 4,  created: 0,  updated: 4,  failed: 0, syncType: "delta" },
+          { daysAgo: 7,  status: "completed", processed: 8,  created: 1,  updated: 7,  failed: 0, syncType: "delta" },
+          { daysAgo: 6,  status: "completed", processed: 6,  created: 0,  updated: 6,  failed: 0, syncType: "delta" },
+          { daysAgo: 5,  status: "failed",    processed: 2,  created: 0,  updated: 0,  failed: 2, syncType: "delta", error: "OData error: UNAUTHORIZED — token expired, renewal needed" },
+          { daysAgo: 4,  status: "completed", processed: 15, created: 3,  updated: 12, failed: 0, syncType: "full" },
+          { daysAgo: 3,  status: "completed", processed: 5,  created: 0,  updated: 5,  failed: 0, syncType: "delta" },
+          { daysAgo: 2,  status: "completed", processed: 9,  created: 2,  updated: 7,  failed: 0, syncType: "delta" },
+          { daysAgo: 1,  status: "completed", processed: 4,  created: 0,  updated: 4,  failed: 0, syncType: "delta" },
+        ];
+        for (const run of demoRuns) {
+          const startedAt = new Date(now - run.daysAgo * DAY - 5 * 60 * 1000); // started 5 min before "now - N days"
+          const completedAt = new Date(startedAt.getTime() + (run.status === "failed" ? 30_000 : 45_000 + run.processed * 800));
+          const inserted = await storage.createIntegrationSyncLog({
+            connectorId: sapConnector.id,
+            syncType: run.syncType,
+            status: run.status,
+            recordsProcessed: run.processed,
+            recordsCreated: run.created,
+            recordsUpdated: run.updated,
+            recordsFailed: run.failed,
+            errorMessage: run.error ?? null,
+            startedAt,
+          });
+          await storage.updateIntegrationSyncLog(inserted.id, { completedAt });
+        }
+        log(`SAP demo sync history seeded (${demoRuns.length} runs)`);
+      }
+    }
+  } catch (error) {
+    log(`[SAP Seed] Error seeding sync history: ${error}`);
+  }
+
   // Auto-start SAP sync schedulers for active connectors
   try {
     const connectors = await storage.getAllEnterpriseConnectors();
