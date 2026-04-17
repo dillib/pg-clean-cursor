@@ -84,9 +84,6 @@ ${pages.map(p => `  <url>
 
   // PRODUCT ENDPOINTS
   // ==========================================
-  // PLM bulk-import, batch creation & QR export routes (must be before /:id)
-  app.use("/api/products", isAuthenticatedOrTeam, productImportRoutes);
-
   app.get("/api/products", async (req: Request, res: Response) => {
     try {
       const products = await productService.getAllProducts();
@@ -110,7 +107,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.post("/api/products", async (req: Request, res: Response) => {
+  app.post("/api/products", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const parsed = insertProductSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -139,7 +136,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.put("/api/products/:id", async (req: Request, res: Response) => {
+  app.put("/api/products/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const existingProduct = await productService.getProduct(req.params.id);
       if (!existingProduct) {
@@ -169,7 +166,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.delete("/api/products/:id", async (req: Request, res: Response) => {
+  app.delete("/api/products/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const existingProduct = await productService.getProduct(req.params.id);
       if (!existingProduct) {
@@ -717,6 +714,9 @@ ${pages.map(p => `  <url>
       res.status(500).json({ error: "Failed to fetch registrations" });
     }
   });
+
+  // PLM bulk-import, batch creation & QR export routes (auth required)
+  app.use("/api/products", isAuthenticatedOrTeam, productImportRoutes);
 
   // ==========================================
   // ENTERPRISE INTEGRATIONS ENDPOINTS
