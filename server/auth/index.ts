@@ -1,29 +1,24 @@
 /**
- * Active auth provider — controlled by AUTH_PROVIDER env var.
- * Default: replit. Next: workos. Future: okta, azure-ad.
+ * Active auth provider — WorkOS AuthKit (SSO).
  *
- * Swap the provider here without touching any route code.
+ * Future providers (Okta, Azure AD, etc.) can be added by implementing
+ * AuthProvider and selecting via AUTH_PROVIDER env var.
  */
 import type { AuthProvider } from "./types";
-import { replitProvider } from "./providers/replit";
 import { workosProvider } from "./providers/workos";
 
 export type { AuthProvider, AuthenticatedUser } from "./types";
 
 function resolveProvider(): AuthProvider {
-  const provider = (process.env.AUTH_PROVIDER ?? "replit").toLowerCase();
-  switch (provider) {
-    case "workos":  return workosProvider;
-    case "replit":  return replitProvider;
-    default:
-      console.warn(`[Auth] Unknown AUTH_PROVIDER="${provider}", falling back to replit`);
-      return replitProvider;
+  const provider = (process.env.AUTH_PROVIDER ?? "workos").toLowerCase();
+  if (provider !== "workos") {
+    console.warn(`[Auth] Unknown AUTH_PROVIDER="${provider}", defaulting to workos`);
   }
+  return workosProvider;
 }
 
 export const authProvider: AuthProvider = resolveProvider();
 
-// Re-export the two most-used pieces directly for clean imports
 export const { isAuthenticated } = authProvider;
 export const getCurrentUser = (req: import("express").Request) =>
   authProvider.getCurrentUser(req);

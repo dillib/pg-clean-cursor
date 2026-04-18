@@ -15,6 +15,7 @@ import {
   type ActionStatus,
 } from "@shared/schema";
 import { authStorage } from "../replit_integrations/auth/storage";
+import { getCurrentUser } from "../auth";
 import {
   safeParseJSON,
   validateHealthScore,
@@ -31,15 +32,15 @@ const router = Router();
 const isAdminOrTeamUser: RequestHandler = async (req, res, next) => {
   try {
     const partnerId = (req.session as any)?.partnerId;
-    if (partnerId) {
-      return next();
-    }
+    if (partnerId) return next();
 
-    const sessionUser = req.user as any;
-    if (!sessionUser?.claims?.sub) {
+    const current = getCurrentUser(req);
+    if (!current) {
       return res.status(403).json({ error: "Admin access required" });
     }
-    const dbUser = await authStorage.getUser(sessionUser.claims.sub);
+    if (current.isAdmin) return next();
+
+    const dbUser = await authStorage.getUser(current.id);
     if (!dbUser || !dbUser.isAdmin) {
       return res.status(403).json({ error: "Admin access required" });
     }
@@ -465,7 +466,7 @@ router.post("/demos/provision", async (req: Request, res: Response) => {
       industry,
       personaTemplate,
       expiresAt,
-      provisionedBy: (req.user as any)?.id || "admin",
+      provisionedBy: getCurrentUser(req)?.id || "admin",
     });
 
     provisionDemoAsync(instance.id, industry, prospectName).catch(err => {

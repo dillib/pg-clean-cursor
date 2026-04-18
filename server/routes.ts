@@ -11,8 +11,8 @@ import { aiService } from "./services/ai-service";
 import { auditService } from "./services/audit-service";
 import { iotService } from "./services/iot-service";
 import { seedDemoData } from "./seed-demo-data";
-import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
-import { authProvider } from "./auth";
+import { authProvider, getCurrentUser } from "./auth";
+import { authStorage } from "./replit_integrations/auth/storage";
 import { injectTenantId } from "./middleware/tenant";
 import { tenantStorage } from "./storage-tenant";
 import { encryptSAPCredentials } from "./services/crypto-service";
@@ -42,18 +42,10 @@ import bcrypt from "bcryptjs";
 import type { RequestHandler } from "express";
 
 const isAuthenticatedOrTeam: RequestHandler = async (req, res, next) => {
-  const user = req.user as any;
-  if (user && req.isAuthenticated?.() && user.expires_at) {
-    const now = Math.floor(Date.now() / 1000);
-    if (now <= user.expires_at) {
-      return next();
-    }
-  }
+  if (getCurrentUser(req)) return next();
 
   const partnerId = (req.session as any)?.partnerId;
-  if (partnerId) {
-    return next();
-  }
+  if (partnerId) return next();
 
   return res.status(401).json({ message: "Unauthorized" });
 };
@@ -63,8 +55,20 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   
-  await setupAuth(app);
-  registerAuthRoutes(app);
+  await authProvider.setup(app);
+
+  // Current-user endpoint — provider-agnostic, backed by the active AuthProvider.
+  app.get("/api/auth/user", authProvider.isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const current = getCurrentUser(req);
+      if (!current) return res.status(401).json({ message: "Unauthorized" });
+      const dbUser = await authStorage.getUser(current.id);
+      res.json(dbUser ?? current);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
 
   // Tenant context on all requests (no-op if unauthenticated)
   app.use(injectTenantId);
