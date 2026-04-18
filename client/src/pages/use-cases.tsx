@@ -667,17 +667,15 @@ export default function UseCases() {
               <h3 className="font-semibold mb-4">Resources</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/docs" className="hover:text-foreground transition-colors">Documentation</Link></li>
-                <li><Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link></li>
-                <li><Link href="/case-studies" className="hover:text-foreground transition-colors">Case Studies</Link></li>
                 <li><Link href="/eu-dpp-guide" className="hover:text-foreground transition-colors">EU DPP Guide</Link></li>
+                <li><Link href="/faqs" className="hover:text-foreground transition-colors">FAQs</Link></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Company</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#about" className="hover:text-foreground transition-colors">About</a></li>
-                <li><Link href="/careers" className="hover:text-foreground transition-colors">Careers</Link></li>
                 <li><Link href="/contact" className="hover:text-foreground transition-colors">Contact</Link></li>
+                <li><Link href="/book-demo" className="hover:text-foreground transition-colors">Book a Demo</Link></li>
               </ul>
             </div>
             <div>
