@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { SiSap } from "react-icons/si";
 import { format } from "date-fns";
+import { SAPHubNav } from "@/components/sap-hub-nav";
 import type { EnterpriseConnector, FieldMapping } from "@shared/schema";
 
 interface SyncLog {
@@ -212,6 +213,7 @@ export default function SAPOperations() {
 
   return (
     <div className="space-y-6">
+      <SAPHubNav />
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">

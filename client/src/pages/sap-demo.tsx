@@ -31,6 +31,7 @@ import {
   Activity,
   Server,
 } from "lucide-react";
+import { SAPHubNav } from "@/components/sap-hub-nav";
 import type { Product } from "@shared/schema";
 
 interface SAPMaterial {
@@ -366,6 +367,7 @@ export default function SAPDemoPage() {
 
   return (
     <div className="space-y-6">
+      <SAPHubNav />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">

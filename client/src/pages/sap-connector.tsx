@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Loader2, Server, RefreshCw, CheckCircle2, XCircle, Clock, ArrowLeftRight, Database, Settings2, ShieldCheck, KeyRound, Wifi, WifiOff } from "lucide-react";
 import { SiSap } from "react-icons/si";
+import { SAPHubNav } from "@/components/sap-hub-nav";
 import type { EnterpriseConnector, SAPConfig, FieldMapping } from "@shared/schema";
 
 const sapConfigSchema = z.object({
@@ -257,6 +258,7 @@ export default function SAPConnector() {
 
   return (
     <div className="space-y-6">
+      <SAPHubNav />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-amber-500 rounded-lg">
