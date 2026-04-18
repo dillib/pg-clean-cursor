@@ -62,9 +62,15 @@ jobs:
           --health-retries 10
     env:
       NODE_ENV: test
+      PORT: "5000"
       DATABASE_URL: postgresql://postgres:test@localhost:5432/photonictag_test
       TEST_DATABASE_URL: postgresql://postgres:test@localhost:5432/photonictag_test
       SESSION_SECRET: ci-test-secret
+      AUDIT_CHAIN_HMAC_KEY: ci-test-hmac-key
+      CONNECTOR_ENCRYPTION_KEY: "0000000000000000000000000000000000000000000000000000000000000000"
+      # workos provider gracefully degrades when WORKOS_* is unset (auth
+      # routes return 503) — safer than replit which does live OIDC discovery.
+      AUTH_PROVIDER: workos
       REPL_ID: ci-repl-id
       PLAYWRIGHT_BASE_URL: http://localhost:5000
     steps:

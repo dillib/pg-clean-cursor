@@ -16,13 +16,14 @@ export default defineConfig({
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
   ],
-  // Start the dev server automatically when running locally
-  webServer: process.env.CI
-    ? undefined
-    : {
-        command: "npm run dev",
-        url: "http://localhost:5000",
-        reuseExistingServer: true,
-        timeout: 60_000,
-      },
+  // Start the dev server automatically. In CI we let Playwright boot it so
+  // tests can't race ahead of a cold startup; locally we reuse any running one.
+  webServer: {
+    command: "npm run dev",
+    url: "http://localhost:5000",
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+    stdout: "pipe",
+    stderr: "pipe",
+  },
 });

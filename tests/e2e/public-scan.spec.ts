@@ -5,9 +5,9 @@ import { test, expect } from "@playwright/test";
  * These tests run against the live dev server.
  */
 
-test.describe("Public scan endpoint", () => {
-  const FAKE_PRODUCT_ID = "00000000-0000-0000-0000-000000000001";
+const FAKE_PRODUCT_ID = "00000000-0000-0000-0000-000000000001";
 
+test.describe("Public scan endpoint", () => {
   test("returns 404 for unknown product", async ({ request }) => {
     const res = await request.post(`/api/products/${FAKE_PRODUCT_ID}/scan`, {
       data: { sessionId: "test-session-abc" },
