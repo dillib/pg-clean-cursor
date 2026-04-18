@@ -10,7 +10,12 @@ const navLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
-export function PublicNav({ hideBookDemo = false }: { hideBookDemo?: boolean } = {}) {
+type PublicNavProps = {
+  hideBookDemo?: boolean;
+  hideSignIn?: boolean;
+};
+
+export function PublicNav({ hideBookDemo = false, hideSignIn = false }: PublicNavProps = {}) {
   return (
     <nav className="sticky top-0 z-50 border-b border-border/60 bg-background/75 backdrop-blur-xl shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -25,8 +30,8 @@ export function PublicNav({ hideBookDemo = false }: { hideBookDemo?: boolean } =
           </Link>
           <div className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
-              <Link 
-                key={link.href} 
+              <Link
+                key={link.href}
                 href={link.href}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
                 data-testid={`link-${link.label.toLowerCase().replace(/\s/g, '-')}`}
@@ -35,8 +40,13 @@ export function PublicNav({ hideBookDemo = false }: { hideBookDemo?: boolean } =
               </Link>
             ))}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <ThemeToggle />
+            {!hideSignIn && (
+              <Button variant="ghost" asChild data-testid="button-sign-in">
+                <Link href="/login">Sign In</Link>
+              </Button>
+            )}
             {!hideBookDemo && (
               <Button asChild data-testid="button-book-demo">
                 <Link href="/book-demo">

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { PublicNav } from "@/components/public-nav";
 import { FadeUp, StaggerContainer, StaggerItem, HoverLift } from "@/components/motion";
 import {
   Accordion,
@@ -81,36 +81,9 @@ const faqItems = [
 export default function Landing() {
   return (
     <div className="min-h-screen bg-background">
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between gap-4">
-            <div className="flex items-center gap-2" data-testid="nav-logo">
-              <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-                <QrCode className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-bold tracking-tight">PhotonicTag</span>
-            </div>
-            <div className="hidden md:flex items-center gap-6">
-              <Link href="/solution" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-solution">Solution</Link>
-              <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-pricing">Pricing</Link>
-              <Link href="/use-cases" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-use-cases">Use Cases</Link>
-              <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-docs">Docs</Link>
-              <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-contact">Contact</Link>
-            </div>
-            <div className="flex items-center gap-3">
-              <ThemeToggle />
-              <Button variant="ghost" asChild data-testid="button-login">
-                <a href="/api/login">Log In</a>
-              </Button>
-              <Button asChild data-testid="button-get-started">
-                <a href="/api/login">Get Started</a>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <PublicNav />
 
-      <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative pt-16 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />

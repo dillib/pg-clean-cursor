@@ -38,6 +38,7 @@ const CRM = lazy(() => import("@/pages/crm"));
 const PartnerLogin = lazy(() => import("@/pages/partner-login"));
 const DemoLogin = lazy(() => import("@/pages/demo-login"));
 const AdminLogin = lazy(() => import("@/pages/admin-login"));
+const Login = lazy(() => import("@/pages/login"));
 const AdminInternal = lazy(() => import("@/pages/admin-internal"));
 const Docs = lazy(() => import("@/pages/docs"));
 const Presentation = lazy(() => import("@/pages/presentation"));
@@ -429,6 +430,7 @@ function Router() {
       <Route path="/integrations" component={Integrations} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/contact" component={Contact} />
+      <Route path="/login" component={Login} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/internal/login" component={PartnerLogin} />
       <Route path="/demo/login" component={DemoLogin} />
