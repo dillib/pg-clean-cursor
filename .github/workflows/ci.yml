@@ -72,6 +72,12 @@ jobs:
       # routes return 503) — safer than replit which does live OIDC discovery.
       AUTH_PROVIDER: workos
       REPL_ID: ci-repl-id
+      # Dummy AI keys — OpenAI SDK throws at construction if apiKey is unset,
+      # and aiClient + internal-routes instantiate at module load. Tests don't
+      # exercise AI paths, so any non-empty string is fine.
+      AI_PROVIDER: openai
+      AI_API_KEY: ci-dummy-ai-key
+      AI_INTEGRATIONS_OPENAI_API_KEY: ci-dummy-openai-key
       PLAYWRIGHT_BASE_URL: http://localhost:5000
     steps:
       - uses: actions/checkout@v4
