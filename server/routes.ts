@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { type Server } from "http";
-import OpenAI from "openai";
-import { insertProductSchema, insertIoTDeviceSchema, insertEnterpriseConnectorSchema, insertLeadSchema, insertPartnerSchema, insertDemoConfigSchema, insertDemoBookingSchema } from "@shared/schema";
+import { aiClient, AI_CHAT_MODEL } from "./services/ai-client";
+import { insertProductSchema, insertIoTDeviceSchema, insertEnterpriseConnectorSchema, insertLeadSchema, insertPartnerSchema, insertDemoConfigSchema, insertDemoBookingSchema, updatePartnerSchema } from "@shared/schema";
 import { productService } from "./services/product-service";
 import { qrService } from "./services/qr-service";
 import { sendBookingConfirmation, sendTeamNotification, sendSAPAlertEmail } from "./services/email";
@@ -11,8 +11,27 @@ import { aiService } from "./services/ai-service";
 import { auditService } from "./services/audit-service";
 import { iotService } from "./services/iot-service";
 import { seedDemoData } from "./seed-demo-data";
-import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
+import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
+import { authProvider } from "./auth";
+import { injectTenantId } from "./middleware/tenant";
+import { tenantStorage } from "./storage-tenant";
+import { encryptSAPCredentials } from "./services/crypto-service";
+
+/** Strips credential fields before returning a connector to the client. */
+function redactConnectorForResponse<T extends { config?: unknown; credentialsCiphertext?: string | null }>(connector: T): T {
+  const { credentialsCiphertext: _hidden, ...rest } = connector as any;
+  const cfg = (connector.config ?? {}) as Record<string, unknown>;
+  const redactedConfig: Record<string, unknown> = { ...cfg };
+  for (const field of ["password", "oauthClientSecret"]) {
+    if (redactedConfig[field] !== undefined) redactedConfig[field] = "***REDACTED***";
+  }
+  return { ...rest, config: redactedConfig } as T;
+}
+import { scanLimiter, formLimiter, identityLimiter, authLimiter, aiLimiter, apiLimiter } from "./middleware/rate-limit";
 import { storage } from "./storage";
+
+// isAuthenticated from the swappable provider
+const { isAuthenticated } = authProvider;
 import sapRoutes from "./routes/sap-routes";
 import { applyFieldMappings } from "./services/sap-odata-client";
 import { sapMockService } from "./services/sap-mock-service";
@@ -46,6 +65,11 @@ export async function registerRoutes(
   
   await setupAuth(app);
   registerAuthRoutes(app);
+
+  // Tenant context on all requests (no-op if unauthenticated)
+  app.use(injectTenantId);
+  // Global API rate limit — catch-all before any endpoint
+  app.use("/api/", apiLimiter);
   
   // ==========================================
   // SEO: SITEMAP + ROBOTS
@@ -114,21 +138,22 @@ ${pages.map(p => `  <url>
         return res.status(400).json({ error: "Invalid product data", details: parsed.error.issues });
       }
 
-      const product = await productService.createProduct(parsed.data);
-      
+      const scoped = tenantStorage(req);
+      const product = await productService.createProduct(parsed.data, scoped);
+
       await qrService.generateQRCode(product.id);
-      
+
       await identityService.createIdentity(product.id);
-      
+
       await traceService.recordEvent(product.id, "manufactured", product.manufacturer, {
         description: `Product ${product.productName} registered in PhotonicTag`,
         location: { name: product.manufacturer },
       });
-      
+
       await auditService.logCreate("product", product.id, product as unknown as Record<string, unknown>);
-      
-      const updatedProduct = await productService.getProduct(product.id);
-      
+
+      const updatedProduct = await productService.getProduct(product.id, scoped);
+
       res.status(201).json(updatedProduct);
     } catch (error) {
       console.error("Error creating product:", error);
@@ -138,7 +163,8 @@ ${pages.map(p => `  <url>
 
   app.put("/api/products/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
-      const existingProduct = await productService.getProduct(req.params.id);
+      const scoped = tenantStorage(req);
+      const existingProduct = await productService.getProduct(req.params.id, scoped);
       if (!existingProduct) {
         return res.status(404).json({ error: "Product not found" });
       }
@@ -148,17 +174,17 @@ ${pages.map(p => `  <url>
         return res.status(400).json({ error: "Invalid product data", details: parsed.error.issues });
       }
 
-      const product = await productService.updateProduct(req.params.id, parsed.data);
-      
+      const product = await productService.updateProduct(req.params.id, parsed.data, scoped);
+
       if (product) {
         await auditService.logUpdate(
-          "product", 
-          product.id, 
+          "product",
+          product.id,
           existingProduct as unknown as Record<string, unknown>,
           product as unknown as Record<string, unknown>
         );
       }
-      
+
       res.json(product);
     } catch (error) {
       console.error("Error updating product:", error);
@@ -168,18 +194,19 @@ ${pages.map(p => `  <url>
 
   app.delete("/api/products/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
-      const existingProduct = await productService.getProduct(req.params.id);
+      const scoped = tenantStorage(req);
+      const existingProduct = await productService.getProduct(req.params.id, scoped);
       if (!existingProduct) {
         return res.status(404).json({ error: "Product not found" });
       }
-      
-      const deleted = await productService.deleteProduct(req.params.id);
+
+      const deleted = await productService.deleteProduct(req.params.id, scoped);
       if (!deleted) {
         return res.status(404).json({ error: "Product not found" });
       }
-      
+
       await auditService.logDelete("product", req.params.id, existingProduct as unknown as Record<string, unknown>);
-      
+
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -217,7 +244,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.post("/api/identities/validate", async (req: Request, res: Response) => {
+  app.post("/api/identities/validate", identityLimiter, async (req: Request, res: Response) => {
     try {
       const { serialNumber } = req.body;
       const result = await identityService.validateIdentity(serialNumber);
@@ -296,7 +323,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.post("/api/products/:productId/trace", async (req: Request, res: Response) => {
+  app.post("/api/products/:productId/trace", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const { eventType, actor, location, description, metadata } = req.body;
       
@@ -330,7 +357,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.post("/api/ai/summarize", async (req: Request, res: Response) => {
+  app.post("/api/ai/summarize", aiLimiter, async (req: Request, res: Response) => {
     try {
       const { productId } = req.body;
       const product = await productService.getProduct(productId);
@@ -347,7 +374,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.post("/api/ai/sustainability", async (req: Request, res: Response) => {
+  app.post("/api/ai/sustainability", aiLimiter, async (req: Request, res: Response) => {
     try {
       const { productId } = req.body;
       const product = await productService.getProduct(productId);
@@ -364,7 +391,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.post("/api/ai/repair-summary", async (req: Request, res: Response) => {
+  app.post("/api/ai/repair-summary", aiLimiter, async (req: Request, res: Response) => {
     try {
       const { productId } = req.body;
       const product = await productService.getProduct(productId);
@@ -381,7 +408,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.post("/api/ai/circularity", async (req: Request, res: Response) => {
+  app.post("/api/ai/circularity", aiLimiter, async (req: Request, res: Response) => {
     try {
       const { productId } = req.body;
       const product = await productService.getProduct(productId);
@@ -398,7 +425,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.post("/api/ai/risk-assessment", async (req: Request, res: Response) => {
+  app.post("/api/ai/risk-assessment", aiLimiter, async (req: Request, res: Response) => {
     try {
       const { productId } = req.body;
       const product = await productService.getProduct(productId);
@@ -585,7 +612,9 @@ ${pages.map(p => `  <url>
   app.post("/api/products/:productId/regional-extensions", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const { productId } = req.params;
-      const product = await storage.getProduct(productId);
+      // Tenant-scoped ownership check: prevents tenant A from attaching a
+      // regional extension to tenant B's product.
+      const product = await tenantStorage(req).getProduct(productId);
       if (!product) {
         return res.status(404).json({ error: "Product not found" });
       }
@@ -631,19 +660,28 @@ ${pages.map(p => `  <url>
   // SCAN INTELLIGENCE & CONSUMER REGISTRATION
   // ==========================================
 
-  // Record a scan — public, no auth
-  app.post("/api/products/:productId/scan", async (req: Request, res: Response) => {
+  // Record a scan — public, no auth; rate-limited per IP
+  app.post("/api/products/:productId/scan", scanLimiter, async (req: Request, res: Response) => {
     try {
       const { productId } = req.params;
       const product = await storage.getProduct(productId);
       if (!product) return res.status(404).json({ error: "Product not found" });
 
-      const sessionId = (req.body?.sessionId as string) || (req.headers["x-session-id"] as string) || null;
+      // sessionId comes from the client for deduplication, but isUnique is
+      // computed server-side — never trust the client to declare itself unique.
+      const rawSessionId = (req.headers["x-session-id"] as string) || (req.body?.sessionId as string) || null;
+      const sessionId = rawSessionId ? rawSessionId.slice(0, 128) : null;
       const userAgent = (req.headers["user-agent"] || "").slice(0, 255);
       const referrer = (req.headers.referer || "").slice(0, 255);
-      // Simple country hint from Accept-Language (e.g. "en-US,en;q=0.9" → "US")
       const acceptLang = req.headers["accept-language"] || "";
       const country = acceptLang.match(/[a-z]{2}-([A-Z]{2})/)?.[1] || null;
+
+      // isUnique: true only when we have a sessionId AND this session hasn't
+      // scanned this product before. The storage layer enforces this.
+      const previousScan = sessionId
+        ? await storage.findProductScanBySession(productId, sessionId)
+        : null;
+      const isUnique = !!sessionId && !previousScan;
 
       const scan = await storage.recordProductScan({
         productId,
@@ -651,7 +689,7 @@ ${pages.map(p => `  <url>
         userAgent,
         referrer,
         sessionId,
-        isUnique: !!sessionId,
+        isUnique,
       });
       res.status(201).json({ id: scan.id });
     } catch (error) {
@@ -664,6 +702,12 @@ ${pages.map(p => `  <url>
   app.get("/api/products/:productId/scan-analytics", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const { productId } = req.params;
+      // Tenant-scoped ownership check before revealing scan/registration data
+      // for this product.
+      const owned = await tenantStorage(req).getProduct(productId);
+      if (!owned) {
+        return res.status(404).json({ error: "Product not found" });
+      }
       const [stats, recent, byDay, registrations] = await Promise.all([
         storage.getProductScanStats(productId),
         storage.getRecentProductScans(productId, 20),
@@ -677,8 +721,8 @@ ${pages.map(p => `  <url>
     }
   });
 
-  // Consumer product registration — public
-  app.post("/api/products/:productId/register", async (req: Request, res: Response) => {
+  // Consumer product registration — public, rate limited
+  app.post("/api/products/:productId/register", formLimiter, async (req: Request, res: Response) => {
     try {
       const { productId } = req.params;
       const product = await storage.getProduct(productId);
@@ -724,8 +768,8 @@ ${pages.map(p => `  <url>
 
   app.get("/api/integrations/connectors", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
-      const connectors = await storage.getAllEnterpriseConnectors();
-      res.json(connectors);
+      const connectors = await tenantStorage(req).getAllEnterpriseConnectors();
+      res.json(connectors.map(redactConnectorForResponse));
     } catch (error) {
       console.error("Error fetching connectors:", error);
       res.status(500).json({ error: "Failed to fetch connectors" });
@@ -734,11 +778,11 @@ ${pages.map(p => `  <url>
 
   app.get("/api/integrations/connectors/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
-      const connector = await storage.getEnterpriseConnector(req.params.id);
+      const connector = await tenantStorage(req).getEnterpriseConnector(req.params.id);
       if (!connector) {
         return res.status(404).json({ error: "Connector not found" });
       }
-      res.json(connector);
+      res.json(redactConnectorForResponse(connector));
     } catch (error) {
       console.error("Error fetching connector:", error);
       res.status(500).json({ error: "Failed to fetch connector" });
@@ -751,8 +795,18 @@ ${pages.map(p => `  <url>
       if (!parsed.success) {
         return res.status(400).json({ error: "Invalid connector data", details: parsed.error.issues });
       }
-      const connector = await storage.createEnterpriseConnector(parsed.data);
-      res.status(201).json(connector);
+      // Split sensitive credentials out of the plaintext config JSONB and
+      // store them as an AES-256-GCM ciphertext in credentialsCiphertext.
+      const rawConfig = (parsed.data.config ?? {}) as Record<string, unknown>;
+      const { redactedConfig, credentialsCiphertext } = encryptSAPCredentials(rawConfig);
+      const tenantId = req.tenantId ?? "default";
+      const connector = await storage.createEnterpriseConnector({
+        ...parsed.data,
+        tenantId,
+        config: redactedConfig,
+        ...(credentialsCiphertext ? { credentialsCiphertext } : {}),
+      } as any);
+      res.status(201).json(redactConnectorForResponse(connector));
     } catch (error) {
       console.error("Error creating connector:", error);
       res.status(500).json({ error: "Failed to create connector" });
@@ -761,11 +815,29 @@ ${pages.map(p => `  <url>
 
   app.patch("/api/integrations/connectors/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const connector = await storage.updateEnterpriseConnector(req.params.id, req.body);
+      // Tenant-ownership gate: refuse to patch a connector from another tenant.
+      const owned = await tenantStorage(req).getEnterpriseConnector(req.params.id);
+      if (!owned) {
+        return res.status(404).json({ error: "Connector not found" });
+      }
+      const body = { ...(req.body ?? {}) } as Record<string, unknown>;
+      // Never allow the client to set credentialsCiphertext directly —
+      // always derive it from the config payload.
+      delete body.credentialsCiphertext;
+      // tenantId is server-controlled; prevent client reassignment.
+      delete body.tenantId;
+      if (body.config && typeof body.config === "object") {
+        const { redactedConfig, credentialsCiphertext } = encryptSAPCredentials(
+          body.config as Record<string, unknown>
+        );
+        body.config = redactedConfig;
+        if (credentialsCiphertext) body.credentialsCiphertext = credentialsCiphertext;
+      }
+      const connector = await storage.updateEnterpriseConnector(req.params.id, body as any);
       if (!connector) {
         return res.status(404).json({ error: "Connector not found" });
       }
-      res.json(connector);
+      res.json(redactConnectorForResponse(connector));
     } catch (error) {
       console.error("Error updating connector:", error);
       res.status(500).json({ error: "Failed to update connector" });
@@ -774,6 +846,11 @@ ${pages.map(p => `  <url>
 
   app.delete("/api/integrations/connectors/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
+      // Tenant-ownership gate before delete.
+      const owned = await tenantStorage(req).getEnterpriseConnector(req.params.id);
+      if (!owned) {
+        return res.status(404).json({ error: "Connector not found" });
+      }
       const deleted = await storage.deleteEnterpriseConnector(req.params.id);
       if (!deleted) {
         return res.status(404).json({ error: "Connector not found" });
@@ -787,7 +864,7 @@ ${pages.map(p => `  <url>
 
   app.post("/api/integrations/connectors/:id/test", isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const connector = await storage.getEnterpriseConnector(req.params.id);
+      const connector = await tenantStorage(req).getEnterpriseConnector(req.params.id);
       if (!connector) {
         return res.status(404).json({ error: "Connector not found" });
       }
@@ -805,7 +882,8 @@ ${pages.map(p => `  <url>
 
   app.post("/api/integrations/connectors/:id/sync", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
-      const connector = await storage.getEnterpriseConnector(req.params.id);
+      const scoped = tenantStorage(req);
+      const connector = await scoped.getEnterpriseConnector(req.params.id);
       if (!connector) {
         return res.status(404).json({ error: "Connector not found" });
       }
@@ -832,7 +910,7 @@ ${pages.map(p => `  <url>
           .filter(m => m.syncStatus === "pending" && !m.photonicTagId)
           .slice(0, 20);
 
-        const existingProducts = await storage.getAllProducts();
+        const existingProducts = await scoped.getAllProducts();
 
         for (const material of materials) {
           try {
@@ -842,7 +920,7 @@ ${pages.map(p => `  <url>
 
             const existing = existingProducts.find(p => p.modelNumber === material.MARA.MATNR);
             if (existing) {
-              await storage.updateProduct(existing.id, mappedData);
+              await scoped.updateProduct(existing.id, mappedData);
               sapMockService.linkToPhotonicTag(material.MARA.MATNR, existing.id);
               updated++;
             } else {
@@ -862,7 +940,7 @@ ${pages.map(p => `  <url>
                 recyclingInstructions: md.recyclingInstructions as string || "",
                 dateOfManufacture,
               };
-              const newProduct = await storage.createProduct(insertData as unknown as import("@shared/schema").InsertProduct);
+              const newProduct = await scoped.createProduct(insertData as unknown as import("@shared/schema").InsertProduct);
               sapMockService.linkToPhotonicTag(material.MARA.MATNR, newProduct.id);
               created++;
             }
@@ -951,7 +1029,7 @@ ${pages.map(p => `  <url>
   // ADMIN/DEMO ENDPOINTS
   // ==========================================
   
-  app.post("/api/admin/seed-demo-data", async (req: Request, res: Response) => {
+  app.post("/api/admin/seed-demo-data", isAuthenticated, async (req: Request, res: Response) => {
     try {
       await seedDemoData();
       res.json({ success: true, message: "Demo data seeded successfully" });
@@ -965,8 +1043,8 @@ ${pages.map(p => `  <url>
   // LEADS CRM ENDPOINTS
   // ==========================================
 
-  // Public endpoint for contact form submissions
-  app.post("/api/leads", async (req: Request, res: Response) => {
+  // Public endpoint for contact form submissions — rate limited
+  app.post("/api/leads", formLimiter, async (req: Request, res: Response) => {
     try {
       // Coerce ISO date strings to Date objects for timestamp fields
       const body = { ...req.body };
@@ -1230,14 +1308,19 @@ ${pages.map(p => `  <url>
 
   app.patch("/api/partners/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const updates: any = { ...req.body };
-
-      if (updates.password) {
-        updates.passwordHash = await bcrypt.hash(updates.password, 10);
-        delete updates.password;
+      const parsed = updatePartnerSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid update data", details: parsed.error.issues });
       }
 
-      const partner = await storage.updatePartner(req.params.id, updates);
+      const { password, ...rest } = parsed.data;
+      const safeUpdates: Record<string, unknown> = { ...rest };
+
+      if (password) {
+        safeUpdates.passwordHash = await bcrypt.hash(password, 10);
+      }
+
+      const partner = await storage.updatePartner(req.params.id, safeUpdates as any);
       if (!partner) {
         return res.status(404).json({ error: "Partner not found" });
       }
@@ -1363,8 +1446,8 @@ ${pages.map(p => `  <url>
     }
   });
 
-  // POST /api/demo-bookings — create a booking and upsert a lead
-  app.post("/api/demo-bookings", async (req: Request, res: Response) => {
+  // POST /api/demo-bookings — create a booking and upsert a lead; rate limited
+  app.post("/api/demo-bookings", formLimiter, async (req: Request, res: Response) => {
     try {
       const parsed = insertDemoBookingSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -1501,7 +1584,9 @@ ${pages.map(p => `  <url>
   // SAP INTEGRATION ENDPOINTS (Protected)
   // ==========================================
   app.use("/api/sap", isAuthenticated, sapRoutes);
-  app.use(exportRoutes);
+  // Export endpoints (PPTX/DOCX) contain internal pricing, roadmap, and proposal content
+  // — restricted to authenticated team/admin users only.
+  app.use(isAuthenticatedOrTeam, exportRoutes);
 
   return httpServer;
 }
@@ -1528,12 +1613,8 @@ Return a JSON array of 3 products. Each product must have:
 
 Respond ONLY with a valid JSON array, no markdown.`;
 
-    const openai = new OpenAI({
-      apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-    });
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const response = await aiClient.chat.completions.create({
+      model: AI_CHAT_MODEL,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: prompt },

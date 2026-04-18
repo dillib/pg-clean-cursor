@@ -1,9 +1,9 @@
-import OpenAI from "openai";
 import { storage } from "../storage";
 import { eventBus } from "../events/event-bus";
-import type { 
-  AIInsight, 
-  InsertAIInsight, 
+import { aiClient, AI_CHAT_MODEL } from "./ai-client";
+import type {
+  AIInsight,
+  InsertAIInsight,
   AIInsightType,
   Product,
   AISummary,
@@ -13,18 +13,13 @@ import type {
   RiskAssessment
 } from "@shared/schema";
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
-
 async function getChatCompletion(messages: Array<{ role: "user" | "assistant" | "system"; content: string }>): Promise<string> {
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
+  const response = await aiClient.chat.completions.create({
+    model: AI_CHAT_MODEL,
     messages,
     response_format: { type: "json_object" },
   });
-  
+
   return response.choices[0]?.message?.content || "{}";
 }
 
@@ -174,7 +169,7 @@ Respond in JSON format: { "overallRisk": "Low", "riskFlags": [{"type": "...", "s
       productId,
       insightType,
       content,
-      model: "gpt-4o",
+      model: AI_CHAT_MODEL,
       isStale: false,
     };
 

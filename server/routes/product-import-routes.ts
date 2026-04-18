@@ -1,18 +1,21 @@
 import { Router, type Request, type Response } from "express";
+import { randomUUID } from "crypto";
 import multer from "multer";
 import * as XLSX from "xlsx";
-import OpenAI from "openai";
+import { aiClient, AI_CHAT_MODEL } from "../services/ai-client";
 import { storage } from "../storage";
+import { tenantStorage } from "../storage-tenant";
 import { qrService } from "../services/qr-service";
 import { insertProductSchema } from "@shared/schema";
+import {
+  validateAIOutput,
+  enforceConfidenceThresholds,
+  buildAIProvenanceEntries,
+  buildHumanProvenanceEntries,
+} from "../services/ai-eval-harness";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
-
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
 
 // ─── Column name aliases → internal field names ───────────────────────────
 const PRODUCT_COLUMN_MAP: Record<string, string> = {
@@ -150,6 +153,7 @@ router.post("/bulk-import", upload.single("file"), async (req: Request, res: Res
     const importBatchId = `IMPORT-${Date.now()}`;
     const businessUnitOverride = (req.body?.businessUnit as string) || undefined;
     const results = { created: 0, skipped: 0, failed: 0, errors: [] as string[], importBatchId, productIds: [] as string[] };
+    const scoped = tenantStorage(req);
 
     for (let i = 0; i < rawRows.length; i++) {
       const mapped = mapRow(rawRows[i], mapping);
@@ -158,7 +162,7 @@ router.post("/bulk-import", upload.single("file"), async (req: Request, res: Res
       try {
         const parsed = insertProductSchema.safeParse(coerced);
         if (!parsed.success) { results.failed++; results.errors.push(`Row ${i + 2}: ${parsed.error.issues.map(e => e.message).join(", ")}`); continue; }
-        const product = await storage.createProduct(parsed.data);
+        const product = await scoped.createProduct(parsed.data);
         await qrService.generateQRCode(product.id);
         results.created++;
         results.productIds.push(product.id);
@@ -211,16 +215,20 @@ Rules:
 - recyclingInstructions: practical guidance, e.g. "Separate metals and plastics. Deliver to certified e-waste facility."
 - Confidence: 0.9 = high certainty, 0.7–0.9 = medium, below 0.7 = low (mark clearly)
 
-Return ONLY this JSON — no markdown, no explanation:
+Return ONLY this JSON — no markdown, no explanation. Strict shape:
+- suggestions is an object keyed by field name; each entry MUST be { "value": string|number, "reason": string, "confidence": number between 0 and 1 }.
+- flags is an array; each flag MUST be { "field": string, "message": string, "severity": "info" | "warning" | "error" }. Do not invent other severity values.
+- "value" is a primitive (string or number). Never an object, array, or null.
+
 {
   "rows": [
     {
       "rowIndex": 0,
       "suggestions": {
-        "materials": { "value": "...", "reason": "...", "confidence": 0.85 }
+        "materials": { "value": "Stainless steel 316L, polypropylene seals", "reason": "Typical industrial pump build", "confidence": 0.85 }
       },
       "flags": [
-        { "field": "carbonFootprint", "message": "Value of 0 seems low for this product type. Estimate: 200–400 kg CO2." }
+        { "field": "carbonFootprint", "message": "Value of 0 seems low for this product type. Estimate: 200–400 kg CO2.", "severity": "warning" }
       ]
     }
   ]
@@ -236,8 +244,8 @@ ${JSON.stringify(rowsForAI.map(r => ({
       missingOptional: r.missingOptional,
     })), null, 2)}`;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const response = await aiClient.chat.completions.create({
+      model: AI_CHAT_MODEL,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -247,15 +255,47 @@ ${JSON.stringify(rowsForAI.map(r => ({
     });
 
     const raw = response.choices[0]?.message?.content || "{}";
-    let parsed: { rows?: any[] };
-    try { parsed = JSON.parse(raw); } catch { parsed = { rows: [] }; }
+    let rawParsed: unknown;
+    try { rawParsed = JSON.parse(raw); } catch { rawParsed = { rows: [] }; }
 
-    const aiRows = parsed.rows || [];
-    const flagged = aiRows.filter((r: any) => r.flags && r.flags.length > 0).length;
-    const enriched = aiRows.filter((r: any) => r.suggestions && Object.keys(r.suggestions).length > 0).length;
+    // Validate against strict schema — reject malformed AI output
+    const validated = validateAIOutput(rawParsed);
+    if (!validated.success) {
+      console.error("[AI Import] Schema validation failed:", validated.error);
+      return res.status(502).json({
+        error: "AI returned malformed output. Please retry or import without AI.",
+        details: validated.error,
+      });
+    }
+
+    // Enforce per-field confidence thresholds server-side
+    const runId = randomUUID();
+    const processedRows = validated.data.rows.map(row => {
+      const { acceptedSuggestions, rejectedFields } = enforceConfidenceThresholds(row);
+
+      // Append low-confidence rejections as flags for human review
+      const extraFlags = rejectedFields.map(r => ({
+        field: r.field,
+        message: `Confidence ${(r.confidence * 100).toFixed(0)}% is below the ${(r.threshold * 100).toFixed(0)}% threshold for this field. Suggested value: "${r.value}". Please review manually.`,
+        severity: "warning" as const,
+      }));
+
+      return {
+        ...row,
+        suggestions: acceptedSuggestions,
+        flags: [...row.flags, ...extraFlags],
+        // Tag each accepted suggestion with provenance metadata
+        provenance: buildAIProvenanceEntries(acceptedSuggestions, runId),
+        runId,
+      };
+    });
+
+    const flagged = processedRows.filter(r => r.flags.length > 0).length;
+    const enriched = processedRows.filter(r => Object.keys(r.suggestions).length > 0).length;
 
     res.json({
-      rows: aiRows,
+      rows: processedRows,
+      runId,
       stats: {
         analyzed: rows.length,
         enriched,
@@ -291,15 +331,28 @@ router.post("/bulk-import/confirmed", async (req: Request, res: Response) => {
       importBatchId,
       productIds: [] as string[],
     };
+    const scoped = tenantStorage(req);
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       if (!row.productName && !row.manufacturer) { results.skipped++; continue; }
 
+      // Build field provenance: AI-accepted fields tagged from row.provenance,
+      // remaining fields tagged as human-entered.
+      const aiProvenance: Record<string, any> = row.provenance ?? {};
+      const humanFields = Object.keys(row).filter(
+        k => !aiProvenance[k] && k !== "provenance" && k !== "runId"
+      );
+      const fieldProvenance = {
+        ...buildHumanProvenanceEntries(humanFields),
+        ...aiProvenance,
+      };
+
       const coerced = coerceProduct({
         ...row,
         businessUnit: businessUnit || row.businessUnit || undefined,
         importBatchId,
+        fieldProvenance,
       });
 
       try {
@@ -309,7 +362,7 @@ router.post("/bulk-import/confirmed", async (req: Request, res: Response) => {
           results.errors.push(`Row ${i + 1}: ${parsed.error.issues.map((e: any) => e.message).join(", ")}`);
           continue;
         }
-        const product = await storage.createProduct(parsed.data);
+        const product = await scoped.createProduct(parsed.data as any);
         await qrService.generateQRCode(product.id);
         results.created++;
         results.productIds.push(product.id);
@@ -343,13 +396,14 @@ router.post("/batch", async (req: Request, res: Response) => {
       failed: [] as { index: number; error: string }[],
       importBatchId,
     };
+    const scoped = tenantStorage(req);
 
     for (let i = 0; i < items.length; i++) {
       const raw = coerceProduct({ ...items[i], businessUnit: businessUnit || items[i].businessUnit, importBatchId });
       try {
         const parsed = insertProductSchema.safeParse(raw);
         if (!parsed.success) { results.failed.push({ index: i, error: parsed.error.issues.map((e: any) => e.message).join(", ") }); continue; }
-        const product = await storage.createProduct(parsed.data);
+        const product = await scoped.createProduct(parsed.data);
         await qrService.generateQRCode(product.id);
         results.created.push({ id: product.id, productName: product.productName, batchNumber: product.batchNumber, qrUrl: `/product/${product.id}` });
       } catch (err: any) {
@@ -369,8 +423,9 @@ router.post("/qr-export", async (req: Request, res: Response) => {
     const { productIds, importBatchId } = req.body as { productIds?: string[]; importBatchId?: string };
     let ids: string[] = productIds || [];
 
+    const scoped = tenantStorage(req);
     if (importBatchId && ids.length === 0) {
-      const allProducts = await storage.getAllProducts();
+      const allProducts = await scoped.getAllProducts();
       ids = allProducts.filter((p: any) => p.importBatchId === importBatchId).map((p: any) => p.id);
     }
 
@@ -380,7 +435,7 @@ router.post("/qr-export", async (req: Request, res: Response) => {
     const items: { name: string; batch: string; sku: string; qr: string; id: string }[] = [];
     for (const id of ids) {
       try {
-        const product = await storage.getProduct(id);
+        const product = await scoped.getProduct(id);
         if (!product) continue;
         let qrData = product.qrCodeData;
         if (!qrData) { const qrRecord = await qrService.generateQRCode(id); qrData = qrRecord?.qrCodeData || ""; }

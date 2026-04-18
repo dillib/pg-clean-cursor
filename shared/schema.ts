@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, jsonb, boolean, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, jsonb, boolean, serial, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -50,9 +50,22 @@ export interface ServiceCenter {
   contact?: string;
 }
 
+export type DataSource = "human" | "sap_sync" | "ai_accepted" | "system";
+
+export interface FieldProvenanceEntry {
+  source: DataSource;
+  at: string;      // ISO 8601
+  by?: string;     // userId or system identifier
+  confidence?: number; // 0–1, populated for ai_accepted
+}
+
+/** Maps each product field name to its provenance metadata. */
+export type FieldProvenanceMap = Record<string, FieldProvenanceEntry>;
+
 export const products = pgTable("products", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  
+  tenantId: text("tenant_id").notNull().default("default"),
+
   // === 1. PRODUCT IDENTIFICATION ===
   productName: text("product_name").notNull(),
   productCategory: text("product_category"),
@@ -109,10 +122,17 @@ export const products = pgTable("products", {
   // === ENTERPRISE / PLM FIELDS ===
   businessUnit: text("business_unit"),
   importBatchId: text("import_batch_id"),
+
+  // === DATA PROVENANCE ===
+  // Per-field source tracking stored as a JSONB map:
+  // { fieldName: { source: "human"|"sap_sync"|"ai_accepted"|"system", at: ISO8601, by?: userId } }
+  // Allows auditors to see exactly where each regulated value came from.
+  fieldProvenance: jsonb("field_provenance").$type<FieldProvenanceMap>().default({}),
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
   updatedAt: true,
   qrCodeData: true,
@@ -124,6 +144,7 @@ export type Product = typeof products.$inferSelect;
 // Product Passports - Extended DPP information
 export const productPassports = pgTable("product_passports", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   productId: varchar("product_id").references(() => products.id).notNull(),
   version: integer("version").default(1).notNull(),
   complianceData: jsonb("compliance_data").$type<Record<string, unknown>>().default({}),
@@ -137,6 +158,7 @@ export const productPassports = pgTable("product_passports", {
 
 export const insertProductPassportSchema = createInsertSchema(productPassports).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -150,6 +172,7 @@ export type ProductPassport = typeof productPassports.$inferSelect;
 
 export const identities = pgTable("identities", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   productId: varchar("product_id").references(() => products.id).notNull(),
   serialNumber: text("serial_number").notNull().unique(),
   gtin: text("gtin"),
@@ -162,6 +185,7 @@ export const identities = pgTable("identities", {
 
 export const insertIdentitySchema = createInsertSchema(identities).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
 });
 
@@ -174,6 +198,7 @@ export type Identity = typeof identities.$inferSelect;
 
 export const qrCodes = pgTable("qr_codes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   productId: varchar("product_id").references(() => products.id).notNull(),
   identityId: varchar("identity_id").references(() => identities.id),
   qrData: text("qr_data").notNull(),
@@ -187,6 +212,7 @@ export const qrCodes = pgTable("qr_codes", {
 
 export const insertQRCodeSchema = createInsertSchema(qrCodes).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
   scanCount: true,
   lastScannedAt: true,
@@ -218,6 +244,7 @@ export interface TraceLocation {
 
 export const traceEvents = pgTable("trace_events", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   productId: varchar("product_id").references(() => products.id).notNull(),
   eventType: text("event_type").$type<TraceEventType>().notNull(),
   actor: text("actor").notNull(),
@@ -231,6 +258,7 @@ export const traceEvents = pgTable("trace_events", {
 
 export const insertTraceEventSchema = createInsertSchema(traceEvents).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
 });
 
@@ -256,6 +284,7 @@ export interface IoTSensorReading {
 
 export const iotDevices = pgTable("iot_devices", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   productId: varchar("product_id").references(() => products.id).notNull(),
   deviceType: text("device_type").$type<IoTDeviceType>().notNull(),
   deviceId: text("device_id").notNull().unique(),
@@ -272,6 +301,7 @@ export const iotDevices = pgTable("iot_devices", {
 
 export const insertIoTDeviceSchema = createInsertSchema(iotDevices).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
   updatedAt: true,
   lastSeenAt: true,
@@ -293,6 +323,7 @@ export type AIInsightType =
 
 export const aiInsights = pgTable("ai_insights", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   productId: varchar("product_id").references(() => products.id).notNull(),
   insightType: text("insight_type").$type<AIInsightType>().notNull(),
   content: jsonb("content").$type<Record<string, unknown>>().notNull(),
@@ -307,6 +338,7 @@ export const aiInsights = pgTable("ai_insights", {
 
 export const insertAIInsightSchema = createInsertSchema(aiInsights).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
 });
 
@@ -328,6 +360,7 @@ export type AuditAction =
 
 export const auditLogs = pgTable("audit_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   userId: varchar("user_id").references(() => users.id),
   action: text("action").$type<AuditAction>().notNull(),
   entityType: text("entity_type").notNull(),
@@ -338,10 +371,24 @@ export const auditLogs = pgTable("audit_logs", {
   userAgent: text("user_agent"),
   correlationId: varchar("correlation_id"),
   timestamp: timestamp("timestamp").default(sql`CURRENT_TIMESTAMP`).notNull(),
+
+  // === CRYPTOGRAPHIC PROVENANCE ===
+  // HMAC-SHA256 chain: each entry links to the previous, making tampering detectable.
+  chainHash: text("chain_hash"),
+  previousChainHash: text("previous_chain_hash"),
+  // SHA-256 fingerprint of the newValue payload (canonical JSON, sorted keys).
+  recordFingerprint: text("record_fingerprint"),
+  // eIDAS RFC 3161 timestamp token (base64 DER) — null until TSA is configured.
+  tsaToken: text("tsa_token"),
+  tsaUrl: text("tsa_url"),
+
+  // Data provenance: where did this value come from?
+  dataSource: text("data_source").$type<"human" | "sap_sync" | "ai_accepted" | "system">(),
 });
 
 export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
   id: true,
+  tenantId: true,
   timestamp: true,
 });
 
@@ -487,6 +534,7 @@ export interface RegionalExtensionPayload {
 
 export const dppRegionalExtensions = pgTable("dpp_regional_extensions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   productId: varchar("product_id").references(() => products.id).notNull(),
   regionCode: text("region_code").$type<RegionCode>().notNull(),
   schemaVersion: text("schema_version").default("1.0").notNull(),
@@ -501,6 +549,7 @@ export const dppRegionalExtensions = pgTable("dpp_regional_extensions", {
 
 export const insertDppRegionalExtensionSchema = createInsertSchema(dppRegionalExtensions).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -613,6 +662,7 @@ export const indiaExtensionSchema = z.object({
 
 export const dppAiInsights = pgTable("dpp_ai_insights", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   productId: varchar("product_id").references(() => products.id).notNull(),
   insightType: text("insight_type").$type<AIInsightType>().notNull(),
   content: jsonb("content").$type<Record<string, unknown>>().notNull(),
@@ -631,6 +681,7 @@ export const dppAiInsights = pgTable("dpp_ai_insights", {
 
 export const insertDppAiInsightSchema = createInsertSchema(dppAiInsights).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
   version: true,
 });
@@ -755,11 +806,15 @@ export interface FieldMapping {
 
 export const enterpriseConnectors = pgTable("enterprise_connectors", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   name: text("name").notNull(),
   connectorType: text("connector_type").$type<ConnectorType>().notNull(),
   status: text("status").$type<ConnectorStatus>().default("inactive").notNull(),
   syncDirection: text("sync_direction").$type<SyncDirection>().default("inbound").notNull(),
   config: jsonb("config").$type<SAPConfig | Record<string, unknown>>().default({}).notNull(),
+  // AES-256-GCM encrypted credentials blob (format: base64(iv) + ":" + base64(ciphertext) + ":" + base64(authTag))
+  // When present, supersedes plaintext fields in `config`. See server/services/crypto-service.ts.
+  credentialsCiphertext: text("credentials_ciphertext"),
   fieldMappings: jsonb("field_mappings").$type<FieldMapping[]>().default([]),
   lastSyncAt: timestamp("last_sync_at"),
   lastSyncStatus: text("last_sync_status"),
@@ -770,6 +825,8 @@ export const enterpriseConnectors = pgTable("enterprise_connectors", {
 
 export const insertEnterpriseConnectorSchema = createInsertSchema(enterpriseConnectors).omit({
   id: true,
+  tenantId: true,
+  credentialsCiphertext: true,
   createdAt: true,
   updatedAt: true,
   lastSyncAt: true,
@@ -782,6 +839,7 @@ export type EnterpriseConnector = typeof enterpriseConnectors.$inferSelect;
 
 export const integrationSyncLogs = pgTable("integration_sync_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   connectorId: varchar("connector_id").references(() => enterpriseConnectors.id).notNull(),
   syncType: text("sync_type").$type<"full" | "delta" | "manual">().notNull(),
   status: text("status").$type<"running" | "completed" | "failed">().notNull(),
@@ -796,6 +854,7 @@ export const integrationSyncLogs = pgTable("integration_sync_logs", {
 
 export const insertIntegrationSyncLogSchema = createInsertSchema(integrationSyncLogs).omit({
   id: true,
+  tenantId: true,
   completedAt: true,
 });
 
@@ -1277,3 +1336,57 @@ export const productRegistrations = pgTable("product_registrations", {
 export const insertProductRegistrationSchema = createInsertSchema(productRegistrations).omit({ id: true, registeredAt: true });
 export type InsertProductRegistration = z.infer<typeof insertProductRegistrationSchema>;
 export type ProductRegistration = typeof productRegistrations.$inferSelect;
+
+// ============================================
+// TENANTS (Multi-tenancy foundation)
+// ============================================
+
+export type TenantPlan = "trial" | "starter" | "growth" | "enterprise";
+export type TenantStatus = "active" | "suspended" | "cancelled";
+
+export const tenants = pgTable("tenants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  plan: text("plan").$type<TenantPlan>().default("trial").notNull(),
+  status: text("status").$type<TenantStatus>().default("active").notNull(),
+  // WorkOS / Okta organization ID — populated when SSO is configured
+  ssoOrganizationId: text("sso_organization_id").unique(),
+  // SCIM directory ID for automated provisioning
+  scimDirectoryId: text("scim_directory_id"),
+  // Region where this tenant's data must reside (eu-west-1, us-east-1, etc.)
+  // Used by cell-based regional deployment to route requests.
+  dataResidencyRegion: text("data_residency_region").default("eu-west-1").notNull(),
+  // Restricts which AI endpoint regions may process this tenant's data.
+  allowedAiRegions: jsonb("allowed_ai_regions").$type<string[]>().default(["eu"]).notNull(),
+  settings: jsonb("settings").$type<Record<string, unknown>>().default({}),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+}, (table) => [
+  index("idx_tenants_slug").on(table.slug),
+  index("idx_tenants_sso_org").on(table.ssoOrganizationId),
+]);
+
+export const insertTenantSchema = createInsertSchema(tenants).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertTenant = z.infer<typeof insertTenantSchema>;
+export type Tenant = typeof tenants.$inferSelect;
+
+// ============================================
+// PARTNER UPDATE SCHEMA (safe subset — prevents passwordHash injection)
+// ============================================
+
+export const updatePartnerSchema = z.object({
+  firstName: z.string().min(1).optional(),
+  lastName: z.string().min(1).optional(),
+  email: z.string().email().optional(),
+  company: z.string().optional(),
+  role: z.enum(["sales_partner", "reseller", "consultant", "demo_viewer"]).optional(),
+  status: z.enum(["active", "inactive", "pending"]).optional(),
+  // Password is re-hashed server-side; passwordHash is NEVER accepted from clients
+  password: z.string().min(6).optional(),
+});

@@ -9,7 +9,10 @@ import { seedDemoData } from "./seed-demo-data";
 import bcrypt from "bcryptjs";
 import { scheduleConnectorSync } from "./services/sap-odata-client";
 import { startReminderScheduler } from "./services/reminder-scheduler";
+import { describeAIProvider } from "./services/ai-client";
 import type { SAPConfig } from "@shared/schema";
+
+console.log(`[startup] AI: ${describeAIProvider()}`);
 
 const app = express();
 const httpServer = createServer(app);
@@ -29,6 +32,10 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false }));
+
+app.get("/healthz", (_req, res) => {
+  res.status(200).json({ status: "ok", uptime: process.uptime() });
+});
 
 // Serve stock images from attached_assets directory
 app.use("/assets", express.static(path.resolve(process.cwd(), "attached_assets")));

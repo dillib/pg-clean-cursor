@@ -1,4 +1,4 @@
-import { users, MASTER_ADMIN_EMAILS, type User, type UpsertUser } from "@shared/models/auth";
+import { users, isMasterAdminEmail, type User, type UpsertUser } from "@shared/models/auth";
 import { db } from "../../db";
 import { eq } from "drizzle-orm";
 
@@ -16,7 +16,7 @@ class AuthStorage implements IAuthStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const isAdmin = userData.email ? MASTER_ADMIN_EMAILS.includes(userData.email.toLowerCase()) : false;
+    const isAdmin = isMasterAdminEmail(userData.email);
     
     const existingByEmail = userData.email
       ? await db.select().from(users).where(eq(users.email, userData.email)).then(r => r[0])

@@ -13,8 +13,21 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)]
 );
 
-// Master admin emails - these users automatically get admin privileges
-export const MASTER_ADMIN_EMAILS = ["dillib@gmail.com"];
+// Master admin emails — sourced from MASTER_ADMIN_EMAILS env var (comma-separated).
+// Resolved lazily so tests can override via process.env at runtime.
+export function getMasterAdminEmails(): string[] {
+  const raw = process.env.MASTER_ADMIN_EMAILS;
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter((e) => e.length > 0);
+}
+
+export function isMasterAdminEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  return getMasterAdminEmails().includes(email.toLowerCase());
+}
 
 // User storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.

@@ -4,3 +4,10 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Environment / secrets — never commit real keys
+.env
+.env.*
+!.env.example
+scripts/fly-secrets.*.env
+!scripts/fly-secrets.env.example

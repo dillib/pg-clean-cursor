@@ -1,0 +1,134 @@
+name: Deploy
+
+# Prod on main push, staging on push to develop, and PR previews on every PR.
+# Every flow migrates the DB first (fails fast) before flipping Fly traffic.
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  # Serialize per-branch deploys so two merges can't race.
+  group: deploy-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # ─── Staging: push to develop ──────────────────────────────────────────────
+  deploy-staging:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    name: Deploy staging
+    runs-on: ubuntu-latest
+    environment: staging
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: DB migrate (Neon staging branch)
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: npm run db:push
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Fly deploy staging
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --config fly.staging.toml --remote-only
+
+  # ─── Production: push to main ─────────────────────────────────────────────
+  deploy-prod:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: Deploy production
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: deploy-prod
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: DB migrate (Neon prod)
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: npm run db:push
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Fly deploy production
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --config fly.toml --remote-only
+
+  # ─── PR preview: ephemeral app per PR ─────────────────────────────────────
+  # Needs FLY_API_TOKEN with org-level permission. Neon branch is created
+  # from prod on demand so data is realistic but isolated.
+  preview:
+    if: github.event_name == 'pull_request'
+    name: PR preview
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    env:
+      APP_NAME: photonictag-pr-${{ github.event.number }}
+      NEON_BRANCH: pr-${{ github.event.number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: Create / reuse Neon branch
+        id: neon
+        uses: neondatabase/create-branch-action@v5
+        with:
+          project_id: ${{ secrets.NEON_PROJECT_ID }}
+          branch_name: ${{ env.NEON_BRANCH }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+
+      - name: DB migrate (PR Neon branch)
+        env:
+          DATABASE_URL: ${{ steps.neon.outputs.db_url }}
+        run: npm run db:push
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Create Fly preview app (idempotent)
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          flyctl apps create "$APP_NAME" --org "${{ secrets.FLY_ORG }}" || true
+          flyctl secrets set --app "$APP_NAME" \
+            DATABASE_URL="${{ steps.neon.outputs.db_url }}" \
+            SESSION_SECRET="${{ secrets.PREVIEW_SESSION_SECRET }}" \
+            AUDIT_CHAIN_HMAC_KEY="${{ secrets.PREVIEW_AUDIT_CHAIN_HMAC_KEY }}" \
+            CONNECTOR_ENCRYPTION_KEY="${{ secrets.PREVIEW_CONNECTOR_ENCRYPTION_KEY }}" \
+            AI_API_KEY="${{ secrets.AI_API_KEY }}"
+
+      - name: Fly deploy preview
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --app "$APP_NAME" --config fly.staging.toml --remote-only
+
+      - name: Comment preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = `https://${process.env.APP_NAME}.fly.dev`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Preview deployed: ${url}`
+            });

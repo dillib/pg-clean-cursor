@@ -1,11 +1,62 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Package, QrCode, Recycle, Sparkles, ArrowRight, Plus } from "lucide-react";
+import {
+  Package,
+  QrCode,
+  Recycle,
+  Sparkles,
+  ArrowRight,
+  Plus,
+  ShieldCheck,
+  ListChecks,
+  Upload,
+} from "lucide-react";
 import { usePrefixedLink } from "@/hooks/use-route-prefix";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatCard } from "@/components/ui/stat-card";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { Product } from "@shared/schema";
+
+// Fields the EU ESPR regulation treats as core for a compliant DPP.
+// "Readiness" = % of products with every one of these filled.
+const REQUIRED_FIELDS = [
+  "manufacturer",
+  "materials",
+  "carbonFootprint",
+  "warrantyInfo",
+  "recyclingInstructions",
+] as const;
+
+function isFieldFilled(product: Product, field: string): boolean {
+  const v = (product as any)[field];
+  if (v === null || v === undefined) return false;
+  if (typeof v === "string") return v.trim().length > 0;
+  if (typeof v === "number") return v > 0;
+  return true;
+}
+
+function computeReadiness(products: Product[]) {
+  if (!products.length) return { score: 0, complete: 0, incomplete: 0 };
+  const complete = products.filter((p) =>
+    REQUIRED_FIELDS.every((f) => isFieldFilled(p, f)),
+  ).length;
+  return {
+    score: Math.round((complete / products.length) * 100),
+    complete,
+    incomplete: products.length - complete,
+  };
+}
 
 export default function Dashboard() {
   const link = usePrefixedLink();
@@ -13,109 +64,187 @@ export default function Dashboard() {
     queryKey: ["/api/products"],
   });
 
-  const totalProducts = products?.length || 0;
-  const avgRepairability = products?.length
-    ? Math.round(products.reduce((acc, p) => acc + p.repairabilityScore, 0) / products.length)
-    : 0;
-  const totalCarbonFootprint = products?.reduce((acc, p) => acc + p.carbonFootprint, 0) || 0;
+  const stats = useMemo(() => {
+    if (!products) return null;
+    const readiness = computeReadiness(products);
+    const avgRepair = products.length
+      ? Math.round(
+          products.reduce((a, p) => a + (p.repairabilityScore || 0), 0) /
+            products.length,
+        )
+      : 0;
+    const totalCarbon = products.reduce(
+      (a, p) => a + (p.carbonFootprint || 0),
+      0,
+    );
+    return {
+      total: products.length,
+      readiness,
+      avgRepair,
+      totalCarbon,
+    };
+  }, [products]);
+
+  const readinessTone: "success" | "warning" | "danger" =
+    !stats || stats.readiness.score >= 80
+      ? "success"
+      : stats.readiness.score >= 50
+        ? "warning"
+        : "danger";
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl" data-testid="text-dashboard-title">
-            Dashboard
-          </h1>
-          <p className="text-muted-foreground">
-            Manage your Digital Product Passports and track sustainability.
-          </p>
-        </div>
-        <Link href={link("/products/new")}>
-          <Button data-testid="button-create-product-hero">
-            <Plus className="mr-2 h-4 w-4" />
-            Create Product
-          </Button>
-        </Link>
+    <div className="space-y-6 sm:space-y-8 max-w-7xl">
+      <PageHeader
+        eyebrow="Overview"
+        title="Dashboard"
+        description="Your Digital Product Passports, compliance progress, and activity."
+        actions={
+          <>
+            <Link href={link("/products")}>
+              <Button variant="outline" size="sm">
+                <Upload className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Bulk import</span>
+                <span className="sm:hidden">Import</span>
+              </Button>
+            </Link>
+            <Link href={link("/products/new")}>
+              <Button size="sm" data-testid="button-create-product-hero">
+                <Plus className="mr-2 h-4 w-4" />
+                New product
+              </Button>
+            </Link>
+          </>
+        }
+      />
+
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="Compliance readiness"
+          value={stats ? `${stats.readiness.score}%` : "—"}
+          icon={ShieldCheck}
+          hint={
+            stats
+              ? `${stats.readiness.complete}/${stats.total} ESPR-ready`
+              : undefined
+          }
+          loading={isLoading}
+          tone={readinessTone}
+          testId="stat-readiness"
+        />
+        <StatCard
+          label="Total products"
+          value={stats?.total ?? 0}
+          icon={Package}
+          hint="Digital passports"
+          loading={isLoading}
+          testId="stat-total-products"
+        />
+        <StatCard
+          label="Avg repairability"
+          value={
+            stats ? (
+              <>
+                {stats.avgRepair}
+                <span className="text-lg text-muted-foreground">/10</span>
+              </>
+            ) : (
+              "—"
+            )
+          }
+          icon={Sparkles}
+          hint="Product average"
+          loading={isLoading}
+          testId="stat-avg-repairability"
+        />
+        <StatCard
+          label="Carbon footprint"
+          value={
+            stats ? (
+              <>
+                {stats.totalCarbon.toLocaleString()}
+                <span className="text-lg text-muted-foreground">kg</span>
+              </>
+            ) : (
+              "—"
+            )
+          }
+          icon={Recycle}
+          hint="Total CO₂ eq."
+          loading={isLoading}
+          testId="stat-carbon-footprint"
+        />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium truncate">Total Products</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground shrink-0" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl sm:text-3xl font-bold" data-testid="text-total-products">
-                {totalProducts}
+      <Card className="overflow-hidden">
+        <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle className="text-base sm:text-lg">
+              ESPR readiness
+            </CardTitle>
+            <CardDescription>
+              Products with every EU-required field filled.
+            </CardDescription>
+          </div>
+          {stats && stats.readiness.incomplete > 0 && (
+            <Link href={link("/products?filter=incomplete")}>
+              <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                <ListChecks className="mr-2 h-4 w-4" />
+                Review {stats.readiness.incomplete} incomplete
+              </Button>
+            </Link>
+          )}
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {isLoading ? (
+            <Skeleton className="h-3 w-full" />
+          ) : (
+            <>
+              <Progress
+                value={stats?.readiness.score ?? 0}
+                aria-label="ESPR readiness"
+                className="h-2"
+              />
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+                <span>
+                  {stats?.readiness.complete ?? 0} complete ·{" "}
+                  {stats?.readiness.incomplete ?? 0} need fields
+                </span>
+                <span className="tabular-nums">
+                  Required: {REQUIRED_FIELDS.join(", ")}
+                </span>
               </div>
-            )}
-            <p className="text-xs text-muted-foreground mt-1 truncate">Digital Passports</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium truncate">QR Active</CardTitle>
-            <QrCode className="h-4 w-4 text-muted-foreground shrink-0" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl sm:text-3xl font-bold" data-testid="text-qr-codes">
-                {totalProducts}
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground mt-1 truncate">Scannable identities</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium truncate">Avg Repair</CardTitle>
-            <Sparkles className="h-4 w-4 text-muted-foreground shrink-0" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl sm:text-3xl font-bold" data-testid="text-avg-repairability">
-                {avgRepairability}<span className="text-lg text-muted-foreground">/10</span>
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground mt-1 truncate">Product average</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium truncate">Carbon</CardTitle>
-            <Recycle className="h-4 w-4 text-muted-foreground shrink-0" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl sm:text-3xl font-bold" data-testid="text-carbon-footprint">
-                {totalCarbonFootprint}<span className="text-lg text-muted-foreground">kg</span>
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground mt-1 truncate">Total CO2 eq.</p>
-          </CardContent>
-        </Card>
-      </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Recent Products</CardTitle>
-            <CardDescription>Your latest Digital Product Passports</CardDescription>
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <CardTitle className="text-base sm:text-lg">
+                  Recent products
+                </CardTitle>
+                <CardDescription>
+                  Your latest Digital Product Passports.
+                </CardDescription>
+              </div>
+              {!!products?.length && (
+                <Link href={link("/products")}>
+                  <Button variant="ghost" size="sm" className="gap-1">
+                    View all
+                    <ArrowRight className="h-3 w-3" />
+                  </Button>
+                </Link>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center gap-4">
+                  <div key={i} className="flex items-center gap-3">
                     <Skeleton className="h-12 w-12 rounded-md" />
                     <div className="space-y-2 flex-1">
                       <Skeleton className="h-4 w-32" />
@@ -124,66 +253,115 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-            ) : products?.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <Package className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground mb-4">No products yet</p>
-                <Link href={link("/products/new")}>
-                  <Button variant="outline" size="sm" data-testid="button-create-first-product">
-                    Create your first product
-                  </Button>
-                </Link>
-              </div>
+            ) : !products?.length ? (
+              <EmptyState
+                icon={Package}
+                title="No products yet"
+                description="Create your first Digital Product Passport or bulk-import from SAP."
+                action={
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Link href={link("/products/new")}>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        data-testid="button-create-first-product"
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create product
+                      </Button>
+                    </Link>
+                    <Link href={link("/integrations/sap")}>
+                      <Button variant="outline" size="sm">
+                        Connect SAP
+                      </Button>
+                    </Link>
+                  </div>
+                }
+              />
             ) : (
-              <div className="space-y-3">
-                {products?.slice(0, 5).map((product) => (
-                  <Link key={product.id} href={link(`/products/${product.id}`)}>
-                    <div
-                      className="flex items-center gap-4 p-2 rounded-md hover-elevate active-elevate-2"
-                      data-testid={`card-product-${product.id}`}
-                    >
-                      <div className="h-12 w-12 rounded-md bg-muted flex items-center justify-center overflow-hidden">
-                        {product.productImage ? (
-                          <img
-                            src={product.productImage}
-                            alt={product.productName}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <Package className="h-6 w-6 text-muted-foreground" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{product.productName}</p>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {product.manufacturer}
-                        </p>
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </Link>
-                ))}
-              </div>
+              <ul className="divide-y">
+                {products.slice(0, 6).map((product) => {
+                  const ready = REQUIRED_FIELDS.every((f) =>
+                    isFieldFilled(product, f),
+                  );
+                  return (
+                    <li key={product.id}>
+                      <Link href={link(`/products/${product.id}`)}>
+                        <div
+                          className="flex items-center gap-3 py-3 hover-elevate active-elevate-2 -mx-2 px-2 rounded-md"
+                          data-testid={`card-product-${product.id}`}
+                        >
+                          <div className="h-11 w-11 shrink-0 rounded-md bg-muted flex items-center justify-center overflow-hidden ring-1 ring-border">
+                            {product.productImage ? (
+                              <img
+                                src={product.productImage}
+                                alt=""
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <Package className="h-5 w-5 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">
+                              {product.productName}
+                            </p>
+                            <p className="text-sm text-muted-foreground truncate">
+                              {product.manufacturer || "Manufacturer missing"}
+                            </p>
+                          </div>
+                          <span
+                            className={`hidden sm:inline text-xs font-medium tabular-nums ${
+                              ready
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : "text-amber-600 dark:text-amber-400"
+                            }`}
+                            aria-label={ready ? "ESPR ready" : "Needs fields"}
+                          >
+                            {ready ? "Ready" : "Incomplete"}
+                          </span>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common tasks and shortcuts</CardDescription>
+            <CardTitle className="text-base sm:text-lg">Quick actions</CardTitle>
+            <CardDescription>Common tasks.</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-3">
+          <CardContent className="grid gap-2">
             <Link href={link("/products/new")}>
-              <Button variant="outline" className="w-full justify-start" data-testid="button-quick-create">
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                data-testid="button-quick-create"
+              >
                 <Plus className="mr-2 h-4 w-4" />
-                Create New Product
+                Create new product
               </Button>
             </Link>
             <Link href={link("/products")}>
-              <Button variant="outline" className="w-full justify-start" data-testid="button-quick-view-all">
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                data-testid="button-quick-view-all"
+              >
                 <Package className="mr-2 h-4 w-4" />
-                View All Products
+                View all products
+              </Button>
+            </Link>
+            <Link href={link("/integrations/sap")}>
+              <Button variant="outline" className="w-full justify-start">
+                <QrCode className="mr-2 h-4 w-4" />
+                SAP connector
               </Button>
             </Link>
           </CardContent>

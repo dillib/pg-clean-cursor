@@ -26,7 +26,8 @@ function createTransporter() {
   });
 }
 
-const CET_TZ = "Europe/Berlin";
+const DEFAULT_TZ = process.env.EMAIL_TIMEZONE || "Europe/Berlin";
+const CET_TZ = DEFAULT_TZ;
 
 export async function sendSAPAlertEmail(opts: {
   connectorName: string;
@@ -55,7 +56,7 @@ export async function sendSAPAlertEmail(opts: {
     <h3 style="margin-top:20px">Recent error messages</h3>
     ${errorList}
     <p style="margin-top:20px">
-      <a href="${process.env.REPL_HOME_URL || "https://photonictag.com"}/integrations/sap-operations" 
+      <a href="${process.env.APP_BASE_URL || "https://photonictag.com"}/integrations/sap-operations"
          style="background:#FFD400;color:#000;padding:10px 20px;text-decoration:none;border-radius:6px;font-weight:600">
         View SAP Operations Dashboard
       </a>

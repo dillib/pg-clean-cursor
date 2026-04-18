@@ -3,6 +3,13 @@ import { sapMockService, SAPMaterial, SAPConflict } from "../services/sap-mock-s
 import { SAPODataClient, scheduleConnectorSync, clearScheduledSync, getActiveSchedules, applyFieldMappings } from "../services/sap-odata-client";
 import { storage } from "../storage";
 import type { InsertProduct, SAPConfig, FieldMapping } from "@shared/schema";
+import { decryptSAPCredentials } from "../services/crypto-service";
+
+/** Merge a DB connector row's redacted config with its decrypted credentials. */
+function materializeSAPConfig(connector: { config: unknown; credentialsCiphertext?: string | null }): SAPConfig {
+  const base = (connector.config ?? {}) as Record<string, unknown>;
+  return decryptSAPCredentials(base, connector.credentialsCiphertext ?? null) as SAPConfig;
+}
 
 const router = Router();
 
@@ -400,7 +407,7 @@ router.post("/connectors/:id/test-real", async (req: Request, res: Response) => 
     if (!connector) {
       return res.status(404).json({ error: "SAP connector not found" });
     }
-    const config = connector.config as SAPConfig;
+    const config = materializeSAPConfig(connector);
     const client = new SAPODataClient(config);
     const result = await client.testConnection();
 
@@ -429,7 +436,7 @@ router.post("/scheduler/start/:connectorId", async (req: Request, res: Response)
     if (!connector || connector.connectorType !== "sap") {
       return res.status(404).json({ error: "SAP connector not found" });
     }
-    const config = connector.config as SAPConfig;
+    const config = materializeSAPConfig(connector);
 
     scheduleConnectorSync(connector.id, config, async (connectorId, client) => {
       const result = await client.fetchMaterials({ top: 100 });
@@ -462,7 +469,7 @@ router.post("/fetch-materials", async (req: Request, res: Response) => {
     if (connectorId) {
       const connector = await storage.getEnterpriseConnector(connectorId);
       if (connector?.connectorType === "sap") {
-        config = connector.config as SAPConfig;
+        config = materializeSAPConfig(connector);
       }
     }
 

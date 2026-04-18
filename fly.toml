@@ -1,0 +1,47 @@
+# Fly.io — PhotonicTag production
+# EU data residency: Frankfurt (fra). Update `app` to your actual Fly app name
+# after `fly apps create photonictag-prod --org personal`.
+app = "photonictag-prod"
+primary_region = "fra"
+kill_signal = "SIGTERM"
+kill_timeout = "30s"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "8080"
+  # Non-secret defaults. Secrets (DATABASE_URL, SESSION_SECRET, AI_API_KEY,
+  # CONNECTOR_ENCRYPTION_KEY, AUDIT_CHAIN_HMAC_KEY, SMTP_*) are set via
+  # `fly secrets set` — never commit them to this file.
+  APP_BASE_URL = "https://photonictag-prod.fly.dev"
+  AI_PROVIDER = "mistral"
+  AUTH_PROVIDER = "workos"
+  EMAIL_TIMEZONE = "Europe/Berlin"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    grace_period = "20s"
+    interval = "15s"
+    method = "GET"
+    timeout = "5s"
+    path = "/healthz"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[deploy]
+  strategy = "rolling"
+  # DB migrations run in a dedicated CI job (see .github/workflows/deploy.yml)
+  # before the Fly deploy is invoked, so a failed migration blocks the rollout.

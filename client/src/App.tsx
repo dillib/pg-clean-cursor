@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery, useMutation } from "@tanstack/react-query";
@@ -14,33 +15,43 @@ import { RoutePrefixProvider } from "@/hooks/use-route-prefix";
 import { Loader2, QrCode, LogOut, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import Landing from "@/pages/landing-validation";
-import Dashboard from "@/pages/dashboard";
-import Products from "@/pages/products";
-import ProductForm from "@/pages/product-form";
-import ProductDetail from "@/pages/product-detail";
-import IoTDevices from "@/pages/iot-devices";
-import SAPConnector from "@/pages/sap-connector";
-import SAPOperations from "@/pages/sap-operations";
-import SAPDemo from "@/pages/sap-demo";
-import PublicScan from "@/pages/public-scan";
-import Pricing from "@/pages/pricing";
-import Integrations from "@/pages/integrations";
-import Contact from "@/pages/contact";
-import Privacy from "@/pages/privacy";
-import Terms from "@/pages/terms";
-import DemoGallery from "@/pages/demo-gallery";
-import CRM from "@/pages/crm";
-import PartnerLogin from "@/pages/partner-login";
-import PartnerDashboard from "@/pages/partner-dashboard";
-import DemoLogin from "@/pages/demo-login";
-import AdminLogin from "@/pages/admin-login";
-import AdminInternal from "@/pages/admin-internal";
-import Docs from "@/pages/docs";
-import Presentation from "@/pages/presentation";
-import FAQs from "@/pages/faqs";
-import BookDemo from "@/pages/book-demo";
-import NotFound from "@/pages/not-found";
+
+// Lazy-load route components so each page ships as its own chunk.
+// Initial page load only parses what's needed to render the current route.
+const Landing = lazy(() => import("@/pages/landing-validation"));
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const Products = lazy(() => import("@/pages/products"));
+const ProductForm = lazy(() => import("@/pages/product-form"));
+const ProductDetail = lazy(() => import("@/pages/product-detail"));
+const IoTDevices = lazy(() => import("@/pages/iot-devices"));
+const SAPConnector = lazy(() => import("@/pages/sap-connector"));
+const SAPOperations = lazy(() => import("@/pages/sap-operations"));
+const SAPDemo = lazy(() => import("@/pages/sap-demo"));
+const PublicScan = lazy(() => import("@/pages/public-scan"));
+const Pricing = lazy(() => import("@/pages/pricing"));
+const Integrations = lazy(() => import("@/pages/integrations"));
+const Contact = lazy(() => import("@/pages/contact"));
+const Privacy = lazy(() => import("@/pages/privacy"));
+const Terms = lazy(() => import("@/pages/terms"));
+const DemoGallery = lazy(() => import("@/pages/demo-gallery"));
+const CRM = lazy(() => import("@/pages/crm"));
+const PartnerLogin = lazy(() => import("@/pages/partner-login"));
+const DemoLogin = lazy(() => import("@/pages/demo-login"));
+const AdminLogin = lazy(() => import("@/pages/admin-login"));
+const AdminInternal = lazy(() => import("@/pages/admin-internal"));
+const Docs = lazy(() => import("@/pages/docs"));
+const Presentation = lazy(() => import("@/pages/presentation"));
+const FAQs = lazy(() => import("@/pages/faqs"));
+const BookDemo = lazy(() => import("@/pages/book-demo"));
+const NotFound = lazy(() => import("@/pages/not-found"));
+
+function RouteFallback() {
+  return (
+    <div className="min-h-[40vh] flex items-center justify-center">
+      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+    </div>
+  );
+}
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
   const style = {
@@ -500,7 +511,9 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <ScrollToTop />
-            <Router />
+            <Suspense fallback={<RouteFallback />}>
+              <Router />
+            </Suspense>
             <Toaster />
           </TooltipProvider>
         </QueryClientProvider>

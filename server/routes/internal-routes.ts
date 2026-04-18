@@ -14,9 +14,14 @@ import {
   type TicketCategory,
   type ActionStatus,
 } from "@shared/schema";
-import { MASTER_ADMIN_EMAILS } from "@shared/models/auth";
 import { authStorage } from "../replit_integrations/auth/storage";
+import {
+  safeParseJSON,
+  validateHealthScore,
+  validateNextBestActions,
+} from "../services/crm-ai-schemas";
 import OpenAI, { toFile } from "openai";
+import { aiClient, AI_CHAT_MODEL } from "../services/ai-client";
 import type { RequestHandler } from "express";
 import multer from "multer";
 import * as XLSX from "xlsx";
@@ -46,14 +51,17 @@ const isAdminOrTeamUser: RequestHandler = async (req, res, next) => {
 
 router.use(isAdminOrTeamUser);
 
+// Kept for OpenAI-only features below (audio transcription via input_audio,
+// Whisper via toFile). Non-audio chat goes through `aiClient` so the EU
+// provider swap (Mistral/Scaleway) applies.
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
   baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
 });
 
 async function aiChat(systemPrompt: string, userPrompt: string): Promise<string> {
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
+  const response = await aiClient.chat.completions.create({
+    model: AI_CHAT_MODEL,
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
@@ -292,9 +300,18 @@ Recent activities (last 30): ${activities.slice(0, 30).map(a => a.activityType).
 Support tickets: ${accountTickets.length} total, ${accountTickets.filter(t => t.status === 'open').length} open`
     );
 
-    const parsed = JSON.parse(result);
-    await storage.updateCustomerAccount(req.params.id, { healthScore: parsed.healthScore });
-    res.json(parsed);
+    const jsonParsed = safeParseJSON(result);
+    if (!jsonParsed.success) {
+      console.error("Health score AI returned invalid JSON:", jsonParsed.error);
+      return res.status(502).json({ error: "AI returned invalid JSON", details: jsonParsed.error });
+    }
+    const validated = validateHealthScore(jsonParsed.data);
+    if (!validated.success) {
+      console.error("Health score AI schema mismatch:", validated.error);
+      return res.status(502).json({ error: "AI output did not match expected schema", details: validated.error });
+    }
+    await storage.updateCustomerAccount(req.params.id, { healthScore: validated.data.healthScore });
+    res.json(validated.data);
   } catch (error) {
     console.error("Error calculating health score:", error);
     res.status(500).json({ error: "Failed to calculate health score" });
@@ -335,9 +352,18 @@ Last activity: ${account.lastActivityAt || 'Never'}
 Recent activities: ${activities.slice(0, 10).map(a => `${a.activityType}: ${a.description || ''}`).join('; ') || 'None'}`
     );
 
-    const parsed = JSON.parse(result);
+    const jsonParsed = safeParseJSON(result);
+    if (!jsonParsed.success) {
+      console.error("Next-best-action AI returned invalid JSON:", jsonParsed.error);
+      return res.status(502).json({ error: "AI returned invalid JSON", details: jsonParsed.error });
+    }
+    const validated = validateNextBestActions(jsonParsed.data);
+    if (!validated.success) {
+      console.error("Next-best-action AI schema mismatch:", validated.error);
+      return res.status(502).json({ error: "AI output did not match expected schema", details: validated.error });
+    }
     const createdActions = [];
-    for (const action of parsed.actions || []) {
+    for (const action of validated.data.actions) {
       const created = await storage.createNextBestAction({
         accountId: req.params.id,
         action: action.action,
@@ -845,8 +871,8 @@ router.post("/assistant/chat", async (req: Request, res: Response) => {
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: "messages array required" });
     }
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const response = await aiClient.chat.completions.create({
+      model: AI_CHAT_MODEL,
       messages: [
         { role: "system", content: TEAM_ASSISTANT_SYSTEM_PROMPT },
         ...messages.map((m: { role: string; content: string }) => ({

@@ -6,7 +6,9 @@ import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
+import { RedisStore } from "connect-redis";
 import { authStorage } from "./storage";
+import { getRedisClient } from "../../redis";
 
 const getOidcConfig = memoize(
   async () => {
@@ -19,23 +21,40 @@ const getOidcConfig = memoize(
 );
 
 export function getSession() {
-  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: sessionTtl,
-    tableName: "sessions",
-  });
+  const sessionTtl = 7 * 24 * 60 * 60; // seconds (1 week)
+  const sessionTtlMs = sessionTtl * 1000;
+
+  // Prefer Redis session store when available (stateless multi-instance support).
+  // Falls back to Postgres for zero-config local dev.
+  const redis = getRedisClient();
+  const store = redis
+    ? new RedisStore({ client: redis, ttl: sessionTtl, prefix: "sess:" })
+    : (() => {
+        const PgStore = connectPg(session);
+        return new PgStore({
+          conString: process.env.DATABASE_URL,
+          createTableIfMissing: false,
+          ttl: sessionTtl,
+          tableName: "sessions",
+        });
+      })();
+
+  if (redis) {
+    console.log("[Session] Using Redis session store");
+  } else {
+    console.log("[Session] Using Postgres session store (set REDIS_URL for Redis)");
+  }
+
   return session({
     secret: process.env.SESSION_SECRET!,
-    store: sessionStore,
+    store,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
-      maxAge: sessionTtl,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: sessionTtlMs,
     },
   });
 }

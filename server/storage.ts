@@ -248,6 +248,7 @@ export interface IStorage {
 
   // Product Scans (Scan Intelligence)
   recordProductScan(scan: InsertProductScan): Promise<ProductScan>;
+  findProductScanBySession(productId: string, sessionId: string): Promise<ProductScan | undefined>;
   getProductScanStats(productId: string): Promise<{ total: number; unique: number; last30Days: number }>;
   getRecentProductScans(productId: string, limit?: number): Promise<ProductScan[]>;
   getScansByDay(productId: string, days?: number): Promise<Array<{ date: string; count: number }>>;
@@ -1040,6 +1041,13 @@ export class DatabaseStorage implements IStorage {
   async recordProductScan(scan: InsertProductScan): Promise<ProductScan> {
     const [created] = await db.insert(productScans).values(scan).returning();
     return created;
+  }
+
+  async findProductScanBySession(productId: string, sessionId: string): Promise<ProductScan | undefined> {
+    const [scan] = await db.select().from(productScans)
+      .where(and(eq(productScans.productId, productId), eq(productScans.sessionId, sessionId)))
+      .limit(1);
+    return scan;
   }
 
   async getProductScanStats(productId: string): Promise<{ total: number; unique: number; last30Days: number }> {

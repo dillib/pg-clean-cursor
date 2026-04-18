@@ -30,6 +30,31 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    chunkSizeWarningLimit: 700,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "wouter", "react-helmet-async"],
+          "ui-vendor": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-select",
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-toast",
+            "@radix-ui/react-tooltip",
+            "lucide-react",
+            "cmdk",
+            "class-variance-authority",
+            "tailwind-merge",
+            "clsx",
+          ],
+          "form-vendor": ["react-hook-form", "@hookform/resolvers", "zod"],
+          "data-vendor": ["@tanstack/react-query", "date-fns", "recharts"],
+          "doc-vendor": ["docx", "pptxgenjs", "xlsx", "qrcode", "file-saver"],
+        },
+      },
+    },
   },
   server: {
     fs: {
