@@ -13,7 +13,7 @@ const TEXT_LIGHT = "FFFFFF";
 const ACCENT_GREEN = "10B981";
 const ACCENT_RED = "EF4444";
 
-router.get("/api/export/presentation.pptx", async (_req: Request, res: Response) => {
+router.get("/presentation.pptx", async (_req: Request, res: Response) => {
   try {
     const pptx = new PptxGenJS();
     pptx.author = "PhotonicTag";
@@ -1034,7 +1034,7 @@ function buildProposalDoc(body: ProposalRequest): Buffer | Promise<Buffer> {
   return Packer.toBuffer(doc);
 }
 
-router.post("/api/export/proposal.docx", async (req: Request, res: Response) => {
+router.post("/proposal.docx", async (req: Request, res: Response) => {
   try {
     const body = req.body as ProposalRequest;
     if (!body.customerName || !body.language) {

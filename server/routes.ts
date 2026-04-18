@@ -1590,7 +1590,7 @@ ${pages.map(p => `  <url>
   app.use("/api/sap", isAuthenticated, sapRoutes);
   // Export endpoints (PPTX/DOCX) contain internal pricing, roadmap, and proposal content
   // — restricted to authenticated team/admin users only.
-  app.use(isAuthenticatedOrTeam, exportRoutes);
+  app.use("/api/export", isAuthenticatedOrTeam, exportRoutes);
 
   return httpServer;
 }
