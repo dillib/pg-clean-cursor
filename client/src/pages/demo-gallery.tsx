@@ -120,7 +120,7 @@ function ProductCard({ product }: { product: Product }) {
 
 export default function DemoGallery() {
   const { data: products = [], isLoading } = useQuery<Product[]>({
-    queryKey: ["/api/products"],
+    queryKey: ["/api/public/demo-products"],
   });
 
   const sortedProducts = [...products].sort((a, b) => 

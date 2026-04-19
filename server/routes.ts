@@ -14,7 +14,7 @@ import { seedDemoData } from "./seed-demo-data";
 import { authProvider, getCurrentUser } from "./auth";
 import { authStorage } from "./replit_integrations/auth/storage";
 import { injectTenantId } from "./middleware/tenant";
-import { tenantStorage } from "./storage-tenant";
+import { tenantStorage, TenantStorage } from "./storage-tenant";
 import { encryptSAPCredentials } from "./services/crypto-service";
 
 /** Strips credential fields before returning a connector to the client. */
@@ -112,9 +112,26 @@ ${pages.map(p => `  <url>
 
   // PRODUCT ENDPOINTS
   // ==========================================
-  app.get("/api/products", async (req: Request, res: Response) => {
+
+  // Public demo catalog — returns only the seeded "default" tenant's products.
+  // Used by marketing pages (demo gallery, use-cases) and the public scan page's
+  // "explore more" rail. Separate from /api/products so unauthed requests never
+  // see a tenant's real catalog.
+  app.get("/api/public/demo-products", async (_req: Request, res: Response) => {
     try {
-      const products = await productService.getAllProducts();
+      const demoStore = new TenantStorage("default");
+      const products = await demoStore.getAllProducts();
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching demo products:", error);
+      res.status(500).json({ error: "Failed to fetch demo products" });
+    }
+  });
+
+  app.get("/api/products", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+    try {
+      const scoped = tenantStorage(req);
+      const products = await scoped.getAllProducts();
       res.json(products);
     } catch (error) {
       console.error("Error fetching products:", error);

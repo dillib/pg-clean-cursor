@@ -541,7 +541,7 @@ function UseCaseCard({ useCase, index, products }: { useCase: UseCase; index: nu
 
 export default function UseCases() {
   const { data: products = [] } = useQuery<Product[]>({
-    queryKey: ["/api/products"],
+    queryKey: ["/api/public/demo-products"],
   });
   
   return (

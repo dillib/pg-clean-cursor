@@ -432,7 +432,7 @@ export default function PublicScan({ isDemo = false }: PublicScanProps) {
   });
 
   const { data: allProducts = [] } = useQuery<Product[]>({
-    queryKey: ["/api/products"],
+    queryKey: ["/api/public/demo-products"],
   });
 
   const scanMutation = useMutation({
