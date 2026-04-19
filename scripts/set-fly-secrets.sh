@@ -39,6 +39,8 @@ while IFS= read -r line; do
   if [[ "$line" =~ ^([A-Z_][A-Z0-9_]*)=(.*)$ ]]; then
     key="${BASH_REMATCH[1]}"
     val="${BASH_REMATCH[2]}"
+    # strip trailing CR (Windows CRLF line endings) so the quote-strip below matches
+    val="${val%$'\r'}"
     # trim surrounding double or single quotes
     if [[ "$val" =~ ^\"(.*)\"$ ]]; then val="${BASH_REMATCH[1]}"; fi
     if [[ "$val" =~ ^\'(.*)\'$ ]]; then val="${BASH_REMATCH[1]}"; fi
