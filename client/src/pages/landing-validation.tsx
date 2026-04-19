@@ -1,10 +1,12 @@
 import { Helmet } from "react-helmet-async";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
 import { ModulesSection } from "@/components/modules-section";
+import type { Product } from "@shared/schema";
 import { 
   QrCode, 
   Shield, 
@@ -28,6 +30,100 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { useCurrency } from "@/hooks/use-currency";
+
+function LivePassportPreview() {
+  const { data: products = [], isLoading } = useQuery<Product[]>({
+    queryKey: ["/api/public/demo-products"],
+  });
+
+  const featured = products
+    .filter((p) => p.productImage)
+    .slice(0, 3);
+
+  if (!isLoading && featured.length === 0) return null;
+
+  return (
+    <section className="py-16 px-4 sm:px-6 lg:px-8 border-b bg-background" data-testid="section-live-passports">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-10">
+          <Badge variant="outline" className="mb-3 gap-1.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            Live on PhotonicTag
+          </Badge>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2" data-testid="text-live-passports-title">
+            Real Digital Product Passports, running right now
+          </h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Tap any passport to see exactly what a consumer sees when they scan the QR.
+          </p>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {isLoading &&
+            [0, 1, 2].map((i) => (
+              <Card key={i} className="overflow-hidden">
+                <div className="aspect-video w-full bg-muted animate-pulse" />
+                <CardContent className="p-4 space-y-2">
+                  <div className="h-4 w-3/4 bg-muted animate-pulse rounded" />
+                  <div className="h-3 w-1/2 bg-muted animate-pulse rounded" />
+                </CardContent>
+              </Card>
+            ))}
+
+          {!isLoading &&
+            featured.map((p) => (
+              <Link key={p.id} href={`/product/${p.id}`} data-testid={`card-live-passport-${p.id}`}>
+                <Card className="overflow-hidden h-full hover-elevate transition-all cursor-pointer">
+                  <div className="aspect-video w-full bg-muted overflow-hidden">
+                    <img
+                      src={p.productImage ?? ""}
+                      alt={p.productName}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h3 className="font-semibold text-sm leading-tight line-clamp-2">{p.productName}</h3>
+                      {p.complianceStatus === "compliant" && (
+                        <Badge variant="outline" className="shrink-0 bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:text-emerald-400 dark:border-emerald-800 text-[10px] px-1.5 py-0">
+                          <CheckCircle className="w-3 h-3 mr-0.5" />
+                          EU Ready
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
+                      {p.manufacturer}
+                      {p.countryOfOrigin ? ` · ${p.countryOfOrigin}` : ""}
+                    </p>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">{p.productCategory ?? "Product"}</span>
+                      <span className="text-primary font-medium inline-flex items-center gap-1">
+                        View passport
+                        <ArrowRight className="w-3 h-3" />
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+        </div>
+
+        <div className="text-center mt-8">
+          <Button variant="outline" asChild data-testid="button-live-see-all">
+            <Link href="/scan/demo" className="gap-2">
+              <QrCode className="w-4 h-4" />
+              See all demo passports
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function LandingValidation() {
   const { symbol } = useCurrency();
@@ -186,6 +282,9 @@ export default function LandingValidation() {
           </div>
         </div>
       </section>
+
+      {/* ── LIVE PASSPORT PREVIEW ── */}
+      <LivePassportPreview />
 
       {/* ── MODULES ── */}
       <div className="bg-muted/30 border-y">
