@@ -10,6 +10,7 @@ import bcrypt from "bcryptjs";
 import { scheduleConnectorSync } from "./services/sap-odata-client";
 import { startReminderScheduler } from "./services/reminder-scheduler";
 import { describeAIProvider } from "./services/ai-client";
+import { hostPolicyMiddleware } from "./middleware/host-policy";
 import type { SAPConfig } from "@shared/schema";
 
 console.log(`[startup] AI: ${describeAIProvider()}`);
@@ -39,6 +40,11 @@ app.get("/healthz", (_req, res) => {
 
 // Serve stock images from attached_assets directory
 app.use("/assets", express.static(path.resolve(process.cwd(), "attached_assets")));
+
+// Gate ops vs customer paths by host. Defaults to HOST_MODE=any (no-op)
+// until HOST_MODE / APP_HOSTS / OPS_HOSTS are set in prod — Phase 1 of the
+// three-system separation ships the capability without flipping the switch.
+app.use(hostPolicyMiddleware());
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
