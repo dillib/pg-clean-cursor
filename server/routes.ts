@@ -14,6 +14,7 @@ import { seedDemoData } from "./seed-demo-data";
 import { authProvider, getCurrentUser } from "./auth";
 import { authStorage } from "./replit_integrations/auth/storage";
 import { injectTenantId } from "./middleware/tenant";
+import { requireMasterAdmin, requireMasterAdminOrTeam } from "./middleware/require-admin";
 import { tenantStorage, TenantStorage } from "./storage-tenant";
 import { encryptSAPCredentials } from "./services/crypto-service";
 
@@ -1050,7 +1051,7 @@ ${pages.map(p => `  <url>
   // ADMIN/DEMO ENDPOINTS
   // ==========================================
   
-  app.post("/api/admin/seed-demo-data", isAuthenticated, async (req: Request, res: Response) => {
+  app.post("/api/admin/seed-demo-data", requireMasterAdmin, async (req: Request, res: Response) => {
     try {
       await seedDemoData();
       res.json({ success: true, message: "Demo data seeded successfully" });
@@ -1113,8 +1114,8 @@ ${pages.map(p => `  <url>
     }
   });
 
-  // Protected CRM endpoints (accessible by admin OR team auth)
-  app.get("/api/leads", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+  // Protected CRM endpoints (accessible by master admin OR team/partner session)
+  app.get("/api/leads", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
       const leads = await storage.getAllLeads();
       res.json(leads);
@@ -1124,7 +1125,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.get("/api/leads/stats", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+  app.get("/api/leads/stats", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
       const stats = await storage.getLeadStats();
       res.json(stats);
@@ -1134,7 +1135,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.get("/api/leads/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+  app.get("/api/leads/:id", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
       const lead = await storage.getLead(req.params.id);
       if (!lead) {
@@ -1147,7 +1148,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.patch("/api/leads/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+  app.patch("/api/leads/:id", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
       const lead = await storage.getLead(req.params.id);
       if (!lead) {
@@ -1173,7 +1174,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.delete("/api/leads/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+  app.delete("/api/leads/:id", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
       const success = await storage.deleteLead(req.params.id);
       if (!success) {
@@ -1186,7 +1187,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.get("/api/leads/:id/activities", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+  app.get("/api/leads/:id/activities", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
       const activities = await storage.getLeadActivities(req.params.id);
       res.json(activities);
@@ -1196,7 +1197,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.post("/api/leads/:id/activities", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+  app.post("/api/leads/:id/activities", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
       const lead = await storage.getLead(req.params.id);
       if (!lead) {
@@ -1288,7 +1289,7 @@ ${pages.map(p => `  <url>
   // PARTNER MANAGEMENT ENDPOINTS (Protected - Admin Only)
   // ==========================================
 
-  app.get("/api/partners", isAuthenticated, async (req: Request, res: Response) => {
+  app.get("/api/partners", requireMasterAdmin, async (req: Request, res: Response) => {
     try {
       const allPartners = await storage.getAllPartners();
       const safePartners = allPartners.map(({ passwordHash, ...p }) => p);
@@ -1299,7 +1300,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.post("/api/partners", isAuthenticated, async (req: Request, res: Response) => {
+  app.post("/api/partners", requireMasterAdmin, async (req: Request, res: Response) => {
     try {
       const parsed = insertPartnerSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -1327,7 +1328,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.patch("/api/partners/:id", isAuthenticated, async (req: Request, res: Response) => {
+  app.patch("/api/partners/:id", requireMasterAdmin, async (req: Request, res: Response) => {
     try {
       const parsed = updatePartnerSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -1354,7 +1355,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.delete("/api/partners/:id", isAuthenticated, async (req: Request, res: Response) => {
+  app.delete("/api/partners/:id", requireMasterAdmin, async (req: Request, res: Response) => {
     try {
       const success = await storage.deletePartner(req.params.id);
       if (!success) {
@@ -1371,7 +1372,7 @@ ${pages.map(p => `  <url>
   // DEMO CONFIG ENDPOINTS (Protected - Admin Only)
   // ==========================================
 
-  app.get("/api/demo-configs", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+  app.get("/api/demo-configs", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
       const configs = await storage.getAllDemoConfigs();
       res.json(configs);
@@ -1381,7 +1382,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.post("/api/demo-configs", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+  app.post("/api/demo-configs", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
       const parsed = insertDemoConfigSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -1402,7 +1403,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.delete("/api/demo-configs/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+  app.delete("/api/demo-configs/:id", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
       const success = await storage.deleteDemoConfig(req.params.id);
       if (!success) {
@@ -1415,7 +1416,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.patch("/api/demo-configs/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+  app.patch("/api/demo-configs/:id", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
       const { demoEmail, demoPassword } = req.body;
       const updates: Record<string, any> = {};
@@ -1457,7 +1458,7 @@ ${pages.map(p => `  <url>
   });
 
   // GET /api/demo-bookings — admin-only, lists all bookings
-  app.get("/api/demo-bookings", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+  app.get("/api/demo-bookings", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
       const bookings = await storage.getAllDemoBookings();
       res.json(bookings);
@@ -1548,7 +1549,7 @@ ${pages.map(p => `  <url>
   });
 
   // PATCH /api/demo-bookings/:id/status — update booking status (admin)
-  app.patch("/api/demo-bookings/:id/status", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+  app.patch("/api/demo-bookings/:id/status", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
       const { status } = req.body;
       if (!["pending", "confirmed", "cancelled"].includes(status)) {
@@ -1583,7 +1584,7 @@ ${pages.map(p => `  <url>
     }
   });
 
-  app.get("/api/demo-configs/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
+  app.get("/api/demo-configs/:id", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
       const config = await storage.getDemoConfig(req.params.id);
       if (!config) {
@@ -1599,7 +1600,7 @@ ${pages.map(p => `  <url>
   // ==========================================
   // INTERNAL ADMIN ENDPOINTS (Protected - Admin Only)
   // ==========================================
-  app.use("/api/internal", isAuthenticatedOrTeam, internalRoutes);
+  app.use("/api/internal", requireMasterAdminOrTeam, internalRoutes);
 
   // ==========================================
   // SAP INTEGRATION ENDPOINTS (Protected)
@@ -1607,7 +1608,7 @@ ${pages.map(p => `  <url>
   app.use("/api/sap", isAuthenticated, sapRoutes);
   // Export endpoints (PPTX/DOCX) contain internal pricing, roadmap, and proposal content
   // — restricted to authenticated team/admin users only.
-  app.use("/api/export", isAuthenticatedOrTeam, exportRoutes);
+  app.use("/api/export", requireMasterAdminOrTeam, exportRoutes);
 
   return httpServer;
 }
