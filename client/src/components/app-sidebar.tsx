@@ -21,6 +21,7 @@ interface NavItem {
   url: string;
   icon: typeof LayoutDashboard;
   showIn: ("admin" | "demo" | "internal")[];
+  adminOnly?: boolean;
 }
 
 const navigationItems: NavItem[] = [
@@ -77,6 +78,7 @@ const navigationItems: NavItem[] = [
     url: "/admin/internal",
     icon: Settings2,
     showIn: ["admin"],
+    adminOnly: true,
   },
 ];
 
@@ -118,7 +120,12 @@ export function AppSidebar({ mode = "admin", teamUser, onLogout }: AppSidebarPro
     return "User";
   };
 
-  const filteredItems = navigationItems.filter((item) => item.showIn.includes(mode));
+  const isAdmin = (user as any)?.isAdmin === true;
+  const filteredItems = navigationItems.filter((item) => {
+    if (!item.showIn.includes(mode)) return false;
+    if (item.adminOnly && !isAdmin) return false;
+    return true;
+  });
 
   const getPrefix = () => {
     if (isDemo) return "/demo";

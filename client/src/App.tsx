@@ -240,6 +240,22 @@ function InternalOpsProtected() {
     );
   }
 
+  if ((user as any)?.isAdmin !== true) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="max-w-md text-center space-y-3">
+          <h1 className="text-2xl font-semibold">Forbidden</h1>
+          <p className="text-muted-foreground">
+            This area is restricted to PhotonicTag staff.
+          </p>
+          <Button variant="outline" onClick={() => setLocation("/")} data-testid="button-forbidden-home">
+            Go to dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="flex h-14 items-center justify-between gap-4 border-b px-4 shrink-0">

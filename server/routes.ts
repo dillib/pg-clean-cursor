@@ -64,7 +64,10 @@ export async function registerRoutes(
       const current = getCurrentUser(req);
       if (!current) return res.status(401).json({ message: "Unauthorized" });
       const dbUser = await authStorage.getUser(current.id);
-      res.json(dbUser ?? current);
+      // isAdmin is session-derived (master-admin email allowlist); the users
+      // table row is not kept in sync with that allowlist, so always prefer
+      // the session value so the frontend can gate UI correctly.
+      res.json({ ...(dbUser ?? {}), ...current, isAdmin: current.isAdmin });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
