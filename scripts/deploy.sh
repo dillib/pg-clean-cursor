@@ -37,10 +37,13 @@ if [[ -z "$DB_URL" ]]; then
   exit 1
 fi
 
-echo "→ [1/2] migrating $ENV_NAME database"
+echo "→ [1/3] verifying EU data residency"
+DATABASE_URL="$DB_URL" bash scripts/db/verify-residency.sh
+
+echo "→ [2/3] migrating $ENV_NAME database"
 DATABASE_URL="$DB_URL" npm run db:push
 
-echo "→ [2/2] deploying $APP"
+echo "→ [3/3] deploying $APP"
 fly deploy --config "$CONFIG" --remote-only
 
 echo "✓ $ENV_NAME deploy complete"
