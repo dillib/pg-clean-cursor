@@ -1,5 +1,7 @@
 import { Router, type Request, type Response } from "express";
-import { storage } from "../storage";
+import { tenantStorage, storageForTenant } from "../storage-tenant";
+import { getTenantId } from "../middleware/tenant";
+import { getPartnerSessionState } from "../middleware/partner-session";
 import { aiService } from "../services/ai-service";
 import { productService } from "../services/product-service";
 import { qrService } from "../services/qr-service";
@@ -14,12 +16,14 @@ import {
   type TicketCategory,
   type ActionStatus,
 } from "@shared/schema";
-import { authStorage } from "../replit_integrations/auth/storage";
+import { authStorage } from "../integrations/auth/storage";
 import { getCurrentUser } from "../auth";
 import {
   safeParseJSON,
   validateHealthScore,
   validateNextBestActions,
+  validateDemoProvisioningOutput,
+  validateTicketTriageOutput,
 } from "../services/crm-ai-schemas";
 import OpenAI, { toFile } from "openai";
 import { aiClient, AI_CHAT_MODEL } from "../services/ai-client";
@@ -27,12 +31,17 @@ import type { RequestHandler } from "express";
 import multer from "multer";
 import * as XLSX from "xlsx";
 
+const crm = (req: Request) => tenantStorage(req);
+
 const router = Router();
 
 const isAdminOrTeamUser: RequestHandler = async (req, res, next) => {
   try {
-    const partnerId = (req.session as any)?.partnerId;
-    if (partnerId) return next();
+    const partnerState = await getPartnerSessionState(req);
+    if (partnerState === "valid") return next();
+    if (partnerState === "invalid") {
+      return res.status(403).json({ error: "Partner session is no longer valid" });
+    }
 
     const current = getCurrentUser(req);
     if (!current) {
@@ -78,7 +87,7 @@ async function aiChat(systemPrompt: string, userPrompt: string): Promise<string>
 
 router.get("/accounts", async (req: Request, res: Response) => {
   try {
-    const accounts = await storage.getAllCustomerAccounts();
+    const accounts = await crm(req).getAllCustomerAccounts();
     res.json(accounts);
   } catch (error) {
     console.error("Error fetching accounts:", error);
@@ -88,7 +97,7 @@ router.get("/accounts", async (req: Request, res: Response) => {
 
 router.get("/accounts/:id", async (req: Request, res: Response) => {
   try {
-    const account = await storage.getCustomerAccount(req.params.id);
+    const account = await crm(req).getCustomerAccount(req.params.id);
     if (!account) return res.status(404).json({ error: "Account not found" });
     res.json(account);
   } catch (error) {
@@ -100,7 +109,7 @@ router.post("/accounts", async (req: Request, res: Response) => {
   try {
     const parsed = insertCustomerAccountSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: "Invalid data", details: parsed.error.issues });
-    const account = await storage.createCustomerAccount(parsed.data);
+    const account = await crm(req).createCustomerAccount(parsed.data);
     res.status(201).json(account);
   } catch (error) {
     res.status(500).json({ error: "Failed to create account" });
@@ -188,14 +197,14 @@ router.post("/accounts/bulk-import", upload.single("file"), async (req: Request,
           };
 
           if (leadData.email) {
-            const existing = await storage.getLeadByEmail(leadData.email);
+            const existing = await crm(req).getLeadByEmail(leadData.email);
             if (existing) {
-              await storage.updateLead(existing.id, leadData);
+              await crm(req).updateLead(existing.id, leadData);
               results.updated++;
               continue;
             }
           }
-          await storage.createLead(leadData as any);
+          await crm(req).createLead(leadData as any);
           results.created++;
         } else {
           if (!mapped.companyName && !mapped.contactName) {
@@ -212,7 +221,7 @@ router.post("/accounts/bulk-import", upload.single("file"), async (req: Request,
             status: (mapped.status || "prospect") as any,
             mrr: mapped.mrr ? parseInt(mapped.mrr) || 0 : 0,
           };
-          await storage.createCustomerAccount(accountData);
+          await crm(req).createCustomerAccount(accountData);
           results.created++;
         }
       } catch (err: any) {
@@ -234,7 +243,7 @@ router.post("/accounts/bulk-import", upload.single("file"), async (req: Request,
 
 router.patch("/accounts/:id", async (req: Request, res: Response) => {
   try {
-    const account = await storage.updateCustomerAccount(req.params.id, req.body);
+    const account = await crm(req).updateCustomerAccount(req.params.id, req.body);
     if (!account) return res.status(404).json({ error: "Account not found" });
     res.json(account);
   } catch (error) {
@@ -244,7 +253,7 @@ router.patch("/accounts/:id", async (req: Request, res: Response) => {
 
 router.delete("/accounts/:id", async (req: Request, res: Response) => {
   try {
-    const success = await storage.deleteCustomerAccount(req.params.id);
+    const success = await crm(req).deleteCustomerAccount(req.params.id);
     if (!success) return res.status(404).json({ error: "Account not found" });
     res.status(204).send();
   } catch (error) {
@@ -254,7 +263,7 @@ router.delete("/accounts/:id", async (req: Request, res: Response) => {
 
 router.get("/accounts/:id/activities", async (req: Request, res: Response) => {
   try {
-    const activities = await storage.getAccountActivities(req.params.id);
+    const activities = await crm(req).getAccountActivities(req.params.id);
     res.json(activities);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch activities" });
@@ -263,7 +272,7 @@ router.get("/accounts/:id/activities", async (req: Request, res: Response) => {
 
 router.post("/accounts/:id/activities", async (req: Request, res: Response) => {
   try {
-    const activity = await storage.createAccountActivity({
+    const activity = await crm(req).createAccountActivity({
       accountId: req.params.id,
       activityType: req.body.activityType,
       description: req.body.description,
@@ -281,11 +290,11 @@ router.post("/accounts/:id/activities", async (req: Request, res: Response) => {
 
 router.post("/accounts/:id/health-score", async (req: Request, res: Response) => {
   try {
-    const account = await storage.getCustomerAccount(req.params.id);
+    const account = await crm(req).getCustomerAccount(req.params.id);
     if (!account) return res.status(404).json({ error: "Account not found" });
 
-    const activities = await storage.getAccountActivities(req.params.id);
-    const tickets = await storage.getAllSupportTickets();
+    const activities = await crm(req).getAccountActivities(req.params.id);
+    const tickets = await crm(req).getAllSupportTickets();
     const accountTickets = tickets.filter(t => t.accountId === req.params.id);
 
     const result = await aiChat(
@@ -311,7 +320,7 @@ Support tickets: ${accountTickets.length} total, ${accountTickets.filter(t => t.
       console.error("Health score AI schema mismatch:", validated.error);
       return res.status(502).json({ error: "AI output did not match expected schema", details: validated.error });
     }
-    await storage.updateCustomerAccount(req.params.id, { healthScore: validated.data.healthScore });
+    await crm(req).updateCustomerAccount(req.params.id, { healthScore: validated.data.healthScore });
     res.json(validated.data);
   } catch (error) {
     console.error("Error calculating health score:", error);
@@ -325,7 +334,7 @@ Support tickets: ${accountTickets.length} total, ${accountTickets.filter(t => t.
 
 router.get("/accounts/:id/actions", async (req: Request, res: Response) => {
   try {
-    const actions = await storage.getNextBestActions(req.params.id);
+    const actions = await crm(req).getNextBestActions(req.params.id);
     res.json(actions);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch actions" });
@@ -334,10 +343,10 @@ router.get("/accounts/:id/actions", async (req: Request, res: Response) => {
 
 router.post("/accounts/:id/generate-actions", async (req: Request, res: Response) => {
   try {
-    const account = await storage.getCustomerAccount(req.params.id);
+    const account = await crm(req).getCustomerAccount(req.params.id);
     if (!account) return res.status(404).json({ error: "Account not found" });
 
-    const activities = await storage.getAccountActivities(req.params.id);
+    const activities = await crm(req).getAccountActivities(req.params.id);
 
     const result = await aiChat(
       `You are a strategic sales advisor for PhotonicTag (B2B Digital Product Passport platform).
@@ -365,7 +374,7 @@ Recent activities: ${activities.slice(0, 10).map(a => `${a.activityType}: ${a.de
     }
     const createdActions = [];
     for (const action of validated.data.actions) {
-      const created = await storage.createNextBestAction({
+      const created = await crm(req).createNextBestAction({
         accountId: req.params.id,
         action: action.action,
         reasoning: action.reasoning,
@@ -385,7 +394,7 @@ Recent activities: ${activities.slice(0, 10).map(a => `${a.activityType}: ${a.de
 router.patch("/actions/:id/status", async (req: Request, res: Response) => {
   try {
     const { status } = req.body;
-    const action = await storage.updateNextBestActionStatus(req.params.id, status as ActionStatus);
+    const action = await crm(req).updateNextBestActionStatus(req.params.id, status as ActionStatus);
     if (!action) return res.status(404).json({ error: "Action not found" });
     res.json(action);
   } catch (error) {
@@ -395,7 +404,7 @@ router.patch("/actions/:id/status", async (req: Request, res: Response) => {
 
 router.get("/actions/pending", async (req: Request, res: Response) => {
   try {
-    const actions = await storage.getAllPendingActions();
+    const actions = await crm(req).getAllPendingActions();
     res.json(actions);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch pending actions" });
@@ -408,7 +417,7 @@ router.get("/actions/pending", async (req: Request, res: Response) => {
 
 router.get("/personas", async (req: Request, res: Response) => {
   try {
-    const templates = await storage.getAllPersonaTemplates();
+    const templates = await crm(req).getAllPersonaTemplates();
     res.json(templates);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch persona templates" });
@@ -419,7 +428,7 @@ router.post("/personas", async (req: Request, res: Response) => {
   try {
     const parsed = insertPersonaTemplateSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: "Invalid data", details: parsed.error.issues });
-    const template = await storage.createPersonaTemplate(parsed.data);
+    const template = await crm(req).createPersonaTemplate(parsed.data);
     res.status(201).json(template);
   } catch (error) {
     res.status(500).json({ error: "Failed to create persona template" });
@@ -432,7 +441,7 @@ router.post("/personas", async (req: Request, res: Response) => {
 
 router.get("/demos", async (req: Request, res: Response) => {
   try {
-    const instances = await storage.getAllDemoInstances();
+    const instances = await crm(req).getAllDemoInstances();
     res.json(instances);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch demo instances" });
@@ -441,7 +450,7 @@ router.get("/demos", async (req: Request, res: Response) => {
 
 router.get("/demos/:id", async (req: Request, res: Response) => {
   try {
-    const instance = await storage.getDemoInstance(req.params.id);
+    const instance = await crm(req).getDemoInstance(req.params.id);
     if (!instance) return res.status(404).json({ error: "Demo instance not found" });
     res.json(instance);
   } catch (error) {
@@ -459,7 +468,7 @@ router.post("/demos/provision", async (req: Request, res: Response) => {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 14);
 
-    const instance = await storage.createDemoInstance({
+    const instance = await crm(req).createDemoInstance({
       prospectName,
       prospectEmail,
       prospectCompany,
@@ -469,7 +478,8 @@ router.post("/demos/provision", async (req: Request, res: Response) => {
       provisionedBy: getCurrentUser(req)?.id || "admin",
     });
 
-    provisionDemoAsync(instance.id, industry, prospectName).catch(err => {
+    const tenantId = getTenantId(req) ?? "default";
+    provisionDemoAsync(instance.id, industry, prospectName, tenantId).catch(err => {
       console.error("Error provisioning demo:", err);
     });
 
@@ -480,7 +490,8 @@ router.post("/demos/provision", async (req: Request, res: Response) => {
   }
 });
 
-async function provisionDemoAsync(instanceId: string, industry: string, prospectName: string) {
+async function provisionDemoAsync(instanceId: string, industry: string, prospectName: string, tenantId: string) {
+  const s = storageForTenant(tenantId);
   try {
     const result = await aiChat(
       `You are a product data generator for Digital Product Passports (DPP) under EU ESPR Regulation 2024/1781. Generate realistic product data for the ${industry} industry for a prospect named "${prospectName}".
@@ -488,27 +499,43 @@ Return a JSON object with "products" array of 3 products. Each product must have
       `Generate 3 realistic ${industry} products for a demo environment.`
     );
 
-    const parsed = JSON.parse(result);
-    const productIds: string[] = [];
+    const jsonParsed = safeParseJSON(result);
+    if (!jsonParsed.success) {
+      console.error("[DemoProvision] AI returned invalid JSON:", jsonParsed.error);
+      await s.updateDemoInstance(instanceId, { status: "expired" });
+      return;
+    }
+    const validated = validateDemoProvisioningOutput(jsonParsed.data);
+    if (!validated.success) {
+      console.error("[DemoProvision] AI output schema mismatch:", validated.error);
+      await s.updateDemoInstance(instanceId, { status: "expired" });
+      return;
+    }
 
-    for (const p of parsed.products || []) {
+    const productIds: string[] = [];
+    const toCreate = validated.data.products.slice(0, 3);
+
+    for (const p of toCreate) {
       try {
-        const product = await productService.createProduct({
-          productName: p.productName || `${industry} Demo Product`,
-          productCategory: p.productCategory || industry,
-          modelNumber: p.modelNumber || "",
-          sku: p.sku || "",
-          manufacturer: p.manufacturer || "Demo Manufacturer",
-          countryOfOrigin: p.countryOfOrigin || "Germany",
-          batchNumber: p.batchNumber || `DEMO-${Date.now()}`,
-          materials: p.materials || "Various materials",
-          carbonFootprint: p.carbonFootprint || 50,
-          repairabilityScore: p.repairabilityScore || 7,
-          warrantyInfo: p.warrantyInfo || "Standard warranty",
-          recyclingInstructions: p.recyclingInstructions || "Contact manufacturer",
-          recycledContentPercent: p.recycledContentPercent,
-          recyclabilityPercent: p.recyclabilityPercent,
-        });
+        const product = await productService.createProduct(
+          {
+            productName: p.productName || `${industry} Demo Product`,
+            productCategory: p.productCategory || industry,
+            modelNumber: p.modelNumber || "",
+            sku: p.sku || "",
+            manufacturer: p.manufacturer || "Demo Manufacturer",
+            countryOfOrigin: p.countryOfOrigin || "Germany",
+            batchNumber: p.batchNumber || `DEMO-${Date.now()}`,
+            materials: p.materials || "Various materials",
+            carbonFootprint: p.carbonFootprint ?? 50,
+            repairabilityScore: p.repairabilityScore ?? 7,
+            warrantyInfo: p.warrantyInfo || "Standard warranty",
+            recyclingInstructions: p.recyclingInstructions || "Contact manufacturer",
+            recycledContentPercent: p.recycledContentPercent,
+            recyclabilityPercent: p.recyclabilityPercent,
+          },
+          s
+        );
         await qrService.generateQRCode(product.id);
         await identityService.createIdentity(product.id);
         productIds.push(product.id);
@@ -517,20 +544,20 @@ Return a JSON object with "products" array of 3 products. Each product must have
       }
     }
 
-    await storage.updateDemoInstance(instanceId, {
+    await s.updateDemoInstance(instanceId, {
       status: "active",
       productIds,
       demoUrl: `/scan/demo`,
     });
   } catch (error) {
     console.error("Demo provisioning failed:", error);
-    await storage.updateDemoInstance(instanceId, { status: "expired" });
+    await s.updateDemoInstance(instanceId, { status: "expired" });
   }
 }
 
 router.patch("/demos/:id", async (req: Request, res: Response) => {
   try {
-    const instance = await storage.updateDemoInstance(req.params.id, req.body);
+    const instance = await crm(req).updateDemoInstance(req.params.id, req.body);
     if (!instance) return res.status(404).json({ error: "Demo instance not found" });
     res.json(instance);
   } catch (error) {
@@ -540,7 +567,7 @@ router.patch("/demos/:id", async (req: Request, res: Response) => {
 
 router.delete("/demos/:id", async (req: Request, res: Response) => {
   try {
-    const success = await storage.deleteDemoInstance(req.params.id);
+    const success = await crm(req).deleteDemoInstance(req.params.id);
     if (!success) return res.status(404).json({ error: "Demo instance not found" });
     res.status(204).send();
   } catch (error) {
@@ -554,7 +581,7 @@ router.delete("/demos/:id", async (req: Request, res: Response) => {
 
 router.get("/tickets", async (req: Request, res: Response) => {
   try {
-    const tickets = await storage.getAllSupportTickets();
+    const tickets = await crm(req).getAllSupportTickets();
     res.json(tickets);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch tickets" });
@@ -563,7 +590,7 @@ router.get("/tickets", async (req: Request, res: Response) => {
 
 router.get("/tickets/:id", async (req: Request, res: Response) => {
   try {
-    const ticket = await storage.getSupportTicket(req.params.id);
+    const ticket = await crm(req).getSupportTicket(req.params.id);
     if (!ticket) return res.status(404).json({ error: "Ticket not found" });
     res.json(ticket);
   } catch (error) {
@@ -576,9 +603,10 @@ router.post("/tickets", async (req: Request, res: Response) => {
     const parsed = insertSupportTicketSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: "Invalid data", details: parsed.error.issues });
 
-    const ticket = await storage.createSupportTicket(parsed.data);
+    const ticket = await crm(req).createSupportTicket(parsed.data);
 
-    triageTicketAsync(ticket.id, ticket.subject, ticket.description).catch(err => {
+    const tenantId = getTenantId(req) ?? "default";
+    triageTicketAsync(ticket.id, ticket.subject, ticket.description, tenantId).catch(err => {
       console.error("Error triaging ticket:", err);
     });
 
@@ -588,7 +616,8 @@ router.post("/tickets", async (req: Request, res: Response) => {
   }
 });
 
-async function triageTicketAsync(ticketId: string, subject: string, description: string) {
+async function triageTicketAsync(ticketId: string, subject: string, description: string, tenantId: string) {
+  const s = storageForTenant(tenantId);
   try {
     const result = await aiChat(
       `You are an AI support triage agent for PhotonicTag (Digital Product Passport platform).
@@ -601,12 +630,22 @@ Respond in JSON: { "summary": string, "priority": "low"|"medium"|"high"|"urgent"
       `Subject: ${subject}\nDescription: ${description}`
     );
 
-    const parsed = JSON.parse(result);
-    await storage.updateSupportTicket(ticketId, {
-      aiSummary: parsed.summary,
-      aiSuggestedPriority: parsed.priority as TicketPriority,
-      aiSuggestedCategory: parsed.category as TicketCategory,
-      aiSuggestedTags: parsed.tags || [],
+    const jsonParsed = safeParseJSON(result);
+    if (!jsonParsed.success) {
+      console.error("[TicketTriage] AI returned invalid JSON:", jsonParsed.error);
+      return;
+    }
+    const validated = validateTicketTriageOutput(jsonParsed.data);
+    if (!validated.success) {
+      console.error("[TicketTriage] AI output schema mismatch:", validated.error);
+      return;
+    }
+    const triage = validated.data;
+    await s.updateSupportTicket(ticketId, {
+      aiSummary: triage.summary,
+      aiSuggestedPriority: triage.priority as TicketPriority,
+      aiSuggestedCategory: triage.category as TicketCategory,
+      aiSuggestedTags: triage.tags,
     });
   } catch (error) {
     console.error("Ticket triage failed:", error);
@@ -617,7 +656,7 @@ router.patch("/tickets/:id", async (req: Request, res: Response) => {
   try {
     const updates = { ...req.body };
     if (updates.status === "resolved") updates.resolvedAt = new Date();
-    const ticket = await storage.updateSupportTicket(req.params.id, updates);
+    const ticket = await crm(req).updateSupportTicket(req.params.id, updates);
     if (!ticket) return res.status(404).json({ error: "Ticket not found" });
     res.json(ticket);
   } catch (error) {
@@ -633,10 +672,10 @@ router.get("/ops/health", async (req: Request, res: Response) => {
   try {
     const uptime = process.uptime();
     const memUsage = process.memoryUsage();
-    const allProducts = await storage.getAllProducts();
-    const allAccounts = await storage.getAllCustomerAccounts();
-    const allTickets = await storage.getAllSupportTickets();
-    const allDemos = await storage.getAllDemoInstances();
+    const allProducts = await crm(req).getAllProducts();
+    const allAccounts = await crm(req).getAllCustomerAccounts();
+    const allTickets = await crm(req).getAllSupportTickets();
+    const allDemos = await crm(req).getAllDemoInstances();
 
     res.json({
       status: "healthy",
@@ -666,7 +705,7 @@ router.get("/ops/health", async (req: Request, res: Response) => {
 router.get("/ops/metrics", async (req: Request, res: Response) => {
   try {
     const { type, limit } = req.query;
-    const metrics = await storage.getMetrics(
+    const metrics = await crm(req).getMetrics(
       type as string | undefined,
       limit ? parseInt(limit as string) : 100
     );
@@ -679,7 +718,7 @@ router.get("/ops/metrics", async (req: Request, res: Response) => {
 router.post("/ops/metrics", async (req: Request, res: Response) => {
   try {
     const { metricType, value, metadata } = req.body;
-    await storage.recordMetric(metricType, value, metadata);
+    await crm(req).recordMetric(metricType, value, metadata);
     res.status(201).json({ success: true });
   } catch (error) {
     res.status(500).json({ error: "Failed to record metric" });
@@ -692,7 +731,7 @@ router.post("/ops/metrics", async (req: Request, res: Response) => {
 
 router.post("/personas/seed-defaults", async (req: Request, res: Response) => {
   try {
-    const existing = await storage.getAllPersonaTemplates();
+    const existing = await crm(req).getAllPersonaTemplates();
     if (existing.length > 0) {
       return res.json({ message: "Templates already exist", count: existing.length });
     }
@@ -708,7 +747,7 @@ router.post("/personas/seed-defaults", async (req: Request, res: Response) => {
 
     const created = [];
     for (const d of defaults) {
-      const template = await storage.createPersonaTemplate(d);
+      const template = await crm(req).createPersonaTemplate(d);
       created.push(template);
     }
     res.status(201).json(created);
@@ -838,7 +877,7 @@ router.post("/assistant/transcribe", upload.single("audio"), async (req: Request
     const safeExt = (["webm", "mp4", "ogg", "wav", "mp3", "m4a"].includes(ext) ? ext : "webm") as "webm" | "mp4" | "ogg" | "wav" | "mp3" | "m4a";
     const base64Audio = req.file.buffer.toString("base64");
     console.log(`[Transcribe] audio: ${mimeType} → ${safeExt}, size: ${req.file.buffer.length} bytes`);
-    const response = await openai.chat.completions.create({
+    const response = (await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -856,7 +895,7 @@ router.post("/assistant/transcribe", upload.single("audio"), async (req: Request
         },
       ],
       max_tokens: 512,
-    });
+    } as Parameters<typeof openai.chat.completions.create>[0])) as import("openai/resources/chat/completions").ChatCompletion;
     const transcript = response.choices[0]?.message?.content?.trim() || "";
     console.log(`[Transcribe] result: "${transcript}"`);
     res.json({ transcript });

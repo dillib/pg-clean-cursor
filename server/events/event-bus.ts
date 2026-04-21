@@ -131,12 +131,13 @@ class EventBus {
     const poll = async () => {
       while (true) {
         try {
-          const results = await redis.xreadgroup(
+          // ioredis typings do not match Redis XREADGROUP arg order; runtime order is valid.
+          const results = await (redis as any).xreadgroup(
             "GROUP", groupName, consumer,
             "BLOCK", 5000,
             "COUNT", 10,
             "STREAMS", STREAM_KEY, ">"
-          ) as any;
+          );
 
           if (!results) continue;
 

@@ -88,7 +88,7 @@ function LivePassportPreview() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <h3 className="font-semibold text-sm leading-tight line-clamp-2">{p.productName}</h3>
-                      {p.complianceStatus === "compliant" && (
+                      {p.ceMarking === true && (
                         <Badge variant="outline" className="shrink-0 bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:text-emerald-400 dark:border-emerald-800 text-[10px] px-1.5 py-0">
                           <CheckCircle className="w-3 h-3 mr-0.5" />
                           EU Ready

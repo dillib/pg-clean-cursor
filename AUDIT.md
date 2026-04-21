@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-16  
 **Scope:** Data residency, tenancy, auth, AI pipeline, subprocessors  
-**Methodology:** Full source read of all routes, services, schema, config, and infrastructure files. Trust code over replit.md. Uncertain items marked `[?]`.
+**Methodology:** Full source read of all routes, services, schema, config, and infrastructure files. Trust code over README / deployment docs. Uncertain items marked `[?]`.
 
 ---
 
@@ -12,7 +12,7 @@
 |------|-------------|------|--------------|
 | Consumer product scan | `GET /api/products/:id` (public) | Rate-limited (60/min) → `storage.getProduct()` | Postgres → JSON response |
 | DPP QR scan uniqueness | `GET /api/scans` (public) | `storage.findProductScanBySession()` | Postgres |
-| Producer auth | Browser → Replit OIDC (`https://replit.com/oidc`) | Token exchange → session (Postgres or Redis) | Postgres `sessions` / Redis |
+| Producer auth | Browser → WorkOS AuthKit | Token exchange → session (Postgres or Redis) | Postgres `sessions` / Redis |
 | Authenticated API | All `/api/*` routes | `isAuthenticated` → `injectTenantId` → route handler → `storage.*()` | Postgres |
 | SAP sync | `setInterval` in `sap-odata-client.ts` | OData/OAuth2 → `SAPODataClient.fetchMaterials()` → `storage.createProduct()` | SAP S/4HANA → Postgres |
 | DPP AI enrichment | `POST /api/products/import/analyze` | `aiLimiter` → OpenAI `gpt-4o` (US) → `validateAIOutput` → confidence thresholds | OpenAI US → Postgres (on confirm) |
@@ -41,28 +41,26 @@ These are hard blockers for EU data residency compliance. File:line references p
 **Risk:** Customer company names, health scores, MRR, activity logs, and support ticket counts are sent verbatim to OpenAI US API for health scoring and next-best-action generation. This is **customer PII / commercially sensitive data** flowing to a US subprocessor with no EU endpoint option configured.  
 **GDPR exposure:** Art. 44, potentially Art. 9 if health/financial data is involved. Likely violates enterprise customer DPA terms.
 
-### B3 — Replit OIDC: auth tokens from US
-**File:** `server/replit_integrations/auth/replitAuth.ts` — ISSUER defaults to `https://replit.com/oidc`  
-**Risk:** Every user authentication event creates an OIDC token exchange with Replit's US-hosted identity server. User identities (email, name, profile image) flow to the US on every session creation. Enterprise SSO (WorkOS/Okta) would eliminate this, but the WorkOS stub throws on startup (see D3).
+### B3 — WorkOS AuthKit: auth tokens (region per WorkOS config)
+**File:** `server/auth/providers/workos.ts`, `server/auth/index.ts`  
+**Risk:** User identities (email, name, profile) flow through WorkOS on every session creation. Subprocessor region and DPA depend on your WorkOS project settings (EU residency is available on appropriate plans). *(Prior third-party hosted OIDC paths were removed; auth is WorkOS-only in this tree.)*
 
 ### B4 — ProtonMail SMTP: consumer PII via Switzerland
-**File:** `.replit:51` — `SMTP_HOST = "smtp.protonmail.ch"` hardcoded in `userenv`  
-**File:** `server/services/email.ts` — `sendBookingConfirmation()`, `sendReminderEmail()`  
-**Risk:** Consumer booking PII (name, email, company, interest area) and producer team notifications transit ProtonMail's Swiss infrastructure. Switzerland has an EU adequacy decision (Art. 45) so this is lower risk than US, but it is a third-country transfer and must be disclosed in privacy notices. The SMTP host is baked into `.replit` env config, not a deployment-time secret.
+**File:** Deployment env (`SMTP_HOST`, etc. — e.g. Fly secrets, `.env`) and `server/services/email.ts` — `sendBookingConfirmation()`, `sendReminderEmail()`  
+**Risk:** Consumer booking PII (name, email, company, interest area) and producer team notifications transit the configured SMTP relay. If that relay is ProtonMail (CH), Switzerland has an EU adequacy decision (Art. 45), but it remains a third-country transfer and must be disclosed in privacy notices. Prefer explicit deployment-time secrets over hardcoded hosts.
 
 ### B5 — Single DATABASE_URL: no regional routing
 **File:** `drizzle.config.ts:4`, `server/db.ts`  
-**Risk:** One `DATABASE_URL` controls all data. No read replica routing, no regional write endpoint selection, no per-tenant DB routing. Cell-based deployment (a future requirement) is architecturally impossible without this being reworked. All data is wherever this single URL points — currently Replit's US-hosted Postgres.
+**Risk:** One `DATABASE_URL` controls all data. No read replica routing, no regional write endpoint selection, no per-tenant DB routing. Cell-based deployment (a future requirement) is architecturally impossible without this being reworked. All data is wherever this single URL points (hosting region is deployment-specific).
 
 ### B6 — SAP credentials stored plaintext in DB
 **File:** `shared/schema.ts` — `enterpriseConnectors.config` JSONB column holds `SAPConfig` including `password` and `oauthClientSecret`  
 **File:** `server/services/sap-odata-client.ts` — reads `config.password`, `config.oauthClientSecret` directly  
 **Risk:** SAP integration credentials stored unencrypted in the database. Any Postgres dump, log leak, or compromised replica exposes SAP system credentials. This is an Art. 32 GDPR technical measure failure and likely violates enterprise customer security requirements.
 
-### B7 — Replit runtime coupling: REPL_HOME_URL, REPL_ID
-**File:** `server/services/email.ts:58` — `REPL_HOME_URL` in SAP alert email body  
-**File:** `vite.config.ts:11-12` — `REPL_ID !== undefined` loads Replit-specific telemetry/cartographer plugins  
-**Risk:** Application code references Replit-specific environment variables that won't exist in AWS/GCP/Azure deployments. `REPL_HOME_URL` in email bodies would render as `undefined` in a self-hosted deployment. The vite plugin issue is dev-only and low risk.
+### B7 — ~~Dev-host env coupling~~ *(resolved in repo cleanup)*
+**Was:** Vendor-specific public URL env vars and optional dev-only Vite telemetry plugins tied to a hosted IDE.  
+**Now:** SAP alert links use `APP_BASE_URL` (see `server/services/email.ts`). `vite.config.ts` uses standard `@vitejs/plugin-react` only; vendor-specific Vite plugins removed.
 
 ### B8 — CET timezone hardcoded in email service
 **File:** `server/services/email.ts:29` — `const CET_TZ = "Europe/Berlin"`  
@@ -151,9 +149,9 @@ All AI calls default to `api.openai.com` via the `baseURL` env var. There is no 
 | # | Subprocessor | Region | Data Sent | Code Location | GDPR Risk |
 |---|-------------|--------|-----------|---------------|-----------|
 | F1 | OpenAI (`api.openai.com`) | US (California) | Product DPP data (materials, manufacturer, sustainability) + CRM PII (company, MRR, health scores) | `server/routes/internal-routes.ts:49`, `server/routes.ts` (AI analyze) | **HIGH** — Art. 44, no EU endpoint, no DPA reference in code |
-| F2 | Replit OIDC (`replit.com/oidc`) | US | User identity tokens (email, name, profile image URL) on every auth | `server/replit_integrations/auth/replitAuth.ts` | **HIGH** — US auth service for EU users; blocks SSO swap |
-| F3 | ProtonMail SMTP (`smtp.protonmail.ch`) | Switzerland (CH) | Consumer PII: name, email, company, interest area, booking details | `server/services/email.ts`, `.replit:51` | **MEDIUM** — adequacy decision exists but is third-country transfer; must be disclosed |
-| F4 | Postgres DB | US (Replit-hosted) | All product, consumer scan, audit, CRM data — everything | `server/db.ts`, `drizzle.config.ts` | **HIGH** — entire data estate in US; no regional routing |
+| F2 | WorkOS AuthKit | Per WorkOS project | User identity tokens (email, name, profile) on auth | `server/auth/providers/workos.ts` | **HIGH/MEDIUM** — depends on WorkOS region + DPA; EU residency optional |
+| F3 | ProtonMail SMTP (`smtp.protonmail.ch`) | Switzerland (CH) | Consumer PII: name, email, company, interest area, booking details | `server/services/email.ts`, SMTP env | **MEDIUM** — adequacy decision exists but is third-country transfer; must be disclosed |
+| F4 | Postgres DB | Hosting region of `DATABASE_URL` | All product, consumer scan, audit, CRM data — everything | `server/db.ts`, `drizzle.config.ts` | **HIGH** — entire data estate follows that region; no regional routing in app |
 | F5 | SAP S/4HANA | Customer-controlled | Material master data pulled to PhotonicTag DB | `server/services/sap-odata-client.ts` | **LOW** — customer controls their own SAP; PhotonicTag pulls, not pushes PII |
 | F6 | Redis | Unknown `[?]` | Session data, event stream | `server/redis.ts` | **[?]** — risk depends on where `REDIS_URL` points; not yet configured in any env files seen |
 
@@ -165,7 +163,7 @@ All AI calls default to `api.openai.com` via the `baseURL` env var. There is no 
 |----|------|----------|-------------|
 | B1 | Residency | CRITICAL | OpenAI US: DPP product data |
 | B2 | Residency | CRITICAL | OpenAI US: CRM customer PII |
-| B3 | Residency | HIGH | Replit OIDC: US auth for EU users |
+| B3 | Residency | HIGH | WorkOS / identity provider region and DPA |
 | B5 | Residency | HIGH | Single DATABASE_URL, no regional routing |
 | B6 | Security | HIGH | SAP credentials plaintext in DB |
 | D4 | Auth | HIGH | Export endpoints publicly accessible |
@@ -180,5 +178,5 @@ All AI calls default to `api.openai.com` via the `baseURL` env var. There is no 
 | B4 | Residency | MEDIUM | ProtonMail: PII transiting Switzerland |
 | D2 | Auth | MEDIUM | partnerId session auth: no DB liveness check |
 | F6 | Subprocessor | LOW/? | Redis region unknown |
-| B7 | Infra | LOW | Replit env var coupling in application code |
+| B7 | Infra | — | *(Resolved: dev-host env/plugins removed.)* |
 | B8 | Infra | LOW | CET timezone hardcoded |

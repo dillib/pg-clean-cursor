@@ -33,6 +33,12 @@ describe("tenantStorage factory", () => {
     expect((scoped as any).tenantId).toBe("default");
   });
 
+  it("maps partner session to partner:* tenant scope", () => {
+    const req = { tenantId: undefined, session: { partnerId: "p-42" } } as unknown as Request;
+    const scoped = tenantStorage(req);
+    expect((scoped as any).tenantId).toBe("partner:p-42");
+  });
+
   it("two requests for different tenants get independent scoped stores", () => {
     const a = tenantStorage(fakeReq("tenant-a"));
     const b = tenantStorage(fakeReq("tenant-b"));

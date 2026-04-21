@@ -15,10 +15,57 @@ import { sql } from "drizzle-orm";
 import { eq, and, desc } from "drizzle-orm";
 import type { Request } from "express";
 import { db } from "./db";
-import { products, auditLogs, enterpriseConnectors, integrationSyncLogs, traceEvents, iotDevices, dppRegionalExtensions, productPassports, identities, qrCodes, aiInsights, dppAiInsights } from "@shared/schema";
-import type { InsertProduct, Product, InsertAuditLog, AuditLog, InsertTraceEvent, TraceEvent } from "@shared/schema";
+import {
+  products,
+  auditLogs,
+  enterpriseConnectors,
+  integrationSyncLogs,
+  traceEvents,
+  iotDevices,
+  dppRegionalExtensions,
+  productPassports,
+  identities,
+  qrCodes,
+  aiInsights,
+  dppAiInsights,
+  customerAccounts,
+  accountActivities,
+  nextBestActions,
+  demoInstances,
+  personaTemplates,
+  supportTickets,
+  platformMetrics,
+  leads,
+  leadActivities,
+} from "@shared/schema";
+import type {
+  InsertProduct,
+  Product,
+  InsertAuditLog,
+  AuditLog,
+  InsertTraceEvent,
+  TraceEvent,
+  CustomerAccount,
+  InsertCustomerAccount,
+  AccountActivity,
+  InsertAccountActivity,
+  NextBestAction,
+  InsertNextBestAction,
+  DemoInstance,
+  InsertDemoInstance,
+  PersonaTemplate,
+  InsertPersonaTemplate,
+  SupportTicket,
+  InsertSupportTicket,
+  Lead,
+  InsertLead,
+  LeadActivity,
+  InsertLeadActivity,
+  ActionStatus,
+} from "@shared/schema";
 import { storage, type IStorage } from "./storage";
 import { getTenantId } from "./middleware/tenant";
+import { computeLeadStatsFromLeads } from "./lead-stats";
 
 /**
  * Sets the Postgres session variable for RLS enforcement.
@@ -30,11 +77,15 @@ export async function setTenantContext(tenantId: string): Promise<void> {
 
 /**
  * Returns a tenant-scoped storage proxy for the current request.
- * Falls back to the base storage for methods that don't need tenant scoping
- * (public lookups, non-tenant tables like leads/partners/demos).
+ * Partner sessions resolve to `partner:<id>`; authenticated users use `user.tenantId`.
  */
 export function tenantStorage(req: Request): TenantStorage {
   const tenantId = getTenantId(req) ?? "default";
+  return new TenantStorage(tenantId);
+}
+
+/** Explicit tenant id (e.g. background jobs) — same scoping as {@link tenantStorage}. */
+export function storageForTenant(tenantId: string): TenantStorage {
   return new TenantStorage(tenantId);
 }
 
@@ -128,8 +179,313 @@ export class TenantStorage {
   }
 
   // ----------------------------------------
-  // PASSTHROUGH — methods without tenant scope
-  // (public lookups, non-tenant tables)
+  // CRM — tenant-scoped (internal console + partner sessions)
+  // ----------------------------------------
+
+  async getAllCustomerAccounts(): Promise<CustomerAccount[]> {
+    return db
+      .select()
+      .from(customerAccounts)
+      .where(eq(customerAccounts.tenantId as any, this.tenantId))
+      .orderBy(desc(customerAccounts.createdAt));
+  }
+
+  async getCustomerAccount(id: string): Promise<CustomerAccount | undefined> {
+    const [row] = await db
+      .select()
+      .from(customerAccounts)
+      .where(and(eq(customerAccounts.id, id), eq(customerAccounts.tenantId as any, this.tenantId)));
+    return row;
+  }
+
+  async createCustomerAccount(account: InsertCustomerAccount): Promise<CustomerAccount> {
+    const [created] = await db
+      .insert(customerAccounts)
+      .values({ ...(account as any), tenantId: this.tenantId })
+      .returning();
+    return created;
+  }
+
+  async updateCustomerAccount(id: string, updates: Partial<CustomerAccount>): Promise<CustomerAccount | undefined> {
+    const [updated] = await db
+      .update(customerAccounts)
+      .set({ ...updates, updatedAt: new Date() } as any)
+      .where(and(eq(customerAccounts.id, id), eq(customerAccounts.tenantId as any, this.tenantId)))
+      .returning();
+    return updated;
+  }
+
+  async deleteCustomerAccount(id: string): Promise<boolean> {
+    const result = await db
+      .delete(customerAccounts)
+      .where(and(eq(customerAccounts.id, id), eq(customerAccounts.tenantId as any, this.tenantId)))
+      .returning();
+    return result.length > 0;
+  }
+
+  async getAccountActivities(accountId: string): Promise<AccountActivity[]> {
+    const owner = await this.getCustomerAccount(accountId);
+    if (!owner) return [];
+    return db
+      .select()
+      .from(accountActivities)
+      .where(and(eq(accountActivities.accountId, accountId), eq(accountActivities.tenantId as any, this.tenantId)))
+      .orderBy(desc(accountActivities.createdAt));
+  }
+
+  async createAccountActivity(activity: InsertAccountActivity): Promise<AccountActivity> {
+    const owner = await this.getCustomerAccount(activity.accountId);
+    if (!owner) {
+      throw new Error("Account not found for this tenant");
+    }
+    const [created] = await db
+      .insert(accountActivities)
+      .values({ ...(activity as any), tenantId: this.tenantId })
+      .returning();
+    return created;
+  }
+
+  async getNextBestActions(accountId: string): Promise<NextBestAction[]> {
+    const owner = await this.getCustomerAccount(accountId);
+    if (!owner) return [];
+    return db
+      .select()
+      .from(nextBestActions)
+      .where(and(eq(nextBestActions.accountId, accountId), eq(nextBestActions.tenantId as any, this.tenantId)))
+      .orderBy(desc(nextBestActions.createdAt));
+  }
+
+  async getAllPendingActions(): Promise<NextBestAction[]> {
+    return db
+      .select()
+      .from(nextBestActions)
+      .where(and(eq(nextBestActions.status, "pending"), eq(nextBestActions.tenantId as any, this.tenantId)))
+      .orderBy(desc(nextBestActions.createdAt));
+  }
+
+  async createNextBestAction(action: InsertNextBestAction): Promise<NextBestAction> {
+    const owner = await this.getCustomerAccount(action.accountId);
+    if (!owner) {
+      throw new Error("Account not found for this tenant");
+    }
+    const [created] = await db
+      .insert(nextBestActions)
+      .values({ ...(action as any), tenantId: this.tenantId })
+      .returning();
+    return created;
+  }
+
+  async updateNextBestActionStatus(id: string, status: ActionStatus): Promise<NextBestAction | undefined> {
+    const updates: Record<string, unknown> = { status };
+    if (status === "completed") updates.completedAt = new Date();
+    const [updated] = await db
+      .update(nextBestActions)
+      .set(updates as any)
+      .where(and(eq(nextBestActions.id, id), eq(nextBestActions.tenantId as any, this.tenantId)))
+      .returning();
+    return updated;
+  }
+
+  async getDemoInstance(id: string): Promise<DemoInstance | undefined> {
+    const [row] = await db
+      .select()
+      .from(demoInstances)
+      .where(and(eq(demoInstances.id, id), eq(demoInstances.tenantId as any, this.tenantId)));
+    return row;
+  }
+
+  async getAllDemoInstances(): Promise<DemoInstance[]> {
+    return db
+      .select()
+      .from(demoInstances)
+      .where(eq(demoInstances.tenantId as any, this.tenantId))
+      .orderBy(desc(demoInstances.createdAt));
+  }
+
+  async createDemoInstance(instance: InsertDemoInstance): Promise<DemoInstance> {
+    const [created] = await db
+      .insert(demoInstances)
+      .values({ ...(instance as any), tenantId: this.tenantId })
+      .returning();
+    return created;
+  }
+
+  async updateDemoInstance(id: string, updates: Partial<DemoInstance>): Promise<DemoInstance | undefined> {
+    const [updated] = await db
+      .update(demoInstances)
+      .set({ ...updates, updatedAt: new Date() } as any)
+      .where(and(eq(demoInstances.id, id), eq(demoInstances.tenantId as any, this.tenantId)))
+      .returning();
+    return updated;
+  }
+
+  async deleteDemoInstance(id: string): Promise<boolean> {
+    const result = await db
+      .delete(demoInstances)
+      .where(and(eq(demoInstances.id, id), eq(demoInstances.tenantId as any, this.tenantId)))
+      .returning();
+    return result.length > 0;
+  }
+
+  async getPersonaTemplate(id: string): Promise<PersonaTemplate | undefined> {
+    const [row] = await db
+      .select()
+      .from(personaTemplates)
+      .where(and(eq(personaTemplates.id, id), eq(personaTemplates.tenantId as any, this.tenantId)));
+    return row;
+  }
+
+  async getAllPersonaTemplates(): Promise<PersonaTemplate[]> {
+    return db
+      .select()
+      .from(personaTemplates)
+      .where(eq(personaTemplates.tenantId as any, this.tenantId))
+      .orderBy(desc(personaTemplates.createdAt));
+  }
+
+  async createPersonaTemplate(template: InsertPersonaTemplate): Promise<PersonaTemplate> {
+    const [created] = await db
+      .insert(personaTemplates)
+      .values({ ...(template as any), tenantId: this.tenantId })
+      .returning();
+    return created;
+  }
+
+  async getSupportTicket(id: string): Promise<SupportTicket | undefined> {
+    const [row] = await db
+      .select()
+      .from(supportTickets)
+      .where(and(eq(supportTickets.id, id), eq(supportTickets.tenantId as any, this.tenantId)));
+    return row;
+  }
+
+  async getAllSupportTickets(): Promise<SupportTicket[]> {
+    return db
+      .select()
+      .from(supportTickets)
+      .where(eq(supportTickets.tenantId as any, this.tenantId))
+      .orderBy(desc(supportTickets.createdAt));
+  }
+
+  async createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket> {
+    const [created] = await db
+      .insert(supportTickets)
+      .values({ ...(ticket as any), tenantId: this.tenantId })
+      .returning();
+    return created;
+  }
+
+  async updateSupportTicket(id: string, updates: Partial<SupportTicket>): Promise<SupportTicket | undefined> {
+    const [updated] = await db
+      .update(supportTickets)
+      .set({ ...updates, updatedAt: new Date() } as any)
+      .where(and(eq(supportTickets.id, id), eq(supportTickets.tenantId as any, this.tenantId)))
+      .returning();
+    return updated;
+  }
+
+  async recordMetric(metricType: string, value: number, metadata?: Record<string, unknown>): Promise<void> {
+    await db.insert(platformMetrics).values({
+      metricType,
+      value,
+      metadata: metadata || {},
+      tenantId: this.tenantId,
+    } as any);
+  }
+
+  async getMetrics(metricType?: string, limit = 100) {
+    const tenantCond = eq(platformMetrics.tenantId as any, this.tenantId);
+    if (metricType) {
+      return db
+        .select()
+        .from(platformMetrics)
+        .where(and(eq(platformMetrics.metricType, metricType), tenantCond))
+        .orderBy(desc(platformMetrics.recordedAt))
+        .limit(limit);
+    }
+    return db
+      .select()
+      .from(platformMetrics)
+      .where(tenantCond)
+      .orderBy(desc(platformMetrics.recordedAt))
+      .limit(limit);
+  }
+
+  async getAllLeads(): Promise<Lead[]> {
+    return db
+      .select()
+      .from(leads)
+      .where(eq(leads.tenantId as any, this.tenantId))
+      .orderBy(desc(leads.createdAt));
+  }
+
+  async getLead(id: string): Promise<Lead | undefined> {
+    const [row] = await db
+      .select()
+      .from(leads)
+      .where(and(eq(leads.id, id), eq(leads.tenantId as any, this.tenantId)));
+    return row;
+  }
+
+  async getLeadByEmail(email: string): Promise<Lead | undefined> {
+    const [row] = await db
+      .select()
+      .from(leads)
+      .where(and(eq(leads.email, email), eq(leads.tenantId as any, this.tenantId)));
+    return row;
+  }
+
+  async createLead(insertLead: InsertLead): Promise<Lead> {
+    const [lead] = await db
+      .insert(leads)
+      .values({ ...(insertLead as any), tenantId: this.tenantId })
+      .returning();
+    return lead;
+  }
+
+  async updateLead(id: string, updates: Partial<Lead>): Promise<Lead | undefined> {
+    const [lead] = await db
+      .update(leads)
+      .set({ ...updates, updatedAt: new Date() } as any)
+      .where(and(eq(leads.id, id), eq(leads.tenantId as any, this.tenantId)))
+      .returning();
+    return lead;
+  }
+
+  async deleteLead(id: string): Promise<boolean> {
+    const result = await db
+      .delete(leads)
+      .where(and(eq(leads.id, id), eq(leads.tenantId as any, this.tenantId)))
+      .returning();
+    return result.length > 0;
+  }
+
+  async getLeadStats() {
+    const allLeads = await this.getAllLeads();
+    return computeLeadStatsFromLeads(allLeads);
+  }
+
+  async getLeadActivities(leadId: string): Promise<LeadActivity[]> {
+    const lead = await this.getLead(leadId);
+    if (!lead) return [];
+    return db
+      .select()
+      .from(leadActivities)
+      .where(eq(leadActivities.leadId, leadId))
+      .orderBy(desc(leadActivities.createdAt));
+  }
+
+  async createLeadActivity(insertActivity: InsertLeadActivity): Promise<LeadActivity> {
+    const lead = await this.getLead(insertActivity.leadId);
+    if (!lead) {
+      throw new Error("Lead not found for this tenant");
+    }
+    const [activity] = await db.insert(leadActivities).values(insertActivity as any).returning();
+    return activity;
+  }
+
+  // ----------------------------------------
+  // PASSTHROUGH — escape hatch (partners table, public lookups, etc.)
   // ----------------------------------------
 
   /** Returns the full IStorage for methods that are tenant-agnostic. */

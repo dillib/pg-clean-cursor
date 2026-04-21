@@ -4,8 +4,8 @@
  * Same pattern as server/services/ai-eval-harness.ts applies to DPP enrichment —
  * but for the internal CRM AI endpoints (health score, next-best-action).
  *
- * Every JSON.parse(aiResult) call in server/routes/internal-routes.ts should go
- * through validateHealthScore / validateNextBestActions instead.
+ * Async background jobs (demo provisioning, ticket triage) must use the same
+ * safeParseJSON → validate* pattern — never raw JSON.parse on model output.
  */
 
 import { z } from "zod";
@@ -73,4 +73,62 @@ export function safeParseJSON(raw: string): { success: true; data: unknown } | {
       error: `Invalid JSON from AI: ${err instanceof Error ? err.message : String(err)}`,
     };
   }
+}
+
+// ─── Demo provisioning (async background job) ───────────────────────────────
+
+/** One DPP-style product row from the demo AI generator. Bounds reject oversized payloads early. */
+export const DemoProvisioningProductSchema = z.object({
+  productName: z.coerce.string().trim().min(1).max(500),
+  productCategory: z.coerce.string().trim().max(200),
+  modelNumber: z.coerce.string().max(200),
+  sku: z.coerce.string().max(200),
+  manufacturer: z.coerce.string().trim().min(1).max(300),
+  countryOfOrigin: z.coerce.string().trim().max(120),
+  batchNumber: z.coerce.string().trim().max(200),
+  materials: z.coerce.string().trim().min(1).max(8000),
+  carbonFootprint: z.coerce.number().finite(),
+  repairabilityScore: z.coerce.number().int().min(1).max(10),
+  warrantyInfo: z.coerce.string().trim().max(2000),
+  recyclingInstructions: z.coerce.string().trim().max(4000),
+  recycledContentPercent: z.coerce.number().min(0).max(100).optional(),
+  recyclabilityPercent: z.coerce.number().min(0).max(100).optional(),
+});
+
+export const DemoProvisioningOutputSchema = z.object({
+  /** Capped for performance / DoS safety; handler may only materialize a subset. */
+  products: z.array(DemoProvisioningProductSchema).min(1).max(10),
+});
+
+export type DemoProvisioningOutput = z.infer<typeof DemoProvisioningOutputSchema>;
+
+export function validateDemoProvisioningOutput(
+  raw: unknown
+): { success: true; data: DemoProvisioningOutput } | { success: false; error: string } {
+  const parsed = DemoProvisioningOutputSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ") };
+  }
+  return { success: true, data: parsed.data };
+}
+
+// ─── Support ticket triage (async background job) ───────────────────────────
+
+export const TicketTriageOutputSchema = z.object({
+  summary: z.coerce.string().trim().min(1).max(4000),
+  priority: z.enum(["low", "medium", "high", "urgent"]),
+  category: z.enum(["billing", "technical", "integration", "compliance", "feature_request", "general"]),
+  tags: z.array(z.coerce.string().trim().max(80)).max(40).default([]),
+});
+
+export type TicketTriageOutput = z.infer<typeof TicketTriageOutputSchema>;
+
+export function validateTicketTriageOutput(
+  raw: unknown
+): { success: true; data: TicketTriageOutput } | { success: false; error: string } {
+  const parsed = TicketTriageOutputSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ") };
+  }
+  return { success: true, data: parsed.data };
 }

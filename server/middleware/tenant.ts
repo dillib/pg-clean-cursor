@@ -5,8 +5,8 @@
  * All storage calls downstream should call `getTenantId(req)` instead of
  * reaching into req.user directly.
  *
- * Partner sessions and public endpoints use explicit product IDs, so tenant
- * scoping for those is enforced at the storage layer via productId ownership.
+ * Partner sessions use `getTenantId` → `partner:<id>` so CRM and products stay
+ * isolated the same way as WorkOS org tenants.
  */
 import type { Request, RequestHandler } from "express";
 import { authProvider } from "../auth";
@@ -28,21 +28,21 @@ export const injectTenantId: RequestHandler = (req, _res, next) => {
 };
 
 /**
+ * Returns the tenant ID if present, undefined otherwise (for public endpoints).
+ */
+export function getTenantId(req: Request): string | undefined {
+  if (req.tenantId) return req.tenantId;
+  const partnerId = (req.session as { partnerId?: string } | undefined)?.partnerId;
+  if (partnerId) return `partner:${partnerId}`;
+  return undefined;
+}
+
+/**
  * Returns the tenant ID from the request. Throws if called on an unauthenticated
  * request without a fallback — use this in route handlers after isAuthenticated.
  */
 export function requireTenantId(req: Request): string {
-  if (req.tenantId) return req.tenantId;
-  // Partner sessions: tenantId will be added when partners are linked to tenants.
-  // For now, use partnerId as tenant scope for partner sessions.
-  const partnerId = (req.session as any)?.partnerId;
-  if (partnerId) return `partner:${partnerId}`;
+  const t = getTenantId(req);
+  if (t) return t;
   throw new Error("No tenant context on request — isAuthenticated must run first.");
-}
-
-/**
- * Returns the tenant ID if present, undefined otherwise (for public endpoints).
- */
-export function getTenantId(req: Request): string | undefined {
-  return req.tenantId ?? undefined;
 }

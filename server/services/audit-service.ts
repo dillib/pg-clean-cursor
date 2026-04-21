@@ -13,8 +13,9 @@ export class AuditService {
     if (this.chainTip !== undefined) return this.chainTip;
     const logs = await storage.getAuditLogs();
     const latest = logs[0]; // ordered desc by timestamp
-    this.chainTip = (latest as any)?.chainHash ?? null;
-    return this.chainTip;
+    const tip: string | null = latest?.chainHash ?? null;
+    this.chainTip = tip;
+    return tip;
   }
 
   async log(

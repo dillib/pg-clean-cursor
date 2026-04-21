@@ -22,13 +22,15 @@ export default function AdminLogin() {
                 <QrCode className="w-7 h-7 text-primary-foreground" />
               </div>
               <CardTitle className="text-2xl" data-testid="text-admin-title">Admin Access</CardTitle>
-              <CardDescription data-testid="text-admin-description">Sign in with your Replit account to access the admin dashboard</CardDescription>
+              <CardDescription data-testid="text-admin-description">
+                Sign in with your organization account (WorkOS) to access the admin dashboard
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild className="w-full gap-2" data-testid="button-admin-login">
                 <a href="/api/login">
                   <LogIn className="w-4 h-4" />
-                  Sign in with Replit
+                  Sign in
                 </a>
               </Button>
             </CardContent>

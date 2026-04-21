@@ -12,10 +12,10 @@ PRs are sequenced so each one is independently deployable without breaking the o
 
 ### PR-01 — Secrets hygiene (no downtime, no migration)
 **Fixes:** D1, B7  
-**What:** Remove hardcoded admin email + Replit env var references from application code.
+**What:** Remove hardcoded admin email and legacy deployment env references from application code.
 - Move `MASTER_ADMIN_EMAILS` from `shared/models/auth.ts:17` to `MASTER_ADMIN_EMAILS` env var, parsed at startup. Fail fast if not set.
-- Replace `REPL_HOME_URL` reference in `server/services/email.ts:58` with `APP_BASE_URL` env var.
-- Add `APP_BASE_URL` to `.replit` userenv and document in README.
+- Ensure SAP / email deep links use `APP_BASE_URL` (see `server/services/email.ts`).
+- Document `APP_BASE_URL` in `.env.example` and Fly secrets.
 - **Test:** Unit test that startup throws if `MASTER_ADMIN_EMAILS` is empty.
 
 ### PR-02 — Auth export endpoints (no migration)
@@ -80,20 +80,19 @@ PRs are sequenced so each one is independently deployable without breaking the o
 - Document the Azure OpenAI setup in a new `docs/ai-eu-setup.md` (one page).
 - **Test:** Unit test that EU region sets correct baseURL.
 
-### PR-09 — Replit auth → WorkOS SSO cut-over
-**Fixes:** B3  
+### PR-09 — Auth provider: WorkOS-only operations
+**Fixes:** B3 (ongoing — WorkOS region/DPA)  
 **Depends on:** PR-05 merged and WorkOS credentials configured in env  
-**What:** Default `AUTH_PROVIDER` to `workos` in production. Replit auth remains available for local dev via `AUTH_PROVIDER=replit`.
-- Update `.replit` deployment env to set `AUTH_PROVIDER=workos`.
-- Validate that `AUTH_PROVIDER=replit` still works locally.
-- Remove `REPL_HOME_URL` from any remaining references.
+**What:** Treat `AUTH_PROVIDER=workos` as the supported path in staging/production (Fly `fly secrets`, `fly.toml`).
+- Remove any remaining references to obsolete hosted-dev auth or dev-only env vars in docs and CI.
+- Confirm local and CI use the same WorkOS graceful-degradation behavior when `WORKOS_*` is unset.
 
 ### PR-10 — Email provider: EU-hosted relay
 **Fixes:** B4  
 **What:** Replace ProtonMail SMTP config with an EU-hosted transactional email provider (Mailjet EU, Brevo/Sendinblue FR, or AWS SES eu-west-1).
 - Add `EMAIL_PROVIDER` env var: `"smtp"` (current) | `"mailjet"` | `"ses-eu"`.
 - Wrap `server/services/email.ts` in a provider interface so SMTP internals are swappable without touching call sites.
-- Update `.replit` userenv to use chosen EU provider's SMTP endpoint.
+- Update deployment secrets / `.env` to use the chosen EU provider's SMTP endpoint.
 - Remove hardcoded `CET_TZ` — replace with `EMAIL_TIMEZONE` env var, default `"UTC"`.
 
 ### PR-11 — Database regional routing stub
@@ -238,9 +237,9 @@ Demo instances (created by `POST /api/internal/demos/provision`) are scoped to a
 | Current Subprocessor | Data Sent | Risk | Proposed Replacement | Notes |
 |---------------------|-----------|------|---------------------|-------|
 | OpenAI US (`api.openai.com`) | DPP product data + CRM PII | CRITICAL | Azure OpenAI (Sweden Central or France Central) | Same GPT-4o model; requires Azure subscription + DPA with Microsoft. EU data boundary guarantee available. See PR-08. |
-| Replit OIDC (`replit.com/oidc`) | User identity on every auth | HIGH | WorkOS (SSO/SAML 2.0) | WorkOS has EU data residency option. Requires WorkOS Enterprise plan. See PR-05, PR-09. |
+| Legacy hosted-dev OIDC (removed) | — | — | WorkOS (SSO/SAML 2.0) | WorkOS has EU data residency option on appropriate plans. See PR-05, PR-09. |
 | ProtonMail SMTP (`smtp.protonmail.ch`) | Consumer PII, booking data | MEDIUM | Brevo (formerly Sendinblue, FR) or Mailjet (FR) | Both are French companies, EU-hosted, GDPR DPA available. See PR-10. |
-| Postgres (Replit US) | All data | HIGH | Postgres on EU cloud (AWS RDS eu-west-1 or Render EU) | DB_REGION_MAP in PR-11 enables this without code changes. |
+| Postgres (region of `DATABASE_URL`) | All data | HIGH | Postgres on EU cloud (AWS RDS eu-west-1 or Render EU) | DB_REGION_MAP in PR-11 enables this without code changes. |
 | Redis (unknown) | Sessions, events | ? | Redis on same cloud + region as Postgres | Must be co-located with cell DB. |
 
 ### Subprocessors that stay

@@ -1,5 +1,6 @@
 import { eq, desc, and, gte, lte, or, isNull, ne } from "drizzle-orm";
 import { db } from "./db";
+import { computeLeadStatsFromLeads } from "./lead-stats";
 import {
   type User,
   type UpsertUser,
@@ -27,6 +28,7 @@ import {
   type InsertDppRegionalExtension,
   type DppAiInsight,
   type InsertDppAiInsight,
+  type AIInsightType,
   type RegionCode,
   type EnterpriseConnector,
   type InsertEnterpriseConnector,
@@ -232,8 +234,17 @@ export interface IStorage {
   updateSupportTicket(id: string, updates: Partial<SupportTicket>): Promise<SupportTicket | undefined>;
 
   // Platform Metrics
-  recordMetric(metricType: string, value: number, metadata?: Record<string, unknown>): Promise<void>;
-  getMetrics(metricType?: string, limit?: number): Promise<Array<{ metricType: string; value: number; metadata: Record<string, unknown> | null; recordedAt: Date }>>;
+  recordMetric(
+    metricType: string,
+    value: number,
+    metadata?: Record<string, unknown>,
+    tenantId?: string
+  ): Promise<void>;
+  getMetrics(
+    metricType?: string,
+    limit?: number,
+    tenantId?: string
+  ): Promise<Array<{ metricType: string; value: number; metadata: Record<string, unknown> | null; recordedAt: Date }>>;
 
   // Demo Bookings
   getAllDemoBookings(): Promise<DemoBooking[]>;
@@ -265,8 +276,9 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+  /** Legacy API name — `users` has no `username` column; matches email. */
+  async getUserByUsername(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
     return user;
   }
 
@@ -555,7 +567,7 @@ export class DatabaseStorage implements IStorage {
   async updateRegionalExtension(id: string, updates: Partial<InsertDppRegionalExtension>): Promise<DppRegionalExtension | undefined> {
     const [extension] = await db
       .update(dppRegionalExtensions)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...updates, updatedAt: new Date() } as Record<string, unknown>)
       .where(eq(dppRegionalExtensions.id, id))
       .returning();
     return extension;
@@ -594,7 +606,7 @@ export class DatabaseStorage implements IStorage {
       .from(dppAiInsights)
       .where(and(
         eq(dppAiInsights.productId, productId),
-        eq(dppAiInsights.insightType, insightType)
+        eq(dppAiInsights.insightType, insightType as AIInsightType)
       ))
       .orderBy(desc(dppAiInsights.createdAt))
       .limit(1);
@@ -655,7 +667,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Leads CRM
-  async getAllLeads(): Promise<Lead[]> {
+  async getAllLeads(tenantId?: string): Promise<Lead[]> {
+    if (tenantId !== undefined) {
+      return db
+        .select()
+        .from(leads)
+        .where(eq(leads.tenantId as any, tenantId))
+        .orderBy(desc(leads.createdAt));
+    }
     return db.select().from(leads).orderBy(desc(leads.createdAt));
   }
 
@@ -664,31 +683,53 @@ export class DatabaseStorage implements IStorage {
     return lead;
   }
 
-  async getLeadByEmail(email: string): Promise<Lead | undefined> {
-    const [lead] = await db.select().from(leads).where(eq(leads.email, email));
+  async getLeadByEmail(email: string, tenantId = "default"): Promise<Lead | undefined> {
+    const [lead] = await db
+      .select()
+      .from(leads)
+      .where(and(eq(leads.email, email), eq(leads.tenantId as any, tenantId)));
     return lead;
   }
 
   async createLead(insertLead: InsertLead): Promise<Lead> {
-    const [lead] = await db.insert(leads).values(insertLead as typeof leads.$inferInsert).returning();
-    return lead;
-  }
-
-  async updateLead(id: string, updates: Partial<Lead>): Promise<Lead | undefined> {
+    const tenantId = (insertLead as { tenantId?: string }).tenantId ?? "default";
     const [lead] = await db
-      .update(leads)
-      .set({ ...updates, updatedAt: new Date() } as typeof leads.$inferInsert)
-      .where(eq(leads.id, id))
+      .insert(leads)
+      .values({ ...(insertLead as typeof leads.$inferInsert), tenantId } as typeof leads.$inferInsert)
       .returning();
     return lead;
   }
 
-  async deleteLead(id: string): Promise<boolean> {
-    const result = await db.delete(leads).where(eq(leads.id, id)).returning();
+  async updateLead(id: string, updates: Partial<Lead>, restrictToTenantId?: string): Promise<Lead | undefined> {
+    const cond =
+      restrictToTenantId !== undefined
+        ? and(eq(leads.id, id), eq(leads.tenantId as any, restrictToTenantId))
+        : eq(leads.id, id);
+    const [lead] = await db
+      .update(leads)
+      .set({ ...updates, updatedAt: new Date() } as typeof leads.$inferInsert)
+      .where(cond)
+      .returning();
+    return lead;
+  }
+
+  async deleteLead(id: string, restrictToTenantId?: string): Promise<boolean> {
+    const cond =
+      restrictToTenantId !== undefined
+        ? and(eq(leads.id, id), eq(leads.tenantId as any, restrictToTenantId))
+        : eq(leads.id, id);
+    const result = await db.delete(leads).where(cond).returning();
     return result.length > 0;
   }
 
-  async getLeadsByStatus(status: LeadStatus): Promise<Lead[]> {
+  async getLeadsByStatus(status: LeadStatus, tenantId?: string): Promise<Lead[]> {
+    if (tenantId !== undefined) {
+      return db
+        .select()
+        .from(leads)
+        .where(and(eq(leads.status, status), eq(leads.tenantId as any, tenantId)))
+        .orderBy(desc(leads.createdAt));
+    }
     return db.select().from(leads).where(eq(leads.status, status)).orderBy(desc(leads.createdAt));
   }
 
@@ -703,7 +744,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Lead Stats for VC Metrics
-  async getLeadStats(): Promise<{
+  async getLeadStats(tenantId?: string): Promise<{
     total: number;
     byStatus: Record<string, number>;
     byTier: Record<string, number>;
@@ -711,38 +752,8 @@ export class DatabaseStorage implements IStorage {
     thisWeek: number;
     lastWeek: number;
   }> {
-    const allLeads = await this.getAllLeads();
-    const now = new Date();
-    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
-
-    const byStatus: Record<string, number> = {};
-    const byTier: Record<string, number> = {};
-    const bySource: Record<string, number> = {};
-    let thisWeek = 0;
-    let lastWeek = 0;
-
-    for (const lead of allLeads) {
-      byStatus[lead.status] = (byStatus[lead.status] || 0) + 1;
-      byTier[lead.tierInterest] = (byTier[lead.tierInterest] || 0) + 1;
-      bySource[lead.source] = (bySource[lead.source] || 0) + 1;
-
-      const createdAt = new Date(lead.createdAt);
-      if (createdAt >= weekAgo) {
-        thisWeek++;
-      } else if (createdAt >= twoWeeksAgo) {
-        lastWeek++;
-      }
-    }
-
-    return {
-      total: allLeads.length,
-      byStatus,
-      byTier,
-      bySource,
-      thisWeek,
-      lastWeek,
-    };
+    const allLeads = await this.getAllLeads(tenantId);
+    return computeLeadStatsFromLeads(allLeads);
   }
 
   // Partners
@@ -819,7 +830,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCustomerAccount(account: InsertCustomerAccount): Promise<CustomerAccount> {
-    const [created] = await db.insert(customerAccounts).values(account as typeof customerAccounts.$inferInsert).returning();
+    const tenantId = (account as { tenantId?: string }).tenantId ?? "default";
+    const [created] = await db
+      .insert(customerAccounts)
+      .values({ ...(account as typeof customerAccounts.$inferInsert), tenantId } as typeof customerAccounts.$inferInsert)
+      .returning();
     return created;
   }
 
@@ -843,7 +858,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAccountActivity(activity: InsertAccountActivity): Promise<AccountActivity> {
-    const [created] = await db.insert(accountActivities).values(activity as typeof accountActivities.$inferInsert).returning();
+    const tenantId = (activity as { tenantId?: string }).tenantId ?? "default";
+    const [created] = await db
+      .insert(accountActivities)
+      .values({ ...(activity as typeof accountActivities.$inferInsert), tenantId } as typeof accountActivities.$inferInsert)
+      .returning();
     return created;
   }
 
@@ -857,7 +876,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createNextBestAction(action: InsertNextBestAction): Promise<NextBestAction> {
-    const [created] = await db.insert(nextBestActions).values(action as typeof nextBestActions.$inferInsert).returning();
+    const tenantId = (action as { tenantId?: string }).tenantId ?? "default";
+    const [created] = await db
+      .insert(nextBestActions)
+      .values({ ...(action as typeof nextBestActions.$inferInsert), tenantId } as typeof nextBestActions.$inferInsert)
+      .returning();
     return created;
   }
 
@@ -883,7 +906,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDemoInstance(instance: InsertDemoInstance): Promise<DemoInstance> {
-    const [created] = await db.insert(demoInstances).values(instance as typeof demoInstances.$inferInsert).returning();
+    const tenantId = (instance as { tenantId?: string }).tenantId ?? "default";
+    const [created] = await db
+      .insert(demoInstances)
+      .values({ ...(instance as typeof demoInstances.$inferInsert), tenantId } as typeof demoInstances.$inferInsert)
+      .returning();
     return created;
   }
 
@@ -912,7 +939,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPersonaTemplate(template: InsertPersonaTemplate): Promise<PersonaTemplate> {
-    const [created] = await db.insert(personaTemplates).values(template as typeof personaTemplates.$inferInsert).returning();
+    const tenantId = (template as { tenantId?: string }).tenantId ?? "default";
+    const [created] = await db
+      .insert(personaTemplates)
+      .values({ ...(template as typeof personaTemplates.$inferInsert), tenantId } as typeof personaTemplates.$inferInsert)
+      .returning();
     return created;
   }
 
@@ -927,7 +958,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket> {
-    const [created] = await db.insert(supportTickets).values(ticket as typeof supportTickets.$inferInsert).returning();
+    const tenantId = (ticket as { tenantId?: string }).tenantId ?? "default";
+    const [created] = await db
+      .insert(supportTickets)
+      .values({ ...(ticket as typeof supportTickets.$inferInsert), tenantId } as typeof supportTickets.$inferInsert)
+      .returning();
     return created;
   }
 
@@ -941,24 +976,52 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Platform Metrics
-  async recordMetric(metricType: string, value: number, metadata?: Record<string, unknown>): Promise<void> {
+  async recordMetric(
+    metricType: string,
+    value: number,
+    metadata?: Record<string, unknown>,
+    tenantId = "default"
+  ): Promise<void> {
     await db.insert(platformMetrics).values({
       metricType,
       value,
       metadata: metadata || {},
+      tenantId,
     } as typeof platformMetrics.$inferInsert);
   }
 
-  async getMetrics(metricType?: string, limit: number = 100): Promise<Array<{ metricType: string; value: number; metadata: Record<string, unknown> | null; recordedAt: Date }>> {
+  async getMetrics(
+    metricType?: string,
+    limit: number = 100,
+    tenantId?: string
+  ): Promise<Array<{ metricType: string; value: number; metadata: Record<string, unknown> | null; recordedAt: Date }>> {
+    const tenantCond =
+      tenantId !== undefined ? eq(platformMetrics.tenantId as any, tenantId) : undefined;
+    if (metricType && tenantCond) {
+      return db
+        .select()
+        .from(platformMetrics)
+        .where(and(eq(platformMetrics.metricType, metricType), tenantCond))
+        .orderBy(desc(platformMetrics.recordedAt))
+        .limit(limit);
+    }
     if (metricType) {
-      return db.select().from(platformMetrics)
+      return db
+        .select()
+        .from(platformMetrics)
         .where(eq(platformMetrics.metricType, metricType))
         .orderBy(desc(platformMetrics.recordedAt))
         .limit(limit);
     }
-    return db.select().from(platformMetrics)
-      .orderBy(desc(platformMetrics.recordedAt))
-      .limit(limit);
+    if (tenantCond) {
+      return db
+        .select()
+        .from(platformMetrics)
+        .where(tenantCond)
+        .orderBy(desc(platformMetrics.recordedAt))
+        .limit(limit);
+    }
+    return db.select().from(platformMetrics).orderBy(desc(platformMetrics.recordedAt)).limit(limit);
   }
 
   // Demo Bookings

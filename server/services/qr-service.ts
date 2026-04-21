@@ -16,7 +16,9 @@ export class QRService {
     const size = options?.size || 256;
     const format = options?.format || "png";
     
-    const scanUrl = `${process.env.REPLIT_DEV_DOMAIN || "http://localhost:5000"}/product/${productId}`;
+    const base =
+      process.env.APP_BASE_URL?.replace(/\/$/, "") || "http://localhost:5000";
+    const scanUrl = `${base}/product/${productId}`;
     
     const qrImageUrl = await QRCode.toDataURL(scanUrl, {
       width: size,

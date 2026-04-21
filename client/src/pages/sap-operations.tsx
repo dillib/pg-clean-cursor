@@ -145,7 +145,13 @@ export default function SAPOperations() {
         credentials: "include",
       });
       if (!r.ok) throw new Error("Sync failed");
-      return r.json() as Promise<{ created: number; updated: number; failed: number; fieldMappingsUsed: number }>;
+      return r.json() as Promise<{
+        created: number;
+        updated: number;
+        failed: number;
+        fieldMappingsUsed: number;
+        firstError?: string;
+      }>;
     },
     onSuccess: (data) => {
       const mappingNote = data.fieldMappingsUsed > 0

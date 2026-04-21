@@ -1,16 +1,21 @@
 import { storage } from "../storage";
-import type { User, InsertUser, Role, InsertRole } from "@shared/schema";
+import type { User, UpsertUser, Role, InsertRole } from "@shared/schema";
 
+/**
+ * Thin wrapper over {@link storage} for user/role reads.
+ * Local username/password auth is not used with the current WorkOS-backed `users` schema.
+ */
 export class AuthService {
   async getUser(id: string): Promise<User | undefined> {
     return storage.getUser(id);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return storage.getUserByUsername(username);
+  /** Legacy name: matches `users.email`. */
+  async getUserByUsername(email: string): Promise<User | undefined> {
+    return storage.getUserByUsername(email);
   }
 
-  async createUser(data: InsertUser): Promise<User> {
+  async createUser(data: UpsertUser): Promise<User> {
     return storage.createUser(data);
   }
 
@@ -26,30 +31,14 @@ export class AuthService {
     return storage.createRole(data);
   }
 
-  async validateCredentials(username: string, password: string): Promise<User | null> {
-    const user = await storage.getUserByUsername(username);
-    
-    if (!user || user.password !== password) {
-      return null;
-    }
-
-    if (!user.isActive) {
-      return null;
-    }
-
-    return user;
+  async validateCredentials(_username: string, _password: string): Promise<User | null> {
+    return null;
   }
 
   async getUserWithRole(userId: string): Promise<{ user: User; role?: Role } | null> {
     const user = await storage.getUser(userId);
     if (!user) return null;
-
-    let role: Role | undefined;
-    if (user.roleId) {
-      role = await storage.getRole(user.roleId);
-    }
-
-    return { user, role };
+    return { user };
   }
 
   hasPermission(role: Role | undefined, permission: string): boolean {

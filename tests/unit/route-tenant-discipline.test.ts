@@ -21,8 +21,6 @@ const FORBIDDEN = /\bstorage\.(getAllProducts|getProduct|createProduct|updatePro
 // Files that legitimately need raw storage (public endpoints, staff-only
 // admin consoles, non-tenant operations). Keep this list short and reviewed.
 const ALLOWLIST = new Set<string>([
-  // internal-routes is staff-only (PhotonicTag admin CRM, not per-tenant data)
-  "internal-routes.ts",
   // sap-routes uses raw storage for credential materialization; tenant check
   // happens before that call site.
   "sap-routes.ts",

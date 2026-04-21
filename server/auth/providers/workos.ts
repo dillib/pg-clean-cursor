@@ -23,7 +23,7 @@ import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { RedisStore } from "connect-redis";
 import { getRedisClient } from "../../redis";
-import { authStorage } from "../../replit_integrations/auth/storage";
+import { authStorage } from "../../integrations/auth/storage";
 import { isMasterAdminEmail } from "@shared/models/auth";
 import type { AuthProvider, AuthenticatedUser } from "../types";
 

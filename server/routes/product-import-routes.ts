@@ -438,7 +438,10 @@ router.post("/qr-export", async (req: Request, res: Response) => {
         const product = await scoped.getProduct(id);
         if (!product) continue;
         let qrData = product.qrCodeData;
-        if (!qrData) { const qrRecord = await qrService.generateQRCode(id); qrData = qrRecord?.qrCodeData || ""; }
+        if (!qrData) {
+          const qrRecord = await qrService.generateQRCode(id);
+          qrData = qrRecord?.qrData || "";
+        }
         items.push({ id, name: product.productName, batch: product.batchNumber, sku: product.sku || "", qr: qrData || "" });
       } catch (_) {}
     }

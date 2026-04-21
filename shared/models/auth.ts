@@ -1,8 +1,8 @@
 import { sql } from "drizzle-orm";
 import { boolean, index, jsonb, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 
-// Session storage table.
-// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
+// Session storage table (connect-pg-simple / express-session).
+// (IMPORTANT) Required for authenticated sessions — do not drop.
 export const sessions = pgTable(
   "sessions",
   {
@@ -29,8 +29,8 @@ export function isMasterAdminEmail(email: string | null | undefined): boolean {
   return getMasterAdminEmails().includes(email.toLowerCase());
 }
 
-// User storage table.
-// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
+// User storage table (OIDC profile upserts from WorkOS, etc.).
+// (IMPORTANT) Required for auth — do not drop.
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),

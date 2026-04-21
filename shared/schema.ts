@@ -4,7 +4,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // ============================================
-// AUTH (from Replit Auth integration)
+// AUTH (sessions + users for WorkOS / OIDC flows)
 // ============================================
 import { users, sessions, type User, type UpsertUser } from "./models/auth";
 export { users, sessions, type User, type UpsertUser };
@@ -922,7 +922,8 @@ export type IntegrationNeeds = "sap_only" | "erp_integration" | "standalone" | "
 
 export const leads = pgTable("leads", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  
+  tenantId: text("tenant_id").notNull().default("default"),
+
   // Contact Info
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
@@ -967,6 +968,7 @@ export const leads = pgTable("leads", {
 
 export const insertLeadSchema = createInsertSchema(leads).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
   updatedAt: true,
   convertedAt: true,
@@ -1066,6 +1068,7 @@ export type AccountTier = "poc" | "starter" | "growth" | "enterprise";
 
 export const customerAccounts = pgTable("customer_accounts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   companyName: text("company_name").notNull(),
   contactName: text("contact_name").notNull(),
   contactEmail: text("contact_email").notNull(),
@@ -1087,6 +1090,7 @@ export const customerAccounts = pgTable("customer_accounts", {
 
 export const insertCustomerAccountSchema = createInsertSchema(customerAccounts).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -1102,6 +1106,7 @@ export type AccountActivityType = "login" | "product_created" | "scan" | "api_ca
 
 export const accountActivities = pgTable("account_activities", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   accountId: varchar("account_id").references(() => customerAccounts.id).notNull(),
   activityType: text("activity_type").$type<AccountActivityType>().notNull(),
   description: text("description"),
@@ -1111,6 +1116,7 @@ export const accountActivities = pgTable("account_activities", {
 
 export const insertAccountActivitySchema = createInsertSchema(accountActivities).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
 });
 
@@ -1126,6 +1132,7 @@ export type ActionStatus = "pending" | "completed" | "dismissed" | "snoozed";
 
 export const nextBestActions = pgTable("next_best_actions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   accountId: varchar("account_id").references(() => customerAccounts.id).notNull(),
   action: text("action").notNull(),
   reasoning: text("reasoning").notNull(),
@@ -1139,6 +1146,7 @@ export const nextBestActions = pgTable("next_best_actions", {
 
 export const insertNextBestActionSchema = createInsertSchema(nextBestActions).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
   completedAt: true,
 });
@@ -1154,6 +1162,7 @@ export type DemoInstanceStatus = "provisioning" | "active" | "expired" | "deacti
 
 export const demoInstances = pgTable("demo_instances", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   prospectName: text("prospect_name").notNull(),
   prospectEmail: text("prospect_email"),
   prospectCompany: text("prospect_company"),
@@ -1171,6 +1180,7 @@ export const demoInstances = pgTable("demo_instances", {
 
 export const insertDemoInstanceSchema = createInsertSchema(demoInstances).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
   updatedAt: true,
   productIds: true,
@@ -1188,6 +1198,7 @@ export type DemoInstance = typeof demoInstances.$inferSelect;
 
 export const personaTemplates = pgTable("persona_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   name: text("name").notNull(),
   industry: text("industry").notNull(),
   description: text("description"),
@@ -1200,6 +1211,7 @@ export const personaTemplates = pgTable("persona_templates", {
 
 export const insertPersonaTemplateSchema = createInsertSchema(personaTemplates).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
 });
 
@@ -1216,6 +1228,7 @@ export type TicketCategory = "billing" | "technical" | "integration" | "complian
 
 export const supportTickets = pgTable("support_tickets", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   accountId: varchar("account_id"),
   subject: text("subject").notNull(),
   description: text("description").notNull(),
@@ -1237,6 +1250,7 @@ export const supportTickets = pgTable("support_tickets", {
 
 export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
   updatedAt: true,
   resolvedAt: true,
@@ -1291,6 +1305,7 @@ export type DemoBooking = typeof demoBookings.$inferSelect;
 
 export const platformMetrics = pgTable("platform_metrics", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().default("default"),
   metricType: text("metric_type").notNull(),
   value: integer("value").notNull(),
   metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),

@@ -1,7 +1,19 @@
 import type { Express, Request, Response } from "express";
 import { type Server } from "http";
 import { aiClient, AI_CHAT_MODEL } from "./services/ai-client";
-import { insertProductSchema, insertIoTDeviceSchema, insertEnterpriseConnectorSchema, insertLeadSchema, insertPartnerSchema, insertDemoConfigSchema, insertDemoBookingSchema, updatePartnerSchema } from "@shared/schema";
+import {
+  insertProductSchema,
+  insertIoTDeviceSchema,
+  insertEnterpriseConnectorSchema,
+  insertLeadSchema,
+  insertPartnerSchema,
+  insertDemoConfigSchema,
+  insertDemoBookingSchema,
+  updatePartnerSchema,
+  type TierInterest,
+  type PartnerRole,
+  type PartnerStatus,
+} from "@shared/schema";
 import { productService } from "./services/product-service";
 import { qrService } from "./services/qr-service";
 import { sendBookingConfirmation, sendTeamNotification, sendSAPAlertEmail } from "./services/email";
@@ -12,8 +24,9 @@ import { auditService } from "./services/audit-service";
 import { iotService } from "./services/iot-service";
 import { seedDemoData } from "./seed-demo-data";
 import { authProvider, getCurrentUser } from "./auth";
-import { authStorage } from "./replit_integrations/auth/storage";
+import { authStorage } from "./integrations/auth/storage";
 import { injectTenantId } from "./middleware/tenant";
+import { getPartnerSessionState } from "./middleware/partner-session";
 import { requireMasterAdmin, requireMasterAdminOrTeam } from "./middleware/require-admin";
 import { tenantStorage, TenantStorage } from "./storage-tenant";
 import { encryptSAPCredentials } from "./services/crypto-service";
@@ -43,12 +56,19 @@ import bcrypt from "bcryptjs";
 import type { RequestHandler } from "express";
 
 const isAuthenticatedOrTeam: RequestHandler = async (req, res, next) => {
-  if (getCurrentUser(req)) return next();
+  try {
+    if (getCurrentUser(req)) return next();
 
-  const partnerId = (req.session as any)?.partnerId;
-  if (partnerId) return next();
+    const partnerState = await getPartnerSessionState(req);
+    if (partnerState === "valid") return next();
+    if (partnerState === "invalid") {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
-  return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized" });
+  } catch (err) {
+    next(err);
+  }
 };
 
 export async function registerRoutes(
@@ -1085,19 +1105,19 @@ ${pages.map(p => `  <url>
       }
 
       // Check for existing lead with same email
-      const existingLead = await storage.getLeadByEmail(parsed.data.email);
+      const existingLead = await storage.getLeadByEmail(parsed.data.email, "default");
       if (existingLead) {
         // Update existing lead instead of creating duplicate
         const updatedLead = await storage.updateLead(existingLead.id, {
           message: parsed.data.message,
-          tierInterest: parsed.data.tierInterest,
+          tierInterest: parsed.data.tierInterest as TierInterest,
           estimatedVolume: parsed.data.estimatedVolume,
           company: parsed.data.company,
           jobTitle: parsed.data.jobTitle,
           notes: existingLead.notes 
             ? `${existingLead.notes}\n\n---\nNew inquiry: ${parsed.data.message || 'No message'}` 
             : parsed.data.message,
-        });
+        }, "default");
         return res.json({ success: true, lead: updatedLead, isExisting: true });
       }
 
@@ -1120,7 +1140,7 @@ ${pages.map(p => `  <url>
   // Protected CRM endpoints (accessible by master admin OR team/partner session)
   app.get("/api/leads", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
-      const leads = await storage.getAllLeads();
+      const leads = await tenantStorage(req).getAllLeads();
       res.json(leads);
     } catch (error) {
       console.error("Error fetching leads:", error);
@@ -1130,7 +1150,7 @@ ${pages.map(p => `  <url>
 
   app.get("/api/leads/stats", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
-      const stats = await storage.getLeadStats();
+      const stats = await tenantStorage(req).getLeadStats();
       res.json(stats);
     } catch (error) {
       console.error("Error fetching lead stats:", error);
@@ -1140,7 +1160,7 @@ ${pages.map(p => `  <url>
 
   app.get("/api/leads/:id", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
-      const lead = await storage.getLead(req.params.id);
+      const lead = await tenantStorage(req).getLead(req.params.id);
       if (!lead) {
         return res.status(404).json({ error: "Lead not found" });
       }
@@ -1153,16 +1173,16 @@ ${pages.map(p => `  <url>
 
   app.patch("/api/leads/:id", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
-      const lead = await storage.getLead(req.params.id);
+      const lead = await tenantStorage(req).getLead(req.params.id);
       if (!lead) {
         return res.status(404).json({ error: "Lead not found" });
       }
 
-      const updatedLead = await storage.updateLead(req.params.id, req.body);
+      const updatedLead = await tenantStorage(req).updateLead(req.params.id, req.body);
       
       // Log status changes
       if (req.body.status && req.body.status !== lead.status) {
-        await storage.createLeadActivity({
+        await tenantStorage(req).createLeadActivity({
           leadId: lead.id,
           activityType: "status_changed",
           description: `Status changed from ${lead.status} to ${req.body.status}`,
@@ -1179,7 +1199,7 @@ ${pages.map(p => `  <url>
 
   app.delete("/api/leads/:id", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
-      const success = await storage.deleteLead(req.params.id);
+      const success = await tenantStorage(req).deleteLead(req.params.id);
       if (!success) {
         return res.status(404).json({ error: "Lead not found" });
       }
@@ -1192,7 +1212,7 @@ ${pages.map(p => `  <url>
 
   app.get("/api/leads/:id/activities", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
-      const activities = await storage.getLeadActivities(req.params.id);
+      const activities = await tenantStorage(req).getLeadActivities(req.params.id);
       res.json(activities);
     } catch (error) {
       console.error("Error fetching lead activities:", error);
@@ -1202,12 +1222,12 @@ ${pages.map(p => `  <url>
 
   app.post("/api/leads/:id/activities", requireMasterAdminOrTeam, async (req: Request, res: Response) => {
     try {
-      const lead = await storage.getLead(req.params.id);
+      const lead = await tenantStorage(req).getLead(req.params.id);
       if (!lead) {
         return res.status(404).json({ error: "Lead not found" });
       }
 
-      const activity = await storage.createLeadActivity({
+      const activity = await tenantStorage(req).createLeadActivity({
         leadId: req.params.id,
         ...req.body,
       });
@@ -1319,7 +1339,12 @@ ${pages.map(p => `  <url>
       const { password, ...rest } = parsed.data;
 
       const partner = await storage.createPartner({
-        ...rest,
+        email: rest.email,
+        firstName: rest.firstName,
+        lastName: rest.lastName,
+        company: rest.company ?? null,
+        role: (rest.role ?? "demo_viewer") as PartnerRole,
+        status: (rest.status ?? "active") as PartnerStatus,
         passwordHash,
       });
 
@@ -1503,12 +1528,12 @@ ${pages.map(p => `  <url>
         const firstName = nameParts[0] || parsed.data.name;
         const lastName = nameParts.slice(1).join(" ") || "-";
 
-        const existingLead = await storage.getLeadByEmail(parsed.data.email);
+        const existingLead = await storage.getLeadByEmail(parsed.data.email, "default");
         if (existingLead) {
           await storage.updateLead(existingLead.id, {
             status: "demo_scheduled",
             company: parsed.data.company || existingLead.company,
-          });
+          }, "default");
           await storage.updateDemoBookingLeadId(booking.id, existingLead.id);
         } else {
           const newLead = await storage.createLead({

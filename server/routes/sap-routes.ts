@@ -8,7 +8,7 @@ import { decryptSAPCredentials } from "../services/crypto-service";
 /** Merge a DB connector row's redacted config with its decrypted credentials. */
 function materializeSAPConfig(connector: { config: unknown; credentialsCiphertext?: string | null }): SAPConfig {
   const base = (connector.config ?? {}) as Record<string, unknown>;
-  return decryptSAPCredentials(base, connector.credentialsCiphertext ?? null) as SAPConfig;
+  return decryptSAPCredentials(base, connector.credentialsCiphertext ?? null) as unknown as SAPConfig;
 }
 
 const router = Router();
