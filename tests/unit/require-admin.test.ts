@@ -15,11 +15,16 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { Request, Response } from "express";
 
 const getCurrentUserMock = vi.fn();
+const getPartnerSessionStateMock = vi.fn();
 
 vi.mock("../../server/auth", () => ({
   authProvider: {
     getCurrentUser: (req: Request) => getCurrentUserMock(req),
   },
+}));
+
+vi.mock("../../server/middleware/partner-session", () => ({
+  getPartnerSessionState: (req: Request) => getPartnerSessionStateMock(req),
 }));
 
 function makeRes() {
@@ -34,6 +39,8 @@ describe("require-admin middleware", () => {
 
   beforeEach(() => {
     getCurrentUserMock.mockReset();
+    getPartnerSessionStateMock.mockReset();
+    getPartnerSessionStateMock.mockResolvedValue("none");
     process.env.MASTER_ADMIN_EMAILS = "admin@example.com";
   });
 
@@ -86,26 +93,41 @@ describe("require-admin middleware", () => {
   });
 
   describe("requireMasterAdminOrTeam", () => {
-    it("bypasses straight to next() when req.session.partnerId is set", async () => {
+    it("bypasses to next() when partner session is valid", async () => {
       const { requireMasterAdminOrTeam } = await import(
         "../../server/middleware/require-admin"
       );
-      // Even if no user is on the request, a partner session is admitted.
+      getPartnerSessionStateMock.mockResolvedValue("valid");
       getCurrentUserMock.mockReturnValue(null);
 
       const req = { session: { partnerId: "partner-abc" } } as unknown as Request;
       const res = makeRes();
       const next = vi.fn();
 
-      requireMasterAdminOrTeam(req, res, next);
+      await requireMasterAdminOrTeam(req, res, next);
 
       expect(next).toHaveBeenCalledOnce();
       expect(res.status).not.toHaveBeenCalled();
-      // getCurrentUser must NOT be called — partnerId short-circuits the check.
       expect(getCurrentUserMock).not.toHaveBeenCalled();
     });
 
-    it("returns 401 when no user and no partnerId", async () => {
+    it("returns 403 when partner session is invalid (stale or forged)", async () => {
+      const { requireMasterAdminOrTeam } = await import(
+        "../../server/middleware/require-admin"
+      );
+      getPartnerSessionStateMock.mockResolvedValue("invalid");
+
+      const req = { session: { partnerId: "ghost" } } as unknown as Request;
+      const res = makeRes();
+      const next = vi.fn();
+
+      await requireMasterAdminOrTeam(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it("returns 401 when no user and no partner session", async () => {
       const { requireMasterAdminOrTeam } = await import(
         "../../server/middleware/require-admin"
       );
@@ -115,13 +137,13 @@ describe("require-admin middleware", () => {
       const res = makeRes();
       const next = vi.fn();
 
-      requireMasterAdminOrTeam(req, res, next);
+      await requireMasterAdminOrTeam(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("returns 403 when user is not a master admin and no partnerId", async () => {
+    it("returns 403 when user is not a master admin and no partner session", async () => {
       const { requireMasterAdminOrTeam } = await import(
         "../../server/middleware/require-admin"
       );
@@ -131,13 +153,13 @@ describe("require-admin middleware", () => {
       const res = makeRes();
       const next = vi.fn();
 
-      requireMasterAdminOrTeam(req, res, next);
+      await requireMasterAdminOrTeam(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(403);
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("calls next() when user is a master admin (no partnerId)", async () => {
+    it("calls next() when user is a master admin (no partner session)", async () => {
       const { requireMasterAdminOrTeam } = await import(
         "../../server/middleware/require-admin"
       );
@@ -147,7 +169,7 @@ describe("require-admin middleware", () => {
       const res = makeRes();
       const next = vi.fn();
 
-      requireMasterAdminOrTeam(req, res, next);
+      await requireMasterAdminOrTeam(req, res, next);
 
       expect(next).toHaveBeenCalledOnce();
       expect(res.status).not.toHaveBeenCalled();

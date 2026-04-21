@@ -54,7 +54,7 @@ vi.mock("../../server/redis", () => ({
 }));
 
 const upsertUserMock = vi.fn().mockResolvedValue({});
-vi.mock("../../server/replit_integrations/auth/storage", () => ({
+vi.mock("../../server/integrations/auth/storage", () => ({
   authStorage: {
     upsertUser: upsertUserMock,
     getUser: vi.fn(),
