@@ -2,87 +2,199 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+ * PHOTONICTAG DESIGN SYSTEM
+ * Three colors only: ink (black), paper (white), yellow.
+ * Every other neutral is an alpha blend of ink on paper
+ * (light mode) or paper on ink (dark mode).
+ * Sharp corners. Hairlines, not shadows. Geist + Geist Mono.
+ * ============================================================ */
+
 /* LIGHT MODE */
 :root {
+  /* Brand primitives — the three colors.
+     --yellow HSL 54 100% 50% == #FFE600 (authoritative brand value). */
+  --ink:    0 0% 0%;
+  --paper:  0 0% 100%;
+  --yellow: 54 100% 50%;
+  --yellow-ink: 0 0% 0%;   /* text that sits on yellow */
+
+  /* Ink + paper as alpha-rgba utility palette.
+     Every neutral in the system is one of these — never a solid grey. */
+  --ink-90: rgba(0,0,0,0.90);
+  --ink-72: rgba(0,0,0,0.72);
+  --ink-56: rgba(0,0,0,0.56);
+  --ink-40: rgba(0,0,0,0.40);
+  --ink-24: rgba(0,0,0,0.24);
+  --ink-12: rgba(0,0,0,0.12);
+  --ink-08: rgba(0,0,0,0.08);
+  --ink-04: rgba(0,0,0,0.04);
+  --paper-90: rgba(255,255,255,0.90);
+  --paper-72: rgba(255,255,255,0.72);
+  --paper-56: rgba(255,255,255,0.56);
+  --paper-40: rgba(255,255,255,0.40);
+  --paper-24: rgba(255,255,255,0.24);
+  --paper-12: rgba(255,255,255,0.12);
+  --paper-08: rgba(255,255,255,0.08);
+  --paper-04: rgba(255,255,255,0.04);
+
+  /* Design-system semantic aliases (from colors_and_type.css).
+     Primitives in client/src/components/brand/* should reference these
+     names directly; shadcn tokens below keep the existing component
+     library compatible. */
+  --bg:            var(--paper);
+  --bg-invert:     var(--ink);
+  --fg:            var(--ink);
+  --fg-invert:     var(--paper);
+  --fg-muted:      var(--ink-56);
+  --fg-subtle:     var(--ink-40);
+  --hairline:      var(--ink-12);
+  --hairline-soft: var(--ink-08);
+  --accent:        hsl(var(--yellow));
+
+  /* Radii — sharp. --radius is pinned to 0 for shadcn tokens;
+     --r-1..--r-3 are available for brand primitives if policy relaxes. */
+  --r-0: 0px;
+  --r-1: 2px;
+  --r-2: 4px;
+  --r-3: 6px;
+  --r-pill: 9999px;
+
+  /* Spacing — 4pt grid */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+  --s-10: 128px;
+
+  /* Elevation — hairlines, not drop-shadows */
+  --hl-inner:   inset 0 0 0 1px var(--hairline);
+  --hl-inner-i: inset 0 0 0 1px var(--paper-12);
+  --hl-outer:   0 0 0 1px var(--hairline);
+  --hl-outer-i: 0 0 0 1px var(--paper-12);
+  --lift-1:     0 1px 0 var(--ink-04), 0 0 0 1px var(--hairline);
+  --lift-2:     0 4px 12px var(--ink-04), 0 0 0 1px var(--hairline);
+  --lift-3:     0 24px 48px var(--ink-12), 0 0 0 1px var(--hairline);
+
+  /* Motion */
+  --ease:  cubic-bezier(0.2, 0, 0, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+
+  /* Type scale */
+  --fs-xs:   11px;
+  --fs-sm:   13px;
+  --fs-base: 15px;
+  --fs-md:   17px;
+  --fs-lg:   20px;
+  --fs-xl:   28px;
+  --fs-2xl:  40px;
+  --fs-3xl:  56px;
+  --fs-4xl:  80px;
+  --fs-5xl:  120px;
+  --fs-6xl:  180px;
+
+  /* Tracking */
+  --lt-tight:  -0.03em;
+  --lt-xtight: -0.045em;
+  --lt-mono:   -0.01em;
+  --lt-caps:    0.08em;
+
+  /* Layout */
+  --container:   1200px;
+  --container-w: 1280px;
+
+  /* Elevate overlay alphas (used by .hover-elevate / .active-elevate) */
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
   --opaque-button-border-intensity: -8;
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
-  --background: 0 0% 100%;
-  --foreground: 30 12% 10%;
-  --border: 43 15% 88%;
-  --card: 43 35% 94%;
-  --card-foreground: 30 12% 10%;
-  --card-border: 43 22% 84%;
-  --sidebar: 43 18% 97%;
-  --sidebar-foreground: 30 12% 10%;
-  --sidebar-border: 43 15% 91%;
-  --sidebar-primary: 50 100% 50%;
-  --sidebar-primary-foreground: 30 10% 5%;
-  --sidebar-accent: 43 16% 94%;
-  --sidebar-accent-foreground: 30 12% 10%;
-  --sidebar-ring: 50 100% 50%;
-  --popover: 43 16% 97%;
-  --popover-foreground: 30 12% 10%;
-  --popover-border: 43 15% 88%;
-  --primary: 50 100% 50%;
-  --primary-foreground: 30 10% 5%;
-  --secondary: 43 15% 91%;
-  --secondary-foreground: 30 12% 10%;
-  --muted: 43 14% 93%;
-  --muted-foreground: 0 0% 0%;
-  --accent: 43 16% 94%;
-  --accent-foreground: 30 12% 10%;
+
+  /* Shadcn semantic tokens — remapped onto ink/paper/yellow */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --border: 0 0% 90%;            /* ~10% ink on paper */
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --card-border: 0 0% 90%;
+  --sidebar: var(--paper);
+  --sidebar-foreground: var(--ink);
+  --sidebar-border: 0 0% 90%;
+  --sidebar-primary: var(--yellow);
+  --sidebar-primary-foreground: var(--ink);
+  --sidebar-accent: 0 0% 96%;    /* ~4% ink */
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-ring: var(--yellow);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --popover-border: 0 0% 90%;
+  --primary: var(--yellow);
+  --primary-foreground: var(--ink);
+  --secondary: 0 0% 96%;
+  --secondary-foreground: var(--ink);
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 40%;  /* ~60% ink — for labels + secondary text */
+  --accent: 0 0% 96%;
+  --accent-foreground: var(--ink);
   --destructive: 0 84% 48%;
-  --destructive-foreground: 0 0% 98%;
-  --input: 0 0% 72%;
-  --ring: 50 100% 50%;
-  --chart-1: 50 100% 50%;
-  --chart-2: 16 85% 52%;
-  --chart-3: 48 96% 50%;
-  --chart-4: 173 80% 35%;
-  --chart-5: 200 85% 45%;
-  --font-sans: Inter, sans-serif;
-  --font-serif: Georgia, serif;
-  --font-mono: JetBrains Mono, monospace;
-  --radius: .5rem;
-  --shadow-2xs: 0px 1px 2px 0px rgb(0 0 0 / 0.04);
-  --shadow-xs: 0px 1px 3px 0px rgb(0 0 0 / 0.06);
-  --shadow-sm: 0px 1px 2px 0px rgb(0 0 0 / 0.04), 0px 2px 4px -1px rgb(0 0 0 / 0.04);
-  --shadow: 0px 2px 4px -1px rgb(0 0 0 / 0.06), 0px 4px 8px -2px rgb(0 0 0 / 0.06);
-  --shadow-md: 0px 4px 6px -1px rgb(0 0 0 / 0.07), 0px 8px 12px -2px rgb(0 0 0 / 0.05);
-  --shadow-lg: 0px 8px 16px -4px rgb(0 0 0 / 0.08), 0px 16px 24px -6px rgb(0 0 0 / 0.06);
-  --shadow-xl: 0px 16px 24px -6px rgb(0 0 0 / 0.08), 0px 24px 40px -8px rgb(0 0 0 / 0.08);
-  --shadow-2xl: 0px 24px 48px -12px rgb(0 0 0 / 0.14);
+  --destructive-foreground: var(--paper);
+  --input: 0 0% 85%;             /* ~15% ink */
+  --ring: var(--yellow);
+  --chart-1: var(--yellow);
+  --chart-2: 0 0% 20%;
+  --chart-3: 0 0% 40%;
+  --chart-4: 0 0% 60%;
+  --chart-5: 0 0% 80%;
+
+  /* Typography */
+  --font-sans:    'Geist', ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, sans-serif;
+  --font-display: 'Geist', ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, sans-serif;
+  --font-serif:   Georgia, serif;
+  --font-mono:    'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Sharp corners — no border-radius anywhere except on photographic imagery */
+  --radius: 0;
+
+  /* Shadows are kept as tokens but narrowed to hairline-equivalents.
+     Prefer `border` over `shadow` in new code. */
+  --shadow-2xs: 0 0 0 1px rgb(0 0 0 / 0.04);
+  --shadow-xs:  0 0 0 1px rgb(0 0 0 / 0.06);
+  --shadow-sm:  0 0 0 1px rgb(0 0 0 / 0.08);
+  --shadow:     0 0 0 1px rgb(0 0 0 / 0.10);
+  --shadow-md:  0 0 0 1px rgb(0 0 0 / 0.10);
+  --shadow-lg:  0 0 0 1px rgb(0 0 0 / 0.12);
+  --shadow-xl:  0 0 0 1px rgb(0 0 0 / 0.14);
+  --shadow-2xl: 0 0 0 1px rgb(0 0 0 / 0.16);
+
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
-/* Fallback for older browsers */
+  /* Fallback for older browsers */
   --sidebar-primary-border: hsl(var(--sidebar-primary));
   --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 
-  /* Fallback for older browsers */
   --sidebar-accent-border: hsl(var(--sidebar-accent));
   --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 
-  /* Fallback for older browsers */
   --primary-border: hsl(var(--primary));
   --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 
-  /* Fallback for older browsers */
   --secondary-border: hsl(var(--secondary));
   --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 
-  /* Fallback for older browsers */
   --muted-border: hsl(var(--muted));
   --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 
-  /* Fallback for older browsers */
   --accent-border: hsl(var(--accent));
   --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 
-  /* Fallback for older browsers */
   --destructive-border: hsl(var(--destructive));
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
@@ -93,74 +205,70 @@
   --opaque-button-border-intensity: 9;
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
-  --background: 30 12% 7%;
-  --foreground: 40 30% 96%;
-  --border: 35 12% 18%;
-  --card: 30 12% 9%;
-  --card-foreground: 40 30% 96%;
-  --card-border: 35 12% 13%;
-  --sidebar: 30 12% 11%;
-  --sidebar-foreground: 40 30% 96%;
-  --sidebar-border: 35 12% 15%;
-  --sidebar-primary: 50 100% 55%;
-  --sidebar-primary-foreground: 30 10% 5%;
-  --sidebar-accent: 35 12% 14%;
-  --sidebar-accent-foreground: 40 30% 96%;
-  --sidebar-ring: 50 100% 55%;
-  --popover: 35 12% 13%;
-  --popover-foreground: 40 30% 96%;
-  --popover-border: 35 12% 17%;
-  --primary: 50 100% 52%;
-  --primary-foreground: 30 10% 5%;
-  --secondary: 35 12% 16%;
-  --secondary-foreground: 40 30% 96%;
-  --muted: 35 12% 15%;
-  --muted-foreground: 0 0% 90%;
-  --accent: 35 12% 13%;
-  --accent-foreground: 40 30% 96%;
-  --destructive: 0 84% 48%;
-  --destructive-foreground: 0 0% 98%;
-  --input: 35 12% 28%;
-  --ring: 50 100% 55%;
-  --chart-1: 50 100% 58%;
-  --chart-2: 16 85% 62%;
-  --chart-3: 48 96% 62%;
-  --chart-4: 173 80% 58%;
-  --chart-5: 200 85% 58%;
-  --shadow-2xs: 0px 1px 2px 0px rgb(0 0 0 / 0.15);
-  --shadow-xs: 0px 1px 3px 0px rgb(0 0 0 / 0.2);
-  --shadow-sm: 0px 1px 2px 0px rgb(0 0 0 / 0.15), 0px 2px 4px -1px rgb(0 0 0 / 0.15);
-  --shadow: 0px 2px 4px -1px rgb(0 0 0 / 0.2), 0px 4px 8px -2px rgb(0 0 0 / 0.2);
-  --shadow-md: 0px 4px 6px -1px rgb(0 0 0 / 0.25), 0px 8px 12px -2px rgb(0 0 0 / 0.2);
-  --shadow-lg: 0px 8px 16px -4px rgb(0 0 0 / 0.28), 0px 16px 24px -6px rgb(0 0 0 / 0.24);
-  --shadow-xl: 0px 16px 24px -6px rgb(0 0 0 / 0.3), 0px 24px 40px -8px rgb(0 0 0 / 0.3);
-  --shadow-2xl: 0px 24px 48px -12px rgb(0 0 0 / 0.4);
 
-/* Fallback for older browsers */
+  --background: var(--ink);
+  --foreground: var(--paper);
+  --border: 0 0% 15%;            /* ~15% paper on ink */
+  --card: var(--ink);
+  --card-foreground: var(--paper);
+  --card-border: 0 0% 15%;
+  --sidebar: var(--ink);
+  --sidebar-foreground: var(--paper);
+  --sidebar-border: 0 0% 15%;
+  --sidebar-primary: var(--yellow);
+  --sidebar-primary-foreground: var(--ink);
+  --sidebar-accent: 0 0% 8%;
+  --sidebar-accent-foreground: var(--paper);
+  --sidebar-ring: var(--yellow);
+  --popover: var(--ink);
+  --popover-foreground: var(--paper);
+  --popover-border: 0 0% 15%;
+  --primary: var(--yellow);
+  --primary-foreground: var(--ink);
+  --secondary: 0 0% 8%;
+  --secondary-foreground: var(--paper);
+  --muted: 0 0% 8%;
+  --muted-foreground: 0 0% 65%;
+  --accent: 0 0% 8%;
+  --accent-foreground: var(--paper);
+  --destructive: 0 84% 48%;
+  --destructive-foreground: var(--paper);
+  --input: 0 0% 20%;
+  --ring: var(--yellow);
+  --chart-1: var(--yellow);
+  --chart-2: 0 0% 85%;
+  --chart-3: 0 0% 65%;
+  --chart-4: 0 0% 45%;
+  --chart-5: 0 0% 25%;
+
+  --shadow-2xs: 0 0 0 1px rgb(255 255 255 / 0.06);
+  --shadow-xs:  0 0 0 1px rgb(255 255 255 / 0.08);
+  --shadow-sm:  0 0 0 1px rgb(255 255 255 / 0.10);
+  --shadow:     0 0 0 1px rgb(255 255 255 / 0.12);
+  --shadow-md:  0 0 0 1px rgb(255 255 255 / 0.12);
+  --shadow-lg:  0 0 0 1px rgb(255 255 255 / 0.14);
+  --shadow-xl:  0 0 0 1px rgb(255 255 255 / 0.16);
+  --shadow-2xl: 0 0 0 1px rgb(255 255 255 / 0.20);
+
+  /* Fallback for older browsers */
   --sidebar-primary-border: hsl(var(--sidebar-primary));
   --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 
-  /* Fallback for older browsers */
   --sidebar-accent-border: hsl(var(--sidebar-accent));
   --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 
-  /* Fallback for older browsers */
   --primary-border: hsl(var(--primary));
   --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 
-  /* Fallback for older browsers */
   --secondary-border: hsl(var(--secondary));
   --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 
-  /* Fallback for older browsers */
   --muted-border: hsl(var(--muted));
   --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 
-  /* Fallback for older browsers */
   --accent-border: hsl(var(--accent));
   --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 
-  /* Fallback for older browsers */
   --destructive-border: hsl(var(--destructive));
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
@@ -170,8 +278,67 @@
     @apply border-border;
   }
 
+  /* Element defaults per colors_and_type.css.
+     body inherits Geist with the ss01/cv11 feature set for
+     the editorial technical feel the brand depends on. */
+  html {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    font-family: var(--font-sans);
+    font-size: var(--fs-base);
+    line-height: 1.5;
+    color: hsl(var(--foreground));
+    background: hsl(var(--background));
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: var(--lt-tight);
+    margin: 0;
+  }
+
+  /* Geist Mono is load-bearing for SKUs, GTINs, hashes, timestamps, IDs, %. */
+  code, kbd, samp, pre, [data-mono] {
+    font-family: var(--font-mono);
+    letter-spacing: var(--lt-mono);
+  }
+
+  ::selection {
+    background: hsl(var(--yellow));
+    color: hsl(var(--yellow-ink));
+  }
+
+  /* Photographic imagery is the only exception to the sharp-corner rule.
+     Opt in explicitly with `img.photo` or a wrapper with `.photo-frame`. */
+  img.photo,
+  .photo-frame {
+    border-radius: var(--r-2);
+  }
+}
+
+@layer utilities {
+  /* Brand utility atoms from colors_and_type.css. Keep minimal. */
+  .mono {
+    font-family: var(--font-mono);
+    letter-spacing: var(--lt-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .caps {
+    text-transform: uppercase;
+    letter-spacing: var(--lt-caps);
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+  .hair {
+    border: 1px solid var(--hairline);
   }
 }
 
@@ -181,19 +348,6 @@
  *
  * <element className="hover-elevate" />
  * <element className="active-elevate-2" />
- *
- * // Using the tailwind utility when a data attribute is "on"
- * <element className="toggle-elevate data-[state=on]:toggle-elevated" />
- * // Or manually controlling the toggle state
- * <element className="toggle-elevate toggle-elevated" />
- *
- * Elevation systems have to handle many states.
- * - not-hovered, vs. hovered vs. active  (three mutually exclusive states)
- * - toggled or not
- * - focused or not (this is not handled with these utilities)
- *
- * Even without handling focused or not, this is six possible combinations that
- * need to be distinguished from eachother visually.
  */
 @layer utilities {
 
@@ -209,42 +363,27 @@
     pointer-events: none;
   }
 
-  /* .no-default-hover-elevate/no-default-active-elevate is an escape hatch so consumers of
-   * buttons/badges can remove the automatic brightness adjustment on interactions
-   * and program their own. */
   .no-default-hover-elevate {}
-
   .no-default-active-elevate {}
 
-
-  /**
-   * Toggleable backgrounds go behind the content. Hoverable/active goes on top.
-   * This way they can stack/compound. Both will overlap the parent's borders!
-   * So borders will be automatically adjusted both on toggle, and hover/active,
-   * and they will be compounded.
-   */
   .toggle-elevate::before,
   .toggle-elevate-2::before {
     content: "";
     pointer-events: none;
     position: absolute;
     inset: 0px;
-    /*border-radius: inherit;   match rounded corners */
     border-radius: inherit;
     z-index: -1;
-    /* sits behind content but above backdrop */
   }
 
   .toggle-elevate.toggle-elevated::before {
     background-color: var(--elevate-2);
   }
 
-  /* If there's a 1px border, adjust the inset so that it covers that parent's border */
   .border.toggle-elevate::before {
     inset: -1px;
   }
 
-  /* Does not work on elements with overflow:hidden! */
   .hover-elevate:not(.no-default-hover-elevate),
   .active-elevate:not(.no-default-active-elevate),
   .hover-elevate-2:not(.no-default-hover-elevate),
@@ -261,10 +400,8 @@
     pointer-events: none;
     position: absolute;
     inset: 0px;
-    /*border-radius: inherit;   match rounded corners */
     border-radius: inherit;
     z-index: 999;
-    /* sits in front of content */
   }
 
   .hover-elevate:hover:not(.no-default-hover-elevate)::after,
@@ -277,7 +414,6 @@
     background-color: var(--elevate-2);
   }
 
-  /* If there's a 1px border, adjust the inset so that it covers that parent's border */
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
   .border.active-elevate:not(.no-active-interaction-elevate)::after,
   .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
@@ -286,7 +422,7 @@
     inset: -1px;
   }
 
-  /* Shimmer skeleton animation */
+  /* Shimmer skeleton animation — honors prefers-reduced-motion. */
   .shimmer {
     background: linear-gradient(
       105deg,
@@ -296,6 +432,11 @@
     );
     background-size: 200% 100%;
     animation: shimmer 1.6s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shimmer { animation: none; }
+    .pulse-dot { animation: none; box-shadow: none; }
   }
 
   /* Live pulse dot */
@@ -308,15 +449,7 @@
     animation: pulse-ring 2s ease-out infinite;
   }
 
-  /* Glassmorphism utility */
-  .glass {
-    background: hsl(var(--background) / 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid hsl(var(--border) / 0.6);
-  }
-
-  /* Concentric inner rounding for nested elements */
+  /* Concentric inner rounding for nested elements — resolves to 0 with --radius:0. */
   .inner-rounded {
     border-radius: calc(var(--radius) - 4px);
   }
@@ -334,125 +467,87 @@
 }
 
 /* ============================================================
-   * YELLOW FLAT DESIGN SYSTEM
-   * Brand color #FFD400 — hsl(50 100% 50%) — yellow
-   * ============================================================ */
+ * Flat-yellow overrides — kept for parity with the previous
+ * system; will be superseded as brand/* primitives land in STEP 3.
+ * ============================================================ */
 
-  /* 1. Page background — plain */
-  body {
-    background: hsl(var(--background));
-    min-height: 100vh;
-  }
+body {
+  background: hsl(var(--background));
+  min-height: 100vh;
+}
 
-  /* 2. Flat yellow — all bg-primary elements */
-  .bg-primary {
-    background: hsl(var(--primary)) !important;
-  }
+.bg-primary {
+  background: hsl(var(--primary)) !important;
+}
 
-  /* text-primary: yellow is unreadable on light backgrounds.
-     Use black for text; keep bg-primary yellow for buttons/fills. */
-  .text-primary {
-    color: hsl(0 0% 0%) !important;
-  }
-  .dark .text-primary {
-    color: hsl(50 100% 55%) !important; /* bright yellow on dark bg */
-  }
+/* text-primary: yellow is unreadable on paper. Use ink. */
+.text-primary {
+  color: hsl(var(--ink)) !important;
+}
+.dark .text-primary {
+  color: hsl(var(--yellow)) !important;
+}
 
-  /* Buttons & links — simple shadow only */
-  button.bg-primary,
-  a.bg-primary {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
-  }
+/* 3. Focus ring — clean outline in brand yellow */
+button:focus-visible {
+  outline: none !important;
+  box-shadow:
+    0 0 0 2px hsl(var(--background)),
+    0 0 0 4px hsl(var(--primary)) !important;
+}
 
-  /* Logo icon backgrounds */
-  div.bg-primary,
-  span.bg-primary {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
-  }
+/* Sidebar — solid background, hairline divider */
+[data-sidebar="sidebar"] {
+  background: hsl(var(--sidebar)) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-right: 1px solid hsl(var(--sidebar-border)) !important;
+  box-shadow: none !important;
+}
 
-  /* CTA section — flat yellow */
-  section.bg-primary {
-    background: hsl(var(--primary)) !important;
-    box-shadow: none !important;
-  }
+/* Active sidebar nav items — flat yellow */
+[data-sidebar="menu-button"][data-active="true"],
+[data-sidebar="menu-button"].active {
+  background: hsl(var(--primary)) !important;
+  box-shadow: none !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
 
-  /* bg-amber-500 elements — flat */
-  .bg-amber-500 {
-    background: hsl(50 100% 50%) !important;
-    box-shadow: none !important;
-  }
+/* Cards — solid paper, hairline border, no shadow */
+.shadcn-card {
+  background: hsl(var(--card)) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: hsl(var(--card-border)) !important;
+  box-shadow: none !important;
+  position: relative;
+}
+.dark .shadcn-card {
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--card-border)) !important;
+  box-shadow: none !important;
+}
 
-  /* 3. Focus ring — clean outline */
-  button:focus-visible {
-    outline: none !important;
-    box-shadow:
-      0 0 0 2px hsl(var(--background)),
-      0 0 0 4px hsl(var(--primary)) !important;
-  }
-
-  /* 4. Sidebar — solid background */
-  [data-sidebar="sidebar"] {
-    background: hsl(var(--sidebar)) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border-right: 1px solid hsl(var(--sidebar-border)) !important;
-    box-shadow: none !important;
-  }
-  .dark [data-sidebar="sidebar"] {
-    background: hsl(var(--sidebar)) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border-right: 1px solid hsl(var(--sidebar-border)) !important;
-    box-shadow: none !important;
-  }
-
-  /* 5. Active sidebar nav items — flat */
-  [data-sidebar="menu-button"][data-active="true"],
-  [data-sidebar="menu-button"].active {
-    background: hsl(var(--primary)) !important;
-    box-shadow: none !important;
-    color: hsl(30 10% 5%) !important;
-  }
-
-  /* 6. Cards — solid background */
-  .shadcn-card {
-    background: hsl(var(--card)) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border-color: hsl(var(--card-border)) !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
-    position: relative;
-  }
-  .dark .shadcn-card {
-    background: hsl(var(--card)) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border-color: hsl(var(--card-border)) !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
-  }
-
-  
-/* 9. Input fields — neutral background, blue focus */
+/* Input fields — hairline border, no custom background fill
+   (the old #F5F5F5 fill violated three-colors-only). */
 input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="search"],
 input[type="number"],
 textarea,
-select,
-.flex.h-9.rounded-md,
-.flex.h-10.rounded-md {
-  background: #F5F5F5 !important;
+select {
+  background: hsl(var(--background)) !important;
   backdrop-filter: none !important;
-  border-color: hsl(var(--input)) !important;
+  border: 1px solid hsl(var(--input)) !important;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 input:focus,
 textarea:focus,
 select:focus {
-  border-color: rgb(59 130 246) !important;
-  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.25) !important;
-  background: #F5F5F5 !important;
+  border-color: hsl(var(--ring)) !important;
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.35) !important;
+  outline: none !important;
 }
 .dark input[type="text"],
 .dark input[type="email"],
@@ -461,12 +556,12 @@ select:focus {
 .dark input[type="number"],
 .dark textarea,
 .dark select {
-  background: rgba(12, 8, 2, 0.65) !important;
-  border-color: rgba(253, 184, 19, 0.18) !important;
+  background: hsl(var(--background)) !important;
+  border-color: hsl(var(--input)) !important;
 }
 .dark input:focus,
 .dark textarea:focus,
 .dark select:focus {
-  border-color: rgb(59 130 246) !important;
-  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.25) !important;
+  border-color: hsl(var(--ring)) !important;
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.35) !important;
 }
