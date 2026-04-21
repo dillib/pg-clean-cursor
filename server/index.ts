@@ -1,5 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import path from "path";
+import pinoHttp from "pino-http";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
@@ -11,12 +12,47 @@ import { scheduleConnectorSync } from "./services/sap-odata-client";
 import { startReminderScheduler } from "./services/reminder-scheduler";
 import { describeAIProvider } from "./services/ai-client";
 import { hostPolicyMiddleware } from "./middleware/host-policy";
+import { logger } from "./logger";
+import {
+  httpRequestDuration,
+  httpRequestsTotal,
+  register as metricsRegister,
+} from "./metrics";
 import type { SAPConfig } from "@shared/schema";
 
-console.log(`[startup] AI: ${describeAIProvider()}`);
+logger.info({ aiProvider: describeAIProvider() }, "[startup] AI provider");
 
 const app = express();
 const httpServer = createServer(app);
+
+// Structured request logging. Trim serializers so we don't dump full bodies
+// (which can contain PII / secrets) — headers are redacted via logger config.
+app.use(
+  pinoHttp({
+    logger,
+    serializers: {
+      req(req) {
+        return {
+          id: (req as any).id,
+          method: req.method,
+          url: req.url,
+          remoteAddress: req.remoteAddress,
+          remotePort: req.remotePort,
+        };
+      },
+      res(res) {
+        return {
+          statusCode: res.statusCode,
+        };
+      },
+    },
+    customLogLevel: (_req, res, err) => {
+      if (err || res.statusCode >= 500) return "error";
+      if (res.statusCode >= 400) return "warn";
+      return "info";
+    },
+  }),
+);
 
 declare module "http" {
   interface IncomingMessage {
@@ -38,6 +74,45 @@ app.get("/healthz", (_req, res) => {
   res.status(200).json({ status: "ok", uptime: process.uptime() });
 });
 
+// Prometheus metrics endpoint. Gated behind METRICS_TOKEN; if the env var
+// is not set the endpoint is disabled (404) entirely.
+app.get("/metrics", async (req, res) => {
+  const expected = process.env.METRICS_TOKEN;
+  if (!expected) {
+    res.status(404).end();
+    return;
+  }
+  const provided = req.header("x-metrics-token");
+  if (provided !== expected) {
+    res.status(404).end();
+    return;
+  }
+  try {
+    res.set("Content-Type", metricsRegister.contentType);
+    res.end(await metricsRegister.metrics());
+  } catch (err) {
+    (req as any).log?.error?.({ err }, "metrics scrape failed");
+    res.status(500).end();
+  }
+});
+
+// Metrics: record duration + count for every request. Uses `req.route?.path`
+// when available so cardinality stays bounded (not the raw URL).
+app.use((req, res, next) => {
+  const end = httpRequestDuration.startTimer();
+  res.on("finish", () => {
+    const route = (req as any).route?.path || req.baseUrl || req.path || "unknown";
+    const labels = {
+      method: req.method,
+      route: typeof route === "string" ? route : String(route),
+      status: String(res.statusCode),
+    };
+    end(labels);
+    httpRequestsTotal.inc(labels);
+  });
+  next();
+});
+
 // Serve stock images from attached_assets directory
 app.use("/assets", express.static(path.resolve(process.cwd(), "attached_assets")));
 
@@ -46,42 +121,11 @@ app.use("/assets", express.static(path.resolve(process.cwd(), "attached_assets")
 // three-system separation ships the capability without flipping the switch.
 app.use(hostPolicyMiddleware());
 
+// Legacy helper kept for backwards compatibility with existing call sites.
+// New code should use `logger` / `req.log` directly.
 export function log(message: string, source = "express") {
-  const formattedTime = new Date().toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-
-  console.log(`${formattedTime} [${source}] ${message}`);
+  logger.info({ source }, message);
 }
-
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      log(logLine);
-    }
-  });
-
-  next();
-});
 
 (async () => {
   setupEventHandlers();

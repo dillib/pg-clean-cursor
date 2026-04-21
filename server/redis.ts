@@ -5,6 +5,7 @@
  * If REDIS_URL is absent the system falls back to in-process mode for local dev.
  */
 import Redis from "ioredis";
+import { logger } from "./logger";
 
 const url = process.env.REDIS_URL;
 
@@ -19,10 +20,10 @@ export function getRedisClient(): Redis | null {
       lazyConnect: false,
     });
     _redis.on("error", (err) => {
-      console.error("[Redis] Connection error:", err.message);
+      logger.error({ err: err.message }, "[Redis] Connection error");
     });
     _redis.on("connect", () => {
-      console.log("[Redis] Connected to", url?.replace(/:\/\/.*@/, "://***@"));
+      logger.info({ url: url?.replace(/:\/\/.*@/, "://***@") }, "[Redis] Connected");
     });
   }
   return _redis;

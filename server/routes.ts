@@ -43,6 +43,7 @@ function redactConnectorForResponse<T extends { config?: unknown; credentialsCip
 }
 import { scanLimiter, formLimiter, identityLimiter, authLimiter, aiLimiter, apiLimiter } from "./middleware/rate-limit";
 import { storage } from "./storage";
+import { logger } from "./logger";
 
 // isAuthenticated from the swappable provider
 const { isAuthenticated } = authProvider;
@@ -89,7 +90,7 @@ export async function registerRoutes(
       // the session value so the frontend can gate UI correctly.
       res.json({ ...(dbUser ?? {}), ...current, isAdmin: current.isAdmin });
     } catch (error) {
-      console.error("Error fetching user:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching user");
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
@@ -147,7 +148,7 @@ ${pages.map(p => `  <url>
       const products = await demoStore.getAllProducts();
       res.json(products);
     } catch (error) {
-      console.error("Error fetching demo products:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching demo products");
       res.status(500).json({ error: "Failed to fetch demo products" });
     }
   });
@@ -158,7 +159,7 @@ ${pages.map(p => `  <url>
       const products = await scoped.getAllProducts();
       res.json(products);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching products");
       res.status(500).json({ error: "Failed to fetch products" });
     }
   });
@@ -171,7 +172,7 @@ ${pages.map(p => `  <url>
       }
       res.json(product);
     } catch (error) {
-      console.error("Error fetching product:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching product");
       res.status(500).json({ error: "Failed to fetch product" });
     }
   });
@@ -201,7 +202,7 @@ ${pages.map(p => `  <url>
 
       res.status(201).json(updatedProduct);
     } catch (error) {
-      console.error("Error creating product:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error creating product");
       res.status(500).json({ error: "Failed to create product" });
     }
   });
@@ -232,7 +233,7 @@ ${pages.map(p => `  <url>
 
       res.json(product);
     } catch (error) {
-      console.error("Error updating product:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error updating product");
       res.status(500).json({ error: "Failed to update product" });
     }
   });
@@ -254,7 +255,7 @@ ${pages.map(p => `  <url>
 
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting product:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error deleting product");
       res.status(500).json({ error: "Failed to delete product" });
     }
   });
@@ -271,7 +272,7 @@ ${pages.map(p => `  <url>
       }
       res.json(identity);
     } catch (error) {
-      console.error("Error fetching identity:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching identity");
       res.status(500).json({ error: "Failed to fetch identity" });
     }
   });
@@ -284,7 +285,7 @@ ${pages.map(p => `  <url>
       }
       res.json(identity);
     } catch (error) {
-      console.error("Error fetching identity:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching identity");
       res.status(500).json({ error: "Failed to fetch identity" });
     }
   });
@@ -295,7 +296,7 @@ ${pages.map(p => `  <url>
       const result = await identityService.validateIdentity(serialNumber);
       res.json(result);
     } catch (error) {
-      console.error("Error validating identity:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error validating identity");
       res.status(500).json({ error: "Failed to validate identity" });
     }
   });
@@ -312,7 +313,7 @@ ${pages.map(p => `  <url>
       }
       res.json(qrCode);
     } catch (error) {
-      console.error("Error fetching QR code:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching QR code");
       res.status(500).json({ error: "Failed to fetch QR code" });
     }
   });
@@ -336,7 +337,7 @@ ${pages.map(p => `  <url>
       
       res.json(qrCode);
     } catch (error) {
-      console.error("Error regenerating QR code:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error regenerating QR code");
       res.status(500).json({ error: "Failed to regenerate QR code" });
     }
   });
@@ -349,7 +350,7 @@ ${pages.map(p => `  <url>
       }
       res.json(qrCode);
     } catch (error) {
-      console.error("Error recording scan:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error recording scan");
       res.status(500).json({ error: "Failed to record scan" });
     }
   });
@@ -363,7 +364,7 @@ ${pages.map(p => `  <url>
       const events = await traceService.getProductTimeline(req.params.productId);
       res.json(events);
     } catch (error) {
-      console.error("Error fetching trace events:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching trace events");
       res.status(500).json({ error: "Failed to fetch trace events" });
     }
   });
@@ -383,7 +384,7 @@ ${pages.map(p => `  <url>
       
       res.status(201).json(event);
     } catch (error) {
-      console.error("Error recording trace event:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error recording trace event");
       res.status(500).json({ error: "Failed to record trace event" });
     }
   });
@@ -397,7 +398,7 @@ ${pages.map(p => `  <url>
       const insights = await aiService.getInsightsByProductId(req.params.productId);
       res.json(insights);
     } catch (error) {
-      console.error("Error fetching insights:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching insights");
       res.status(500).json({ error: "Failed to fetch insights" });
     }
   });
@@ -414,7 +415,7 @@ ${pages.map(p => `  <url>
       const result = await aiService.generateSummary(product);
       res.json(result);
     } catch (error) {
-      console.error("Error generating summary:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error generating summary");
       res.status(500).json({ error: "Failed to generate summary" });
     }
   });
@@ -431,7 +432,7 @@ ${pages.map(p => `  <url>
       const result = await aiService.generateSustainabilityInsight(product);
       res.json(result);
     } catch (error) {
-      console.error("Error generating sustainability insights:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error generating sustainability insights");
       res.status(500).json({ error: "Failed to generate sustainability insights" });
     }
   });
@@ -448,7 +449,7 @@ ${pages.map(p => `  <url>
       const result = await aiService.generateRepairSummary(product);
       res.json(result);
     } catch (error) {
-      console.error("Error generating repair summary:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error generating repair summary");
       res.status(500).json({ error: "Failed to generate repair summary" });
     }
   });
@@ -465,7 +466,7 @@ ${pages.map(p => `  <url>
       const result = await aiService.generateCircularityScore(product);
       res.json(result);
     } catch (error) {
-      console.error("Error generating circularity score:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error generating circularity score");
       res.status(500).json({ error: "Failed to generate circularity score" });
     }
   });
@@ -482,7 +483,7 @@ ${pages.map(p => `  <url>
       const result = await aiService.generateRiskAssessment(product);
       res.json(result);
     } catch (error) {
-      console.error("Error generating risk assessment:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error generating risk assessment");
       res.status(500).json({ error: "Failed to generate risk assessment" });
     }
   });
@@ -500,7 +501,7 @@ ${pages.map(p => `  <url>
       );
       res.json(logs);
     } catch (error) {
-      console.error("Error fetching audit logs:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching audit logs");
       res.status(500).json({ error: "Failed to fetch audit logs" });
     }
   });
@@ -520,7 +521,7 @@ ${pages.map(p => `  <url>
       }
       res.json(devices);
     } catch (error) {
-      console.error("Error fetching IoT devices:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching IoT devices");
       res.status(500).json({ error: "Failed to fetch IoT devices" });
     }
   });
@@ -533,7 +534,7 @@ ${pages.map(p => `  <url>
       }
       res.json(device);
     } catch (error) {
-      console.error("Error fetching IoT device:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching IoT device");
       res.status(500).json({ error: "Failed to fetch IoT device" });
     }
   });
@@ -551,7 +552,7 @@ ${pages.map(p => `  <url>
       
       res.status(201).json(device);
     } catch (error) {
-      console.error("Error registering IoT device:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error registering IoT device");
       res.status(500).json({ error: "Failed to register IoT device" });
     }
   });
@@ -569,7 +570,7 @@ ${pages.map(p => `  <url>
       }
       res.json(device);
     } catch (error) {
-      console.error("Error updating IoT device status:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error updating IoT device status");
       res.status(500).json({ error: "Failed to update IoT device status" });
     }
   });
@@ -589,7 +590,7 @@ ${pages.map(p => `  <url>
       }
       res.json(device);
     } catch (error) {
-      console.error("Error recording sensor reading:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error recording sensor reading");
       res.status(500).json({ error: "Failed to record sensor reading" });
     }
   });
@@ -605,7 +606,7 @@ ${pages.map(p => `  <url>
       }
       res.json(result);
     } catch (error) {
-      console.error("Error scanning IoT device:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error scanning IoT device");
       res.status(500).json({ error: "Failed to scan IoT device" });
     }
   });
@@ -618,7 +619,7 @@ ${pages.map(p => `  <url>
       }
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting IoT device:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error deleting IoT device");
       res.status(500).json({ error: "Failed to delete IoT device" });
     }
   });
@@ -632,7 +633,7 @@ ${pages.map(p => `  <url>
       const extensions = await storage.getRegionalExtensionsByProductId(req.params.productId);
       res.json(extensions);
     } catch (error) {
-      console.error("Error fetching regional extensions:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching regional extensions");
       res.status(500).json({ error: "Failed to fetch regional extensions" });
     }
   });
@@ -649,7 +650,7 @@ ${pages.map(p => `  <url>
       }
       res.json(extension);
     } catch (error) {
-      console.error("Error fetching regional extension:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching regional extension");
       res.status(500).json({ error: "Failed to fetch regional extension" });
     }
   });
@@ -670,7 +671,7 @@ ${pages.map(p => `  <url>
       });
       res.status(201).json(extension);
     } catch (error) {
-      console.error("Error creating regional extension:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error creating regional extension");
       res.status(500).json({ error: "Failed to create regional extension" });
     }
   });
@@ -683,7 +684,7 @@ ${pages.map(p => `  <url>
       }
       res.json(extension);
     } catch (error) {
-      console.error("Error updating regional extension:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error updating regional extension");
       res.status(500).json({ error: "Failed to update regional extension" });
     }
   });
@@ -696,7 +697,7 @@ ${pages.map(p => `  <url>
       }
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting regional extension:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error deleting regional extension");
       res.status(500).json({ error: "Failed to delete regional extension" });
     }
   });
@@ -738,7 +739,7 @@ ${pages.map(p => `  <url>
       });
       res.status(201).json({ id: scan.id });
     } catch (error) {
-      console.error("Error recording scan:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error recording scan");
       res.status(500).json({ error: "Failed to record scan" });
     }
   });
@@ -761,7 +762,7 @@ ${pages.map(p => `  <url>
       ]);
       res.json({ stats, recent, byDay, registrations });
     } catch (error) {
-      console.error("Error fetching scan analytics:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching scan analytics");
       res.status(500).json({ error: "Failed to fetch analytics" });
     }
   });
@@ -788,7 +789,7 @@ ${pages.map(p => `  <url>
       });
       res.status(201).json({ id: reg.id, message: "Product registered successfully" });
     } catch (error) {
-      console.error("Error registering product:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error registering product");
       res.status(500).json({ error: "Failed to register product" });
     }
   });
@@ -799,7 +800,7 @@ ${pages.map(p => `  <url>
       const registrations = await storage.getProductRegistrations(req.params.productId);
       res.json(registrations);
     } catch (error) {
-      console.error("Error fetching registrations:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching registrations");
       res.status(500).json({ error: "Failed to fetch registrations" });
     }
   });
@@ -816,7 +817,7 @@ ${pages.map(p => `  <url>
       const connectors = await tenantStorage(req).getAllEnterpriseConnectors();
       res.json(connectors.map(redactConnectorForResponse));
     } catch (error) {
-      console.error("Error fetching connectors:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching connectors");
       res.status(500).json({ error: "Failed to fetch connectors" });
     }
   });
@@ -829,7 +830,7 @@ ${pages.map(p => `  <url>
       }
       res.json(redactConnectorForResponse(connector));
     } catch (error) {
-      console.error("Error fetching connector:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching connector");
       res.status(500).json({ error: "Failed to fetch connector" });
     }
   });
@@ -853,7 +854,7 @@ ${pages.map(p => `  <url>
       } as any);
       res.status(201).json(redactConnectorForResponse(connector));
     } catch (error) {
-      console.error("Error creating connector:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error creating connector");
       res.status(500).json({ error: "Failed to create connector" });
     }
   });
@@ -884,7 +885,7 @@ ${pages.map(p => `  <url>
       }
       res.json(redactConnectorForResponse(connector));
     } catch (error) {
-      console.error("Error updating connector:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error updating connector");
       res.status(500).json({ error: "Failed to update connector" });
     }
   });
@@ -902,7 +903,7 @@ ${pages.map(p => `  <url>
       }
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting connector:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error deleting connector");
       res.status(500).json({ error: "Failed to delete connector" });
     }
   });
@@ -920,7 +921,7 @@ ${pages.map(p => `  <url>
       await storage.updateEnterpriseConnector(req.params.id, { status: "active" as const });
       res.json({ success: true, message: "Connection successful" });
     } catch (error) {
-      console.error("Error testing connector:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error testing connector");
       res.status(500).json({ error: "Connection test failed" });
     }
   });
@@ -992,13 +993,13 @@ ${pages.map(p => `  <url>
           } catch (err) {
             const e = err as Error;
             const errMsg = `${material.MARA.MATNR}: ${e.message}`;
-            console.error("[Connector Sync] Material error:", errMsg);
+            ((req as any).log ?? logger).error({ errMsg }, "[Connector Sync] Material error");
             errors.push(errMsg);
             failed++;
           }
         }
       } catch (err) {
-        console.error("[Connector Sync] Error:", err);
+        ((req as any).log ?? logger).error({ err }, "[Connector Sync] Error");
       }
 
       const total = created + updated + failed;
@@ -1041,7 +1042,7 @@ ${pages.map(p => `  <url>
               alertEmailTo,
             });
           } catch (emailErr) {
-            console.error("[SAP Alert] Failed to send alert email:", emailErr);
+            ((req as any).log ?? logger).error({ err: emailErr }, "[SAP Alert] Failed to send alert email");
           }
         }
       }
@@ -1055,7 +1056,7 @@ ${pages.map(p => `  <url>
         firstError: errors[0] ?? null,
       });
     } catch (error) {
-      console.error("Error syncing connector:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error syncing connector");
       res.status(500).json({ error: "Sync failed" });
     }
   });
@@ -1065,7 +1066,7 @@ ${pages.map(p => `  <url>
       const logs = await storage.getSyncLogsByConnectorId(req.params.id);
       res.json(logs);
     } catch (error) {
-      console.error("Error fetching sync logs:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching sync logs");
       res.status(500).json({ error: "Failed to fetch sync logs" });
     }
   });
@@ -1079,7 +1080,7 @@ ${pages.map(p => `  <url>
       await seedDemoData();
       res.json({ success: true, message: "Demo data seeded successfully" });
     } catch (error) {
-      console.error("Error seeding demo data:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error seeding demo data");
       res.status(500).json({ error: "Failed to seed demo data" });
     }
   });
@@ -1132,7 +1133,7 @@ ${pages.map(p => `  <url>
 
       res.status(201).json({ success: true, lead });
     } catch (error) {
-      console.error("Error creating lead:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error creating lead");
       res.status(500).json({ error: "Failed to submit form" });
     }
   });
@@ -1143,7 +1144,7 @@ ${pages.map(p => `  <url>
       const leads = await tenantStorage(req).getAllLeads();
       res.json(leads);
     } catch (error) {
-      console.error("Error fetching leads:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching leads");
       res.status(500).json({ error: "Failed to fetch leads" });
     }
   });
@@ -1153,7 +1154,7 @@ ${pages.map(p => `  <url>
       const stats = await tenantStorage(req).getLeadStats();
       res.json(stats);
     } catch (error) {
-      console.error("Error fetching lead stats:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching lead stats");
       res.status(500).json({ error: "Failed to fetch lead stats" });
     }
   });
@@ -1166,7 +1167,7 @@ ${pages.map(p => `  <url>
       }
       res.json(lead);
     } catch (error) {
-      console.error("Error fetching lead:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching lead");
       res.status(500).json({ error: "Failed to fetch lead" });
     }
   });
@@ -1192,7 +1193,7 @@ ${pages.map(p => `  <url>
 
       res.json(updatedLead);
     } catch (error) {
-      console.error("Error updating lead:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error updating lead");
       res.status(500).json({ error: "Failed to update lead" });
     }
   });
@@ -1205,7 +1206,7 @@ ${pages.map(p => `  <url>
       }
       res.json({ success: true });
     } catch (error) {
-      console.error("Error deleting lead:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error deleting lead");
       res.status(500).json({ error: "Failed to delete lead" });
     }
   });
@@ -1215,7 +1216,7 @@ ${pages.map(p => `  <url>
       const activities = await tenantStorage(req).getLeadActivities(req.params.id);
       res.json(activities);
     } catch (error) {
-      console.error("Error fetching lead activities:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching lead activities");
       res.status(500).json({ error: "Failed to fetch activities" });
     }
   });
@@ -1233,7 +1234,7 @@ ${pages.map(p => `  <url>
       });
       res.status(201).json(activity);
     } catch (error) {
-      console.error("Error creating lead activity:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Error creating lead activity");
       res.status(500).json({ error: "Failed to create activity" });
     }
   });
@@ -1271,13 +1272,13 @@ ${pages.map(p => `  <url>
       const { passwordHash, ...safePartner } = partner;
       req.session.save((err) => {
         if (err) {
-          console.error("Session save error:", err);
+          ((req as any).log ?? logger).error({ err }, "Session save error");
           return res.status(500).json({ error: "Login failed" });
         }
         res.json({ success: true, partner: safePartner });
       });
     } catch (error) {
-      console.error("Partner login error:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Partner login error");
       res.status(500).json({ error: "Login failed" });
     }
   });
@@ -1297,7 +1298,7 @@ ${pages.map(p => `  <url>
       const { passwordHash, ...safePartner } = partner;
       res.json(safePartner);
     } catch (error) {
-      console.error("Partner auth check error:", error);
+      ((req as any).log ?? logger).error({ err: error }, "Partner auth check error");
       res.status(500).json({ error: "Auth check failed" });
     }
   });

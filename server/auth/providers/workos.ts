@@ -26,6 +26,7 @@ import { getRedisClient } from "../../redis";
 import { authStorage } from "../../integrations/auth/storage";
 import { isMasterAdminEmail } from "@shared/models/auth";
 import type { AuthProvider, AuthenticatedUser } from "../types";
+import { logger } from "../../logger";
 
 const REQUIRED_ENV = ["WORKOS_API_KEY", "WORKOS_CLIENT_ID", "WORKOS_REDIRECT_URI"] as const;
 
@@ -52,8 +53,9 @@ function buildSessionMiddleware() {
         });
       })();
 
-  console.log(
-    `[Session] Using ${redis ? "Redis" : "Postgres"} session store (workos provider)`
+  logger.info(
+    { store: redis ? "redis" : "postgres", provider: "workos" },
+    "[Session] session store selected",
   );
 
   return session({
@@ -99,9 +101,9 @@ class WorkOSAuthProvider implements AuthProvider {
     app.use(buildSessionMiddleware());
 
     if (!isConfigured()) {
-      console.warn(
-        `[auth/workos] AUTH_PROVIDER=workos but missing env: ${missingEnvList().join(", ")}. ` +
-          `SSO endpoints will return 503 until these are set.`
+      logger.warn(
+        { missingEnv: missingEnvList() },
+        "[auth/workos] AUTH_PROVIDER=workos but required env missing — SSO endpoints will return 503",
       );
     } else {
       this.workos = new WorkOS(process.env.WORKOS_API_KEY!);
@@ -170,14 +172,18 @@ class WorkOSAuthProvider implements AuthProvider {
         delete (req.session as any)?.returnTo;
         res.redirect(returnTo);
       } catch (err) {
-        console.error("[auth/workos] authenticateWithCode failed", err);
+        (req as any).log?.error?.({ err }, "[auth/workos] authenticateWithCode failed")
+          ?? logger.error({ err }, "[auth/workos] authenticateWithCode failed");
         res.status(401).json({ error: "Authentication failed" });
       }
     };
 
     const logout = (req: Request, res: Response) => {
       req.session.destroy((err) => {
-        if (err) console.error("[auth/workos] session destroy failed", err);
+        if (err) {
+          (req as any).log?.error?.({ err }, "[auth/workos] session destroy failed")
+            ?? logger.error({ err }, "[auth/workos] session destroy failed");
+        }
         res.redirect("/");
       });
     };

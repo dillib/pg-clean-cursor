@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import * as schema from "@shared/schema";
+import { logger } from "./logger";
 
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL environment variable is not set");
@@ -19,7 +20,7 @@ const pool = new pg.Pool({
 });
 
 pool.on("error", (err) => {
-  console.error("[PgPool] Unexpected error on idle client:", err.message);
+  logger.error({ err: err.message }, "[PgPool] Unexpected error on idle client");
 });
 
 export const db = drizzle(pool, { schema });

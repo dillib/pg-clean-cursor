@@ -13,6 +13,7 @@
 import { randomUUID } from "crypto";
 import type { CloudEvent, EventType } from "@shared/schema";
 import { getRedisClient } from "../redis";
+import { logger } from "../logger";
 
 type EventHandler<T = unknown> = (event: CloudEvent<T>) => Promise<void>;
 
@@ -63,7 +64,7 @@ class EventBus {
           "payload",    JSON.stringify(event.data),
         );
       } catch (err) {
-        console.error("[EventBus] Redis XADD failed, falling back to in-process:", (err as Error).message);
+        logger.error({ err: (err as Error).message }, "[EventBus] Redis XADD failed, falling back to in-process");
       }
     }
 
@@ -82,7 +83,7 @@ class EventBus {
         try {
           await sub.handler(event as CloudEvent);
         } catch (error) {
-          console.error(`[EventBus] Handler error for ${event.type}:`, error);
+          logger.error({ err: error, eventType: event.type }, "[EventBus] Handler error");
         }
       })
     );
@@ -117,7 +118,7 @@ class EventBus {
   ): Promise<void> {
     const redis = getRedisClient();
     if (!redis) {
-      console.log("[EventBus] No Redis — skipping stream consumer (in-process mode).");
+      logger.info("[EventBus] No Redis — skipping stream consumer (in-process mode).");
       return;
     }
 
@@ -162,20 +163,20 @@ class EventBus {
                 await handler(event);
                 await redis.xack(STREAM_KEY, groupName, msgId);
               } catch (err) {
-                console.error("[EventBus] Failed to process stream message:", msgId, err);
+                logger.error({ err, msgId }, "[EventBus] Failed to process stream message");
                 // Message stays in PEL for retry / dead-letter handling
               }
             }
           }
         } catch (err: any) {
           if (err.message?.includes("NOGROUP")) break;
-          console.error("[EventBus] Stream consumer error:", err.message);
+          logger.error({ err: err.message }, "[EventBus] Stream consumer error");
           await new Promise(r => setTimeout(r, 1000));
         }
       }
     };
 
-    poll().catch(console.error);
+    poll().catch((err) => logger.error({ err }, "[EventBus] poll loop crashed"));
   }
 
   getEventLog(): CloudEvent[] { return [...this.eventLog]; }

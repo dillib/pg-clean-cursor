@@ -6,13 +6,14 @@
  */
 import type { AuthProvider } from "./types";
 import { workosProvider } from "./providers/workos";
+import { logger } from "../logger";
 
 export type { AuthProvider, AuthenticatedUser } from "./types";
 
 function resolveProvider(): AuthProvider {
   const provider = (process.env.AUTH_PROVIDER ?? "workos").toLowerCase();
   if (provider !== "workos") {
-    console.warn(`[Auth] Unknown AUTH_PROVIDER="${provider}", defaulting to workos`);
+    logger.warn({ provider }, "[Auth] Unknown AUTH_PROVIDER, defaulting to workos");
   }
   return workosProvider;
 }
