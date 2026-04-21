@@ -17,6 +17,7 @@ import {
 import { productService } from "./services/product-service";
 import { qrService } from "./services/qr-service";
 import { sendBookingConfirmation, sendTeamNotification, sendSAPAlertEmail } from "./services/email";
+import { sendTransactionalEmail } from "./services/email-service";
 import { identityService } from "./services/identity-service";
 import { traceService } from "./services/trace-service";
 import { aiService } from "./services/ai-service";
@@ -1123,12 +1124,16 @@ ${pages.map(p => `  <url>
       }
 
       const lead = await storage.createLead(parsed.data);
-      
+
       // Log the activity
       await storage.createLeadActivity({
         leadId: lead.id,
         activityType: "note_added",
         description: `Lead created from ${parsed.data.source || 'contact_form'}`,
+      });
+
+      await sendTransactionalEmail("lead-confirm", lead.email, {
+        name: `${lead.firstName} ${lead.lastName}`.trim(),
       });
 
       res.status(201).json({ success: true, lead });
@@ -1347,6 +1352,11 @@ ${pages.map(p => `  <url>
         role: (rest.role ?? "demo_viewer") as PartnerRole,
         status: (rest.status ?? "active") as PartnerStatus,
         passwordHash,
+      });
+
+      await sendTransactionalEmail("partner-invite", partner.email, {
+        name: `${partner.firstName} ${partner.lastName}`.trim(),
+        company: partner.company ?? undefined,
       });
 
       const { passwordHash: _, ...safePartner } = partner;
@@ -1571,6 +1581,11 @@ ${pages.map(p => `  <url>
       sendTeamNotification(emailData).catch((err) =>
         console.error("[Email] Failed to send team notification:", err)
       );
+      void sendTransactionalEmail("demo-booking-confirm", booking.email, {
+        name: booking.name,
+        slot: new Date(booking.slotDatetime).toISOString(),
+        interestArea: booking.interestArea,
+      });
     } catch (error) {
       console.error("Error creating demo booking:", error);
       res.status(500).json({ error: "Failed to create demo booking" });
