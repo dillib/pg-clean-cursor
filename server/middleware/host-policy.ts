@@ -38,6 +38,13 @@ const OPS_PATH_PREFIXES = [
   "/demo",
   "/partner",
   "/admin",
+  "/api/leads",
+  "/api/partners",
+  "/api/demo-configs",
+  "/api/demo-bookings",
+  "/api/internal",
+  "/api/export",
+  "/api/admin",
 ] as const;
 
 // Path prefixes that belong to the tenant customer app. Marketing and public

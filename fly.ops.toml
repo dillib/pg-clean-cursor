@@ -1,0 +1,47 @@
+# Deploy with: fly deploy -c fly.ops.toml
+# Fly.io — PhotonicTag ops/internal console
+# EU data residency: Frankfurt (fra). This app serves the operator-only
+# surface (admin, internal, partner, demo, sales CRM) under ops.photonictag.com.
+app = "photonictag-ops"
+primary_region = "fra"
+kill_signal = "SIGTERM"
+kill_timeout = "30s"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "8080"
+  HOST_MODE = "ops"
+  # Non-secret defaults. Secrets (DATABASE_URL, SESSION_SECRET, AI_API_KEY,
+  # CONNECTOR_ENCRYPTION_KEY, AUDIT_CHAIN_HMAC_KEY, SMTP_*) are set via
+  # `fly secrets set -c fly.ops.toml` — never commit them to this file.
+  APP_BASE_URL = "https://photonictag-ops.fly.dev"
+  AI_PROVIDER = "mistral"
+  AUTH_PROVIDER = "workos"
+  EMAIL_TIMEZONE = "Europe/Berlin"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    grace_period = "20s"
+    interval = "15s"
+    method = "GET"
+    timeout = "5s"
+    path = "/healthz"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[deploy]
+  strategy = "rolling"
