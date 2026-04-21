@@ -1,7 +1,10 @@
 import { Link } from "wouter";
 import { QrCode } from "lucide-react";
+import { useCookieConsent } from "@/hooks/use-cookie-consent";
 
 export function PublicFooter() {
+  const { resetConsent } = useCookieConsent();
+
   return (
     <footer className="border-t py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
@@ -37,8 +40,17 @@ export function PublicFooter() {
           <div>
             <h4 className="text-sm font-semibold mb-3">Legal</h4>
             <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-              <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+              <Link href="/privacy" className="hover:text-foreground transition-colors" data-testid="footer-link-privacy">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-foreground transition-colors" data-testid="footer-link-terms">Terms of Service</Link>
+              <Link href="/dpa" className="hover:text-foreground transition-colors" data-testid="footer-link-dpa">Data Processing Agreement</Link>
+              <button
+                type="button"
+                onClick={resetConsent}
+                className="text-left hover:text-foreground transition-colors"
+                data-testid="footer-link-cookie-preferences"
+              >
+                Cookie preferences
+              </button>
             </div>
           </div>
         </div>

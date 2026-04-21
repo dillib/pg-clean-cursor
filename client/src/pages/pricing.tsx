@@ -8,6 +8,26 @@ import { PublicNav } from "@/components/public-nav";
 import { PublicFooter } from "@/components/public-footer";
 import { ModulesSection } from "@/components/modules-section";
 import { useCurrency } from "@/hooks/use-currency";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
+const pricingFaqs = [
+  {
+    q: "How does billing work?",
+    a: "Paid plans are billed monthly in EUR. Annual billing is available with a 20% discount. Enterprise contracts support quarterly or annual invoicing via SEPA or SWIFT. All prices exclude applicable VAT.",
+  },
+  {
+    q: "Do you offer a free trial?",
+    a: "The Starter tier is month-to-month with no minimum commitment, so you can evaluate the full platform on real data. Enterprise customers can engage in a structured 4–6 week Proof of Concept credited toward the first year's subscription.",
+  },
+  {
+    q: "Where is my data hosted?",
+    a: "All customer data is hosted in EU regions. Primary production runs in Frankfurt (eu-central), with database replication within the EEA. Sub-processor details are listed in our Data Processing Agreement.",
+  },
+  {
+    q: "How do I cancel?",
+    a: "Starter and Growth can be cancelled at any time from your account settings; billing stops at the end of the current period. Enterprise cancellation follows the notice period in your signed order form.",
+  },
+];
 
 const platformTiers = [
   {
@@ -346,6 +366,33 @@ export default function Pricing() {
               </div>
             </CardContent>
           </Card>
+        </section>
+
+        <section className="mb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold mb-2">Pricing FAQ</h2>
+            <p className="text-muted-foreground">Answers to the most common pricing questions</p>
+          </div>
+          <Accordion type="single" collapsible className="space-y-3 max-w-3xl mx-auto">
+            {pricingFaqs.map((item, i) => (
+              <AccordionItem
+                key={i}
+                value={`pricing-faq-${i}`}
+                className="border rounded-lg px-4"
+                data-testid={`pricing-faq-item-${i}`}
+              >
+                <AccordionTrigger
+                  className="text-left font-medium py-4 hover:no-underline"
+                  data-testid={`pricing-faq-trigger-${i}`}
+                >
+                  {item.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground pb-4 leading-relaxed">
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </section>
 
         <section className="text-center">

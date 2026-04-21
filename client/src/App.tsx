@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { HelmetProvider } from "react-helmet-async";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ScrollToTop } from "@/components/scroll-to-top";
+import { CookieBanner } from "@/components/cookie-banner";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
@@ -33,6 +34,7 @@ const Integrations = lazy(() => import("@/pages/integrations"));
 const Contact = lazy(() => import("@/pages/contact"));
 const Privacy = lazy(() => import("@/pages/privacy"));
 const Terms = lazy(() => import("@/pages/terms"));
+const DPA = lazy(() => import("@/pages/dpa"));
 const DemoGallery = lazy(() => import("@/pages/demo-gallery"));
 const CRM = lazy(() => import("@/pages/crm"));
 const PartnerLogin = lazy(() => import("@/pages/partner-login"));
@@ -516,6 +518,7 @@ function Router() {
       <Route path="/faqs" component={FAQs} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
+      <Route path="/dpa" component={DPA} />
       <Route path="/book-demo" component={BookDemo} />
       <Route component={NotFound} />
     </Switch>
@@ -532,6 +535,7 @@ function App() {
             <Suspense fallback={<RouteFallback />}>
               <Router />
             </Suspense>
+            <CookieBanner />
             <Toaster />
           </TooltipProvider>
         </QueryClientProvider>
