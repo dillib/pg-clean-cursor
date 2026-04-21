@@ -27,6 +27,5 @@ vitest.config.ts
 .DS_Store
 Thumbs.db
 
-# Brainstorm notes that live under attached_assets (real stock_images/ stays)
-attached_assets/Pasted-*.txt
-attached_assets/*.md
+# Agent worktrees and scheduled-task state
+.claude
