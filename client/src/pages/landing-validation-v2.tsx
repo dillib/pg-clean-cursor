@@ -275,7 +275,15 @@ export default function LandingValidationV2() {
 
         <div className="relative max-w-5xl mx-auto">
           <Reveal>
-            <BrandBadge tone="accent" style={{ marginBottom: 24 }}>
+            <BrandBadge
+              tone="accent"
+              style={{
+                marginBottom: 24,
+                background: "#FFE0E0",
+                borderColor: "#FFC2C2",
+                color: "#7F1D1D",
+              }}
+            >
               <Icon name="bolt" size={12} /> Battery Passport Deadline: Feb 18, 2027
             </BrandBadge>
             <Eyebrow style={{ marginBottom: 18 }}>
