@@ -63,7 +63,7 @@ export function CookieBanner() {
             >
               <DialogTrigger asChild>
                 <Button
-                  variant="link"
+                  variant="ghost"
                   size="sm"
                   className="text-muted-foreground"
                   data-testid="button-cookie-preferences"

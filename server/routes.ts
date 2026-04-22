@@ -149,7 +149,7 @@ ${pages.map(p => `  <url>
       const products = await demoStore.getAllProducts();
       res.json(products);
     } catch (error) {
-      ((req as any).log ?? logger).error({ err: error }, "Error fetching demo products");
+      logger.error({ err: error }, "Error fetching demo products");
       res.status(500).json({ error: "Failed to fetch demo products" });
     }
   });
