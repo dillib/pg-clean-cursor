@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
@@ -206,8 +207,13 @@ function LivePassportPreview() {
 export default function LandingValidationV2() {
   const { symbol } = useCurrency();
 
+  // Scoped yellow token — slightly lighter than the global #FFE600 so
+  // accents on paper feel warmer and less electric. Only applies to this
+  // subtree; the rest of the app still uses the design-system yellow.
+  const scopedYellow = { ["--yellow" as string]: "51 100% 62%" } as React.CSSProperties;
+
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(var(--paper))" }}>
+    <div style={{ minHeight: "100vh", background: "hsl(var(--paper))", ...scopedYellow }}>
       <Helmet>
         <title>PhotonicTag — EU Digital Product Passport Compliance Platform</title>
         <meta name="description" content="EU Digital Product Passports (DPP) are mandatory starting 2027. PhotonicTag gets you compliant in weeks — with AI insights, tamper-proof QR identity, and SAP integration. ESPR 2024/1781 ready." />
@@ -227,27 +233,42 @@ export default function LandingValidationV2() {
         <PublicNav />
       </div>
 
-      {/* ── HERO — dark ink panel with yellow accent ── */}
+      {/* ── HERO — paper with hairline grid + yellow accents ── */}
       <section
         className="relative px-4 sm:px-6 lg:px-8"
         style={{
           paddingTop: 144,
           paddingBottom: 96,
-          background: "hsl(var(--ink))",
-          color: "hsl(var(--paper))",
+          background: "hsl(var(--paper))",
+          color: "hsl(var(--ink))",
           overflow: "hidden",
+          borderBottom: "1px solid var(--hairline)",
         }}
       >
-        {/* hairline grid backdrop */}
+        {/* soft hairline grid backdrop */}
         <div
           aria-hidden
           style={{
             position: "absolute",
             inset: 0,
             backgroundImage:
-              "linear-gradient(var(--paper-04) 1px, transparent 1px), linear-gradient(90deg, var(--paper-04) 1px, transparent 1px)",
+              "linear-gradient(var(--ink-04) 1px, transparent 1px), linear-gradient(90deg, var(--ink-04) 1px, transparent 1px)",
             backgroundSize: "64px 64px",
             backgroundPosition: "-1px -1px",
+            pointerEvents: "none",
+          }}
+        />
+        {/* subtle yellow wash, upper right */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: -120,
+            right: -120,
+            width: 520,
+            height: 520,
+            background: "hsl(var(--yellow) / 0.28)",
+            filter: "blur(80px)",
             pointerEvents: "none",
           }}
         />
@@ -257,7 +278,7 @@ export default function LandingValidationV2() {
             <BrandBadge tone="accent" style={{ marginBottom: 24 }}>
               <Icon name="bolt" size={12} /> Battery Passport Deadline: Feb 18, 2027
             </BrandBadge>
-            <Eyebrow color="var(--paper-56)" style={{ marginBottom: 18 }}>
+            <Eyebrow style={{ marginBottom: 18 }}>
               EU ESPR 2024/1781 · Compliance Platform
             </Eyebrow>
 
@@ -265,18 +286,28 @@ export default function LandingValidationV2() {
               data-testid="text-hero-title"
               style={{
                 fontFamily: "var(--font-display)",
-                fontSize: "clamp(48px, 7vw, 88px)",
-                lineHeight: 0.98,
+                fontSize: "clamp(44px, 6.5vw, 80px)",
+                lineHeight: 1.0,
                 letterSpacing: "-0.045em",
                 fontWeight: 600,
                 margin: 0,
                 marginBottom: 24,
-                color: "hsl(var(--paper))",
+                color: "hsl(var(--ink))",
                 maxWidth: 980,
               }}
             >
               Every product deserves{" "}
-              <span style={{ color: "hsl(var(--yellow))" }}>a verified identity.</span>
+              <span
+                style={{
+                  background: "hsl(var(--yellow))",
+                  color: "hsl(var(--yellow-ink))",
+                  padding: "0 8px",
+                  boxDecorationBreak: "clone",
+                  WebkitBoxDecorationBreak: "clone",
+                }}
+              >
+                a verified identity.
+              </span>
             </h1>
 
             <p
@@ -284,21 +315,21 @@ export default function LandingValidationV2() {
               style={{
                 fontSize: 18,
                 lineHeight: 1.55,
-                color: "var(--paper-72)",
+                color: "var(--ink-72)",
                 maxWidth: 640,
                 margin: 0,
                 marginBottom: 14,
               }}
             >
               EU Digital Product Passports are mandatory under ESPR 2024/1781 — non-compliance means
-              fines up to <Mono style={{ color: "hsl(var(--paper))" }}>€100,000+</Mono> per violation
+              fines up to <Mono style={{ color: "hsl(var(--ink))" }}>€100,000+</Mono> per violation
               and EU market access restrictions.
             </p>
             <p
               style={{
                 fontSize: 15,
                 lineHeight: 1.6,
-                color: "var(--paper-56)",
+                color: "var(--ink-56)",
                 maxWidth: 620,
                 margin: 0,
                 marginBottom: 36,
@@ -315,7 +346,7 @@ export default function LandingValidationV2() {
                 </BrandButton>
               </Link>
               <Link href="/scan/demo" data-testid="button-hero-see-demo">
-                <BrandButton variant="secondary" invert size="lg" icon="qr">
+                <BrandButton variant="secondary" size="lg" icon="qr">
                   See a live passport
                 </BrandButton>
               </Link>
@@ -331,9 +362,9 @@ export default function LandingValidationV2() {
                 <div
                   key={c.tid}
                   data-testid={c.tid}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--paper-72)" }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--ink-72)" }}
                 >
-                  <Icon name="check" size={14} stroke="hsl(var(--yellow))" />
+                  <Icon name="check" size={14} stroke="hsl(var(--ink))" />
                   {c.label}
                 </div>
               ))}
@@ -346,14 +377,15 @@ export default function LandingValidationV2() {
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(2, 1fr)",
-                border: "1px solid var(--paper-12)",
+                border: "1px solid var(--hairline)",
+                background: "hsl(var(--paper))",
               }}
               className="sm:!grid-cols-4"
             >
-              <HeroMetric value="Feb 2027" label="First DPP deadline" invert />
-              <HeroMetric value="€100K+" label="Per violation fine" invert />
-              <HeroMetric value="4–6 wks" label="Average go-live" invert />
-              <HeroMetric value="99.9%" label="Platform uptime SLA" invert />
+              <HeroMetric value="Feb 2027" label="First DPP deadline" />
+              <HeroMetric value="€100K+" label="Per violation fine" />
+              <HeroMetric value="4–6 wks" label="Average go-live" />
+              <HeroMetric value="99.9%" label="Platform uptime SLA" />
             </div>
           </Reveal>
         </div>
@@ -632,11 +664,11 @@ export default function LandingValidationV2() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      background: "hsl(var(--ink))",
+                      background: "hsl(var(--yellow))",
                       flexShrink: 0,
                     }}
                   >
-                    <Icon name={f.icon} size={18} stroke="hsl(var(--paper))" />
+                    <Icon name={f.icon} size={18} stroke="hsl(var(--yellow-ink))" />
                   </div>
                   <div>
                     <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, letterSpacing: "-0.015em", marginBottom: 6 }}>
@@ -651,15 +683,19 @@ export default function LandingValidationV2() {
         </div>
       </section>
 
-      {/* ── HOW IT WORKS — ink panel ── */}
+      {/* ── HOW IT WORKS — paper with hairline rails + yellow accent ── */}
       <section
         data-testid="section-how-it-works"
         className="py-20 px-4 sm:px-6 lg:px-8"
-        style={{ background: "hsl(var(--ink))", color: "hsl(var(--paper))" }}
+        style={{
+          background: "var(--ink-04)",
+          borderTop: "1px solid var(--hairline)",
+          borderBottom: "1px solid var(--hairline)",
+        }}
       >
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <Eyebrow color="var(--paper-56)" style={{ marginBottom: 12 }}>Operational sequence</Eyebrow>
+            <Eyebrow style={{ marginBottom: 12 }}>Operational sequence</Eyebrow>
             <h2
               data-testid="text-how-it-works-title"
               style={{
@@ -668,17 +704,16 @@ export default function LandingValidationV2() {
                 lineHeight: 1.05,
                 letterSpacing: "-0.035em",
                 marginBottom: 12,
-                color: "hsl(var(--paper))",
               }}
             >
               How it works
             </h2>
-            <p style={{ fontSize: 17, color: "var(--paper-56)", maxWidth: 640, margin: "0 auto" }}>
+            <p style={{ fontSize: 17, color: "var(--fg-muted)", maxWidth: 640, margin: "0 auto" }}>
               Four steps from your first product to full EU compliance — with your team trained and your SAP connected.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4" style={{ border: "1px solid var(--paper-12)" }}>
+          <div className="grid md:grid-cols-4" style={{ border: "1px solid var(--hairline)", background: "hsl(var(--paper))" }}>
             {[
               { tid: "step-connect", n: "01", title: "Connect", body: "Integrate SAP, ERP, or import via Excel. Product data maps automatically to DPP categories." },
               { tid: "step-enrich", n: "02", title: "Enrich", body: "AI generates sustainability scores, circularity grades, repair guides, and fills data gaps automatically." },
@@ -690,24 +725,41 @@ export default function LandingValidationV2() {
                 data-testid={s.tid}
                 style={{
                   padding: "32px 24px",
-                  borderLeft: i === 0 ? "none" : "1px solid var(--paper-12)",
+                  borderLeft: i === 0 ? "none" : "1px solid var(--hairline)",
+                  position: "relative",
                 }}
                 className="max-md:!border-l-0 max-md:border-t max-md:first:border-t-0"
               >
-                <Mono style={{ display: "block", fontSize: 13, color: "hsl(var(--yellow))", marginBottom: 16 }}>
-                  {s.n}
-                </Mono>
-                <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 600, letterSpacing: "-0.015em", marginBottom: 8, color: "hsl(var(--paper))" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    marginBottom: 16,
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      background: "hsl(var(--yellow))",
+                    }}
+                  />
+                  <Mono style={{ fontSize: 13, color: "var(--fg-muted)" }}>{s.n}</Mono>
+                </div>
+                <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 600, letterSpacing: "-0.015em", marginBottom: 8 }}>
                   {s.title}
                 </h3>
-                <p style={{ fontSize: 14, color: "var(--paper-56)", lineHeight: 1.6, margin: 0 }}>{s.body}</p>
+                <p style={{ fontSize: 14, color: "var(--fg-muted)", lineHeight: 1.6, margin: 0 }}>{s.body}</p>
               </div>
             ))}
           </div>
 
           <div className="text-center mt-10">
             <Link href="/docs" data-testid="button-how-it-works-cta">
-              <BrandButton variant="secondary" invert size="md" icon="arrowR">
+              <BrandButton variant="secondary" size="md" icon="arrowR">
                 Read the documentation
               </BrandButton>
             </Link>
@@ -894,11 +946,11 @@ export default function LandingValidationV2() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    background: "hsl(var(--ink))",
+                    background: "hsl(var(--yellow))",
                     marginBottom: 16,
                   }}
                 >
-                  <Icon name={v.icon} size={18} stroke="hsl(var(--paper))" />
+                  <Icon name={v.icon} size={18} stroke="hsl(var(--yellow-ink))" />
                 </div>
                 <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, letterSpacing: "-0.015em", marginBottom: 8 }}>
                   {v.title}
