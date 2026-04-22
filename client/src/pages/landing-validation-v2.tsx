@@ -279,9 +279,8 @@ export default function LandingValidationV2() {
               tone="accent"
               style={{
                 marginBottom: 24,
-                background: "#FFE0E0",
-                borderColor: "#FFC2C2",
-                color: "#7F1D1D",
+                background: "#E4002B",
+                borderColor: "#E4002B",
               }}
             >
               <Icon name="bolt" size={12} /> Battery Passport Deadline: Feb 18, 2027
