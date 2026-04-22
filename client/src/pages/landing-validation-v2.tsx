@@ -286,24 +286,25 @@ export default function LandingValidationV2() {
               data-testid="text-hero-title"
               style={{
                 fontFamily: "var(--font-display)",
-                fontSize: "clamp(44px, 6.5vw, 80px)",
-                lineHeight: 1.0,
+                fontSize: "clamp(40px, 5.8vw, 72px)",
+                lineHeight: 1.05,
                 letterSpacing: "-0.045em",
                 fontWeight: 600,
                 margin: 0,
                 marginBottom: 24,
                 color: "hsl(var(--ink))",
-                maxWidth: 980,
+                maxWidth: 920,
               }}
             >
-              Every product deserves{" "}
+              Every product deserves
+              <br />
               <span
                 style={{
+                  display: "inline-block",
                   background: "hsl(var(--yellow))",
                   color: "hsl(var(--yellow-ink))",
-                  padding: "0 8px",
-                  boxDecorationBreak: "clone",
-                  WebkitBoxDecorationBreak: "clone",
+                  padding: "0 12px",
+                  marginTop: 8,
                 }}
               >
                 a verified identity.
