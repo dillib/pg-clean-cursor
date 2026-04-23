@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import type { Product } from "@shared/schema";
 import { useCurrency } from "@/hooks/use-currency";
-import { PublicNav } from "@/components/public-nav";
+import { PublicNavV2 } from "@/components/brand/public-nav-v2";
 import { PublicFooter } from "@/components/public-footer";
 import { ModulesSection } from "@/components/modules-section";
 import {
@@ -230,7 +230,7 @@ export default function LandingValidationV2() {
       </Helmet>
 
       <div className="fixed top-0 left-0 right-0 z-50">
-        <PublicNav />
+        <PublicNavV2 />
       </div>
 
       {/* ── HERO — paper with hairline grid + yellow accents ── */}

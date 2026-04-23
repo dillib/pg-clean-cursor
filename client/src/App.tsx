@@ -21,6 +21,8 @@ import { Button } from "@/components/ui/button";
 // Initial page load only parses what's needed to render the current route.
 const Landing = lazy(() => import("@/pages/landing-validation"));
 const LandingV2 = lazy(() => import("@/pages/landing-validation-v2"));
+const Platform = lazy(() => import("@/pages/platform"));
+const Industries = lazy(() => import("@/pages/industries"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const Products = lazy(() => import("@/pages/products"));
 const ProductForm = lazy(() => import("@/pages/product-form"));
@@ -393,6 +395,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/v2" component={LandingV2} />
+      <Route path="/platform" component={Platform} />
+      <Route path="/industries" component={Industries} />
       <Route path="/">
         <ProtectedRoute>
           <Dashboard />
