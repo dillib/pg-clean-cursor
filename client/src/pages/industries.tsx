@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "wouter";
 import { PublicNavV2, industriesMenu } from "@/components/brand/public-nav-v2";
 import { PublicFooter } from "@/components/public-footer";
-import { Eyebrow, Mono, BrandBadge, BrandButton } from "@/components/brand/brand";
+import { Eyebrow, Mono, BrandButton } from "@/components/brand/brand";
 import { Icon } from "@/components/brand/icon";
 import { Reveal } from "@/components/brand/motion";
 import type { IconName } from "@/components/brand/icon";
@@ -523,7 +523,7 @@ function UseCaseCard({ uc, idx }: { uc: UseCase; idx: number }) {
       data-testid={`industry-usecase-${idx}`}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Mono style={{ fontSize: 11, color: "var(--fg-muted)" }}>USE CASE / {String(idx + 1).padStart(2, "0")}</Mono>
+        <Mono style={{ fontSize: 11, color: "var(--ink-72)" }}>USE CASE / {String(idx + 1).padStart(2, "0")}</Mono>
         <Icon name="arrowR" size={14} stroke="var(--ink-72)" />
       </div>
       <h4
@@ -589,7 +589,7 @@ function IndustrySection({ ind, index }: { ind: IndustryBlock; index: number }) 
                 >
                   <Icon name={ind.icon} size={20} stroke="hsl(var(--yellow-ink))" />
                 </div>
-                <Mono style={{ fontSize: 11, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                <Mono style={{ fontSize: 11, color: "var(--ink-72)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                   Industry / {String(index + 1).padStart(2, "0")}
                 </Mono>
               </div>
@@ -622,7 +622,7 @@ function IndustrySection({ ind, index }: { ind: IndustryBlock; index: number }) 
               }}
             >
               <div>
-                <Mono style={{ fontSize: 11, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                <Mono style={{ fontSize: 11, color: "var(--ink-72)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                   Deadline
                 </Mono>
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: 15, color: "hsl(var(--ink))", marginTop: 4 }}>
@@ -630,7 +630,7 @@ function IndustrySection({ ind, index }: { ind: IndustryBlock; index: number }) 
                 </div>
               </div>
               <div style={{ borderTop: "1px solid var(--hairline)", paddingTop: 12 }}>
-                <Mono style={{ fontSize: 11, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                <Mono style={{ fontSize: 11, color: "var(--ink-72)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                   Regulation
                 </Mono>
                 <div style={{ fontSize: 13, color: "hsl(var(--ink))", marginTop: 4, lineHeight: 1.4 }}>
@@ -638,7 +638,7 @@ function IndustrySection({ ind, index }: { ind: IndustryBlock; index: number }) 
                 </div>
               </div>
               <div style={{ borderTop: "1px solid var(--hairline)", paddingTop: 12 }}>
-                <Mono style={{ fontSize: 11, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                <Mono style={{ fontSize: 11, color: "var(--ink-72)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                   Who it&apos;s for
                 </Mono>
                 <div style={{ fontSize: 13, color: "var(--ink-72)", marginTop: 4, lineHeight: 1.5 }}>
@@ -664,7 +664,7 @@ function IndustrySection({ ind, index }: { ind: IndustryBlock; index: number }) 
         </Reveal>
 
         <div style={{ marginTop: 32, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-          <Mono style={{ fontSize: 12, color: "var(--fg-muted)" }}>
+          <Mono style={{ fontSize: 12, color: "var(--ink-72)" }}>
             {ind.useCases.length} use cases · live on the platform
           </Mono>
           <Link href="/book-demo">
@@ -705,7 +705,7 @@ export default function IndustriesPage() {
   return (
     <div style={{ minHeight: "100vh", background: "hsl(var(--paper))", ...scopedYellow }}>
       <Helmet>
-        <title>Industries & Use Cases — PhotonicTag</title>
+        <title>Industries — PhotonicTag</title>
         <meta
           name="description"
           content="Eight EU-regulated industries covered end-to-end: batteries, textiles, electronics, automotive, packaging, furniture, construction, chemicals & pharma. Detailed use cases, deadlines, and regulation mapping."
@@ -740,7 +740,7 @@ export default function IndustriesPage() {
         />
         <div className="relative" style={{ maxWidth: 1100, margin: "0 auto" }}>
           <Reveal>
-            <Eyebrow style={{ marginBottom: 16 }}>Industries & Use Cases</Eyebrow>
+            <Eyebrow style={{ marginBottom: 16 }}>Industries</Eyebrow>
             <h1
               style={{
                 fontFamily: "var(--font-display)",
@@ -791,7 +791,7 @@ export default function IndustriesPage() {
                 }}
                 className="hover-elevate"
               >
-                <Mono style={{ fontSize: 11, color: "var(--fg-muted)" }}>{ind.deadline}</Mono>
+                <Mono style={{ fontSize: 11, color: "var(--ink-72)" }}>{ind.deadline}</Mono>
                 <span style={{ fontSize: 13.5, fontWeight: 500, lineHeight: 1.3 }}>{ind.label}</span>
               </a>
             ))}
@@ -817,7 +817,7 @@ export default function IndustriesPage() {
         <div className="px-4 sm:px-6 lg:px-8" style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 24 }} className="md:grid-cols-[1fr_auto] md:items-end">
             <div>
-              <Mono style={{ fontSize: 11, color: "hsl(var(--yellow-ink) / 0.7)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>
+              <Mono style={{ fontSize: 11, color: "hsl(var(--yellow-ink))", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>
                 Pick your industry · we ship the schema
               </Mono>
               <h2
@@ -836,7 +836,7 @@ export default function IndustriesPage() {
               >
                 Talk to someone who has shipped a passport in your sector.
               </h2>
-              <p style={{ fontSize: 16, color: "hsl(var(--yellow-ink) / 0.85)", margin: 0, maxWidth: 620 }}>
+              <p style={{ fontSize: 16, color: "hsl(var(--yellow-ink))", margin: 0, maxWidth: 620 }}>
                 30 minutes. We'll map your product to the right regulation, the right deadline, and the right ingest path. No deck, no salesperson — an engineer.
               </p>
             </div>

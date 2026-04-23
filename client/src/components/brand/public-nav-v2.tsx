@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Link, useLocation } from "wouter";
+import { QrCode } from "lucide-react";
 import { BrandButton } from "./brand";
 import { Icon } from "./icon";
 
@@ -25,28 +26,15 @@ export const industriesMenu: { slug: string; label: string; deadline: string }[]
 
 function NavLogo() {
   return (
-    <Link href="/v2">
+    <Link href="/">
       <div
-        style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}
+        className="flex items-center gap-2 cursor-pointer"
         data-testid="nav-v2-logo"
       >
-        <svg width={30} height={30} viewBox="0 0 64 64" style={{ display: "block" }}>
-          <rect width="64" height="64" fill="hsl(var(--ink))" />
-          <rect x="12" y="12" width="40" height="40" fill="hsl(var(--yellow))" />
-          <rect x="22" y="22" width="20" height="20" fill="hsl(var(--ink))" />
-          <rect x="28" y="28" width="8" height="8" fill="hsl(var(--yellow))" />
-        </svg>
-        <span
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: 18,
-            fontWeight: 600,
-            letterSpacing: "-0.03em",
-            color: "hsl(var(--ink))",
-          }}
-        >
-          photonictag
-        </span>
+        <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center shadow-sm">
+          <QrCode className="w-5 h-5 text-primary-foreground" />
+        </div>
+        <span className="text-xl font-bold tracking-tight">PhotonicTag</span>
       </div>
     </Link>
   );
@@ -85,7 +73,7 @@ export function PublicNavV2() {
   const linkStyle = (active: boolean): React.CSSProperties => ({
     fontSize: 14,
     fontFamily: "var(--font-sans)",
-    color: active ? "hsl(var(--ink))" : "var(--ink-72)",
+    color: "hsl(var(--ink))",
     textDecoration: "none",
     padding: "6px 2px",
     borderBottom: `2px solid ${active ? "hsl(var(--yellow))" : "transparent"}`,
@@ -148,8 +136,8 @@ export function PublicNavV2() {
               }}
               data-testid="nav-v2-btn-industries"
             >
-              Industries & Use Cases
-              <Icon name="chev" size={14} />
+              Industries
+              <Icon name="chev" size={14} stroke="hsl(var(--ink))" />
             </button>
 
             {open && (
@@ -177,7 +165,7 @@ export function PublicNavV2() {
                     fontSize: 11,
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
-                    color: "var(--fg-muted)",
+                    color: "var(--ink-72)",
                   }}
                 >
                   Explore by industry
@@ -204,7 +192,7 @@ export function PublicNavV2() {
                           style={{
                             fontFamily: "var(--font-mono)",
                             fontSize: 11,
-                            color: "var(--fg-muted)",
+                            color: "var(--ink-72)",
                           }}
                         >
                           {it.deadline}
@@ -237,7 +225,7 @@ export function PublicNavV2() {
                       }}
                       data-testid="nav-v2-industry-all"
                     >
-                      All industries & use cases
+                      All industries
                       <Icon name="arrowR" size={12} />
                     </a>
                   </Link>
@@ -245,7 +233,7 @@ export function PublicNavV2() {
                     style={{
                       fontFamily: "var(--font-mono)",
                       fontSize: 11,
-                      color: "var(--fg-muted)",
+                      color: "var(--ink-72)",
                     }}
                   >
                     {industriesMenu.length} sectors
@@ -269,7 +257,7 @@ export function PublicNavV2() {
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <Link href="/login">
-            <a style={{ fontSize: 14, color: "var(--ink-72)", textDecoration: "none" }} data-testid="nav-v2-signin">
+            <a style={{ fontSize: 14, color: "hsl(var(--ink))", textDecoration: "none" }} data-testid="nav-v2-signin">
               Sign in
             </a>
           </Link>

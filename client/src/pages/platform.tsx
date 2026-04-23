@@ -38,7 +38,7 @@ function SectionHead({
         {title}
       </h2>
       {lede && (
-        <p style={{ fontSize: 17, lineHeight: 1.55, color: "var(--fg-muted)", margin: 0 }}>{lede}</p>
+        <p style={{ fontSize: 17, lineHeight: 1.55, color: "var(--ink-72)", margin: 0 }}>{lede}</p>
       )}
     </div>
   );
@@ -80,7 +80,7 @@ function PillarTile({
         >
           <Icon name={icon} size={20} stroke="hsl(var(--yellow-ink))" />
         </div>
-        <Mono style={{ fontSize: 12, color: "var(--fg-muted)" }}>{n}</Mono>
+        <Mono style={{ fontSize: 12, color: "var(--ink-72)" }}>{n}</Mono>
       </div>
       <h3
         style={{
@@ -93,7 +93,7 @@ function PillarTile({
       >
         {title}
       </h3>
-      <p style={{ fontSize: 14, color: "var(--fg-muted)", lineHeight: 1.6, margin: 0 }}>{body}</p>
+      <p style={{ fontSize: 14, color: "var(--ink-72)", lineHeight: 1.6, margin: 0 }}>{body}</p>
       <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
         {bullets.map((b) => (
           <li key={b} style={{ display: "flex", gap: 8, fontSize: 13, color: "hsl(var(--ink))" }}>
@@ -120,7 +120,7 @@ function StatBlock({ value, label, sub }: { value: string; label: string; sub?: 
       >
         {value}
       </Mono>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--fg-muted)", marginBottom: sub ? 6 : 0 }}>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--ink-72)", marginBottom: sub ? 6 : 0 }}>
         {label}
       </div>
       {sub && <div style={{ fontSize: 12, color: "var(--ink-72)", lineHeight: 1.5 }}>{sub}</div>}
@@ -346,7 +346,7 @@ export default function PlatformPage() {
                   background: "var(--ink-04)",
                 }}
               >
-                <Mono style={{ fontSize: 12, color: "var(--fg-muted)" }}>
+                <Mono style={{ fontSize: 12, color: "var(--ink-72)" }}>
                   sap.mapping › product.master
                 </Mono>
                 <BrandBadge tone="accent">live</BrandBadge>
@@ -380,7 +380,7 @@ export default function PlatformPage() {
                 ))}
               </div>
               <div style={{ padding: "10px 14px", borderTop: "1px solid var(--hairline)", background: "var(--ink-04)" }}>
-                <Mono style={{ fontSize: 11, color: "var(--fg-muted)" }}>
+                <Mono style={{ fontSize: 11, color: "var(--ink-72)" }}>
                   + 47 more fields auto-mapped via heuristic
                 </Mono>
               </div>
@@ -473,7 +473,7 @@ export default function PlatformPage() {
                   <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, letterSpacing: "-0.02em", marginBottom: 8 }}>
                     {m.title}
                   </h3>
-                  <p style={{ fontSize: 14, color: "var(--fg-muted)", lineHeight: 1.6, marginBottom: 12 }}>
+                  <p style={{ fontSize: 14, color: "var(--ink-72)", lineHeight: 1.6, marginBottom: 12 }}>
                     {m.body}
                   </p>
                   <div
@@ -525,7 +525,7 @@ export default function PlatformPage() {
                   <h4 style={{ fontFamily: "var(--font-display)", fontSize: 15, fontWeight: 600, letterSpacing: "-0.015em", marginBottom: 6 }}>
                     {t.title}
                   </h4>
-                  <p style={{ fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.55, margin: 0 }}>{t.body}</p>
+                  <p style={{ fontSize: 13, color: "var(--ink-72)", lineHeight: 1.55, margin: 0 }}>{t.body}</p>
                 </div>
               ))}
             </div>
@@ -620,12 +620,12 @@ export default function PlatformPage() {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
                   <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "hsl(var(--yellow))" }} />
-                  <Mono style={{ fontSize: 13, color: "var(--fg-muted)" }}>{s.w}</Mono>
+                  <Mono style={{ fontSize: 13, color: "var(--ink-72)" }}>{s.w}</Mono>
                 </div>
                 <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, letterSpacing: "-0.015em", marginBottom: 8 }}>
                   {s.title}
                 </h3>
-                <p style={{ fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.6, margin: 0 }}>{s.body}</p>
+                <p style={{ fontSize: 13, color: "var(--ink-72)", lineHeight: 1.6, margin: 0 }}>{s.body}</p>
               </div>
             ))}
           </div>
@@ -655,7 +655,7 @@ export default function PlatformPage() {
       {/* ── CTA ── */}
       <section className="py-24 px-4 sm:px-6 lg:px-8" style={{ background: "hsl(var(--yellow))", color: "hsl(var(--yellow-ink))" }}>
         <div className="max-w-4xl mx-auto text-center">
-          <Eyebrow color="rgba(0,0,0,0.56)" style={{ marginBottom: 16 }}>Start this week</Eyebrow>
+          <Eyebrow color="hsl(var(--yellow-ink))" style={{ marginBottom: 16 }}>Start this week</Eyebrow>
           <h2
             style={{
               fontFamily: "var(--font-display)",
@@ -670,7 +670,7 @@ export default function PlatformPage() {
           >
             See PhotonicTag in your stack.
           </h2>
-          <p style={{ fontSize: 17, color: "rgba(0,0,0,0.78)", maxWidth: 620, margin: "0 auto 32px" }}>
+          <p style={{ fontSize: 17, color: "hsl(var(--yellow-ink))", maxWidth: 620, margin: "0 auto 32px" }}>
             45 minutes. We bring two of your real SKUs and walk through the platform end-to-end — SAP extract to
             consumer scan to regulator export. No slides.
           </p>
