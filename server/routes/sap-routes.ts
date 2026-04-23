@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { sapMockService, SAPMaterial, SAPConflict } from "../services/sap-mock-service";
-import { SAPODataClient, scheduleConnectorSync, clearScheduledSync, getActiveSchedules, applyFieldMappings } from "../services/sap-odata-client";
+import { SAPODataClient, ODataMaterial, scheduleConnectorSync, clearScheduledSync, getActiveSchedules, applyFieldMappings } from "../services/sap-odata-client";
 import { storage } from "../storage";
 import type { InsertProduct, SAPConfig, FieldMapping } from "@shared/schema";
 import { decryptSAPCredentials } from "../services/crypto-service";
@@ -9,6 +9,44 @@ import { decryptSAPCredentials } from "../services/crypto-service";
 function materializeSAPConfig(connector: { config: unknown; credentialsCiphertext?: string | null }): SAPConfig {
   const base = (connector.config ?? {}) as Record<string, unknown>;
   return decryptSAPCredentials(base, connector.credentialsCiphertext ?? null) as unknown as SAPConfig;
+}
+
+/** Default mock-host config used when a sync request omits connectorId — preserves
+ * legacy demo behavior where the routes returned the seeded 100 materials. */
+const DEMO_SAP_CONFIG: SAPConfig = {
+  systemType: "S4HANA", hostname: "mock", port: 443, client: "100",
+  systemId: "DEMO", apiType: "OData", oauthEnabled: false, syncFrequency: "manual",
+};
+
+/** Resolve a SAPODataClient for a sync request. When connectorId is provided
+ * and matches a SAP connector, use its decrypted config; otherwise fall back
+ * to the mock-host config so the demo flow still works without a connector. */
+async function resolveClientForRequest(connectorId?: string): Promise<{ client: SAPODataClient; usedDemoConfig: boolean }> {
+  if (connectorId) {
+    const connector = await storage.getEnterpriseConnector(connectorId);
+    if (connector?.connectorType === "sap") {
+      return { client: new SAPODataClient(materializeSAPConfig(connector)), usedDemoConfig: false };
+    }
+  }
+  return { client: new SAPODataClient(DEMO_SAP_CONFIG), usedDemoConfig: true };
+}
+
+/** Build the OData write-back payload from a PhotonicTag product update.
+ * Mirrors sapMockService.mapFromPhotonicTagProduct() but emits OData-shaped
+ * fields so SAPODataClient.updateMaterial() can PATCH them to the live system. */
+function productToODataPayload(product: {
+  productName?: string | null;
+  weight?: number | null;
+  modelNumber?: string | null;
+}): Partial<ODataMaterial> {
+  const payload: Partial<ODataMaterial> = {};
+  if (product.productName) payload.MaterialDescription = product.productName.slice(0, 40);
+  if (product.weight != null) {
+    payload.GrossWeight = product.weight;
+    payload.NetWeight = product.weight;
+  }
+  payload.LastChangeDate = new Date().toISOString().split("T")[0];
+  return payload;
 }
 
 const router = Router();
@@ -75,7 +113,15 @@ router.get("/conflicts", async (_req: Request, res: Response) => {
 router.post("/sync/from-sap", async (req: Request, res: Response) => {
   try {
     const { matnrs, limit = 10, connectorId } = req.body;
-    const materials = sapMockService.getAllMaterials();
+
+    // Route through SAPODataClient: real OData when connector points at a real
+    // host, mock data when host contains "mock" / "demo.sap.example.com" or
+    // when no connectorId is given. This is the path the UI's connector-driven
+    // sync goes through; the demo flow is preserved by the mock fallback.
+    const { client } = await resolveClientForRequest(connectorId);
+    const fetched = await client.fetchMaterialsAsSAPMaterial({ top: 200 });
+    const materials = fetched.materials;
+    const usedMock = fetched.usedMock;
 
     // Load connector field mappings if a connectorId is provided
     let fieldMappings: FieldMapping[] = [];
@@ -85,7 +131,7 @@ router.post("/sync/from-sap", async (req: Request, res: Response) => {
         fieldMappings = connector.fieldMappings as FieldMapping[];
       }
     }
-    
+
     let toSync: SAPMaterial[];
     if (matnrs && Array.isArray(matnrs)) {
       toSync = materials.filter(m => matnrs.includes(m.MARA.MATNR));
@@ -166,6 +212,7 @@ router.post("/sync/from-sap", async (req: Request, res: Response) => {
       updated,
       failed,
       conflicts,
+      usedMock,
     });
   } catch (error) {
     console.error("[SAP API] Error syncing from SAP:", error);
@@ -175,10 +222,17 @@ router.post("/sync/from-sap", async (req: Request, res: Response) => {
 
 router.post("/sync/to-sap", async (req: Request, res: Response) => {
   try {
-    const { productIds } = req.body;
-    const materials = sapMockService.getAllMaterials();
+    const { productIds, connectorId } = req.body;
+
+    // Route through SAPODataClient: real OData PATCH/PUT when connector points
+    // at a real host, sapMockService.updateMaterial() when the host is mock.
+    // This is the bidirectional write-back the platform page promises.
+    const { client } = await resolveClientForRequest(connectorId);
+    const fetched = await client.fetchMaterialsAsSAPMaterial({ top: 200 });
+    const materials = fetched.materials;
+    const usedMock = fetched.usedMock;
     const linkedMaterials = materials.filter(m => m.photonicTagId);
-    
+
     let toSync: SAPMaterial[];
     if (productIds && Array.isArray(productIds)) {
       toSync = linkedMaterials.filter(m => productIds.includes(m.photonicTagId));
@@ -189,11 +243,12 @@ router.post("/sync/to-sap", async (req: Request, res: Response) => {
     let updated = 0;
     let failed = 0;
     const conflicts: SAPConflict[] = [];
+    const writeErrors: string[] = [];
 
     for (const material of toSync) {
       try {
         if (!material.photonicTagId) continue;
-        
+
         const product = await storage.getProduct(material.photonicTagId);
         if (!product) {
           sapMockService.unlinkFromPhotonicTag(material.MARA.MATNR);
@@ -208,8 +263,15 @@ router.post("/sync/to-sap", async (req: Request, res: Response) => {
           }
           material.syncStatus = "conflict";
         } else {
-          const updates = sapMockService.mapFromPhotonicTagProduct(product, material.MARA.MATNR);
-          sapMockService.updateMaterial(material.MARA.MATNR, updates);
+          // Real OData PATCH/PUT (or mock fallback when host is mock)
+          const odataPayload = productToODataPayload(product);
+          const writeResult = await client.updateMaterial(material.MARA.MATNR, odataPayload);
+          if (!writeResult.success) {
+            material.syncStatus = "error";
+            failed++;
+            if (writeResult.error) writeErrors.push(`${material.MARA.MATNR}: ${writeResult.error}`);
+            continue;
+          }
           material.syncStatus = "synced";
           material.lastSyncedAt = new Date().toISOString();
           updated++;
@@ -238,6 +300,8 @@ router.post("/sync/to-sap", async (req: Request, res: Response) => {
       updated,
       failed,
       conflicts,
+      usedMock,
+      writeErrors: writeErrors.slice(0, 10),
     });
   } catch (error) {
     console.error("[SAP API] Error syncing to SAP:", error);
@@ -248,7 +312,15 @@ router.post("/sync/to-sap", async (req: Request, res: Response) => {
 router.post("/sync/bidirectional", async (req: Request, res: Response) => {
   try {
     const { limit = 20, connectorId } = req.body;
-    const materials = sapMockService.getAllMaterials();
+
+    // Route through SAPODataClient for real-or-mock symmetry with the other
+    // sync endpoints. Note: the verification half of "bidirectional" only
+    // touches local sync metadata today — when the brief's follow-up to
+    // implement real OData write-back lands, swap that for client.updateMaterial.
+    const { client } = await resolveClientForRequest(connectorId);
+    const fetched = await client.fetchMaterialsAsSAPMaterial({ top: 200 });
+    const materials = fetched.materials;
+    const usedMock = fetched.usedMock;
 
     // Load connector field mappings if a connectorId is provided
     let fieldMappings: FieldMapping[] = [];
@@ -336,6 +408,7 @@ router.post("/sync/bidirectional", async (req: Request, res: Response) => {
       updated,
       failed,
       conflicts,
+      usedMock,
     });
   } catch (error) {
     console.error("[SAP API] Error in bidirectional sync:", error);

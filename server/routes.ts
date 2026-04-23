@@ -49,8 +49,10 @@ import { logger } from "./logger";
 // isAuthenticated from the swappable provider
 const { isAuthenticated } = authProvider;
 import sapRoutes from "./routes/sap-routes";
-import { applyFieldMappings } from "./services/sap-odata-client";
+import { applyFieldMappings, SAPODataClient } from "./services/sap-odata-client";
 import { sapMockService } from "./services/sap-mock-service";
+import { decryptSAPCredentials } from "./services/crypto-service";
+import type { SAPConfig } from "@shared/schema";
 import internalRoutes from "./routes/internal-routes";
 import exportRoutes from "./routes/export-routes";
 import productImportRoutes from "./routes/product-import-routes";
@@ -949,11 +951,24 @@ ${pages.map(p => `  <url>
         startedAt: new Date(),
       });
 
-      // Run real sync against mock SAP (or real SAP via OData client)
+      // Resolve a SAPODataClient from the connector's persisted config — real
+      // OData when hostname is real, mock fallback when hostname contains
+      // "mock" / "demo.sap.example.com". This is the user-visible sync the
+      // platform page promises; without this routing, connecting a real S/4
+      // tenant would silently fall through to seeded mock data.
+      const decryptedConfig = decryptSAPCredentials(
+        (connector.config ?? {}) as Record<string, unknown>,
+        connector.credentialsCiphertext ?? null,
+      ) as unknown as SAPConfig;
+      const client = new SAPODataClient(decryptedConfig);
+
       let created = 0, updated = 0, failed = 0;
       const errors: string[] = [];
+      let usedMock = false;
       try {
-        const materials = sapMockService.getAllMaterials()
+        const fetched = await client.fetchMaterialsAsSAPMaterial({ top: 200 });
+        usedMock = fetched.usedMock;
+        const materials = fetched.materials
           .filter(m => m.syncStatus === "pending" && !m.photonicTagId)
           .slice(0, 20);
 
@@ -1055,6 +1070,7 @@ ${pages.map(p => `  <url>
         created, updated, failed,
         fieldMappingsUsed: fieldMappings.length,
         firstError: errors[0] ?? null,
+        usedMock,
       });
     } catch (error) {
       ((req as any).log ?? logger).error({ err: error }, "Error syncing connector");
