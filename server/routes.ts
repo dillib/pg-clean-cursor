@@ -1097,6 +1097,24 @@ ${pages.map(p => `  <url>
     }
   });
 
+  // ── Audit chain integrity (regulator-grade verification) ─────────────────
+  // Walks every audit_log entry and proves: (1) every chainHash recomputes
+  // from row content; (2) chain links are intact; (3) genesis is null.
+  // Pairs with the DB-level append-only trigger
+  // (server/db/sql/001_audit_logs_append_only.sql). Designed to be the
+  // compliance pitch for EU Battery Reg Article 65 + India BWM Rules.
+  app.get("/api/audit/integrity", requireMasterAdmin, async (req: Request, res: Response) => {
+    try {
+      const { entityType, entityId } = req.query as { entityType?: string; entityId?: string };
+      const { verifyAuditChain } = await import("./services/audit-integrity-service");
+      const report = await verifyAuditChain({ entityType, entityId });
+      res.status(report.passed ? 200 : 409).json(report);
+    } catch (error) {
+      ((req as any).log ?? logger).error({ err: error }, "Audit integrity check failed");
+      res.status(500).json({ error: "Integrity check failed", details: String(error) });
+    }
+  });
+
   // ── CSV-lite connector upload ─────────────────────────────────────────────
   // Brief 2026-17 opportunity #3 — second-revenue connector path. Accepts a
   // CSV/XLSX file for any connector with connectorType === "csv", parses it,

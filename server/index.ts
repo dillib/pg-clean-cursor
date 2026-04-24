@@ -6,6 +6,7 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import { setupEventHandlers } from "./events/handlers";
 import { storage } from "./storage";
+import { runSqlMigrations } from "./db/migrate";
 import { seedDemoData } from "./seed-demo-data";
 import bcrypt from "bcryptjs";
 import { scheduleConnectorSync } from "./services/sap-odata-client";
@@ -129,7 +130,20 @@ export function log(message: string, source = "express") {
 
 (async () => {
   setupEventHandlers();
-  
+
+  // Apply SQL migrations (triggers / functions Drizzle Kit doesn't manage —
+  // primary use case: append-only enforcement on audit_logs). Idempotent;
+  // tracked in _pt_sql_migrations. Skipped in NODE_ENV=test.
+  try {
+    const result = await runSqlMigrations();
+    if (result.applied.length > 0) {
+      log(`[Migrations] applied: ${result.applied.join(", ")}`);
+    }
+  } catch (err) {
+    logger.error({ err }, "[Migrations] failed at startup");
+    throw err;
+  }
+
   await registerRoutes(httpServer, app);
 
   // Auto-seed demo data if database is empty
