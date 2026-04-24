@@ -14,6 +14,7 @@ import { startReminderScheduler } from "./services/reminder-scheduler";
 import { describeAIProvider } from "./services/ai-client";
 import { hostPolicyMiddleware } from "./middleware/host-policy";
 import { logger } from "./logger";
+import { assertProductionTrustConfig } from "./startup-guards";
 import {
   httpRequestDuration,
   httpRequestsTotal,
@@ -130,6 +131,7 @@ export function log(message: string, source = "express") {
 
 (async () => {
   setupEventHandlers();
+  assertProductionTrustConfig();
 
   // Apply SQL migrations (triggers / functions Drizzle Kit doesn't manage —
   // primary use case: append-only enforcement on audit_logs). Idempotent;

@@ -51,6 +51,12 @@ const Presentation = lazy(() => import("@/pages/presentation"));
 const FAQs = lazy(() => import("@/pages/faqs"));
 const BookDemo = lazy(() => import("@/pages/book-demo"));
 const NotFound = lazy(() => import("@/pages/not-found"));
+const Regulations = lazy(() => import("@/pages/regulations"));
+const Developers = lazy(() => import("@/pages/developers"));
+const Security = lazy(() => import("@/pages/security"));
+const Suppliers = lazy(() => import("@/pages/suppliers"));
+const Filings = lazy(() => import("@/pages/filings"));
+const DeveloperApi = lazy(() => import("@/pages/developer-api"));
 
 function RouteFallback() {
   return (
@@ -447,6 +453,21 @@ function Router() {
           <SAPDemo />
         </ProtectedRoute>
       </Route>
+      <Route path="/suppliers">
+        <ProtectedRoute>
+          <Suppliers />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/filings">
+        <ProtectedRoute>
+          <Filings />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/settings/api">
+        <ProtectedRoute>
+          <DeveloperApi />
+        </ProtectedRoute>
+      </Route>
       <Route path="/admin/internal">
         <InternalOpsProtected />
       </Route>
@@ -458,6 +479,9 @@ function Router() {
       </Route>
       <Route path="/scan/demo" component={DemoGallery} />
       <Route path="/integrations" component={Integrations} />
+      <Route path="/regulations" component={Regulations} />
+      <Route path="/developers" component={Developers} />
+      <Route path="/security" component={Security} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/contact" component={Contact} />
       <Route path="/login" component={Login} />

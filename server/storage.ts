@@ -92,6 +92,10 @@ import {
   demoBookings,
   productScans,
   productRegistrations,
+  tenants,
+  type Tenant,
+  type TenantTheme,
+  type PublicTenantTheme,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -267,6 +271,11 @@ export interface IStorage {
   // Product Registrations (Consumer ownership)
   createProductRegistration(reg: InsertProductRegistration): Promise<ProductRegistration>;
   getProductRegistrations(productId: string): Promise<ProductRegistration[]>;
+
+  // Tenants — white-label theme lives in tenants.settings.theme JSONB
+  getTenant(id: string): Promise<Tenant | undefined>;
+  getPublicTenantTheme(tenantId: string): Promise<PublicTenantTheme | undefined>;
+  updateTenantTheme(tenantId: string, theme: Partial<TenantTheme>): Promise<Tenant | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1160,6 +1169,60 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(productRegistrations)
       .where(eq(productRegistrations.productId, productId))
       .orderBy(desc(productRegistrations.registeredAt));
+  }
+
+  // ── Tenants ──────────────────────────────────────────────────────────────
+  // White-label theme lives in tenants.settings.theme (JSONB) — no schema
+  // change required. See shared/schema.ts TenantTheme.
+  async getTenant(id: string): Promise<Tenant | undefined> {
+    const [tenant] = await db.select().from(tenants).where(eq(tenants.id, id));
+    return tenant;
+  }
+
+  /**
+   * Returns the public-safe view of a tenant's theme — the only fields the
+   * unauthenticated consumer scan page is allowed to read. Returns null
+   * defaults when the tenant has no theme configured (caller falls back to
+   * platform defaults).
+   */
+  async getPublicTenantTheme(tenantId: string): Promise<PublicTenantTheme | undefined> {
+    const tenant = await this.getTenant(tenantId);
+    if (!tenant) return undefined;
+    const settings = (tenant.settings ?? {}) as Record<string, unknown>;
+    const theme = (settings.theme ?? {}) as TenantTheme;
+    return {
+      tenantId: tenant.id,
+      brandName: theme.brandName ?? null,
+      primaryColor: theme.primaryColor ?? null,
+      primaryColorInk: theme.primaryColorInk ?? null,
+      logoUrl: theme.logoUrl ?? null,
+      tagline: theme.tagline ?? null,
+    };
+  }
+
+  /**
+   * Merge-update the theme block inside tenants.settings without clobbering
+   * other settings keys. Empty-string values are normalised to undefined so
+   * the UI can clear individual fields by sending "".
+   */
+  async updateTenantTheme(tenantId: string, theme: Partial<TenantTheme>): Promise<Tenant | undefined> {
+    const existing = await this.getTenant(tenantId);
+    if (!existing) return undefined;
+    const settings = (existing.settings ?? {}) as Record<string, unknown>;
+    const currentTheme = (settings.theme ?? {}) as TenantTheme;
+    const cleaned: Partial<TenantTheme> = {};
+    for (const [k, v] of Object.entries(theme)) {
+      if (typeof v === "string" && v.trim() === "") continue;
+      (cleaned as any)[k] = v;
+    }
+    const nextTheme: TenantTheme = { ...currentTheme, ...cleaned };
+    const nextSettings = { ...settings, theme: nextTheme };
+    const [updated] = await db
+      .update(tenants)
+      .set({ settings: nextSettings, updatedAt: new Date() })
+      .where(eq(tenants.id, tenantId))
+      .returning();
+    return updated;
   }
 }
 

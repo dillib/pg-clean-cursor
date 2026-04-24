@@ -62,6 +62,13 @@ import type {
   LeadActivity,
   InsertLeadActivity,
   ActionStatus,
+  DppRegionalExtension,
+  InsertDppRegionalExtension,
+  RegionCode,
+  InsertEnterpriseConnector,
+  EnterpriseConnector,
+  InsertIntegrationSyncLog,
+  IntegrationSyncLog,
 } from "@shared/schema";
 import { storage, type IStorage } from "./storage";
 import { getTenantId } from "./middleware/tenant";
@@ -482,6 +489,189 @@ export class TenantStorage {
     }
     const [activity] = await db.insert(leadActivities).values(insertActivity as any).returning();
     return activity;
+  }
+
+  // ----------------------------------------
+  // DPP REGIONAL EXTENSIONS — tenant-scoped
+  // ----------------------------------------
+
+  async getRegionalExtension(id: string): Promise<DppRegionalExtension | undefined> {
+    const [row] = await db
+      .select()
+      .from(dppRegionalExtensions)
+      .where(
+        and(
+          eq(dppRegionalExtensions.id, id),
+          eq(dppRegionalExtensions.tenantId as any, this.tenantId),
+        ),
+      );
+    return row;
+  }
+
+  async getRegionalExtensionsByProductId(productId: string): Promise<DppRegionalExtension[]> {
+    const product = await this.getProduct(productId);
+    if (!product) return [];
+    return db
+      .select()
+      .from(dppRegionalExtensions)
+      .where(
+        and(
+          eq(dppRegionalExtensions.productId, productId),
+          eq(dppRegionalExtensions.tenantId as any, this.tenantId),
+        ),
+      )
+      .orderBy(desc(dppRegionalExtensions.updatedAt));
+  }
+
+  async getRegionalExtensionByProductAndRegion(
+    productId: string,
+    regionCode: RegionCode,
+  ): Promise<DppRegionalExtension | undefined> {
+    const product = await this.getProduct(productId);
+    if (!product) return undefined;
+    const [row] = await db
+      .select()
+      .from(dppRegionalExtensions)
+      .where(
+        and(
+          eq(dppRegionalExtensions.productId, productId),
+          eq(dppRegionalExtensions.regionCode, regionCode),
+          eq(dppRegionalExtensions.tenantId as any, this.tenantId),
+        ),
+      );
+    return row;
+  }
+
+  async createRegionalExtension(
+    extension: InsertDppRegionalExtension,
+  ): Promise<DppRegionalExtension> {
+    const product = await this.getProduct(extension.productId);
+    if (!product) {
+      throw new Error("Product not found for this tenant");
+    }
+    const [row] = await db
+      .insert(dppRegionalExtensions)
+      .values({ ...(extension as any), tenantId: this.tenantId } as typeof dppRegionalExtensions.$inferInsert)
+      .returning();
+    return row;
+  }
+
+  async updateRegionalExtension(
+    id: string,
+    updates: Partial<InsertDppRegionalExtension>,
+  ): Promise<DppRegionalExtension | undefined> {
+    const existing = await this.getRegionalExtension(id);
+    if (!existing) return undefined;
+    const [row] = await db
+      .update(dppRegionalExtensions)
+      .set({ ...updates, updatedAt: new Date() } as any)
+      .where(
+        and(
+          eq(dppRegionalExtensions.id, id),
+          eq(dppRegionalExtensions.tenantId as any, this.tenantId),
+        ),
+      )
+      .returning();
+    return row;
+  }
+
+  async deleteRegionalExtension(id: string): Promise<boolean> {
+    const result = await db
+      .delete(dppRegionalExtensions)
+      .where(
+        and(
+          eq(dppRegionalExtensions.id, id),
+          eq(dppRegionalExtensions.tenantId as any, this.tenantId),
+        ),
+      )
+      .returning();
+    return result.length > 0;
+  }
+
+  async createEnterpriseConnector(insert: InsertEnterpriseConnector): Promise<EnterpriseConnector> {
+    const [row] = await db
+      .insert(enterpriseConnectors)
+      .values({ ...(insert as any), tenantId: this.tenantId } as typeof enterpriseConnectors.$inferInsert)
+      .returning();
+    return row;
+  }
+
+  async updateEnterpriseConnector(
+    id: string,
+    updates: Partial<InsertEnterpriseConnector> & Record<string, unknown>,
+  ): Promise<EnterpriseConnector | undefined> {
+    const owned = await this.getEnterpriseConnector(id);
+    if (!owned) return undefined;
+    const [row] = await db
+      .update(enterpriseConnectors)
+      .set({ ...updates, updatedAt: new Date() } as any)
+      .where(
+        and(
+          eq(enterpriseConnectors.id, id),
+          eq(enterpriseConnectors.tenantId as any, this.tenantId),
+        ),
+      )
+      .returning();
+    return row;
+  }
+
+  async deleteEnterpriseConnector(id: string): Promise<boolean> {
+    const owned = await this.getEnterpriseConnector(id);
+    if (!owned) return false;
+    const result = await db
+      .delete(enterpriseConnectors)
+      .where(
+        and(
+          eq(enterpriseConnectors.id, id),
+          eq(enterpriseConnectors.tenantId as any, this.tenantId),
+        ),
+      )
+      .returning();
+    return result.length > 0;
+  }
+
+  async createIntegrationSyncLog(insert: InsertIntegrationSyncLog): Promise<IntegrationSyncLog> {
+    const [row] = await db
+      .insert(integrationSyncLogs)
+      .values({ ...(insert as any), tenantId: this.tenantId } as typeof integrationSyncLogs.$inferInsert)
+      .returning();
+    return row;
+  }
+
+  async updateIntegrationSyncLog(
+    id: string,
+    updates: Partial<IntegrationSyncLog>,
+  ): Promise<IntegrationSyncLog | undefined> {
+    const [existing] = await db
+      .select()
+      .from(integrationSyncLogs)
+      .where(
+        and(eq(integrationSyncLogs.id, id), eq(integrationSyncLogs.tenantId as any, this.tenantId)),
+      );
+    if (!existing) return undefined;
+    const [row] = await db
+      .update(integrationSyncLogs)
+      .set(updates as any)
+      .where(
+        and(eq(integrationSyncLogs.id, id), eq(integrationSyncLogs.tenantId as any, this.tenantId)),
+      )
+      .returning();
+    return row;
+  }
+
+  async getSyncLogsByConnectorId(connectorId: string): Promise<IntegrationSyncLog[]> {
+    const connector = await this.getEnterpriseConnector(connectorId);
+    if (!connector) return [];
+    return db
+      .select()
+      .from(integrationSyncLogs)
+      .where(
+        and(
+          eq(integrationSyncLogs.connectorId, connectorId),
+          eq(integrationSyncLogs.tenantId as any, this.tenantId),
+        ),
+      )
+      .orderBy(desc(integrationSyncLogs.startedAt));
   }
 
   // ----------------------------------------

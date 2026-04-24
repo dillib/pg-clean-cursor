@@ -1,5 +1,19 @@
 import { Link, useLocation } from "wouter";
-import { Package, LayoutDashboard, Plus, LogOut, QrCode, Wifi, Plug, ArrowLeftRight, Settings2, Activity } from "lucide-react";
+import {
+  Package,
+  LayoutDashboard,
+  Plus,
+  LogOut,
+  QrCode,
+  Wifi,
+  Plug,
+  ArrowLeftRight,
+  Settings2,
+  Activity,
+  Users,
+  FileDown,
+  KeyRound,
+} from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -59,6 +73,24 @@ const navigationItems: NavItem[] = [
     title: "SAP Demo",
     url: "/integrations/sap-demo",
     icon: ArrowLeftRight,
+    showIn: ["admin", "demo"],
+  },
+  {
+    title: "Suppliers",
+    url: "/suppliers",
+    icon: Users,
+    showIn: ["admin", "demo"],
+  },
+  {
+    title: "Filings",
+    url: "/filings",
+    icon: FileDown,
+    showIn: ["admin", "demo"],
+  },
+  {
+    title: "API & webhooks",
+    url: "/settings/api",
+    icon: KeyRound,
     showIn: ["admin", "demo"],
   },
   {

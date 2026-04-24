@@ -1,5 +1,13 @@
 import nodemailer from "nodemailer";
 
+/** `smtp` (default) | `noop` — PLAN PR-10 hook for additional EU providers */
+export type EmailProviderId = "smtp" | "noop";
+
+export function getEmailProvider(): EmailProviderId {
+  const v = (process.env.EMAIL_PROVIDER || "smtp").toLowerCase();
+  return v === "noop" ? "noop" : "smtp";
+}
+
 export interface BookingEmailData {
   id: string;
   name: string;
@@ -36,6 +44,10 @@ export async function sendSAPAlertEmail(opts: {
   recentErrors: string[];
   alertEmailTo: string;
 }): Promise<void> {
+  if (getEmailProvider() === "noop") {
+    console.log("[Email] EMAIL_PROVIDER=noop — skipping SAP alert email");
+    return;
+  }
   if (!isSmtpConfigured()) {
     console.log("[Email] SMTP not configured — skipping SAP alert email");
     return;
@@ -231,6 +243,10 @@ function wrapEmail(bodyRows: string): string {
 // ─── Confirmation Email ───────────────────────────────────────────────────────
 
 export async function sendBookingConfirmation(booking: BookingEmailData): Promise<void> {
+  if (getEmailProvider() === "noop") {
+    console.log("[Email] EMAIL_PROVIDER=noop — skipping confirmation for", booking.email);
+    return;
+  }
   if (!isSmtpConfigured()) {
     console.log("[Email] SMTP not configured — skipping confirmation email for", booking.email);
     return;
@@ -309,6 +325,10 @@ export async function sendReminderEmail(
   booking: BookingEmailData,
   type: "24h" | "1h"
 ): Promise<void> {
+  if (getEmailProvider() === "noop") {
+    console.log(`[Email] EMAIL_PROVIDER=noop — skipping ${type} reminder for`, booking.email);
+    return;
+  }
   if (!isSmtpConfigured()) {
     console.log(`[Email] SMTP not configured — skipping ${type} reminder for`, booking.email);
     return;
@@ -380,6 +400,10 @@ export async function sendReminderEmail(
 // ─── Team Notification Email ──────────────────────────────────────────────────
 
 export async function sendTeamNotification(booking: BookingEmailData): Promise<void> {
+  if (getEmailProvider() === "noop") {
+    console.log("[Email] EMAIL_PROVIDER=noop — skipping team notification for booking", booking.id);
+    return;
+  }
   if (!isSmtpConfigured()) {
     console.log("[Email] SMTP not configured — skipping team notification for booking", booking.id);
     return;

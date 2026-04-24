@@ -1391,6 +1391,30 @@ export const insertTenantSchema = createInsertSchema(tenants).omit({
 export type InsertTenant = z.infer<typeof insertTenantSchema>;
 export type Tenant = typeof tenants.$inferSelect;
 
+/**
+ * Tenant white-label theme — stored in tenants.settings.theme (JSONB) so we
+ * don't need a schema migration to ship the consumer-scan branding override.
+ * Promoted to columns later if we ever need to query by theme attributes.
+ */
+export interface TenantTheme {
+  brandName?: string;          // shown on the consumer scan CTA + footer
+  primaryColor?: string;       // hex, e.g. "#FFE600" — overrides --yellow on the scan page
+  primaryColorInk?: string;    // hex, contrast text color on top of primaryColor (defaults to ink)
+  logoUrl?: string;            // optional URL or data URL — shown in scan-page nav (small)
+  tagline?: string;            // one-line description shown under brandName
+}
+
+/** Public-safe view of a tenant's theme — what the scan page is allowed to fetch
+ * without auth. Excludes any administrative metadata. */
+export interface PublicTenantTheme {
+  tenantId: string;
+  brandName: string | null;
+  primaryColor: string | null;
+  primaryColorInk: string | null;
+  logoUrl: string | null;
+  tagline: string | null;
+}
+
 // ============================================
 // PARTNER UPDATE SCHEMA (safe subset — prevents passwordHash injection)
 // ============================================

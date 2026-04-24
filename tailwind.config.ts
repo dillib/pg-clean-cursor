@@ -108,11 +108,12 @@ export default {
           foreground: "hsl(var(--sidebar-accent-foreground) / <alpha-value>)",
           border: "var(--sidebar-accent-border)"
         },
+        /* Presence / status — ink + yellow only (no chromatic greens/ambers) */
         status: {
-          online: "rgb(34 197 94)",
-          away: "rgb(245 158 11)",
-          busy: "rgb(239 68 68)",
-          offline: "rgb(156 163 175)",
+          online: "hsl(var(--ink) / <alpha-value>)",
+          away: "var(--ink-56)",
+          busy: "hsl(var(--yellow) / <alpha-value>)",
+          offline: "var(--ink-24)",
         },
       },
       fontFamily: {

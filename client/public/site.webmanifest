@@ -1,0 +1,17 @@
+{
+  "name": "PhotonicTag",
+  "short_name": "PhotonicTag",
+  "description": "Digital Product Passports and EU ESPR compliance",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAF7",
+  "theme_color": "#FFDF00",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

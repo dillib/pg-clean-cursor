@@ -243,6 +243,22 @@ export function PublicNavV2() {
             )}
           </div>
 
+          <Link href="/regulations">
+            <a style={linkStyle(loc === "/regulations")} data-testid="nav-v2-link-regulations">
+              Regulations
+            </a>
+          </Link>
+          <Link href="/developers">
+            <a style={linkStyle(loc === "/developers")} data-testid="nav-v2-link-developers">
+              Developers
+            </a>
+          </Link>
+          <Link href="/security">
+            <a style={linkStyle(loc === "/security")} data-testid="nav-v2-link-security">
+              Security
+            </a>
+          </Link>
+
           <Link href="/pricing">
             <a style={linkStyle(loc === "/pricing")} data-testid="nav-v2-link-pricing">
               Pricing

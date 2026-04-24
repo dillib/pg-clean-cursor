@@ -165,6 +165,57 @@ ${pages.map(p => `  <url>
     }
   });
 
+  // ── Public tenant theme — used by the consumer scan page to apply white-
+  // label branding (logo, primary color, brand name). Returns ONLY the
+  // public-safe view defined in shared/schema.ts PublicTenantTheme — never
+  // leaks tenant administrative metadata. Unauth-friendly so the scan page
+  // can render before any session exists.
+  app.get("/api/public/tenants/:tenantId/theme", async (req: Request, res: Response) => {
+    try {
+      const theme = await storage.getPublicTenantTheme(req.params.tenantId);
+      if (!theme) return res.status(404).json({ error: "Tenant not found" });
+      // Cache for 5 minutes — theme changes rarely; reduces scan-page TTFB.
+      res.set("Cache-Control", "public, max-age=300, s-maxage=300");
+      res.json(theme);
+    } catch (error) {
+      ((req as any).log ?? logger).error({ err: error }, "Error fetching public tenant theme");
+      res.status(500).json({ error: "Failed to fetch tenant theme" });
+    }
+  });
+
+  // ── Update tenant white-label theme — admin only, scoped to caller's tenant.
+  // Master admins can edit any tenant; regular admins only their own.
+  app.patch("/api/tenants/:tenantId/theme", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const callerUser = await authProvider.getCurrentUser(req);
+      if (!callerUser) return res.status(401).json({ error: "Unauthorized" });
+
+      const callerTenantId = (callerUser as { tenantId?: string }).tenantId;
+      const { isMasterAdminEmail } = await import("@shared/models/auth");
+      const isMaster = isMasterAdminEmail(callerUser.email);
+
+      if (!isMaster && callerTenantId !== req.params.tenantId) {
+        return res.status(403).json({ error: "Cannot edit another tenant's theme" });
+      }
+
+      const body = req.body as Record<string, unknown>;
+      const allowedKeys = ["brandName", "primaryColor", "primaryColorInk", "logoUrl", "tagline"] as const;
+      const cleaned: Record<string, unknown> = {};
+      for (const k of allowedKeys) {
+        if (k in body) cleaned[k] = body[k];
+      }
+
+      const updated = await storage.updateTenantTheme(req.params.tenantId, cleaned);
+      if (!updated) return res.status(404).json({ error: "Tenant not found" });
+
+      const publicTheme = await storage.getPublicTenantTheme(req.params.tenantId);
+      res.json(publicTheme);
+    } catch (error) {
+      ((req as any).log ?? logger).error({ err: error }, "Error updating tenant theme");
+      res.status(500).json({ error: "Failed to update tenant theme" });
+    }
+  });
+
   app.get("/api/products", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
       const scoped = tenantStorage(req);
@@ -677,7 +728,7 @@ ${pages.map(p => `  <url>
         return res.status(404).json({ error: "Product not found" });
       }
 
-      const extension = await storage.createRegionalExtension({
+      const extension = await tenantStorage(req).createRegionalExtension({
         ...req.body,
         productId,
       });
@@ -690,7 +741,7 @@ ${pages.map(p => `  <url>
 
   app.patch("/api/regional-extensions/:id", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
-      const extension = await storage.updateRegionalExtension(req.params.id, req.body);
+      const extension = await tenantStorage(req).updateRegionalExtension(req.params.id, req.body);
       if (!extension) {
         return res.status(404).json({ error: "Regional extension not found" });
       }
@@ -703,7 +754,7 @@ ${pages.map(p => `  <url>
 
   app.delete("/api/regional-extensions/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const deleted = await storage.deleteRegionalExtension(req.params.id);
+      const deleted = await tenantStorage(req).deleteRegionalExtension(req.params.id);
       if (!deleted) {
         return res.status(404).json({ error: "Regional extension not found" });
       }
@@ -809,6 +860,10 @@ ${pages.map(p => `  <url>
   // Get registrations for a product — authenticated
   app.get("/api/products/:productId/registrations", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
+      const owned = await tenantStorage(req).getProduct(req.params.productId);
+      if (!owned) {
+        return res.status(404).json({ error: "Product not found" });
+      }
       const registrations = await storage.getProductRegistrations(req.params.productId);
       res.json(registrations);
     } catch (error) {
@@ -857,10 +912,8 @@ ${pages.map(p => `  <url>
       // store them as an AES-256-GCM ciphertext in credentialsCiphertext.
       const rawConfig = (parsed.data.config ?? {}) as Record<string, unknown>;
       const { redactedConfig, credentialsCiphertext } = encryptSAPCredentials(rawConfig);
-      const tenantId = req.tenantId ?? "default";
-      const connector = await storage.createEnterpriseConnector({
+      const connector = await tenantStorage(req).createEnterpriseConnector({
         ...parsed.data,
-        tenantId,
         config: redactedConfig,
         ...(credentialsCiphertext ? { credentialsCiphertext } : {}),
       } as any);
@@ -891,7 +944,7 @@ ${pages.map(p => `  <url>
         body.config = redactedConfig;
         if (credentialsCiphertext) body.credentialsCiphertext = credentialsCiphertext;
       }
-      const connector = await storage.updateEnterpriseConnector(req.params.id, body as any);
+      const connector = await tenantStorage(req).updateEnterpriseConnector(req.params.id, body as any);
       if (!connector) {
         return res.status(404).json({ error: "Connector not found" });
       }
@@ -909,7 +962,7 @@ ${pages.map(p => `  <url>
       if (!owned) {
         return res.status(404).json({ error: "Connector not found" });
       }
-      const deleted = await storage.deleteEnterpriseConnector(req.params.id);
+      const deleted = await tenantStorage(req).deleteEnterpriseConnector(req.params.id);
       if (!deleted) {
         return res.status(404).json({ error: "Connector not found" });
       }
@@ -930,7 +983,7 @@ ${pages.map(p => `  <url>
       // Simulate connection test (in production, this would actually test the SAP connection)
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      await storage.updateEnterpriseConnector(req.params.id, { status: "active" as const });
+      await tenantStorage(req).updateEnterpriseConnector(req.params.id, { status: "active" as const });
       res.json({ success: true, message: "Connection successful" });
     } catch (error) {
       ((req as any).log ?? logger).error({ err: error }, "Error testing connector");
@@ -949,7 +1002,7 @@ ${pages.map(p => `  <url>
       const fieldMappings = (connector.fieldMappings ?? []) as import("@shared/schema").FieldMapping[];
 
       // Create sync log
-      const syncLog = await storage.createIntegrationSyncLog({
+      const syncLog = await scoped.createIntegrationSyncLog({
         connectorId: connector.id,
         syncType: "manual",
         status: "running",
@@ -1029,7 +1082,7 @@ ${pages.map(p => `  <url>
 
       const total = created + updated + failed;
 
-      await storage.updateIntegrationSyncLog(syncLog.id, {
+      await scoped.updateIntegrationSyncLog(syncLog.id, {
         status: failed > 0 && created + updated === 0 ? "failed" : "completed",
         recordsProcessed: total,
         recordsCreated: created,
@@ -1039,7 +1092,7 @@ ${pages.map(p => `  <url>
         ...(failed > 0 ? { errorMessage: `${failed} record(s) failed to sync` } : {}),
       });
 
-      await storage.updateEnterpriseConnector(connector.id, {
+      await scoped.updateEnterpriseConnector(connector.id, {
         lastSyncAt: new Date(),
         lastSyncStatus: failed > 0 && total === failed ? "error" : "completed",
         productsSynced: (connector.productsSynced || 0) + created + updated,
@@ -1050,7 +1103,7 @@ ${pages.map(p => `  <url>
       const alertThreshold = sapConfig?.alertThresholdConsecutiveFailures;
       const alertEmailTo = sapConfig?.alertEmailTo;
       if (alertThreshold && alertEmailTo) {
-        const recentLogs = await storage.getSyncLogsByConnectorId(connector.id);
+        const recentLogs = await scoped.getSyncLogsByConnectorId(connector.id);
         const last10 = recentLogs.slice(0, 10);
         const recentFailureCount = last10.filter(l => l.status === "failed").length;
         if (recentFailureCount >= alertThreshold) {
@@ -1089,7 +1142,12 @@ ${pages.map(p => `  <url>
 
   app.get("/api/integrations/connectors/:id/logs", isAuthenticatedOrTeam, async (req: Request, res: Response) => {
     try {
-      const logs = await storage.getSyncLogsByConnectorId(req.params.id);
+      const scoped = tenantStorage(req);
+      const owned = await scoped.getEnterpriseConnector(req.params.id);
+      if (!owned) {
+        return res.status(404).json({ error: "Connector not found" });
+      }
+      const logs = await scoped.getSyncLogsByConnectorId(req.params.id);
       res.json(logs);
     } catch (error) {
       ((req as any).log ?? logger).error({ err: error }, "Error fetching sync logs");
@@ -1142,7 +1200,7 @@ ${pages.map(p => `  <url>
 
         const fieldMappings = (connector.fieldMappings ?? []) as import("@shared/schema").FieldMapping[];
 
-        const syncLog = await storage.createIntegrationSyncLog({
+        const syncLog = await scoped.createIntegrationSyncLog({
           connectorId: connector.id,
           syncType: "manual",
           status: "running",
@@ -1200,7 +1258,7 @@ ${pages.map(p => `  <url>
         const totalProcessed = created + updated + failed;
         const allErrors = [...importResult.errors, ...insertErrors].slice(0, 50);
 
-        await storage.updateIntegrationSyncLog(syncLog.id, {
+        await scoped.updateIntegrationSyncLog(syncLog.id, {
           status: failed > 0 && created + updated === 0 ? "failed" : "completed",
           recordsProcessed: totalProcessed,
           recordsCreated: created,
@@ -1210,7 +1268,7 @@ ${pages.map(p => `  <url>
           ...(allErrors.length > 0 ? { errorMessage: allErrors.slice(0, 5).join("; ") } : {}),
         });
 
-        await storage.updateEnterpriseConnector(connector.id, {
+        await scoped.updateEnterpriseConnector(connector.id, {
           lastSyncAt: new Date(),
           lastSyncStatus: failed > 0 && totalProcessed === failed ? "error" : "completed",
           productsSynced: (connector.productsSynced || 0) + created + updated,

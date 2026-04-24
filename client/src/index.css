@@ -4,19 +4,20 @@
 
 /* ============================================================
  * PHOTONICTAG DESIGN SYSTEM
- * Three colors only: ink (black), paper (white), yellow.
- * Every other neutral is an alpha blend of ink on paper
- * (light mode) or paper on ink (dark mode).
- * Sharp corners. Hairlines, not shadows. Geist + Geist Mono.
+ * Canonical token spec: repo root design-system/colors_and_type.css
+ * (Vite alias @design-system). Three colors: ink, paper, yellow #FFDF00.
+ * Geist fonts: npm `geist` via GeistSans/GeistMono variables in main.tsx.
  * ============================================================ */
 
 /* LIGHT MODE */
 :root {
   /* Brand primitives — the three colors.
-     --yellow HSL 54 100% 50% == #FFE600 (authoritative brand value). */
+     --yellow HSL 51 100% 50% == #FFDF00 (matches design-system/colors_and_type.css). */
   --ink:    0 0% 0%;
-  --paper:  0 0% 100%;
-  --yellow: 54 100% 50%;
+  /* Page canvas (#FAFAF7) vs pure card white — matches design-system paper model */
+  --paper:       60 9% 98%;
+  --paper-pure:  0 0% 100%;
+  --yellow: 51 100% 50%;
   --yellow-ink: 0 0% 0%;   /* text that sits on yellow */
 
   /* Ink + paper as alpha-rgba utility palette.
@@ -121,10 +122,10 @@
   --background: var(--paper);
   --foreground: var(--ink);
   --border: 0 0% 90%;            /* ~10% ink on paper */
-  --card: var(--paper);
+  --card: var(--paper-pure);
   --card-foreground: var(--ink);
   --card-border: 0 0% 90%;
-  --sidebar: var(--paper);
+  --sidebar: var(--paper-pure);
   --sidebar-foreground: var(--ink);
   --sidebar-border: 0 0% 90%;
   --sidebar-primary: var(--yellow);
@@ -132,7 +133,7 @@
   --sidebar-accent: 0 0% 96%;    /* ~4% ink */
   --sidebar-accent-foreground: var(--ink);
   --sidebar-ring: var(--yellow);
-  --popover: var(--paper);
+  --popover: var(--paper-pure);
   --popover-foreground: var(--ink);
   --popover-border: 0 0% 90%;
   --primary: var(--yellow);
@@ -153,11 +154,11 @@
   --chart-4: 0 0% 60%;
   --chart-5: 0 0% 80%;
 
-  /* Typography */
-  --font-sans:    'Geist', ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, sans-serif;
-  --font-display: 'Geist', ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, sans-serif;
+  /* Typography — Geist variables injected on #root in main.tsx */
+  --font-sans:    var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, sans-serif;
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, sans-serif;
   --font-serif:   Georgia, serif;
-  --font-mono:    'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-mono:    var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* Sharp corners — no border-radius anywhere except on photographic imagery */
   --radius: 0;

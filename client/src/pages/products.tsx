@@ -31,6 +31,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import type { Product } from "@shared/schema";
+import { Mono } from "@/components/brand/brand";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 type ImportStep = "upload" | "preview" | "ai-review" | "importing" | "done";
@@ -71,10 +72,16 @@ interface ImportResult {
 
 // ─── Confidence indicator ──────────────────────────────────────────────────
 function ConfidenceDot({ value }: { value: number }) {
-  const color = value >= 0.9 ? "bg-green-500" : value >= 0.7 ? "bg-amber-500" : "bg-red-500";
-  const label = value >= 0.9 ? "High confidence" : value >= 0.7 ? "Medium confidence" : "Low confidence";
+  const tier = value >= 0.9 ? "high" : value >= 0.7 ? "mid" : "low";
+  const label = tier === "high" ? "High confidence" : tier === "mid" ? "Medium confidence" : "Low confidence";
+  const cls =
+    tier === "high"
+      ? "bg-ink"
+      : tier === "mid"
+        ? "bg-ink/40"
+        : "bg-yellow border border-ink/20";
   return (
-    <span title={`${label} (${Math.round(value * 100)}%)`} className={`inline-block h-2 w-2 rounded-full ${color} shrink-0 mt-1`} />
+    <span title={`${label} (${Math.round(value * 100)}%)`} className={`inline-block h-2 w-2 rounded-full ${cls} shrink-0 mt-1`} />
   );
 }
 
@@ -809,7 +816,14 @@ export default function Products() {
                   <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center overflow-hidden shrink-0">
                     {product.productImage ? <img src={product.productImage} alt={product.productName} className="h-full w-full object-cover" /> : <Package className="h-5 w-5 text-muted-foreground" />}
                   </div>
-                  <span className="font-medium truncate max-w-[180px]">{product.productName}</span>
+                  <div className="min-w-0">
+                    <span className="font-medium truncate max-w-[180px] block">{product.productName}</span>
+                    {product.modelNumber ? (
+                      <Mono className="text-[11px] text-muted-foreground truncate max-w-[200px] block mt-0.5">
+                        {product.modelNumber}
+                      </Mono>
+                    ) : null}
+                  </div>
                 </div>
               </TableCell>
               <TableCell className="text-muted-foreground">{product.manufacturer}</TableCell>

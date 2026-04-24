@@ -64,6 +64,10 @@ const DEFAULTS: Record<AIProvider, ProviderDefaults> = {
 export const AI_PROVIDER: AIProvider =
   (process.env.AI_PROVIDER as AIProvider | undefined) ?? "openai";
 
+/** Data residency hint for logging / routing (PLAN PR-08). Set `eu` when using EU-hosted inference. */
+export const AI_ENDPOINT_REGION: "us" | "eu" =
+  (process.env.AI_ENDPOINT_REGION || "us").toLowerCase() === "eu" ? "eu" : "us";
+
 const defaults = DEFAULTS[AI_PROVIDER] ?? DEFAULTS.openai;
 
 const apiKey =
@@ -82,5 +86,5 @@ export const AI_CHAT_MODEL = process.env.AI_CHAT_MODEL ?? defaults.chat;
 export const AI_MINI_MODEL = process.env.AI_MINI_MODEL ?? defaults.mini;
 
 export function describeAIProvider(): string {
-  return `${AI_PROVIDER} (chat=${AI_CHAT_MODEL}, mini=${AI_MINI_MODEL}${baseURL ? `, baseURL=${baseURL}` : ""})`;
+  return `${AI_PROVIDER} region=${AI_ENDPOINT_REGION} (chat=${AI_CHAT_MODEL}, mini=${AI_MINI_MODEL}${baseURL ? `, baseURL=${baseURL}` : ""})`;
 }
