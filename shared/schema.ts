@@ -762,7 +762,7 @@ export interface DppModuleSummary {
 // ENTERPRISE INTEGRATIONS
 // ============================================
 
-export type ConnectorType = "sap" | "oracle" | "microsoft_dynamics" | "siemens" | "infor" | "custom";
+export type ConnectorType = "sap" | "oracle" | "microsoft_dynamics" | "siemens" | "infor" | "csv" | "custom";
 export type ConnectorStatus = "active" | "inactive" | "error" | "pending" | "connecting";
 export type SyncDirection = "inbound" | "outbound" | "bidirectional";
 

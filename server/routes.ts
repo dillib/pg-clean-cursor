@@ -57,7 +57,16 @@ import internalRoutes from "./routes/internal-routes";
 import exportRoutes from "./routes/export-routes";
 import productImportRoutes from "./routes/product-import-routes";
 import bcrypt from "bcryptjs";
+import multer from "multer";
+import { importCSVFromBuffer } from "./services/csv-import-service";
 import type { RequestHandler } from "express";
+
+// CSV/XLSX upload via memory storage — 10 MB limit. Per-tenant rate limit lives
+// at the route level; the connector enum (csv) is what gates the upload path.
+const csvUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
 
 const isAuthenticatedOrTeam: RequestHandler = async (req, res, next) => {
   try {
@@ -1087,6 +1096,127 @@ ${pages.map(p => `  <url>
       res.status(500).json({ error: "Failed to fetch sync logs" });
     }
   });
+
+  // ── CSV-lite connector upload ─────────────────────────────────────────────
+  // Brief 2026-17 opportunity #3 — second-revenue connector path. Accepts a
+  // CSV/XLSX file for any connector with connectorType === "csv", parses it,
+  // applies the connector's fieldMappings, inserts the resulting products
+  // under tenant scope, and writes one row to integrationSyncLogs.
+  app.post(
+    "/api/integrations/connectors/:id/upload",
+    isAuthenticatedOrTeam,
+    csvUpload.single("file"),
+    async (req: Request, res: Response) => {
+      try {
+        const scoped = tenantStorage(req);
+        const connector = await scoped.getEnterpriseConnector(req.params.id);
+        if (!connector) {
+          return res.status(404).json({ error: "Connector not found" });
+        }
+        if (connector.connectorType !== "csv") {
+          return res.status(400).json({
+            error: `Upload is only supported for csv connectors (this connector is ${connector.connectorType})`,
+          });
+        }
+        if (!req.file) {
+          return res.status(400).json({ error: "No file uploaded — send multipart/form-data with field 'file'" });
+        }
+
+        const fieldMappings = (connector.fieldMappings ?? []) as import("@shared/schema").FieldMapping[];
+
+        const syncLog = await storage.createIntegrationSyncLog({
+          connectorId: connector.id,
+          syncType: "manual",
+          status: "running",
+          recordsProcessed: 0,
+          recordsCreated: 0,
+          recordsUpdated: 0,
+          recordsFailed: 0,
+          startedAt: new Date(),
+        });
+
+        const importResult = importCSVFromBuffer(req.file.buffer, fieldMappings, req.file.originalname);
+
+        let created = 0;
+        let updated = 0;
+        let failed = 0;
+        const insertErrors: string[] = [];
+
+        for (const record of importResult.records) {
+          try {
+            const md = record as Record<string, unknown>;
+            const rawDate = md.dateOfManufacture;
+            const dateOfManufacture =
+              rawDate instanceof Date ? rawDate
+              : rawDate ? new Date(rawDate as string)
+              : undefined;
+            const insertData = {
+              ...record,
+              description: typeof md.description === "string" ? md.description : `Imported from CSV (${connector.name})`,
+              materials: typeof md.materials === "string" ? md.materials : "",
+              safetyCertifications: Array.isArray(md.safetyCertifications) ? md.safetyCertifications : [],
+              carbonFootprint: md.carbonFootprint != null ? Math.round(Number(md.carbonFootprint)) : 0,
+              repairabilityScore: md.repairabilityScore != null ? Math.round(Number(md.repairabilityScore)) : 0,
+              warrantyInfo: typeof md.warrantyInfo === "string" ? md.warrantyInfo : "",
+              recyclingInstructions: typeof md.recyclingInstructions === "string" ? md.recyclingInstructions : "",
+              dateOfManufacture,
+            };
+            const modelKey = md.modelNumber as string | undefined;
+            const existing = modelKey
+              ? (await scoped.getAllProducts()).find(p => p.modelNumber === modelKey)
+              : undefined;
+            if (existing) {
+              await scoped.updateProduct(existing.id, record);
+              updated++;
+            } else {
+              await scoped.createProduct(insertData as unknown as import("@shared/schema").InsertProduct);
+              created++;
+            }
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            failed++;
+            if (insertErrors.length < 50) insertErrors.push(msg);
+          }
+        }
+
+        const totalProcessed = created + updated + failed;
+        const allErrors = [...importResult.errors, ...insertErrors].slice(0, 50);
+
+        await storage.updateIntegrationSyncLog(syncLog.id, {
+          status: failed > 0 && created + updated === 0 ? "failed" : "completed",
+          recordsProcessed: totalProcessed,
+          recordsCreated: created,
+          recordsUpdated: updated,
+          recordsFailed: failed,
+          completedAt: new Date(),
+          ...(allErrors.length > 0 ? { errorMessage: allErrors.slice(0, 5).join("; ") } : {}),
+        });
+
+        await storage.updateEnterpriseConnector(connector.id, {
+          lastSyncAt: new Date(),
+          lastSyncStatus: failed > 0 && totalProcessed === failed ? "error" : "completed",
+          productsSynced: (connector.productsSynced || 0) + created + updated,
+        } as any);
+
+        res.json({
+          success: true,
+          syncLogId: syncLog.id,
+          parsed: importResult.parsed,
+          mapped: importResult.mapped,
+          created,
+          updated,
+          failed,
+          fieldMappingsUsed: fieldMappings.length,
+          firstError: allErrors[0] ?? null,
+          errors: allErrors,
+        });
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        ((req as any).log ?? logger).error({ err: error }, "Error uploading CSV to connector");
+        res.status(500).json({ error: "CSV upload failed", details: msg });
+      }
+    },
+  );
 
   // ==========================================
   // ADMIN/DEMO ENDPOINTS
