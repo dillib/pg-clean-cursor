@@ -6,6 +6,23 @@ import { PublicFooter } from "@/components/public-footer";
 import { Eyebrow, Mono, BrandBadge, BrandButton } from "@/components/brand/brand";
 import { Icon } from "@/components/brand/icon";
 import { Reveal } from "@/components/brand/motion";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { apiRequest } from "@/lib/queryClient";
+import {
+  demoProduct,
+  demoTraceEvents,
+  demoRegionalExtensions,
+  demoAIInsights,
+  getCategoryDeadline,
+} from "@/lib/demo-passport";
 import type {
   Product,
   TraceEvent,
@@ -15,13 +32,15 @@ import type {
 } from "@shared/schema";
 
 /* ------------------------------------------------------------ *
- * public-scan-v2
+ * public-scan-v2 — canonical consumer passport page
  * -----------------------------------------------------------
- * Reference implementation of the photonictag design system:
- * three colors only (ink / paper / yellow), sharp corners,
- * hairline elevation, Geist + Geist Mono. Same data queries
- * as public-scan.tsx so this can be A/B compared against the
- * existing /product/:id page.
+ * Mounted at /product/:id (and /product/demo for the static
+ * demo fixture). Photonictag design system: ink / paper /
+ * yellow only, sharp corners, hairline elevation, Geist.
+ *
+ * Consumer-engagement layer: registration dialog (warranty
+ * activation), share buttons (copy / WhatsApp / LinkedIn),
+ * regulatory deadline banner driven by product category.
  * ------------------------------------------------------------ */
 
 const regionFlags: Record<string, string> = {
@@ -46,15 +65,17 @@ interface PublicScanV2Props {
   isDemo?: boolean;
 }
 
-export default function PublicScanV2({ isDemo = false }: PublicScanV2Props) {
+export default function PublicScanV2({ isDemo: isDemoProp = false }: PublicScanV2Props) {
   const params = useParams<{ id: string }>();
+  // /product/demo also triggers demo mode (matches the legacy v1 contract).
+  const isDemo = isDemoProp || params.id === "demo";
 
-  const { data: product, isLoading, error } = useQuery<Product>({
+  const { data: fetchedProduct, isLoading, error } = useQuery<Product>({
     queryKey: ["/api/products", params.id],
     enabled: !isDemo && !!params.id,
   });
 
-  const { data: traceEvents } = useQuery<TraceEvent[]>({
+  const { data: fetchedTraceEvents } = useQuery<TraceEvent[]>({
     queryKey: ["/api/products", params.id, "trace"],
     enabled: !isDemo && !!params.id,
   });
@@ -64,17 +85,24 @@ export default function PublicScanV2({ isDemo = false }: PublicScanV2Props) {
     enabled: !isDemo && !!params.id,
   });
 
-  const { data: regionalExtensions } = useQuery<DppRegionalExtension[]>({
+  const { data: fetchedRegionalExtensions } = useQuery<DppRegionalExtension[]>({
     queryKey: ["/api/products", params.id, "regional-extensions"],
     enabled: !isDemo && !!params.id,
   });
 
-  const { data: aiInsights } = useQuery<AIInsight[]>({
+  const { data: fetchedAIInsights } = useQuery<AIInsight[]>({
     queryKey: ["/api/products", params.id, "insights"],
     enabled: !isDemo && !!params.id,
   });
 
-  // Track scan (same as v1 page)
+  // Demo mode swaps in the static fixture so /product/demo works without a
+  // backend round-trip (same contract as legacy v1 page).
+  const product = isDemo ? (demoProduct as Product) : fetchedProduct;
+  const traceEvents = isDemo ? (demoTraceEvents as TraceEvent[]) : fetchedTraceEvents;
+  const regionalExtensions = isDemo ? (demoRegionalExtensions as DppRegionalExtension[]) : fetchedRegionalExtensions;
+  const aiInsights = isDemo ? (demoAIInsights as AIInsight[]) : fetchedAIInsights;
+
+  // Track scan (skipped in demo mode to keep analytics clean)
   useEffect(() => {
     if (!isDemo && params.id && params.id !== "demo") {
       let sid = sessionStorage.getItem("pt_sid");
@@ -86,6 +114,46 @@ export default function PublicScanV2({ isDemo = false }: PublicScanV2Props) {
       }).catch(() => {});
     }
   }, [params.id, isDemo]);
+
+  // ── Consumer engagement state: registration dialog + share/copy
+  const [showRegister, setShowRegister] = useState(false);
+  const [regSubmitting, setRegSubmitting] = useState(false);
+  const [regDone, setRegDone] = useState(false);
+  const [regForm, setRegForm] = useState({
+    ownerName: "",
+    ownerEmail: "",
+    purchaseDate: "",
+    purchaseLocation: "",
+    warrantyActivated: true,
+    marketingOptIn: false,
+  });
+  const [linkCopied, setLinkCopied] = useState(false);
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+
+  const handleRegister = async () => {
+    if (!product?.id || isDemo) return;
+    setRegSubmitting(true);
+    try {
+      await apiRequest("POST", `/api/products/${product.id}/register`, regForm);
+      setRegDone(true);
+    } catch {
+      // Soft-fail: keep the form open so the user can retry.
+    } finally {
+      setRegSubmitting(false);
+    }
+  };
+
+  const copyShareLink = () => {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2500);
+    });
+  };
+
+  const deadline = useMemo(
+    () => (product ? getCategoryDeadline(product.productCategory ?? null) : null),
+    [product?.productCategory],
+  );
 
   const summaryInsight = aiInsights?.find(i => i.insightType === "summary")?.content as
     { headline?: string; keyPoints?: string[] } | undefined;
@@ -167,6 +235,46 @@ export default function PublicScanV2({ isDemo = false }: PublicScanV2Props) {
       )}
 
       <main style={{ maxWidth: 1200, margin: "0 auto", padding: isDemo ? "32px 24px 96px" : "96px 24px" }}>
+
+        {/* ───── Compliance deadline banner (regulatory urgency) ───── */}
+        {deadline && (
+          <Reveal>
+            <div
+              style={{
+                marginBottom: 28,
+                padding: "16px 20px",
+                background: deadline.urgent ? "hsl(var(--ink))" : "var(--ink-04)",
+                color: deadline.urgent ? "hsl(var(--paper))" : "hsl(var(--ink))",
+                border: `1px solid ${deadline.urgent ? "hsl(var(--ink))" : "var(--hairline)"}`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 16,
+                flexWrap: "wrap",
+              }}
+              data-testid="banner-compliance-deadline"
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <Icon
+                  name="bolt"
+                  size={18}
+                  stroke={deadline.urgent ? "hsl(var(--yellow))" : "hsl(var(--ink))"}
+                />
+                <div>
+                  <Mono style={{ fontSize: 11, color: deadline.urgent ? "var(--paper-72)" : "var(--fg-muted)" }}>
+                    EU compliance deadline
+                  </Mono>
+                  <div style={{ fontSize: 14, marginTop: 2 }}>
+                    <strong>{deadline.date}</strong> · {deadline.description}
+                  </div>
+                </div>
+              </div>
+              {deadline.urgent && (
+                <BrandBadge tone="accent">Action required</BrandBadge>
+              )}
+            </div>
+          </Reveal>
+        )}
 
         {/* ───── Hero row: dark editor surface + yellow QR chip ───── */}
         <Reveal>
@@ -483,6 +591,81 @@ export default function PublicScanV2({ isDemo = false }: PublicScanV2Props) {
           </Reveal>
         )}
 
+        {/* ───── Register + share (consumer engagement layer) ───── */}
+        {!isDemo && (
+          <Reveal delay={300}>
+            <section
+              style={{
+                marginTop: 28,
+                padding: 28,
+                border: "1px solid var(--hairline)",
+                background: "var(--ink-04)",
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 1fr) auto",
+                gap: 24,
+                alignItems: "center",
+              }}
+              data-testid="section-register-share-v2"
+            >
+              <div>
+                <Eyebrow>Register this product</Eyebrow>
+                <div style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: 22,
+                  fontWeight: 600,
+                  letterSpacing: "-0.02em",
+                  marginTop: 8,
+                  lineHeight: 1.2,
+                }}>
+                  Activate your warranty and get end-of-life recycling reminders.
+                </div>
+                <div style={{ marginTop: 18, display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+                  <Mono style={{ fontSize: 12, color: "var(--fg-muted)" }}>Share this passport</Mono>
+                  <BrandButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={copyShareLink}
+                    data-testid="button-share-copy-v2"
+                  >
+                    <Icon name={linkCopied ? "check" : "doc"} size={12} />
+                    {linkCopied ? "Copied" : "Copy link"}
+                  </BrandButton>
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent("Verified product passport: " + shareUrl)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid="button-share-whatsapp-v2"
+                    style={{ textDecoration: "none" }}
+                  >
+                    <BrandButton variant="secondary" size="sm">
+                      <Icon name="ext" size={12} /> WhatsApp
+                    </BrandButton>
+                  </a>
+                  <a
+                    href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid="button-share-linkedin-v2"
+                    style={{ textDecoration: "none" }}
+                  >
+                    <BrandButton variant="secondary" size="sm">
+                      <Icon name="ext" size={12} /> LinkedIn
+                    </BrandButton>
+                  </a>
+                </div>
+              </div>
+              <BrandButton
+                variant="primary"
+                size="md"
+                onClick={() => setShowRegister(true)}
+                data-testid="button-register-product-v2"
+              >
+                Register ownership <Icon name="arrowR" size={14} />
+              </BrandButton>
+            </section>
+          </Reveal>
+        )}
+
         {/* ───── CTA strip ───── */}
         <Reveal delay={320}>
           <section style={{
@@ -509,9 +692,6 @@ export default function PublicScanV2({ isDemo = false }: PublicScanV2Props) {
               </div>
             </div>
             <div style={{ display: "flex", gap: 12 }}>
-              <Link href={`/product/${params.id}`}>
-                <BrandButton variant="secondary" invert>View classic layout</BrandButton>
-              </Link>
               <Link href="/book-demo">
                 <BrandButton variant="primary">Book a demo</BrandButton>
               </Link>
@@ -519,6 +699,121 @@ export default function PublicScanV2({ isDemo = false }: PublicScanV2Props) {
           </section>
         </Reveal>
       </main>
+
+      {/* ── Registration dialog ───────────────────────────────── */}
+      <Dialog open={showRegister} onOpenChange={setShowRegister}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Register this product</DialogTitle>
+            <DialogDescription>
+              Activate your warranty and get recycling reminders when this product reaches end of life.
+            </DialogDescription>
+          </DialogHeader>
+
+          {regDone ? (
+            <div className="text-center py-8 space-y-3" data-testid="state-registration-done-v2">
+              <div className="text-lg font-semibold">Registered.</div>
+              <p className="text-sm text-muted-foreground">
+                Your warranty is active. We'll remind you when it's time to recycle this product responsibly.
+              </p>
+              <BrandButton
+                variant="ink"
+                size="sm"
+                onClick={() => { setShowRegister(false); setRegDone(false); }}
+                data-testid="button-reg-done-v2"
+              >
+                Done
+              </BrandButton>
+            </div>
+          ) : (
+            <div className="space-y-4 py-1">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="reg-name-v2">Name</Label>
+                  <Input
+                    id="reg-name-v2"
+                    className="mt-1"
+                    value={regForm.ownerName}
+                    onChange={e => setRegForm(f => ({ ...f, ownerName: e.target.value }))}
+                    placeholder="Jane Smith"
+                    data-testid="input-reg-name-v2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="reg-email-v2">Email</Label>
+                  <Input
+                    id="reg-email-v2"
+                    className="mt-1"
+                    type="email"
+                    value={regForm.ownerEmail}
+                    onChange={e => setRegForm(f => ({ ...f, ownerEmail: e.target.value }))}
+                    placeholder="jane@example.com"
+                    data-testid="input-reg-email-v2"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="reg-date-v2">Purchase date</Label>
+                  <Input
+                    id="reg-date-v2"
+                    className="mt-1"
+                    type="date"
+                    value={regForm.purchaseDate}
+                    onChange={e => setRegForm(f => ({ ...f, purchaseDate: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="reg-location-v2">Where purchased</Label>
+                  <Input
+                    id="reg-location-v2"
+                    className="mt-1"
+                    value={regForm.purchaseLocation}
+                    onChange={e => setRegForm(f => ({ ...f, purchaseLocation: e.target.value }))}
+                    placeholder="Amazon, Best Buy…"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2 pt-1 text-sm">
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="rounded mt-0.5"
+                    checked={regForm.warrantyActivated}
+                    onChange={e => setRegForm(f => ({ ...f, warrantyActivated: e.target.checked }))}
+                    data-testid="checkbox-warranty-v2"
+                  />
+                  <span>Activate warranty registration</span>
+                </label>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="rounded mt-0.5"
+                    checked={regForm.marketingOptIn}
+                    onChange={e => setRegForm(f => ({ ...f, marketingOptIn: e.target.checked }))}
+                    data-testid="checkbox-marketing-v2"
+                  />
+                  <span>Receive product updates from {product?.manufacturer}</span>
+                </label>
+              </div>
+              <div className="flex gap-3 justify-end pt-2">
+                <BrandButton variant="secondary" size="sm" onClick={() => setShowRegister(false)}>
+                  Cancel
+                </BrandButton>
+                <BrandButton
+                  variant="ink"
+                  size="sm"
+                  onClick={handleRegister}
+                  disabled={regSubmitting || !regForm.ownerName || !regForm.ownerEmail}
+                  data-testid="button-reg-submit-v2"
+                >
+                  {regSubmitting ? "Registering…" : "Register"}
+                </BrandButton>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <PublicFooter />
     </div>

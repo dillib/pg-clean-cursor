@@ -31,8 +31,7 @@ const IoTDevices = lazy(() => import("@/pages/iot-devices"));
 const SAPConnector = lazy(() => import("@/pages/sap-connector"));
 const SAPOperations = lazy(() => import("@/pages/sap-operations"));
 const SAPDemo = lazy(() => import("@/pages/sap-demo"));
-const PublicScan = lazy(() => import("@/pages/public-scan"));
-const PublicScanV2 = lazy(() => import("@/pages/public-scan-v2"));
+const PublicScan = lazy(() => import("@/pages/public-scan-v2"));
 const Pricing = lazy(() => import("@/pages/pricing"));
 const Integrations = lazy(() => import("@/pages/integrations"));
 const Contact = lazy(() => import("@/pages/contact"));
@@ -447,9 +446,6 @@ function Router() {
       </Route>
       <Route path="/crm">
         <DualAuthCRM />
-      </Route>
-      <Route path="/product/:id/v2">
-        <PublicScanV2 />
       </Route>
       <Route path="/product/:id">
         <PublicScan />
