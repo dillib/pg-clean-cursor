@@ -1,0 +1,133 @@
+/* ============================================================
+   PhotonicTag · Design tokens
+   Three colors. One yellow. Everything else is ink or paper.
+   ============================================================ */
+
+/* Fonts ---------------------------------------------------- */
+@import url('./fonts/fonts.css');
+
+:root {
+  /* ── Type ─────────────────────────────────────────────── */
+  --font-sans:     'Geist', ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, sans-serif;
+  --font-display:  'Geist', ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, sans-serif;
+  --font-mono:     'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ── Color · THREE only ───────────────────────────────── */
+  /* Yellow — the one accent. Used sparingly. */
+  --yellow:        #FFDF00;
+  --yellow-ink:    #000000;  /* text that sits on yellow */
+
+  /* Ink — pure black, and neutrals built from its alpha. */
+  --ink:           #000000;
+  --ink-90:        rgba(0,0,0,0.90);
+  --ink-72:        rgba(0,0,0,0.72);
+  --ink-56:        rgba(0,0,0,0.56);
+  --ink-40:        rgba(0,0,0,0.40);
+  --ink-24:        rgba(0,0,0,0.24);
+  --ink-12:        rgba(0,0,0,0.12);
+  --ink-08:        rgba(0,0,0,0.08);
+  --ink-04:        rgba(0,0,0,0.04);
+
+  /* Paper — pure white, and tints built from its alpha. */
+  --paper:         #FFFFFF;
+  --paper-90:      rgba(255,255,255,0.90);
+  --paper-72:      rgba(255,255,255,0.72);
+  --paper-56:      rgba(255,255,255,0.56);
+  --paper-40:      rgba(255,255,255,0.40);
+  --paper-24:      rgba(255,255,255,0.24);
+  --paper-12:      rgba(255,255,255,0.12);
+  --paper-08:      rgba(255,255,255,0.08);
+  --paper-04:      rgba(255,255,255,0.04);
+
+  /* Semantic — derive from the three above. */
+  --bg:            var(--paper);
+  --bg-invert:     var(--ink);
+  --fg:            var(--ink);
+  --fg-invert:     var(--paper);
+  --fg-muted:      var(--ink-56);
+  --fg-subtle:     var(--ink-40);
+  --hairline:      var(--ink-12);
+  --hairline-soft: var(--ink-08);
+  --accent:        var(--yellow);
+
+  /* ── Radii · sharp ────────────────────────────────────── */
+  --r-0:  0px;
+  --r-1:  2px;
+  --r-2:  4px;
+  --r-3:  6px;   /* reserved for pills only */
+  --r-pill: 9999px;
+
+  /* ── Spacing · 4pt grid ───────────────────────────────── */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+  --s-10: 128px;
+
+  /* ── Elevation · hairlines, not shadows ───────────────── */
+  --hl-inner:   inset 0 0 0 1px var(--hairline);
+  --hl-inner-i: inset 0 0 0 1px var(--paper-12);
+  --hl-outer:   0 0 0 1px var(--hairline);
+  --hl-outer-i: 0 0 0 1px var(--paper-12);
+  --lift-1:     0 1px 0 var(--ink-04), 0 0 0 1px var(--hairline);
+  --lift-2:     0 4px 12px var(--ink-04), 0 0 0 1px var(--hairline);
+  --lift-3:     0 24px 48px var(--ink-12), 0 0 0 1px var(--hairline);
+
+  /* ── Motion ───────────────────────────────────────────── */
+  --ease:   cubic-bezier(0.2, 0, 0, 1);
+  --dur-1:  120ms;
+  --dur-2:  200ms;
+  --dur-3:  320ms;
+
+  /* ── Type scale ───────────────────────────────────────── */
+  --fs-xs:   11px;   /* caption / mono ticker */
+  --fs-sm:   13px;
+  --fs-base: 15px;
+  --fs-md:   17px;
+  --fs-lg:   20px;
+  --fs-xl:   28px;
+  --fs-2xl:  40px;
+  --fs-3xl:  56px;
+  --fs-4xl:  80px;
+  --fs-5xl:  120px;
+  --fs-6xl:  180px;
+
+  /* tracking */
+  --lt-tight: -0.03em;
+  --lt-xtight: -0.045em;
+  --lt-mono:   -0.01em;
+  --lt-caps:    0.08em;
+
+  /* ── Layout ───────────────────────────────────────────── */
+  --container: 1200px;
+  --container-w: 1280px;
+}
+
+/* ============================================================
+   Element defaults
+   ============================================================ */
+html { background: var(--bg); color: var(--fg); }
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  color: var(--fg);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'ss01', 'cv11';
+}
+h1,h2,h3,h4 { font-family: var(--font-display); font-weight: 600; letter-spacing: var(--lt-tight); margin: 0; }
+code, kbd, samp { font-family: var(--font-mono); letter-spacing: var(--lt-mono); }
+::selection { background: var(--yellow); color: var(--yellow-ink); }
+
+/* Utility atoms (kept minimal) */
+.mono  { font-family: var(--font-mono); letter-spacing: var(--lt-mono); font-variant-numeric: tabular-nums; }
+.caps  { text-transform: uppercase; letter-spacing: var(--lt-caps); }
+.num   { font-variant-numeric: tabular-nums; }
+.hair  { border: 1px solid var(--hairline); }

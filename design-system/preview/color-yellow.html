@@ -1,0 +1,140 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Colors — yellow · the accent</title><link rel="stylesheet" href="_preview.css">
+<style>
+  /* The accent is #FFDF00 — canary / school-bus yellow.
+     Brighter than Tailwind's yellow-400, slightly warmer than spectral.
+     Reads as a signal colour, not as highlighter, not as mustard. */
+  .card { background: var(--ink); color: var(--paper); }
+  .card__head { border-bottom-color: var(--paper-12); }
+  .card__eyebrow { color: #FFDF00; }
+  .card__meta { color: var(--paper-40); }
+  .spec-label { color: var(--paper-40); }
+
+  .y-hero {
+    background: #FFDF00; color: var(--ink);
+    aspect-ratio: 16/7; display:flex; flex-direction:column; justify-content:space-between;
+    padding: 40px; position:relative; overflow:hidden;
+  }
+  .y-hero::after {
+    content:''; position:absolute; inset:12px; border:1px solid var(--ink); pointer-events:none;
+  }
+
+  .pair { padding:18px 20px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+  .pair .label { font-family:var(--font-sans); font-size:15px; }
+  .pair .meta  { font-family:var(--font-mono); font-size:12px; display:flex; align-items:center; gap:14px; }
+  .badge { font-family:var(--font-mono); font-size:10.5px; padding:3px 8px; border-radius:999px; text-transform:uppercase; letter-spacing:0.06em; }
+  .pass { background:rgba(35, 165, 95, 0.16); color:#27B06A; }
+
+  .usage {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--paper-12);
+    border:1px solid var(--paper-12);
+  }
+  .usage > div { padding:22px; background:var(--ink); }
+  .usage .do > .spec-label { color:#27B06A; }
+  .usage .dont > .spec-label { color:#FF7A59; }
+
+  .compare { display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--paper-12); }
+  .compare > div { padding:22px; display:flex; flex-direction:column; gap:6px; }
+  .compare > div + div { border-left:1px solid var(--paper-12); }
+  .compare .sw { height:56px; border:1px solid var(--paper-12); }
+  .compare .hx { font-family:var(--font-mono); font-size:12px; color:var(--paper); }
+  .compare .nt { font-family:var(--font-mono); font-size:11px; color:var(--paper-56); line-height:1.55; }
+  .compare .old { opacity:0.55; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card__head">
+    <div>
+      <div class="card__eyebrow">Color · Accent</div>
+      <div class="card__title" style="color:var(--paper)">One yellow. <span style="color:#FFDF00">#FFDF00</span></div>
+    </div>
+    <div class="card__meta">Used for: primary CTAs, brand marks, "live" state, selection.<br/>Lives on black. Lives on white. Never carries body copy.</div>
+  </div>
+
+  <div class="y-hero">
+    <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase">Primary accent</div>
+    <div>
+      <div style="font-family:var(--font-display);font-size:72px;font-weight:700;letter-spacing:-0.035em;line-height:0.95">#FFDF00</div>
+      <div class="mono" style="font-size:13px;margin-top:8px">rgb(255, 223, 0) · oklch(0.905 0.205 97)</div>
+      <div class="mono" style="font-size:12px;margin-top:4px;color:rgba(0,0,0,0.56)">canary — bright signal yellow, slightly warmer than spectral, maximally legible on black</div>
+    </div>
+  </div>
+
+  <!-- Before/after swatch compare -->
+  <div>
+    <div class="spec-label">The tuning path</div>
+    <div class="compare" style="margin-top:12px">
+      <div class="old">
+        <div class="sw" style="background:#FACC15"></div>
+        <div class="hx">#FACC15 <span class="nt">&nbsp;·&nbsp; previous</span></div>
+        <div class="nt">Tailwind yellow-400 — deeper, slightly mustard. Read as cautious under warm lighting.</div>
+      </div>
+      <div>
+        <div class="sw" style="background:#FFDF00"></div>
+        <div class="hx">#FFDF00 <span class="nt">&nbsp;·&nbsp; current</span></div>
+        <div class="nt">Canary. Brighter luminance, cleaner on ink. More signal, less mustard — still warm enough to feel archival.</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="spec-label">Working pairings — every combination we use in production</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--paper-12);margin-top:12px">
+
+      <div class="pair" style="background:var(--ink);color:var(--paper);border-bottom:1px solid var(--paper-12);border-right:1px solid var(--paper-12)">
+        <span class="label" style="color:#FFDF00;font-weight:500">Yellow type on black</span>
+        <span class="meta"><span class="badge pass">AAA</span><span style="color:var(--paper-56)">15.9 : 1</span></span>
+      </div>
+
+      <div class="pair" style="background:#FFDF00;color:var(--ink);border-bottom:1px solid var(--paper-12)">
+        <span class="label" style="font-weight:600">Black type on yellow</span>
+        <span class="meta"><span class="badge pass" style="background:rgba(0,0,0,0.1);color:var(--ink)">AAA</span><span style="color:rgba(0,0,0,0.56)">15.9 : 1</span></span>
+      </div>
+
+      <div class="pair" style="background:var(--paper);color:var(--ink);border-right:1px solid var(--paper-12)">
+        <span class="label" style="display:inline-flex;align-items:center;gap:10px">
+          <span style="background:#FFDF00;color:var(--ink);padding:4px 10px;font-family:var(--font-mono);font-size:12px;font-weight:500;border-radius:3px">Live</span>
+          as a chip on white
+        </span>
+        <span class="meta" style="color:var(--fg-muted)"><span class="badge pass" style="background:rgba(35,165,95,0.14);color:#1E7E48">AAA</span>15.9 : 1 (inside the chip)</span>
+      </div>
+
+      <div class="pair" style="background:#FFF9CC;color:var(--ink)">
+        <span class="label">Ink on <span class="mono" style="background:#FFDF00;padding:1px 6px;border-radius:2px">paper-yellow</span> wash</span>
+        <span class="meta" style="color:rgba(0,0,0,0.64)"><span class="badge pass" style="background:rgba(0,0,0,0.08);color:var(--ink)">AAA</span>19.8 : 1</span>
+      </div>
+    </div>
+    <div class="mono" style="font-size:11px;color:var(--paper-56);margin-top:10px;line-height:1.55">Every pairing ships at AAA. Yellow is always paired with ink — never with paper, never with itself, never with a second accent.</div>
+  </div>
+
+  <div class="usage">
+    <div class="do">
+      <div class="spec-label" style="color:#27B06A">✓ Do</div>
+      <ul style="margin:12px 0 0 0;padding-left:16px;font-size:14px;color:var(--paper);line-height:1.7">
+        <li>Fill the <strong>one</strong> primary CTA per screen</li>
+        <li>Mark a <strong>live</strong> filing, a signed passport, a currently-selected row</li>
+        <li>Carry the <strong>smile</strong> inside the logomark</li>
+        <li>Use as <strong>::selection</strong> background</li>
+      </ul>
+    </div>
+    <div class="dont" style="border-left:1px solid var(--paper-12)">
+      <div class="spec-label" style="color:#FF7A59">✗ Don't</div>
+      <ul style="margin:12px 0 0 0;padding-left:16px;font-size:14px;color:var(--paper);line-height:1.7">
+        <li>Use yellow for <strong>warning</strong> states — we reserve it for <em>success + brand</em></li>
+        <li>Put <strong>white, light gray, or ink-56</strong> text on yellow</li>
+        <li>Fill large decorative blocks — it loses its signal value</li>
+        <li>Pair with a second accent colour — the palette is <strong>three</strong> colours only</li>
+      </ul>
+    </div>
+    <div style="border-left:1px solid var(--paper-12)">
+      <div class="spec-label">Why this yellow</div>
+      <ul style="margin:12px 0 0 0;padding-left:16px;font-size:14px;color:var(--paper);line-height:1.7">
+        <li>Bright enough to <em>signal</em> on ink at any size</li>
+        <li>Warm enough to feel archival — ties to paper + hang-tag metaphor</li>
+        <li>Passes <strong>AAA</strong> with black — 15.9 : 1</li>
+        <li>A canonical yellow — holds identity in CMYK print and screen</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body></html>

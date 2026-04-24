@@ -1,0 +1,10 @@
+/* Geist + Geist Mono — Vercel's open-source fonts (SIL OFL 1.1).
+   Served from Google Fonts (official Geist distribution). The user
+   noted these are available locally via `npm i geist`; when porting
+   to production, swap the `src: url(...)` lines for local paths:
+
+     src: url('/fonts/geist/Geist[wght].woff2') format('woff2-variations');
+
+   and keep the weight range 100–900 to preserve variable-weight use. */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap');

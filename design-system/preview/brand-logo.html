@@ -1,0 +1,308 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Brand — logomark · the yellow tag</title><link rel="stylesheet" href="_preview.css">
+<style>
+  .hero  { background: var(--ink); color: var(--paper); padding: 80px 64px; border:1px solid var(--hairline); }
+  .hero__lock { display:flex; align-items:center; justify-content:center; gap:28px; }
+  .hero__word { font-family: var(--font-display); font-size: 60px; font-weight: 600; letter-spacing: -0.045em; line-height:1; }
+  .hero__tag  { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; text-align:center; color: var(--paper-56); margin-top: 22px; }
+
+  .surfaces { display:grid; grid-template-columns:repeat(4,1fr); border:1px solid var(--hairline); }
+  .surfaces > div { padding:40px; display:flex; align-items:center; justify-content:center; border-left:1px solid var(--hairline); aspect-ratio: 1/1; }
+  .surfaces > div:first-child { border-left:none; }
+
+  .reasoning { display:grid; grid-template-columns: 1fr 1fr; gap:0; border:1px solid var(--hairline); }
+  .reasoning > div { padding: 28px; }
+  .reasoning > div + div { border-left:1px solid var(--hairline); }
+  .reasoning h4 { font-family: var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:0.1em; color: var(--fg-subtle); margin: 0 0 10px; font-weight:500; }
+  .reasoning p { margin: 0 0 10px; font-size: 14px; color: var(--fg-muted); line-height: 1.6; }
+  .reasoning em { color: var(--ink); font-style: normal; font-weight:500; }
+
+  .scale-row { display:flex; align-items:center; gap:40px; padding: 32px; border:1px solid var(--hairline); background: var(--paper-cream); }
+
+  .compare { display:grid; grid-template-columns: 1fr 1fr; border:1px solid var(--hairline); }
+  .compare > div { padding:40px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; min-height:360px; }
+  .compare > div + div { border-left:1px solid var(--hairline); }
+  .compare .hdr { font-family:var(--font-mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; }
+  .compare .sub { font-family:var(--font-mono); font-size:11px; color:var(--fg-subtle); text-align:center; line-height:1.5; max-width:28ch; }
+  .compare .primary-flag { font-family:var(--font-mono); font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; background:var(--ink); color:var(--paper); padding:3px 8px; border-radius:2px; }
+
+  @keyframes ptTagSwing { 0%, 100% { transform: rotate(-2.2deg); } 50% { transform: rotate(2.2deg); } }
+  .tag-swing { animation: ptTagSwing 4.6s ease-in-out infinite; transform-origin: 50% 6%; }
+  @media (prefers-reduced-motion: reduce) { .tag-swing { animation:none; } }
+</style>
+</head>
+
+<body><div class="card">
+
+  <div class="card__head">
+    <div>
+      <div class="card__eyebrow">Brand · Logomark</div>
+      <div class="card__title">The <span style="color:#FFDF00">yellow tag</span>.</div>
+    </div>
+    <div class="card__meta">The silhouette itself is the brand colour.<br/>Yellow body, ink eyes + smile. Warm, memorable, physical.<br/>The ink version stays around for one-colour printing.</div>
+  </div>
+
+  <!--
+    THE YELLOW TAG — v2.
+
+    Geometry unchanged from v1: 4:5 pentagonal hang-tag on a 4 px grid.
+       apex (24,4), shoulders (40,14)/(8,14), bottom (8..40, 56).
+       String hole: r=2 at (24, 12), knocked out via even-odd fill.
+
+    Primary fill: #FFDF00 (yellow).
+       Eyes and smile are INK (#14110B) so they read as features on the
+       yellow body rather than as holes in it.
+
+    Ink variant (secondary): inverse — ink body, yellow smile, knocked-
+       out eyes. Reserved for single-ink printing, tiny sizes (<20 px),
+       and any surface where yellow can't be reproduced.
+  -->
+
+  <svg id="symbol-def" width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <!-- ── Primary: yellow tag ──────────────────────────────── -->
+      <symbol id="ptag-yellow" viewBox="0 0 48 60">
+        <!-- string -->
+        <line x1="24" y1="0" x2="24" y2="6" stroke="var(--string-col, #14110B)" stroke-width="1.4" stroke-linecap="square"/>
+        <!-- silhouette — yellow body with string-hole punched -->
+        <path fill="#FFDF00" fill-rule="evenodd" d="
+          M 24 6
+          L 40 14
+          L 40 56
+          L 8 56
+          L 8 14
+          Z
+          M 24 10
+          a 2 2 0 1 0 0.01 0
+          Z
+        "/>
+        <!-- eyes — solid ink on yellow -->
+        <circle cx="18" cy="28" r="2.2" fill="#14110B"/>
+        <circle cx="30" cy="28" r="2.2" fill="#14110B"/>
+        <!-- smile — three ink dots in a U -->
+        <circle cx="19" cy="40" r="1.6" fill="#14110B"/>
+        <circle cx="24" cy="42" r="1.6" fill="#14110B"/>
+        <circle cx="29" cy="40" r="1.6" fill="#14110B"/>
+      </symbol>
+
+      <!-- ── Secondary: ink tag, yellow smile ─────────────────── -->
+      <symbol id="ptag-ink" viewBox="0 0 48 60">
+        <line x1="24" y1="0" x2="24" y2="6" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/>
+        <path fill="currentColor" fill-rule="evenodd" d="
+          M 24 6
+          L 40 14
+          L 40 56
+          L 8 56
+          L 8 14
+          Z
+          M 24 10
+          a 2 2 0 1 0 0.01 0
+          Z
+        "/>
+        <circle cx="18" cy="28" r="2.2" fill="var(--logo-bg, #FAFAF8)"/>
+        <circle cx="30" cy="28" r="2.2" fill="var(--logo-bg, #FAFAF8)"/>
+        <circle cx="19" cy="40" r="1.6" fill="#FFDF00"/>
+        <circle cx="24" cy="42" r="1.6" fill="#FFDF00"/>
+        <circle cx="29" cy="40" r="1.6" fill="#FFDF00"/>
+      </symbol>
+
+      <!-- ── Mono (single ink, no yellow anywhere) ────────────── -->
+      <symbol id="ptag-mono" viewBox="0 0 48 60">
+        <line x1="24" y1="0" x2="24" y2="6" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/>
+        <path fill="currentColor" fill-rule="evenodd" d="
+          M 24 6 L 40 14 L 40 56 L 8 56 L 8 14 Z
+          M 24 10 a 2 2 0 1 0 0.01 0 Z
+        "/>
+        <circle cx="18" cy="28" r="2.2" fill="var(--logo-bg, #FAFAF8)"/>
+        <circle cx="30" cy="28" r="2.2" fill="var(--logo-bg, #FAFAF8)"/>
+        <circle cx="19" cy="40" r="1.6" fill="var(--logo-bg, #FAFAF8)"/>
+        <circle cx="24" cy="42" r="1.6" fill="var(--logo-bg, #FAFAF8)"/>
+        <circle cx="29" cy="40" r="1.6" fill="var(--logo-bg, #FAFAF8)"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- HERO — mark + wordmark on black -->
+  <div class="hero">
+    <div class="hero__lock">
+      <svg class="tag-swing" width="108" height="135" viewBox="0 0 48 60" aria-label="PhotonicTag yellow tag mark" style="--string-col:#FAFAF8">
+        <use href="#ptag-yellow"/>
+      </svg>
+      <div class="hero__word">photonictag</div>
+    </div>
+    <div class="hero__tag">Digital Product Passports</div>
+  </div>
+
+  <!-- PRIMARY vs SECONDARY comparison -->
+  <div>
+    <div class="spec-label">Primary (yellow) · Secondary (ink)</div>
+    <div class="compare" style="margin-top:14px">
+
+      <div style="background:var(--paper-cream)">
+        <span class="primary-flag">Primary</span>
+        <svg width="180" height="225" viewBox="0 0 48 60" style="--string-col:#14110B">
+          <use href="#ptag-yellow"/>
+        </svg>
+        <div class="hdr">Yellow tag</div>
+        <div class="sub">The default. Silhouette carries the brand colour; eyes and smile are ink.</div>
+      </div>
+
+      <div style="background:var(--paper-cream)">
+        <svg width="180" height="225" viewBox="0 0 48 60" style="color:#14110B; --logo-bg:#FBF9F4">
+          <use href="#ptag-ink"/>
+        </svg>
+        <div class="hdr">Ink tag</div>
+        <div class="sub">Secondary. For one-ink print, embossing, favicons, or surfaces where yellow can't reproduce.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SURFACES - yellow-first -->
+  <div>
+    <div class="spec-label">On four surfaces — yellow tag everywhere the brand colour reproduces</div>
+    <div class="surfaces" style="margin-top:14px">
+
+      <!-- On ink -->
+      <div style="background:var(--ink)">
+        <svg width="130" height="163" viewBox="0 0 48 60" style="--string-col:#FAFAF8">
+          <use href="#ptag-yellow"/>
+        </svg>
+      </div>
+
+      <!-- On paper -->
+      <div style="background:var(--paper-pure)">
+        <svg width="130" height="163" viewBox="0 0 48 60" style="--string-col:#14110B">
+          <use href="#ptag-yellow"/>
+        </svg>
+      </div>
+
+      <!-- On cream paper -->
+      <div style="background:var(--paper-cream)">
+        <svg width="130" height="163" viewBox="0 0 48 60" style="--string-col:#14110B">
+          <use href="#ptag-yellow"/>
+        </svg>
+      </div>
+
+      <!-- On yellow itself — yellow can't sit on yellow, so this is the ink fallback -->
+      <div style="background:#FFDF00">
+        <svg width="130" height="163" viewBox="0 0 48 60" style="color:#14110B; --logo-bg:#FFDF00">
+          <use href="#ptag-ink"/>
+        </svg>
+      </div>
+
+    </div>
+    <div class="mono" style="font-size:11px;color:var(--fg-subtle);margin-top:10px">
+      Yellow on ink · yellow on paper · yellow on cream · <em style="font-style:normal;color:var(--ink)">ink</em> on yellow (the one surface where we flip — yellow can't sit on itself).
+    </div>
+  </div>
+
+  <!-- Construction note -->
+  <div class="reasoning">
+    <div>
+      <h4>Why yellow as the silhouette</h4>
+      <p>The smile alone asked the yellow to do all the work in a <em>4-pixel-wide</em> zone — it was a nice touch but not an identity. Filling the whole silhouette makes the brand readable at a glance from any distance, and lets the mark act as its own badge or spot-colour block in layout.</p>
+    </div>
+    <div>
+      <h4>Why keep the ink version</h4>
+      <p>A one-colour fallback is non-negotiable for real-world use: etched into metal hang-tags, laser-scored into leather, single-ink printed on thermal receipts, or sitting at favicon sizes. Same geometry, same smile, same story — just no colour.</p>
+    </div>
+    <div>
+      <h4>Why the smile becomes ink</h4>
+      <p>Inside the yellow silhouette, three yellow smile-dots on a yellow body would disappear. Flipping the smile and eyes to ink keeps the face legible without introducing any third colour. Still a strict two-colour palette: <em>yellow + ink</em>.</p>
+    </div>
+    <div>
+      <h4>What stays the same</h4>
+      <p>Every proportion from v1 carries over: 4:5 body, 16-px pentagonal head, 4-px grid, r=2 string-hole, the exact eye and smile coordinates. The tag is still a tag. It just wears its colour out loud now.</p>
+    </div>
+  </div>
+
+  <!-- SCALE (primary) -->
+  <div>
+    <div class="spec-label">Scale test — yellow tag, 20 px to 96 px</div>
+    <div class="scale-row" style="margin-top:14px">
+      <script>
+        [20, 24, 32, 48, 64, 96].forEach(h => {
+          const w = Math.round(h * 48 / 60);
+          document.write(`<svg width="${w}" height="${h}" viewBox="0 0 48 60" style="--string-col:#14110B"><use href="#ptag-yellow"/></svg>`);
+        });
+      </script>
+      <div class="mono" style="font-size:11px;color:var(--fg-subtle);margin-left:auto;line-height:1.7">
+        yellow tag · min viable <strong style="color:var(--ink)">20 px</strong><br/>
+        below 20 px, the ink eyes start to merge →
+      </div>
+    </div>
+    <div class="scale-row" style="margin-top:10px">
+      <script>
+        [16, 20, 24, 32, 48, 64, 96].forEach(h => {
+          const w = Math.round(h * 48 / 60);
+          document.write(`<svg width="${w}" height="${h}" viewBox="0 0 48 60" style="color:#14110B; --logo-bg:#FBF9F4"><use href="#ptag-ink"/></svg>`);
+        });
+      </script>
+      <div class="mono" style="font-size:11px;color:var(--fg-subtle);margin-left:auto;line-height:1.7">
+        ink tag · min viable <strong style="color:var(--ink)">16 px</strong><br/>
+        use for favicons, icon sheets, one-ink print
+      </div>
+    </div>
+  </div>
+
+  <!-- IN-PRODUCT USAGE -->
+  <div>
+    <div class="spec-label">In the product</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:14px">
+
+      <!-- App header - yellow tag -->
+      <div style="padding:20px;border:1px solid var(--hairline);background:var(--paper-pure)">
+        <div class="mono" style="font-size:10px;color:var(--fg-subtle);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px">App header · 28 px</div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--hairline);border-radius:10px;background:var(--paper-cream)">
+          <svg width="22" height="28" viewBox="0 0 48 60" style="--string-col:#14110B"><use href="#ptag-yellow"/></svg>
+          <span style="font-family:var(--font-display);font-size:17px;font-weight:600;letter-spacing:-0.025em">photonictag</span>
+          <span style="margin-left:auto;font-family:var(--font-mono);font-size:11px;color:var(--fg-muted)">acme-industries</span>
+        </div>
+      </div>
+
+      <!-- Public viewer hero -->
+      <div style="padding:20px;border:1px solid var(--hairline);background:var(--ink);color:var(--paper)">
+        <div class="mono" style="font-size:10px;color:var(--paper-56);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px">Public viewer · hero</div>
+        <div style="display:flex;align-items:center;justify-content:center;padding:10px 0">
+          <svg class="tag-swing" width="72" height="90" viewBox="0 0 48 60" style="--string-col:#FAFAF8"><use href="#ptag-yellow"/></svg>
+        </div>
+        <div class="mono" style="font-size:10.5px;color:var(--paper-56);text-align:center">ESPR-TX-402 · signed 2026-03-14</div>
+      </div>
+
+      <!-- Physical sticker -->
+      <div style="padding:20px;border:1px solid var(--hairline);background:var(--paper-cream)">
+        <div class="mono" style="font-size:10px;color:var(--fg-subtle);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px">Sticker · 48 × 48 mm</div>
+        <div style="display:flex;align-items:center;justify-content:center;aspect-ratio:3/2;background:var(--paper-pure);border:1px solid var(--hairline)">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+            <svg width="46" height="58" viewBox="0 0 48 60" style="--string-col:#14110B"><use href="#ptag-yellow"/></svg>
+            <span style="font-family:var(--font-mono);font-size:8.5px;color:var(--fg-subtle);letter-spacing:0.1em;text-transform:uppercase">photonictag.eu/p/tx-402</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DO / DON'T -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--hairline)">
+    <div style="padding:24px">
+      <div class="spec-label" style="color:#0F5E2E">✓ Do</div>
+      <ul style="margin:10px 0 0;padding-left:18px;font-size:14px;color:var(--fg-muted);line-height:1.7">
+        <li>Use the <strong>yellow tag</strong> as the default — it's the primary mark.</li>
+        <li>Swap to the <strong>ink tag</strong> below 20 px, on yellow backgrounds, or when printing single-ink.</li>
+        <li>Keep eyes and smile <strong>ink</strong> inside the yellow body. Same two colours, always.</li>
+        <li>Pair with the wordmark at the same cap-height — tag body = wordmark x-height × 1.8.</li>
+      </ul>
+    </div>
+    <div style="padding:24px;border-left:1px solid var(--hairline)">
+      <div class="spec-label" style="color:#8A1F14">✗ Don't</div>
+      <ul style="margin:10px 0 0;padding-left:18px;font-size:14px;color:var(--fg-muted);line-height:1.7">
+        <li>Outline the silhouette — solid fill only, never a stroke.</li>
+        <li>Put the yellow tag on a yellow background. Use the ink tag there.</li>
+        <li>Introduce a third colour (paper eyes, coloured smile, gradients). Two colours, full stop.</li>
+        <li>Change the 4:5 proportion, the eye positions, or the smile curve.</li>
+      </ul>
+    </div>
+  </div>
+
+</div></body></html>

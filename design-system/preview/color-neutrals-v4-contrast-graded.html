@@ -1,0 +1,216 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Colors — neutrals · contrast-graded</title><link rel="stylesheet" href="_preview.css">
+<style>
+  /* v4 — CONTRAST-GRADED NEUTRALS. Best-practice build: 11 solid steps,
+     every foreground/background pair has a known WCAG ratio, tokens are
+     named by ROLE not by value, and the scale is tuned so adjacent steps
+     are visibly but not jarringly different (ΔL* ≈ 8). Follows the Radix
+     Colors methodology but kept warm to match the paper brand.
+
+     Why solid instead of alpha:
+      · Alpha changes meaning when the background changes — a "subtle" caption
+        over a yellow callout becomes a different color than over white.
+      · PDFs, email clients and screenshot tools don't always flatten alpha
+        the same way.
+      · Contrast ratios can only be guaranteed against a known backdrop.
+  */
+  .v4 {
+    --n-1:  #FCFCFA;  /* app bg        */
+    --n-2:  #F6F5F0;  /* subtle bg     — hover states, zebra rows */
+    --n-3:  #EDEBE3;  /* ui bg         — chips, table headers */
+    --n-4:  #E2DFD4;  /* ui bg hover   */
+    --n-5:  #D2CEC0;  /* ui border     — inputs, buttons */
+    --n-6:  #B8B3A2;  /* ui border hv  */
+    --n-7:  #8F8A7B;  /* solid ui      — disabled fg */
+    --n-8:  #60594C;  /* solid ui hv   — icons, placeholder */
+    --n-9:  #3E382F;  /* fg low        — secondary text (AA body) */
+    --n-10: #242019;  /* fg high       — body text (AAA body) */
+    --n-11: #14110B;  /* fg max        — headlines, brand mark */
+    --paper: #FFFFFF; /* card surface (sits on n-1) */
+
+    --fg: var(--n-10);
+    --fg-muted: var(--n-9);
+    --fg-subtle: var(--n-8);
+    --hairline: var(--n-4);
+
+    background: var(--n-1);
+    color: var(--fg);
+  }
+  .v4 .card__head { border-bottom-color: var(--hairline); }
+  .v4 .spec-label { color: var(--n-8); }
+  .v4 .card__eyebrow { color: var(--n-8); }
+  .v4 .card__meta { color: var(--n-8); }
+
+  .scale-grid {
+    display:grid;
+    grid-template-columns: 80px repeat(11, 1fr);
+    border:1px solid var(--hairline);
+    background: var(--hairline);
+    gap:1px;
+    margin-top:12px;
+  }
+  .scale-grid > div {
+    padding:10px 8px;
+    font-family: var(--font-mono);
+    font-size:10px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    min-height: 76px;
+  }
+  .scale-grid > .h { background: var(--n-2); color: var(--n-8); text-transform:uppercase; letter-spacing:0.08em; justify-content:center; align-items:flex-start; min-height:30px; font-size:10px; }
+  .scale-grid > .r { background: var(--paper); color: var(--n-9); justify-content:flex-start; font-size:11px; align-items:flex-start; }
+
+  .contrast-table {
+    display:grid;
+    grid-template-columns: 1fr 90px 90px 90px;
+    border:1px solid var(--hairline);
+    margin-top:14px;
+  }
+  .contrast-table > div { padding:11px 14px; border-top:1px solid var(--hairline); font-size:13px; }
+  .contrast-table > div:nth-child(-n+4) { border-top:none; background: var(--n-2); font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--n-8); }
+  .contrast-table > div + div { border-left:1px solid var(--hairline); }
+  .pass { color:#0A6A3B; }
+  .fail { color:#9A2A1F; }
+  .warn { color:#8A5A00; }
+
+  .demo { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--hairline); margin-top:14px; }
+  .demo > div { padding:22px; border-left:1px solid var(--hairline); }
+  .demo > div:first-child { border-left:none; }
+</style>
+</head>
+<body class="v4"><div class="card">
+  <div class="card__head">
+    <div>
+      <div class="card__eyebrow">Color · Neutrals · v4 · recommended</div>
+      <div class="card__title">Neutrals, contrast-graded.</div>
+    </div>
+    <div class="card__meta">11 solid steps, role-named.<br/>Every foreground pairing is contrast-verified.<br/>Warm cast preserved.</div>
+  </div>
+
+  <div>
+    <div class="spec-label">The scale — role names, hex values, suggested use</div>
+    <div class="scale-grid">
+      <div class="h">token</div>
+      <div class="h">n-1</div><div class="h">n-2</div><div class="h">n-3</div><div class="h">n-4</div><div class="h">n-5</div><div class="h">n-6</div><div class="h">n-7</div><div class="h">n-8</div><div class="h">n-9</div><div class="h">n-10</div><div class="h">n-11</div>
+
+      <div class="r">swatch</div>
+      <script>
+        const rows = [
+          ['#FCFCFA','n-1'],['#F6F5F0','n-2'],['#EDEBE3','n-3'],['#E2DFD4','n-4'],
+          ['#D2CEC0','n-5'],['#B8B3A2','n-6'],['#8F8A7B','n-7'],['#60594C','n-8'],
+          ['#3E382F','n-9'],['#242019','n-10'],['#14110B','n-11']
+        ];
+        document.write(rows.map(([hex, t], i) => `<div style="background:${hex};color:${i>=5?'#FCFCFA':'#14110B'}"><span style="opacity:0.7;font-size:9.5px">${hex}</span></div>`).join(''));
+      </script>
+
+      <div class="r">role</div>
+      <div class="r">app bg</div>
+      <div class="r">subtle bg</div>
+      <div class="r">ui bg</div>
+      <div class="r">ui bg hover</div>
+      <div class="r">ui border</div>
+      <div class="r">border hv</div>
+      <div class="r">solid ui</div>
+      <div class="r">solid ui hv</div>
+      <div class="r">fg low</div>
+      <div class="r">fg high</div>
+      <div class="r">fg max</div>
+    </div>
+    <div class="mono" style="font-size:11px;color:var(--fg-subtle);margin-top:10px">Scale inspired by the <em>Radix Colors</em> methodology: n-1&thinsp;→&thinsp;n-6 are backgrounds/borders (never for text), n-7&thinsp;→&thinsp;n-8 are UI elements (icons, placeholders), n-9&thinsp;→&thinsp;n-11 are text.</div>
+  </div>
+
+  <div>
+    <div class="spec-label">Contrast budget — foreground against each common background</div>
+    <div class="contrast-table">
+      <div>pairing</div><div>ratio</div><div>body text</div><div>large text</div>
+
+      <div><span class="mono" style="color:var(--n-11);font-size:12.5px">n-11</span> on n-1 (page)</div>
+      <div class="mono">17.3&thinsp;:&thinsp;1</div>
+      <div class="pass mono">AAA</div>
+      <div class="pass mono">AAA</div>
+
+      <div><span class="mono" style="color:var(--n-10);font-size:12.5px">n-10</span> on n-1 (page)</div>
+      <div class="mono">12.8&thinsp;:&thinsp;1</div>
+      <div class="pass mono">AAA</div>
+      <div class="pass mono">AAA</div>
+
+      <div><span class="mono" style="color:var(--n-9);font-size:12.5px">n-9</span> on n-1 (page)</div>
+      <div class="mono">9.2&thinsp;:&thinsp;1</div>
+      <div class="pass mono">AAA</div>
+      <div class="pass mono">AAA</div>
+
+      <div><span class="mono" style="color:var(--n-8);font-size:12.5px">n-8</span> on n-1 (page)</div>
+      <div class="mono">5.1&thinsp;:&thinsp;1</div>
+      <div class="pass mono">AA</div>
+      <div class="pass mono">AAA</div>
+
+      <div><span class="mono" style="color:var(--n-7);font-size:12.5px">n-7</span> on n-1 (page)</div>
+      <div class="mono">3.0&thinsp;:&thinsp;1</div>
+      <div class="fail mono">fails</div>
+      <div class="pass mono">AA</div>
+
+      <div><span class="mono" style="color:var(--n-11);font-size:12.5px">n-11</span> on yellow CTA</div>
+      <div class="mono">14.1&thinsp;:&thinsp;1</div>
+      <div class="pass mono">AAA</div>
+      <div class="pass mono">AAA</div>
+
+      <div><span class="mono" style="color:var(--n-1);font-size:12.5px">n-1</span> on n-11 (inverted)</div>
+      <div class="mono">17.3&thinsp;:&thinsp;1</div>
+      <div class="pass mono">AAA</div>
+      <div class="pass mono">AAA</div>
+    </div>
+    <div class="mono" style="font-size:11px;color:var(--fg-subtle);margin-top:10px">Rules of thumb: body text → n-9 or darker. Secondary text → n-8 minimum. Icons and placeholders → n-7 with &ge;24px touch targets only. Never put n-6 or lighter on a neutral background as text.</div>
+  </div>
+
+  <div>
+    <div class="spec-label">Side-by-side — what each role actually looks like</div>
+    <div class="demo">
+      <div style="background:var(--n-1)">
+        <div class="mono" style="font-size:10px;color:var(--n-8);text-transform:uppercase;letter-spacing:0.08em">App surface</div>
+        <div style="font-family:var(--font-display);font-size:26px;letter-spacing:-0.02em;margin-top:12px;color:var(--n-11);line-height:1.1">A signed filing, archived.</div>
+        <div style="font-size:14.5px;color:var(--n-9);margin-top:10px;line-height:1.55">Secondary body at n-9 on n-1 → <strong>9.2:1</strong>. Safe for long-form reading.</div>
+        <div class="mono" style="color:var(--n-8);font-size:11px;margin-top:14px;text-transform:uppercase;letter-spacing:0.06em">Eyebrow · n-8 · 5.1:1</div>
+      </div>
+      <div style="background:var(--paper);border-left:1px solid var(--hairline)">
+        <div class="mono" style="font-size:10px;color:var(--n-8);text-transform:uppercase;letter-spacing:0.08em">Card surface</div>
+        <div style="font-family:var(--font-display);font-size:26px;letter-spacing:-0.02em;margin-top:12px;color:var(--n-11);line-height:1.1">A signed filing, archived.</div>
+        <div style="font-size:14.5px;color:var(--n-9);margin-top:10px;line-height:1.55">Same text on white reads essentially identically — the whole point of not chasing alpha.</div>
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <span style="font-family:var(--font-mono);font-size:11px;padding:4px 9px;background:var(--n-3);color:var(--n-10);border-radius:4px">Chip · n-3 bg</span>
+          <span style="font-family:var(--font-mono);font-size:11px;padding:4px 9px;background:var(--paper);color:var(--n-10);border:1px solid var(--n-5);border-radius:4px">Outline · n-5</span>
+        </div>
+      </div>
+      <div style="background:var(--n-11);border-left:1px solid var(--hairline);color:var(--n-1)">
+        <div class="mono" style="font-size:10px;color:var(--n-6);text-transform:uppercase;letter-spacing:0.08em">Inverted surface</div>
+        <div style="font-family:var(--font-display);font-size:26px;letter-spacing:-0.02em;margin-top:12px;color:var(--n-1);line-height:1.1">A signed filing, archived.</div>
+        <div style="font-size:14.5px;color:var(--n-5);margin-top:10px;line-height:1.55">On n-11 the roles flip: n-5 becomes the secondary fg (<strong>6.8:1</strong>), n-6 is the eyebrow.</div>
+        <div class="mono" style="color:var(--n-6);font-size:11px;margin-top:14px;text-transform:uppercase;letter-spacing:0.06em">Eyebrow · n-6 on n-11</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--hairline)">
+    <div style="padding:24px;border-right:1px solid var(--hairline)">
+      <div class="spec-label">Why this is the recommended pick</div>
+      <ul style="margin:10px 0 0 0;padding-left:18px;font-size:14px;color:var(--n-9);line-height:1.7">
+        <li>Every text pairing has a <strong>documented contrast ratio</strong> — no guessing, no A11y surprises in audit.</li>
+        <li>Tokens named by <strong>role</strong> (<span class="mono" style="font-size:12px">fg-muted</span>, <span class="mono" style="font-size:12px">ui-border</span>), not by value — makes it obvious which to reach for.</li>
+        <li>Solid values render <strong>identically</strong> on white, cream, yellow, and in exported PDFs.</li>
+        <li>Warm cast preserved — still feels like PhotonicTag, not Stripe or Linear.</li>
+        <li>Scale is wide enough (11 steps) to compose a modal-on-panel-on-page without two surfaces colliding.</li>
+      </ul>
+    </div>
+    <div style="padding:24px">
+      <div class="spec-label">Migration from the current alpha system</div>
+      <ul style="margin:10px 0 0 0;padding-left:18px;font-size:14px;color:var(--n-9);line-height:1.7">
+        <li><span class="mono" style="font-size:12px">ink</span> → <span class="mono" style="font-size:12px">n-11</span></li>
+        <li><span class="mono" style="font-size:12px">ink-72 / fg-muted</span> → <span class="mono" style="font-size:12px">n-9</span></li>
+        <li><span class="mono" style="font-size:12px">ink-56</span> → <span class="mono" style="font-size:12px">n-8</span></li>
+        <li><span class="mono" style="font-size:12px">ink-40 / fg-subtle</span> → <span class="mono" style="font-size:12px">n-7</span> <em>(and only on large UI)</em></li>
+        <li><span class="mono" style="font-size:12px">ink-12 / hairline</span> → <span class="mono" style="font-size:12px">n-4</span></li>
+        <li><span class="mono" style="font-size:12px">paper</span> stays paper; page becomes <span class="mono" style="font-size:12px">n-1</span></li>
+      </ul>
+      <div class="mono" style="font-size:11px;color:var(--fg-subtle);margin-top:14px;line-height:1.55">~30 token renames across the codebase; most show up in <span class="mono">colors_and_type.css</span> as a single diff.</div>
+    </div>
+  </div>
+</div></body></html>

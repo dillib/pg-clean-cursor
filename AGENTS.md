@@ -21,7 +21,7 @@ This repository is the **PhotonicTag app root** (Node + Vite + Drizzle). Cursor 
 ## Docs
 
 - [`PLAN.md`](PLAN.md), [`AUDIT.md`](AUDIT.md) — security / tenancy roadmap  
-- **Design system** (tokens + HANDOFF): keep a sibling checkout `../design-system` from the main PhotonicTag design repo, or add as a git submodule when you publish it separately.
+- **Design system** (tokens + HANDOFF): vendored in this repo at [`design-system/`](design-system/) (same source as the PhotonicTag brand package).
 
 ## Run locally
 

@@ -46,32 +46,35 @@ const Tilt = ({ children, max = 5, scale = 1.01, style = {} }) => {
 
 // ── Reveal ──────────────────────────────────────────────────
 // Intersection-observer driven opacity+translate fade-in.
-// Reveal — CSS-only fade-in. Resting state is VISIBLE (opacity: 1); the
-// animation only overrides it briefly on entry. Even if animations are
-// disabled, blocked, or stuck, the element defaults to visible.
-if (typeof document !== 'undefined' && !document.getElementById('pt-reveal-kf')) {
-  const s = document.createElement('style');
-  s.id = 'pt-reveal-kf';
-  s.textContent = `
-    @keyframes ptReveal {
-      from { opacity: 0; transform: translateY(var(--pt-reveal-y, 8px)); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      @keyframes ptReveal { from { opacity: 1; transform: none; } }
-    }
-  `;
-  document.head.appendChild(s);
-}
+const Reveal = ({ children, delay = 0, y = 8, as: As = 'div', style = {}, ...rest }) => {
+  const ref = React.useRef(null);
+  const [shown, setShown] = React.useState(false);
 
-const Reveal = ({ children, delay = 0, y = 8, as: As = 'div', style = {}, ...rest }) => (
-  <As style={{
-    opacity: 1,
-    transform: 'none',
-    animation: `ptReveal 600ms var(--ease) ${delay}ms backwards`,
-    '--pt-reveal-y': `${y}px`,
-    ...style,
-  }} {...rest}>{children}</As>
-);
+  React.useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setShown(true); return; }
+    const el = ref.current; if (!el) return;
+    // If element is already in view on mount, show it immediately (next frame).
+    const r = el.getBoundingClientRect();
+    if (r.top < window.innerHeight && r.bottom > 0) {
+      requestAnimationFrame(() => setShown(true));
+      return;
+    }
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setShown(true); io.disconnect(); }
+    }, {rootMargin: '0px 0px -10% 0px', threshold: 0.01});
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <As ref={ref} style={{
+      opacity: shown ? 1 : 0,
+      transform: shown ? 'none' : `translateY(${y}px)`,
+      transition: `opacity 600ms var(--ease) ${delay}ms, transform 600ms var(--ease) ${delay}ms`,
+      ...style,
+    }} {...rest}>{children}</As>
+  );
+};
 
 // ── Marquee ─────────────────────────────────────────────────
 // Infinite horizontal ticker. Pure CSS animation. Pauses on hover.

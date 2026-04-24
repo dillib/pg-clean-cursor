@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Spacing</title><link rel="stylesheet" href="_preview.css"></head>
+<body><div class="card">
+  <div class="card__head"><div><div class="card__eyebrow">Spacing</div><div class="card__title">A 4pt grid. Ten steps.</div></div><div class="card__meta">s-1 → s-10<br/>4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 · 96 · 128</div></div>
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <script>
+      const steps=[['s-1',4],['s-2',8],['s-3',12],['s-4',16],['s-5',24],['s-6',32],['s-7',48],['s-8',64],['s-9',96],['s-10',128]];
+      document.write(steps.map(([t,v]) => `
+        <div style="display:grid;grid-template-columns:120px ${v}px 1fr;align-items:center;gap:24px">
+          <div class="mono" style="font-size:11px;color:var(--fg-subtle)">${t} · ${v}px</div>
+          <div style="height:24px;background:var(--ink)"></div>
+          <div style="height:1px;background:var(--hairline)"></div>
+        </div>`).join(''));
+    </script>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:32px;margin-top:32px">
+    <div>
+      <div class="spec-label">Radii · sharp</div>
+      <div style="display:flex;gap:12px;margin-top:14px">
+        <div style="width:64px;height:64px;background:var(--ink);border-radius:0"></div>
+        <div style="width:64px;height:64px;background:var(--ink);border-radius:2px"></div>
+        <div style="width:64px;height:64px;background:var(--ink);border-radius:4px"></div>
+        <div style="width:64px;height:64px;background:var(--ink);border-radius:6px"></div>
+        <div style="width:64px;height:64px;background:var(--ink);border-radius:9999px"></div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px" class="mono">
+        <span style="width:64px;font-size:11px;color:var(--fg-subtle)">r-0 · 0</span>
+        <span style="width:64px;font-size:11px;color:var(--fg-subtle)">r-1 · 2</span>
+        <span style="width:64px;font-size:11px;color:var(--fg-subtle)">r-2 · 4</span>
+        <span style="width:64px;font-size:11px;color:var(--fg-subtle)">r-3 · 6</span>
+        <span style="width:64px;font-size:11px;color:var(--fg-subtle)">pill</span>
+      </div>
+    </div>
+    <div>
+      <div class="spec-label">Elevation · hairlines, not shadows</div>
+      <div style="display:flex;gap:12px;margin-top:14px">
+        <div style="width:120px;height:80px;background:var(--paper);box-shadow:var(--hl-outer);display:flex;align-items:center;justify-content:center" class="mono"><span style="font-size:11px;color:var(--fg-muted)">hl-outer</span></div>
+        <div style="width:120px;height:80px;background:var(--paper);box-shadow:var(--lift-2);display:flex;align-items:center;justify-content:center" class="mono"><span style="font-size:11px;color:var(--fg-muted)">lift-2</span></div>
+        <div style="width:120px;height:80px;background:var(--paper);box-shadow:var(--lift-3);display:flex;align-items:center;justify-content:center" class="mono"><span style="font-size:11px;color:var(--fg-muted)">lift-3</span></div>
+      </div>
+    </div>
+  </div>
+</div></body></html>

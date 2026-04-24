@@ -1,0 +1,28 @@
+/* Preview card chrome — used by every specimen HTML in /preview. */
+@import url('../colors_and_type.css');
+
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: var(--font-sans); }
+
+.card {
+  min-height: 100vh;
+  padding: 48px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  box-sizing: border-box;
+}
+.card--dark { background: var(--ink); color: var(--paper); }
+
+.card__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--hairline); }
+.card--dark .card__head { border-bottom-color: var(--paper-12); }
+
+.card__eyebrow { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: var(--lt-caps); color: var(--fg-muted); }
+.card--dark .card__eyebrow { color: var(--paper-56); }
+.card__title { font-family: var(--font-display); font-size: 40px; font-weight: 600; letter-spacing: var(--lt-tight); line-height: 1; }
+.card__meta  { font-family: var(--font-mono); font-size: 11px; color: var(--fg-subtle); text-align: right; line-height: 1.6; }
+.card--dark .card__meta { color: var(--paper-40); }
+
+.spec-label { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: var(--lt-caps); color: var(--fg-subtle); }
+.card--dark .spec-label { color: var(--paper-40); }
+
+.grid { display: grid; gap: 24px; }

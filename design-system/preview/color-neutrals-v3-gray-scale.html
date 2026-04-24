@@ -1,0 +1,142 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Colors — ink & paper · solid gray scale</title><link rel="stylesheet" href="_preview.css">
+<style>
+  /* v3 — SOLID GRAY SCALE. Instead of ink + alpha, define 10 explicit gray tokens.
+     This is the shadcn / Linear / Radix approach — predictable on any background,
+     compositable (gray-2 on gray-1), survives PDF export without surprises. */
+  .v3 {
+    --gray-0:  #FFFFFF;
+    --gray-1:  #FAFAF8;
+    --gray-2:  #F3F2ED;
+    --gray-3:  #E7E5DD;
+    --gray-4:  #D4D1C7;
+    --gray-5:  #A8A49A;
+    --gray-6:  #6E6A61;
+    --gray-7:  #464238;
+    --gray-8:  #2B2822;
+    --gray-9:  #14120E;
+
+    --fg: var(--gray-9);
+    --fg-muted: var(--gray-7);
+    --fg-subtle: var(--gray-6);
+    --hairline: var(--gray-3);
+
+    background: var(--gray-1);
+    color: var(--fg);
+  }
+  .v3 .card__head { border-bottom-color: var(--hairline); }
+  .scale { display:grid; grid-template-columns:repeat(10,1fr); gap:0; border:1px solid var(--hairline); margin-top:12px; }
+  .scale > div { aspect-ratio:1/1; display:flex; flex-direction:column; justify-content:flex-end; padding:10px; font-family:var(--font-mono); font-size:10px; }
+  .role-row { display:grid; grid-template-columns:140px 1fr 1fr; gap:0; border-top:1px solid var(--hairline); }
+  .role-row > div { padding:14px 18px; }
+  .role-row:first-child { border-top:none; }
+  .role-row > div + div { border-left:1px solid var(--hairline); }
+</style>
+</head>
+<body class="v3"><div class="card">
+  <div class="card__head">
+    <div>
+      <div class="card__eyebrow">Color · Neutrals · v3</div>
+      <div class="card__title">A real gray scale.</div>
+    </div>
+    <div class="card__meta">10 solid tokens, gray-0 → gray-9.<br/>No alpha, no ambiguity.<br/>Same discipline, predictable output.</div>
+  </div>
+
+  <div>
+    <div class="spec-label">Gray scale — gray-0 (paper) to gray-9 (ink)</div>
+    <div class="scale">
+      <script>
+        const grays = [
+          ['0','#FFFFFF'],['1','#FAFAF8'],['2','#F3F2ED'],['3','#E7E5DD'],['4','#D4D1C7'],
+          ['5','#A8A49A'],['6','#6E6A61'],['7','#464238'],['8','#2B2822'],['9','#14120E']
+        ];
+        document.write(grays.map(([i,hex]) => {
+          const dark = parseInt(i) >= 5;
+          return `<div style="background:${hex};color:${dark?'#F3F2ED':'#14120E'}"><span style="opacity:0.7">gray-${i}</span><span style="font-size:11px;margin-top:2px">${hex}</span></div>`;
+        }).join(''));
+      </script>
+    </div>
+    <div class="mono" style="font-size:11px;color:var(--fg-subtle);margin-top:10px">Contrast-checked: gray-7 on gray-1 is AA body; gray-6 on gray-1 is AA large; gray-9 on gray-1 is AAA.</div>
+  </div>
+
+  <div style="border:1px solid var(--hairline)">
+    <div class="role-row">
+      <div class="spec-label">Role</div>
+      <div class="spec-label">Token</div>
+      <div class="spec-label">Used for</div>
+    </div>
+    <div class="role-row">
+      <div class="mono" style="font-size:13px;color:var(--fg)">page</div>
+      <div style="display:flex;align-items:center;gap:12px"><span style="width:22px;height:22px;background:var(--gray-1);border:1px solid var(--hairline)"></span><span class="mono" style="font-size:12px">gray-1 · #FAFAF8</span></div>
+      <div style="font-size:14px;color:var(--fg-muted)">Body background</div>
+    </div>
+    <div class="role-row">
+      <div class="mono" style="font-size:13px;color:var(--fg)">surface</div>
+      <div style="display:flex;align-items:center;gap:12px"><span style="width:22px;height:22px;background:var(--gray-0);border:1px solid var(--hairline)"></span><span class="mono" style="font-size:12px">gray-0 · #FFFFFF</span></div>
+      <div style="font-size:14px;color:var(--fg-muted)">Cards, panels, modals</div>
+    </div>
+    <div class="role-row">
+      <div class="mono" style="font-size:13px;color:var(--fg)">subdued</div>
+      <div style="display:flex;align-items:center;gap:12px"><span style="width:22px;height:22px;background:var(--gray-2);border:1px solid var(--hairline)"></span><span class="mono" style="font-size:12px">gray-2 · #F3F2ED</span></div>
+      <div style="font-size:14px;color:var(--fg-muted)">Table headers, code blocks, filled chips</div>
+    </div>
+    <div class="role-row">
+      <div class="mono" style="font-size:13px;color:var(--fg)">hairline</div>
+      <div style="display:flex;align-items:center;gap:12px"><span style="width:22px;height:22px;background:var(--gray-3);border:1px solid var(--hairline)"></span><span class="mono" style="font-size:12px">gray-3 · #E7E5DD</span></div>
+      <div style="font-size:14px;color:var(--fg-muted)">Dividers, card borders</div>
+    </div>
+    <div class="role-row">
+      <div class="mono" style="font-size:13px;color:var(--fg)">disabled</div>
+      <div style="display:flex;align-items:center;gap:12px"><span style="width:22px;height:22px;background:var(--gray-5);border:1px solid var(--hairline)"></span><span class="mono" style="font-size:12px">gray-5 · #A8A49A</span></div>
+      <div style="font-size:14px;color:var(--fg-muted)">Disabled text, placeholder glyphs</div>
+    </div>
+    <div class="role-row">
+      <div class="mono" style="font-size:13px;color:var(--fg)">fg-subtle</div>
+      <div style="display:flex;align-items:center;gap:12px"><span style="width:22px;height:22px;background:var(--gray-6);border:1px solid var(--hairline)"></span><span class="mono" style="font-size:12px">gray-6 · #6E6A61</span></div>
+      <div style="font-size:14px;color:var(--fg-muted)">Captions, eyebrow labels, metadata</div>
+    </div>
+    <div class="role-row">
+      <div class="mono" style="font-size:13px;color:var(--fg)">fg-muted</div>
+      <div style="display:flex;align-items:center;gap:12px"><span style="width:22px;height:22px;background:var(--gray-7);border:1px solid var(--hairline)"></span><span class="mono" style="font-size:12px">gray-7 · #464238</span></div>
+      <div style="font-size:14px;color:var(--fg-muted)">Secondary body copy</div>
+    </div>
+    <div class="role-row">
+      <div class="mono" style="font-size:13px;color:var(--fg)">fg</div>
+      <div style="display:flex;align-items:center;gap:12px"><span style="width:22px;height:22px;background:var(--gray-9)"></span><span class="mono" style="font-size:12px">gray-9 · #14120E</span></div>
+      <div style="font-size:14px;color:var(--fg-muted)">Headlines, primary ink, brand mark</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:0;border:1px solid var(--hairline)">
+    <div style="padding:28px;background:var(--gray-0)">
+      <div class="spec-label">Typical surface composition</div>
+      <div style="color:var(--gray-9);font-family:var(--font-display);font-size:28px;letter-spacing:-0.02em;margin-top:14px;line-height:1.15">Evidence of custody, signed and timestamped.</div>
+      <div style="color:var(--gray-7);font-size:15px;margin-top:10px;line-height:1.55">Secondary at gray-7 renders identically on white, on gray-2, and on an attachment in an email client.</div>
+      <div class="mono" style="color:var(--gray-6);font-size:11px;margin-top:14px;letter-spacing:0.04em;text-transform:uppercase">Captions sit at gray-6</div>
+    </div>
+    <div style="background:var(--gray-9);padding:28px;color:var(--gray-1)">
+      <div class="spec-label" style="color:var(--gray-5)">Inverted — same tokens, flipped roles</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:14px;border:1px solid var(--gray-8)">
+        <script>
+          const darks = [['1','#FAFAF8'],['5','#A8A49A'],['7','#464238'],['8','#2B2822']];
+          document.write(darks.map(([i,hex]) => `<div style="aspect-ratio:1/1;background:${hex};display:flex;flex-direction:column;justify-content:flex-end;padding:10px;color:${parseInt(i)<5?'#14120E':'#FAFAF8'};font-family:var(--font-mono);font-size:10.5px"><span style="opacity:0.7">gray-${i}</span><span style="font-size:12px;margin-top:2px">${hex}</span></div>`).join(''));
+        </script>
+      </div>
+      <div class="mono" style="color:var(--gray-5);font-size:11px;margin-top:12px;line-height:1.55">Dark mode is the same palette inverted — no parallel "paper-*" scale to maintain.</div>
+    </div>
+  </div>
+
+  <div style="padding:20px 0;border-top:1px solid var(--hairline);display:flex;gap:48px;align-items:flex-start">
+    <div style="flex:1">
+      <div class="spec-label">When to pick this</div>
+      <div style="font-size:14px;color:var(--fg-muted);margin-top:10px;line-height:1.6;max-width:52ch">
+        The team ships a lot of layered UI — modals over panels over dashboards — and the alpha system keeps producing surprises. Solid tokens make every surface composition a lookup instead of a math problem, and they survive PDF export, email clients, and high-DPI print faithfully.
+      </div>
+    </div>
+    <div style="flex:1">
+      <div class="spec-label">Cost</div>
+      <div style="font-size:14px;color:var(--fg-muted);margin-top:10px;line-height:1.6;max-width:52ch">
+        Loses the philosophical tagline <em>"no grays defined — every neutral is ink or paper + alpha"</em>. That's a real brand asset in your README. If it still reads as <em>you</em>, this trade isn't worth it.
+      </div>
+    </div>
+  </div>
+</div></body></html>

@@ -1,0 +1,126 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Components — badges</title><link rel="stylesheet" href="_preview.css">
+<style>
+  /* Badges — readability-first rebuild.
+     Before: 11px mono, low-contrast defaults (ink-72 on paper with ink-24 border).
+     After:  12.5px mono @500, higher contrast defaults, explicit semantic tones. */
+  .badge {
+    display:inline-flex; align-items:center; gap:7px;
+    height:24px; padding:0 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .badge .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+  /* Tones — every one verified ≥ 4.5:1 on its backdrop */
+  .badge--default  { background: var(--paper-pure); color: var(--ink); border-color: var(--ink-40); }
+  .badge--muted    { background: var(--paper-cream); color: var(--ink); border-color: var(--ink-24); }
+  .badge--solid    { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .badge--accent   { background: #FFDF00; color: var(--ink); border-color: var(--ink); font-weight: 600; }
+  .badge--success  { background: #E8F5EC; color: #0F5E2E; border-color: #0F5E2E; }
+  .badge--warning  { background: #FFF3D6; color: #6A4700; border-color: #6A4700; }
+  .badge--danger   { background: #FBE8E4; color: #8A1F14; border-color: #8A1F14; }
+  .badge--outline  { background: transparent; color: var(--ink); border-color: var(--ink); }
+
+  .row { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+  .spec { display:grid; grid-template-columns: 1fr 160px 120px; gap:1px; background: var(--hairline); border:1px solid var(--hairline); margin-top:14px; }
+  .spec > div { background: var(--paper); padding:12px 14px; font-family:var(--font-mono); font-size:11.5px; color:var(--ink-72); }
+  .spec > .hd { background: var(--paper-cream); font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-56); }
+  .spec .example { display:flex; align-items:center; }
+</style></head>
+<body><div class="card">
+  <div class="card__head">
+    <div>
+      <div class="card__eyebrow">Components · Badges</div>
+      <div class="card__title">State labels, readable first.</div>
+    </div>
+    <div class="card__meta">24 px tall · 12 px mono / 500 wt<br/>4 px corner · minimum 4.5:1 contrast<br/>always with a label, often with a dot</div>
+  </div>
+
+  <div>
+    <div class="spec-label">Structural tones — the five shapes of a badge</div>
+    <div class="row">
+      <span class="badge badge--default">Default</span>
+      <span class="badge badge--muted">Muted</span>
+      <span class="badge badge--outline">Outline</span>
+      <span class="badge badge--solid">Solid</span>
+      <span class="badge badge--accent">Accent</span>
+    </div>
+    <div class="mono" style="font-size:11.5px;color:var(--fg-muted);margin-top:10px;line-height:1.55">Default = most-used, for filterable metadata. Muted = "this is information, not a call to act." Outline = destructive-safe alternative to solid. Solid = rare, used when the badge itself <em>is</em> the primary focal point of a row. Accent = reserved for "live" and "filing" — brand-coded status.</div>
+  </div>
+
+  <div>
+    <div class="spec-label">Semantic tones — use only for state, never for category</div>
+    <div class="row">
+      <span class="badge badge--success"><span class="dot" style="background:#0F5E2E"></span>Filed</span>
+      <span class="badge badge--success"><span class="dot" style="background:#0F5E2E"></span>Verified</span>
+      <span class="badge badge--warning"><span class="dot" style="background:#6A4700"></span>Needs review</span>
+      <span class="badge badge--warning"><span class="dot" style="background:#6A4700"></span>Expires 14d</span>
+      <span class="badge badge--danger"><span class="dot" style="background:#8A1F14"></span>Failed ESPR</span>
+      <span class="badge badge--danger"><span class="dot" style="background:#8A1F14"></span>Rejected</span>
+    </div>
+    <div class="mono" style="font-size:11.5px;color:var(--fg-muted);margin-top:10px;line-height:1.55">Semantic colors are paired with both a <strong>dot</strong> and a <strong>label</strong> — never color alone. Every pair hits WCAG AA+ at 4.5:1 in its own chip.</div>
+  </div>
+
+  <div>
+    <div class="spec-label">The regulation lifecycle — what ships in the app</div>
+    <div class="row">
+      <span class="badge badge--accent"><span class="dot" style="background:var(--ink)"></span>Live</span>
+      <span class="badge badge--solid">Supported</span>
+      <span class="badge badge--default">Draft</span>
+      <span class="badge badge--muted">Planned 2028</span>
+      <span class="badge badge--outline">Archived</span>
+    </div>
+    <div class="mono" style="font-size:11.5px;color:var(--fg-muted);margin-top:10px;line-height:1.55">These five are the <em>only</em> allowed values on a regulation row. Keep the order consistent — always L → R in filters, legends, and tables.</div>
+  </div>
+
+  <div>
+    <div class="spec-label">Spec — what's guaranteed</div>
+    <div class="spec">
+      <div class="hd">attribute</div><div class="hd">value</div><div class="hd">note</div>
+
+      <div>height</div><div>24 px</div><div>fits a 32 px row</div>
+      <div>padding</div><div>0 · 10 px</div><div>+ 7 px gap for dot</div>
+      <div>font</div><div>Geist Mono 12 / 500</div><div>letter-spacing 0.01em</div>
+      <div>radius</div><div>4 px</div><div>matches input radius</div>
+      <div>min contrast</div><div>4.5 : 1</div><div>AA body</div>
+      <div>max length</div><div>24 chars</div><div>truncate with …</div>
+      <div>clickable?</div><div>only if it filters</div><div>otherwise read-only</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="spec-label">In context — at row scale</div>
+    <div style="margin-top:14px;border:1px solid var(--hairline)">
+      <div style="display:grid;grid-template-columns:1.2fr 1.6fr 1fr 0.9fr;gap:0;padding:0;background:var(--paper-cream);border-bottom:1px solid var(--hairline)">
+        <div class="mono" style="padding:10px 16px;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-56)">SKU</div>
+        <div class="mono" style="padding:10px 16px;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-56)">Product</div>
+        <div class="mono" style="padding:10px 16px;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-56)">Regulation</div>
+        <div class="mono" style="padding:10px 16px;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-56)">Status</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1.2fr 1.6fr 1fr 0.9fr;gap:0;padding:14px 16px;border-bottom:1px solid var(--hairline);align-items:center;background:var(--paper-pure)">
+        <div class="mono" style="font-size:13px;color:var(--ink)">NFT-CRW-INK-M</div>
+        <div style="font-size:14px;color:var(--ink)">Merino Crew · Ink</div>
+        <div><span class="badge badge--default">ESPR · Textiles</span></div>
+        <div><span class="badge badge--success"><span class="dot" style="background:#0F5E2E"></span>Filed</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1.2fr 1.6fr 1fr 0.9fr;gap:0;padding:14px 16px;border-bottom:1px solid var(--hairline);align-items:center;background:var(--paper-pure)">
+        <div class="mono" style="font-size:13px;color:var(--ink)">LUM-BATT-18650-A</div>
+        <div style="font-size:14px;color:var(--ink)">Cell pack · 18650 Li-ion</div>
+        <div><span class="badge badge--default">Battery Reg.</span></div>
+        <div><span class="badge badge--warning"><span class="dot" style="background:#6A4700"></span>Needs review</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1.2fr 1.6fr 1fr 0.9fr;gap:0;padding:14px 16px;align-items:center;background:var(--paper-pure)">
+        <div class="mono" style="font-size:13px;color:var(--ink)">VOLT-CELL-220V-C</div>
+        <div style="font-size:14px;color:var(--ink)">Industrial inverter · 2.2kW</div>
+        <div><span class="badge badge--muted">ESPR · Electronics</span></div>
+        <div><span class="badge badge--accent"><span class="dot" style="background:var(--ink)"></span>Live</span></div>
+      </div>
+    </div>
+  </div>
+</div></body></html>

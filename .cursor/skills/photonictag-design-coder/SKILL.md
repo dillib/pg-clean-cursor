@@ -10,8 +10,8 @@ description: >-
 
 ## Source of truth
 
-- Canonical tokens live in the **PhotonicTag `design-system/` package** (sibling folder in the Pg-cursor workspace, or add as a submodule): `colors_and_type.css`, `HANDOFF.md`.
-- This app maps tokens through [`client/src/index.css`](../../../client/src/index.css) and [`tailwind.config.ts`](../../../tailwind.config.ts).
+- Canonical tokens live in repo [`design-system/colors_and_type.css`](../../../design-system/colors_and_type.css) and [`design-system/HANDOFF.md`](../../../design-system/HANDOFF.md).
+- This app maps tokens through [`client/src/index.css`](../../../client/src/index.css) and [`tailwind.config.ts`](../../../tailwind.config.ts). Vite alias `@design-system` resolves to `design-system/`.
 
 ## Rules
 

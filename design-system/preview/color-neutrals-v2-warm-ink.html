@@ -1,0 +1,101 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Colors — ink & paper · warm ink</title><link rel="stylesheet" href="_preview.css">
+<style>
+  /* v2 — WARM INK. Paper stays the cream we know. Ink shifts from pure black to
+     warm charcoal (#1B1714) so it reads as "archival" rather than "tech black".
+     Alpha scale is preserved so every downstream token still resolves. */
+  .v2 {
+    --ink-warm: #1B1714;
+    --paper-warm: #F7F4EC;
+    --fg: rgba(27,23,20,0.92);
+    --fg-muted: rgba(27,23,20,0.64);
+    --fg-subtle: rgba(27,23,20,0.44);
+    --hairline: rgba(27,23,20,0.12);
+    background: var(--paper-warm);
+    color: var(--fg);
+  }
+  .v2 .card__head { border-bottom-color: var(--hairline); }
+  .swatch-grid { display:grid; grid-template-columns:repeat(8,1fr); gap:0; margin-top:12px; border:1px solid var(--hairline); }
+  .swatch { aspect-ratio:2/1; display:flex; flex-direction:column; justify-content:flex-end; padding:12px; font-family:var(--font-mono); font-size:10.5px; }
+  .tag { opacity:0.7; }
+  .val { font-size:12px; margin-top:2px; }
+</style>
+</head>
+<body class="v2"><div class="card">
+  <div class="card__head">
+    <div>
+      <div class="card__eyebrow">Color · Neutrals · v2</div>
+      <div class="card__title">Warm ink on warm paper.</div>
+    </div>
+    <div class="card__meta">Ink #1B1714 — <em>not</em> pure black.<br/>Paper #F7F4EC — slightly warmer cream.<br/>Same alpha ladder; warmer cast.</div>
+  </div>
+
+  <div>
+    <div class="spec-label">Warm ink — alpha scale on warm paper</div>
+    <div class="swatch-grid">
+      <script>
+        const alphas = [100,72,56,40,24,12,8,4];
+        document.write(alphas.map(a => `<div class="swatch" style="background:rgba(27,23,20,${a/100});color:${a>=40?'#F7F4EC':'rgba(27,23,20,0.72)'}"><span class="tag">ink${a===100?'':'-'+a}</span><span class="val">${a}%</span></div>`).join(''));
+      </script>
+    </div>
+    <div class="mono" style="font-size:11px;color:var(--fg-subtle);margin-top:10px">Warm black reads as <em>ledger ink</em>, not <em>product ink</em>. Good fit for a company that talks about filings, signatures, and dossiers.</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:0;border:1px solid var(--hairline)">
+    <div style="padding:28px">
+      <div class="spec-label">Typical surface composition</div>
+      <div style="color:var(--fg);font-family:var(--font-display);font-size:28px;letter-spacing:-0.02em;margin-top:14px;line-height:1.15">Evidence of custody, signed and timestamped.</div>
+      <div style="color:var(--fg-muted);font-size:15px;margin-top:10px;line-height:1.55">Secondary copy at ink-64 — a touch darker than the 56% we use today, because warm ink reads lighter at the same alpha.</div>
+      <div class="mono" style="color:var(--fg-subtle);font-size:11px;margin-top:14px;letter-spacing:0.04em;text-transform:uppercase">Captions and metadata sit at ink-44</div>
+      <div style="margin-top:22px;padding-top:14px;border-top:1px solid var(--hairline);display:flex;gap:24px;font-family:var(--font-mono);font-size:11px;color:var(--fg-subtle)">
+        <span>Hairline ink-12</span><span>Hover ink-8</span><span>Press ink-16</span>
+      </div>
+    </div>
+    <div style="background:#1B1714;padding:28px;color:#F7F4EC">
+      <div class="spec-label" style="color:rgba(247,244,236,0.56)">Inverted — warm paper on warm ink</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:14px;border:1px solid rgba(247,244,236,0.12)">
+        <script>
+          document.write([100,56,24,12].map(a => `<div style="aspect-ratio:1/1;background:rgba(247,244,236,${a/100});display:flex;flex-direction:column;justify-content:flex-end;padding:10px;color:${a>=40?'#1B1714':'#F7F4EC'};font-family:var(--font-mono);font-size:10.5px"><span style="opacity:0.7">paper${a===100?'':'-'+a}</span><span style="font-size:12px;margin-top:2px">${a}%</span></div>`).join(''));
+        </script>
+      </div>
+      <div class="mono" style="color:rgba(247,244,236,0.56);font-size:11px;margin-top:12px;line-height:1.55">Warm-on-warm inverts avoid the metallic sheen of true-black dark mode.</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+    <div style="padding:20px;border:1px solid var(--hairline)">
+      <div class="spec-label">fg</div>
+      <div style="color:var(--fg);font-size:17px;margin-top:8px">Body, headlines</div>
+      <div class="mono" style="font-size:10.5px;color:var(--fg-subtle);margin-top:6px">ink-92 · #1B1714</div>
+    </div>
+    <div style="padding:20px;border:1px solid var(--hairline)">
+      <div class="spec-label">fg-muted</div>
+      <div style="color:var(--fg-muted);font-size:17px;margin-top:8px">Secondary</div>
+      <div class="mono" style="font-size:10.5px;color:var(--fg-subtle);margin-top:6px">ink-64</div>
+    </div>
+    <div style="padding:20px;border:1px solid var(--hairline)">
+      <div class="spec-label">fg-subtle</div>
+      <div style="color:var(--fg-subtle);font-size:17px;margin-top:8px">Captions, hints</div>
+      <div class="mono" style="font-size:10.5px;color:var(--fg-subtle);margin-top:6px">ink-44</div>
+    </div>
+    <div style="padding:20px;border:1px solid var(--hairline)">
+      <div class="spec-label">hairline</div>
+      <div style="color:var(--fg);font-size:17px;margin-top:8px;border-top:1px solid var(--hairline);padding-top:10px">1px divider</div>
+      <div class="mono" style="font-size:10.5px;color:var(--fg-subtle);margin-top:6px">ink-12</div>
+    </div>
+  </div>
+
+  <div style="padding:20px 0;border-top:1px solid var(--hairline);display:flex;gap:48px;align-items:flex-start">
+    <div style="flex:1">
+      <div class="spec-label">When to pick this</div>
+      <div style="font-size:14px;color:var(--fg-muted);margin-top:10px;line-height:1.6;max-width:52ch">
+        The warmth ties the page to the <em>paper</em> metaphor your brand already leans on — signatures, dossiers, eIDAS stamps. If PhotonicTag should feel more like a law firm and less like a devtool, this is the version.
+      </div>
+    </div>
+    <div style="flex:1">
+      <div class="spec-label">Cost</div>
+      <div style="font-size:14px;color:var(--fg-muted);margin-top:10px;line-height:1.6;max-width:52ch">
+        Every hex is different. You'll need to re-test print contrast on invoices and PDF exports, and the yellow accent (#FFD800) will pull ever-so-slightly greener against warm ink.
+      </div>
+    </div>
+  </div>
+</div></body></html>

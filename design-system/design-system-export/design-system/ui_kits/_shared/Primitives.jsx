@@ -94,12 +94,10 @@ const BrandMark = ({ size = 28, invert = false }) => (
 );
 
 // ── Wordmark (inline) ─────────────────────────────────────
-// invert=false → wordmark for light/paper backgrounds (ink text)
-// invert=true  → wordmark for dark/ink backgrounds   (paper text)
 const Wordmark = ({ size = 22, invert = false }) => (
   <div style={{display:'inline-flex', alignItems:'center', gap:10}}>
     <BrandMark size={size * 1.18} invert={invert}/>
-    <span style={{fontFamily:'var(--font-display)', fontSize: size, fontWeight:600, letterSpacing:'-0.035em', color: invert ? 'var(--paper)' : 'var(--ink)'}}>photonictag</span>
+    <span style={{fontFamily:'var(--font-display)', fontSize: size, fontWeight:600, letterSpacing:'-0.035em', color: invert ? 'var(--ink)' : 'var(--paper)'}}>photonictag</span>
   </div>
 );
 
@@ -111,62 +109,4 @@ const Kbd = ({ children }) => (
 // ── Helper: dot row ───────────────────────────────────────
 const DotDivider = () => <span style={{width:3, height:3, borderRadius:'50%', background:'var(--ink-24)', flexShrink:0}}/>;
 
-// ── glass() · liquid-glass style helper ───────────────────
-// Apple-esque frosted backdrop. Use on elements that sit OVER imagery,
-// color, or pattern — never on flat paper (it disappears).
-//
-//   glass()                 — default: frosted white for light backdrops
-//   glass({tone:'dark'})    — frosted black for yellow / ink backdrops
-//   glass({tone:'cream'})   — warm cream frost for hero pattern
-//   glass({radius: 16})     — override border radius
-//   glass({strength: 'strong'}) — heavier blur + more saturation
-//
-// Merge the returned object into an element's inline style.
-const glass = ({ tone = 'light', radius = 12, strength = 'medium' } = {}) => {
-  const blur  = strength === 'strong' ? 22 : strength === 'light' ? 10 : 16;
-  const sat   = strength === 'strong' ? 1.6 : 1.35;
-  const tones = {
-    light: {
-      background: 'rgba(255,255,255,0.55)',
-      border:     '1px solid rgba(255,255,255,0.7)',
-      boxShadow:
-        'inset 0 1px 0 rgba(255,255,255,0.9),' +
-        'inset 0 -1px 0 rgba(0,0,0,0.06),' +
-        '0 1px 0 rgba(0,0,0,0.04),' +
-        '0 8px 24px rgba(0,0,0,0.08)',
-    },
-    cream: {
-      background: 'rgba(250,250,247,0.62)',
-      border:     '1px solid rgba(255,255,255,0.55)',
-      boxShadow:
-        'inset 0 1px 0 rgba(255,255,255,0.75),' +
-        'inset 0 -1px 0 rgba(0,0,0,0.05),' +
-        '0 8px 24px rgba(0,0,0,0.06)',
-    },
-    dark: {
-      background: 'rgba(0,0,0,0.42)',
-      border:     '1px solid rgba(255,255,255,0.16)',
-      boxShadow:
-        'inset 0 1px 0 rgba(255,255,255,0.16),' +
-        'inset 0 -1px 0 rgba(0,0,0,0.4),' +
-        '0 10px 32px rgba(0,0,0,0.28)',
-    },
-    yellow: {
-      // Sits on a yellow slab — warm frost to preserve color identity.
-      background: 'rgba(255,250,214,0.5)',
-      border:     '1px solid rgba(255,255,255,0.6)',
-      boxShadow:
-        'inset 0 1px 0 rgba(255,255,255,0.85),' +
-        'inset 0 -1px 0 rgba(0,0,0,0.05),' +
-        '0 6px 18px rgba(0,0,0,0.06)',
-    },
-  };
-  return {
-    ...tones[tone],
-    borderRadius: radius,
-    backdropFilter: `saturate(${sat}) blur(${blur}px)`,
-    WebkitBackdropFilter: `saturate(${sat}) blur(${blur}px)`,
-  };
-};
-
-Object.assign(window, { Icon, Mono, Eyebrow, Button, Badge, BrandMark, Wordmark, Kbd, DotDivider, glass });
+Object.assign(window, { Icon, Mono, Eyebrow, Button, Badge, BrandMark, Wordmark, Kbd, DotDivider });

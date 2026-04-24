@@ -1,0 +1,59 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Colors — ink & paper</title><link rel="stylesheet" href="_preview.css"></head>
+<body><div class="card">
+  <div class="card__head"><div><div class="card__eyebrow">Color · Neutrals</div><div class="card__title">Ink and paper, as opacities.</div></div><div class="card__meta">No grays defined.<br/>Every neutral is ink or paper + alpha.<br/>Solid black reserved for emphasis.</div></div>
+
+  <div>
+    <div class="spec-label">Ink — alpha scale on paper</div>
+    <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:0;margin-top:12px;border:1px solid var(--hairline)">
+      <script>
+        const alphas = [100,72,56,40,24,12,8,4];
+        document.write(alphas.map(a => `<div style="aspect-ratio:2/1;background:rgba(0,0,0,${a/100});display:flex;flex-direction:column;justify-content:flex-end;padding:12px;color:${a>=40?'#fff':'rgba(0,0,0,0.72)'};font-family:var(--font-mono);font-size:10.5px"><span style="opacity:0.7">ink${a===100?'':'-'+a}</span><span style="font-size:12px;margin-top:2px">${a}%</span></div>`).join(''));
+      </script>
+    </div>
+    <div class="mono" style="font-size:11px;color:var(--fg-subtle);margin-top:10px">100% ink is for brand marks, primary CTAs, and the one element on a screen that must be read first. Everything else steps down.</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:0;border:1px solid var(--hairline)">
+    <div style="padding:28px">
+      <div class="spec-label">Typical surface composition</div>
+      <div style="color:var(--fg);font-family:var(--font-display);font-size:28px;letter-spacing:-0.02em;margin-top:14px;line-height:1.15">Evidence of custody, signed and timestamped.</div>
+      <div style="color:var(--fg-muted);font-size:15px;margin-top:10px;line-height:1.55">Secondary copy uses ink-56 — readable, but it lets the headline breathe.</div>
+      <div class="mono" style="color:var(--fg-subtle);font-size:11px;margin-top:14px;letter-spacing:0.04em;text-transform:uppercase">Captions and metadata sit at ink-40</div>
+      <div style="margin-top:22px;padding-top:14px;border-top:1px solid var(--hairline);display:flex;gap:24px;font-family:var(--font-mono);font-size:11px;color:var(--fg-subtle)">
+        <span>Hairline ink-12</span><span>Hover ink-8</span><span>Press ink-12</span>
+      </div>
+    </div>
+    <div style="background:var(--ink);padding:28px;color:var(--paper)">
+      <div class="spec-label" style="color:var(--paper-56)">Inverted — paper on ink</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:14px;border:1px solid var(--paper-12)">
+        <script>
+          document.write([100,56,24,12].map(a => `<div style="aspect-ratio:1/1;background:rgba(255,255,255,${a/100});display:flex;flex-direction:column;justify-content:flex-end;padding:10px;color:${a>=40?'#000':'#fff'};font-family:var(--font-mono);font-size:10.5px"><span style="opacity:0.7">paper${a===100?'':'-'+a}</span><span style="font-size:12px;margin-top:2px">${a}%</span></div>`).join(''));
+        </script>
+      </div>
+      <div class="mono" style="color:var(--paper-56);font-size:11px;margin-top:12px;line-height:1.55">Full ink surfaces are used sparingly — hero blocks, command palettes, the pre-footer.</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+    <div style="padding:20px;border:1px solid var(--hairline)">
+      <div class="spec-label">fg</div>
+      <div style="color:var(--fg);font-size:17px;margin-top:8px">Body, headlines</div>
+      <div class="mono" style="font-size:10.5px;color:var(--fg-subtle);margin-top:6px">ink-90 · 0.90</div>
+    </div>
+    <div style="padding:20px;border:1px solid var(--hairline)">
+      <div class="spec-label">fg-muted</div>
+      <div style="color:var(--fg-muted);font-size:17px;margin-top:8px">Secondary</div>
+      <div class="mono" style="font-size:10.5px;color:var(--fg-subtle);margin-top:6px">ink-56 · 0.56</div>
+    </div>
+    <div style="padding:20px;border:1px solid var(--hairline)">
+      <div class="spec-label">fg-subtle</div>
+      <div style="color:var(--fg-subtle);font-size:17px;margin-top:8px">Captions, hints</div>
+      <div class="mono" style="font-size:10.5px;color:var(--fg-subtle);margin-top:6px">ink-40 · 0.40</div>
+    </div>
+    <div style="padding:20px;border:1px solid var(--hairline)">
+      <div class="spec-label">hairline</div>
+      <div style="color:var(--fg);font-size:17px;margin-top:8px;border-top:1px solid var(--hairline);padding-top:10px">1px divider</div>
+      <div class="mono" style="font-size:10.5px;color:var(--fg-subtle);margin-top:6px">ink-12 · 0.12</div>
+    </div>
+  </div>
+</div></body></html>
