@@ -558,6 +558,31 @@ function applyTransformation(value: unknown, transform?: string): unknown {
 }
 
 /**
+ * Apply user-configured FieldMappings to any flat key/value record (CSV row,
+ * generic JSON, etc.) producing a partial PhotonicTag product record. The
+ * baseDefaults parameter is merged first so caller-supplied defaults are
+ * overridden by anything the mappings produce.
+ *
+ * This is the engine; SAP-specific applyFieldMappings() below wraps it with
+ * the SAPMaterial-aware flattener and the mock baseline.
+ */
+export function applyFieldMappingsToRecord(
+  source: Record<string, unknown>,
+  mappings: FieldMapping[],
+  baseDefaults: Record<string, unknown> = {},
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...baseDefaults };
+  const validMappings = mappings.filter(m => m.sourceField.trim() && m.targetField.trim());
+  for (const mapping of validMappings) {
+    const raw = source[mapping.sourceField.trim()];
+    if (raw !== undefined) {
+      result[mapping.targetField.trim()] = applyTransformation(raw, mapping.transformation);
+    }
+  }
+  return result;
+}
+
+/**
  * Apply user-configured FieldMappings to a SAPMaterial, producing a partial
  * PhotonicTag product record. Falls back to sapMockService hardcoded mapping
  * for any fields not covered by the user's mappings.
@@ -567,20 +592,8 @@ export function applyFieldMappings(
   mappings: FieldMapping[],
 ): Record<string, unknown> {
   const flat = flattenMaterial(material);
-
-  // Start with the hardcoded baseline so un-mapped fields are still populated
   const base = sapMockService.mapToPhotonicTagProduct(material) as Record<string, unknown>;
-  const result: Record<string, unknown> = { ...base };
-
-  const validMappings = mappings.filter(m => m.sourceField.trim() && m.targetField.trim());
-  for (const mapping of validMappings) {
-    const raw = flat[mapping.sourceField.trim()];
-    if (raw !== undefined) {
-      result[mapping.targetField.trim()] = applyTransformation(raw, mapping.transformation);
-    }
-  }
-
-  return result;
+  return applyFieldMappingsToRecord(flat, mappings, base);
 }
 
 // Scheduler registry — active sync jobs keyed by connectorId
