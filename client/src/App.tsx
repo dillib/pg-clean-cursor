@@ -29,6 +29,7 @@ const ProductForm = lazy(() => import("@/pages/product-form"));
 const ProductDetail = lazy(() => import("@/pages/product-detail"));
 const IoTDevices = lazy(() => import("@/pages/iot-devices"));
 const SAPConnector = lazy(() => import("@/pages/sap-connector"));
+const CSVConnector = lazy(() => import("@/pages/csv-connector"));
 const SAPOperations = lazy(() => import("@/pages/sap-operations"));
 const SAPDemo = lazy(() => import("@/pages/sap-demo"));
 const PublicScan = lazy(() => import("@/pages/public-scan-v2"));
@@ -431,6 +432,11 @@ function Router() {
           <SAPConnector />
         </ProtectedRoute>
       </Route>
+      <Route path="/integrations/csv">
+        <ProtectedRoute>
+          <CSVConnector />
+        </ProtectedRoute>
+      </Route>
       <Route path="/integrations/sap-operations">
         <ProtectedRoute>
           <SAPOperations />
@@ -501,6 +507,11 @@ function Router() {
       <Route path="/demo/integrations/sap">
         <DemoProtectedRoute>
           <SAPConnector />
+        </DemoProtectedRoute>
+      </Route>
+      <Route path="/demo/integrations/csv">
+        <DemoProtectedRoute>
+          <CSVConnector />
         </DemoProtectedRoute>
       </Route>
       <Route path="/demo/integrations/sap-operations">
